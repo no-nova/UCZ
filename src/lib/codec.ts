@@ -109,7 +109,7 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
   // P17.7: the line/field column predictors run the same `text` CM on the same
   // raw text stream as text-sparse5 — they substitute three of that model's nine
   // contexts, so the eligibility rule is identical (no WORD-PRE dictionary).
-  if (context === 'text-linecol' || context === 'text-lexcol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
+  if (context === 'text-linecol' || context === 'text-lexcol' || context === 'text-tabcol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   if (context === 'wide-geom') return !wordPre && sp.id === ID.WIDE_GRAD && sp.s >= 6 && sp.s <= 8 && sp.r >= 256 && sp.r <= 8192 && sp.r % 2 === 0
   if (context === 'wp-merge') return wordPre && sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1
   // P17.6: the word-trigram H[8] is orthogonal to WORD-PRE dictionary collapsing.
@@ -1260,7 +1260,7 @@ export function encodeTerrainGroup(parts: Uint8Array[], sp: Spec, cost?: Float32
         return markPayloadModel(p,payloadModelFlags(p)|V21_FLAG_CONTEXTS)
       }
       if(options?.context==='wide-geom') { checkWide(sp,parts.map(p=>p.length));return encodeWide16(parts,sp,cost,blockCost,onProgress,kernel,options) }
-      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol')
+      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol')
         return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,options.context==='wp-token3',options)
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return encodeGroupedTranspose(parts,sp.s,blockCost ?? (cost ? {values:cost,blockSize:1} : undefined),onProgress,true,undefined,'v20',options)
       if(options?.context==='bin-stride4') {
@@ -1306,7 +1306,7 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
         return lengths.map(len=>{const p=joined.subarray(at,at+len);at+=len;return sp.id===ID.GRAD_V3?medInv(p,sp.s,sp.r):deltaInv(p,sp.s)})
       }
       if(options?.context==='wide-geom') {checkWide(sp,lengths);return decodeWide16(payload,lengths,sp,onProgress,kernel,options)}
-      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol') && !wordPre) {
+      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol') && !wordPre) {
         const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,options.context==='wp-token3',options)
         let p=0;return lengths.map(n=>{const part=joined.subarray(p,p+n);p+=n;return part})
       }
@@ -1467,6 +1467,8 @@ export const planTuning = {
   pocketDeltaCandidates: true,
   /** P17.7: carve low-entropy pockets out of coarse incompressible segments. */
   pocketCarve: true,
+  /** P17.9: after the carve, re-price small non-STORE groups with stronger codecs. */
+  groupCodecUpgrade: true,
   /** P7-3：孤儿小分组坍缩进主力共享 CM 组（真实 A/B，严格更小才吸收）。 */
   orphanConsolidation: true,
   /**
@@ -2066,6 +2068,8 @@ export interface Compressed {
   contextComparison?: ContextComparison
   /** P17.7: conservative low-entropy pocket carve-out inside coarse STORE/O0 groups. */
   pocketComparison?: PocketComparison
+  /** P17.9: exact post-carve group codec upgrades (strict container shrinkage only). */
+  groupCodecComparison?: GroupCodecComparison
   bcjComparison?: { baselineBytes: number; candidateBytes: number; accepted: boolean; seams: number }
   rec2Comparison?: { baselineBytes:number; candidateBytes?:number; accepted:boolean; params?:{op:number;a:number;b:number}; error?:string }
 }
@@ -3770,7 +3774,8 @@ export async function compressAdaptive(
     const chosen=await refineContextCandidates(data,baseline,{serial:!!options?.serial||!workerTuningMatchesDefaults()},onStage)
     const coalescedBcj=refineBcjSegments(data,chosen)
     const carved=refineNoisePockets(data,coalescedBcj)
-    const rec2=refineRec2(data,carved)
+    const upgraded=refineGroupCodecs(data,carved)
+    const rec2=refineRec2(data,upgraded)
     const bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
     return bp
   }
@@ -4080,6 +4085,142 @@ export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Comp
     comparison.accepted = true
     retainedPlanGroups.set(container, nextGroups)
     return finish({ ...baseline, container, segs: nextSegs, blockCost, blockSeg, overhead: header.length })
+  } catch (error) {
+    comparison.error = error instanceof Error ? error.message : String(error)
+    comparison.accepted = false
+    comparison.candidateBytes = baseline.container.length
+    return finish(baseline)
+  }
+}
+export interface GroupCodecComparison {
+  baselineBytes: number
+  candidateBytes: number
+  accepted: boolean
+  scannedGroups: number
+  upgrades: { from: { id: number; s: number; r: number }; to: { id: number; s: number; r: number }; rawBytes: number; payloadBytes: number }[]
+  error?: string
+}
+/**
+ * P17.9: after the pocket carve has split the coarse segments, several small
+ * groups are left holding bytes that a CM-backed codec codes better than the
+ * rANS/O0 recipe that survived planning (measured on AITDCC/P: `SUB_ANCHOR
+ * s=60` -> `DELTA_V3 s=2` -574 B, `BIN` -> `BIN_V3` -129 B, `TRANSPOSE s=2` ->
+ * `DELTA_V3 s=2` -67 B, `SUB_ANCHOR s=10` -> `TRANSPOSE_GROUP s=2` -36 B).
+ *
+ * The pass is strictly additive and self-limiting: a group is only re-priced
+ * when it is small (<= 128 KiB raw), free of WORD-PRE / context / matchDist
+ * (those change the wire meaning of the group), and every candidate is adopted
+ * only when the serialized plan - coalesced header plus the sum of all group
+ * payloads - gets strictly smaller. Candidates reuse the `res` tag unless it
+ * collides with a live group, in which case a fresh tag keeps the header legal
+ * without merging unrelated payloads.
+ */
+const GROUP_CODEC_MIN_BYTES = 1024
+const GROUP_CODEC_MAX_BYTES = 128 * 1024
+const GROUP_CODEC_CANDIDATES: readonly { id: number; s: number; r: number }[] = [
+  { id: ID.BIN_V3, s: 1, r: 1 },
+  { id: ID.DELTA_V3, s: 2, r: 1 },
+  { id: ID.DELTA_V3, s: 1, r: 1 },
+  { id: ID.TRANSPOSE_GROUP, s: 2, r: 1 },
+]
+/** Groups whose recipe ignores `res`, so a fresh tag is free and legal. */
+const GROUP_CODEC_RES_FREE = new Set<number>([ID.DELTA, ID.DELTA_V3, ID.O0])
+const GROUP_CODEC_SKIP = new Set<number>([ID.STORE, ID.FILL, ID.REC2, ID.BITPLANE, ID.WIDE_GRAD])
+
+export function refineGroupCodecs(data: Uint8Array, baseline: Compressed): Compressed {
+  const comparison: GroupCodecComparison = { baselineBytes: baseline.container.length, candidateBytes: baseline.container.length, accepted: false, scannedGroups: 0, upgrades: [] }
+  const finish = (chosen: Compressed) => ({ ...chosen, groupCodecComparison: comparison })
+  try {
+    if (!planTuning.groupCodecUpgrade) return finish(baseline)
+    const groups = retainedPlanGroups.get(baseline.container)
+    if (!groups || !groups.length) return finish(baseline)
+    const segs = baseline.segs
+    const nextGroups = groups.map(g => ({ ...g, spec: { ...g.spec } }))
+    const usedRes = new Set(nextGroups.map(g => `${g.spec.id},${g.spec.s},${g.spec.r}`))
+    let bestTotal = baseline.container.length
+    let bestSegs: typeof segs | null = null
+    let curSegs: typeof segs = segs
+    const planTotal = (gs: readonly PlanGroup[], ss: readonly SegResult[]) => planHeader(data.length, ss, gs).length + gs.reduce((n, g) => n + g.payload.length, 0)
+    for (let gi = 0; gi < nextGroups.length; gi++) {
+      const g = nextGroups[gi]
+      if (GROUP_CODEC_SKIP.has(g.spec.id) || g.wordPre || g.context || g.matchDist) continue
+      const members = [...g.members]
+      if (!members.length) continue
+      let raw = 0
+      for (const i of members) raw += segs[i].end - segs[i].start
+      if (raw < GROUP_CODEC_MIN_BYTES || raw > GROUP_CODEC_MAX_BYTES) continue
+      comparison.scannedGroups++
+      const parts = members.map(i => data.subarray(segs[i].start, segs[i].end))
+      const positions = members.map(i => segs[i].start)
+      const kernel: CMVariant = (payloadModelFlags(g.payload) & V20_FLAG_CM) ? 'v20' : g.v15 ? 'v15' : 'v20'
+      let chosen: { spec: { id: number; s: number; r: number }; payload: Uint8Array } | null = null
+      for (const cand of GROUP_CODEC_CANDIDATES) {
+        if (cand.id === g.spec.id && cand.s === g.spec.s) continue
+        const spec = { id: cand.id, s: cand.s, r: cand.r }
+        if (usedRes.has(`${spec.id},${spec.s},${spec.r}`)) {
+          // Keep the header legal without merging unrelated payloads: rule families
+          // whose decoder ignores `res` can take a fresh tag, the rest are skipped.
+          if (!GROUP_CODEC_RES_FREE.has(spec.id)) continue
+          let r = 2
+          while (r < 256 && usedRes.has(`${spec.id},${spec.s},${r}`)) r++
+          if (r >= 256) continue
+          spec.r = r
+        }
+        let payload: Uint8Array
+        try {
+          payload = withCMBlockSize(raw, () => encodeTerrainGroup(parts, spec as Spec, undefined, undefined, undefined, positions, kernel as 'v20' | 'v15'))
+        } catch { continue }
+        if (payload.length <= 24 || payload.length >= g.payload.length) continue
+        // Distribute the payload exactly: the block-cost invariant is
+        // `overhead + sum(compLen) === container.length`, so rounding the last
+        // member as a remainder keeps the ledger byte-accurate.
+        let remaining = payload.length
+        let seen = 0
+        const trialSegs = curSegs.map((sg, i) => {
+          if (!members.includes(i)) return sg
+          const len = sg.end - sg.start
+          seen++
+          const compLen = seen === members.length ? remaining : Math.max(1, Math.round(payload!.length * (len / raw)))
+          remaining -= compLen
+          return { ...sg, spec: spec as Spec, compLen }
+        })
+        const trialGroups = nextGroups.map((x, i) => i === gi ? { ...x, spec: spec as Spec, payload: payload!, v15: true } : x)
+        let total: number
+        try { total = planTotal(trialGroups, trialSegs) } catch { continue }
+        if (total >= bestTotal) continue
+        bestTotal = total
+        bestSegs = trialSegs
+        curSegs = trialSegs
+        nextGroups[gi] = trialGroups[gi]
+        chosen = { spec, payload: payload! }
+        break
+      }
+      if (!chosen) continue
+      usedRes.add(`${chosen.spec.id},${chosen.spec.s},${chosen.spec.r}`)
+      comparison.upgrades.push({ from: { id: groups[gi].spec.id, s: groups[gi].spec.s, r: groups[gi].spec.r }, to: { ...chosen.spec }, rawBytes: raw, payloadBytes: chosen.payload.length })
+    }
+    comparison.candidateBytes = bestTotal
+    if (!comparison.upgrades.length || !bestSegs || bestTotal >= baseline.container.length) return finish(baseline)
+    const header = planHeader(data.length, bestSegs, nextGroups)
+    const total = header.length + nextGroups.reduce((n, g) => n + g.payload.length, 0)
+    if (total >= baseline.container.length) return finish(baseline)
+    const container = new Uint8Array(total)
+    container.set(header)
+    let w = header.length
+    for (const g of nextGroups) { container.set(g.payload, w); w += g.payload.length }
+    const blockCost = new Float32Array(baseline.blockCost.length), blockSeg = new Int32Array(baseline.blockSeg.length)
+    let si = 0
+    for (let b = 0; b < baseline.blockCost.length; b++) {
+      const bl = baseline.analysis.blocks[b]
+      while (si + 1 < bestSegs.length && bl.start >= bestSegs[si].end) si++
+      const sg = bestSegs[si]
+      blockCost[b] = sg.rawLen > 0 ? (sg.compLen ?? 0) * 8 / sg.rawLen : 0
+      blockSeg[b] = si
+    }
+    comparison.accepted = true
+    comparison.candidateBytes = total
+    retainedPlanGroups.set(container, nextGroups)
+    return finish({ ...baseline, container, segs: bestSegs, blockCost, blockSeg, overhead: header.length })
   } catch (error) {
     comparison.error = error instanceof Error ? error.message : String(error)
     comparison.accepted = false
@@ -4523,7 +4664,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol','text-lexcol']
+    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol','text-lexcol','text-tabcol']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     if(!modes.length||rawBytes<CONTEXT_MIN_BYTES){result.skipped='ineligible-or-small';return result}
@@ -4655,10 +4796,14 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
       // distinct contexts within 0.5% of the sample winner (not just the runner-up).
       // A bounded sample can rank contexts inside noise; the complete-container gate
       // still decides adoption, so an extra full encode can only ever remove bytes.
+      // P17.9: on raw text the sample screen runs at the probe table tier, which can
+      // misrank the high-order lexical/tabular layouts by ~1 KiB, so the threshold
+      // widens to 0.8% and up to four distinct contexts are priced on the full group.
+      // Every promotion is still gated by the complete-container comparison.
       if(pick) {
         for(const t of positive) {
-          if(modes.length>=3) break
-          if(t.bytes<=pick.bytes*1.005 && !modes.includes(t.context)) modes.push(t.context)
+          if(modes.length>=4) break
+          if(t.bytes<=pick.bytes*1.008 && !modes.includes(t.context)) modes.push(t.context)
         }
       }
       result.screen={rawBytes:sample.bytes,controlBytes,trials,selected:[...modes],matchDist:!!pick?.matchDist}

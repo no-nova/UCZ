@@ -29,7 +29,7 @@ export const CONTEXT_CODES = { 'bin-stride4': 1, 'wide-geom': 2, 'wp-token3': 3,
  * `contextFromGroupBits` returns `undefined` for it, so the extended namespace
  * starts at 1 exactly like the base one.
  */
-export const EXT_CONTEXT_CODES = { 'text-linecol': 1, 'text-lexcol': 2 } as const
+export const EXT_CONTEXT_CODES = { 'text-linecol': 1, 'text-lexcol': 2, 'text-tabcol': 3 } as const
 export type CMContext = keyof typeof CONTEXT_CODES | keyof typeof EXT_CONTEXT_CODES
 /** Split a context into the three-bit field value and the namespace bit it needs. */
 export function contextCodeOf(context: CMContext): { code: number; ext: boolean } {

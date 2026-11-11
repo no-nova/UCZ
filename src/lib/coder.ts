@@ -723,7 +723,7 @@ class Model {
         || (this.context === 'bin-stride4' && (profile !== 'bin' || wordTokens))
         || (this.context === 'wide-geom' && (profile !== 'res2d' || geomStride <= 0 || wordTokens))
         || (this.context === 'text-sparse5' && (profile !== 'text' || geomStride !== 0 || wordTokens))
-        || ((this.context === 'text-linecol' || this.context === 'text-lexcol') && (profile !== 'text' || geomStride !== 0 || wordTokens))
+        || ((this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') && (profile !== 'text' || geomStride !== 0 || wordTokens))
         || ((this.context === 'wp-token3' || this.context === 'wp-merge') && (profile !== 'text' || !wordTokens || geomStride !== 0)))
         throw Error('无效的 v21 CM 上下文 / profile / 格式标志')
       this.requiredFlags |= V21_FLAG_CONTEXTS
@@ -753,7 +753,7 @@ class Model {
     this.geomStride = geomStride
     // WORD-PRE 词元只对 v15 内核有意义：v13/v2 的比特流必须一字节不变。
     this.wordTokens = wordTokens && isAPMKernel(variant)
-    if (this.context === 'text-linecol' || this.context === 'text-lexcol') {
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') {
       this.lineColBytes = new Uint8Array(256)
       this.fieldColBytes = new Uint8Array(8 * 64)
     }
@@ -920,7 +920,7 @@ class Model {
         return
       }
       if(this.profile === 'text') {
-        if (this.context === 'text-linecol' || this.context === 'text-lexcol') {
+        if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') {
           // P17.8: `text-lexcol` is the source-code variant of the column model. It
           // keeps BOTH word slots (`word0 = hh(curWord,b1)` and the word bigram) and
           // spends the remaining two slots on the field/line hashes. `text-linecol`
@@ -932,21 +932,33 @@ class Model {
           const prevF = this.fieldColBytes[fPos]
           const prevL = this.lineColBytes[this.lineCol]
           H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4)
-          const fieldHash = mix32((prevF | (this.fieldCol << 8) | (this.fieldIdx << 14) | ((this.fieldEqMask & 0x1f) << 17) | (b1 << 22)) | 0)
-          const lineHash = (this.lineEqMask & 0x07) !== 0 && this.lineCol < 32
-            ? mix32((prevL | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
-            : hh(this.curWord, b1)
-          if (this.context === 'text-lexcol') {
-            H[5] = hh(this.curWord, b1)
-            H[6] = hh(this.prevWord, this.curWord || b1)
-            H[7] = fieldHash
-            H[8] = lineHash
-          } else {
+          if (this.context === 'text-linecol') {
+            const fieldHash = mix32((prevF | (this.fieldCol << 8) | (this.fieldIdx << 14) | ((this.fieldEqMask & 0x1f) << 17) | (b1 << 22)) | 0)
+            const lineHash = (this.lineEqMask & 0x07) !== 0 && this.lineCol < 32
+              ? mix32((prevL | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
+              : hh(this.curWord, b1)
             H[5] = fieldHash
             H[6] = lineHash
             H[7] = hh(this.prevPrevWord, this.prevWord, this.curWord || b1)
             H[8] = hh(b1, b3, this.g(5))
+            return
           }
+          // P17.9: the lexical/tabular layouts put the CURRENT byte (`b1`) and the
+          // PREDICTED column byte (`prevF`, `prevL`) in the discriminators instead of
+          // hashing the column index into a high slot. `text-lexcol` (hybrid1) keeps a
+          // constant word bigram in H[6]; `text-tabcol` (hybrid3) keeps that slot for
+          // the conditional line hash and always spends H[8] on the field/line pair,
+          // which wins on colon/tab delimited records (AITDCC C/K) while the constant
+          // bigram wins on source code (B).
+          const fieldHash = mix32((b1 | (prevF << 8) | (this.fieldIdx << 16) | ((this.fieldEqMask & 7) << 20)) | 0)
+          const lineHash = mix32(((b2 | (prevF << 8) | (prevL << 16) | (Math.min(this.fieldCol, 63) << 24)) ^ Math.imul(this.fieldIdx, 2654435761)) | 0)
+          const lineCond = (this.lineEqMask & 0x07) !== 0 && this.lineCol < 32
+            ? mix32((prevL | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
+            : hh(this.prevWord, this.curWord || b1)
+          H[5] = hh(this.curWord, b1)
+          H[6] = this.context === 'text-tabcol' ? lineCond : hh(this.prevWord, this.curWord || b1)
+          H[7] = fieldHash
+          H[8] = lineHash
           return
         }
         H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=hh(this.curWord,b1);H[7]=hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
@@ -1317,7 +1329,7 @@ class Model {
   }
 
   private byteUpdate(byte: number) {
-    if (this.context === 'text-linecol' || this.context === 'text-lexcol') this.updateLineCol(byte)
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
       const lower = byte | 32
       const asciiLetter = lower >= 97 && lower <= 122
