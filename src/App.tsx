@@ -235,7 +235,7 @@ export default function App() {
                 还原 .ucz 文件
               </button>
             </div>
-            <p className="max-w-3xl text-xs leading-relaxed text-slate-500">每个文件最多 64 MiB（{formatBytes(MAX_INPUT_BYTES)}），超限或空文件单独提示，不影响其它任务。文件按并发上限排队，开始处理时才读取；大文件模型可能占用数百 MiB 内存，低内存设备建议选择 1 个任务。</p>
+            <p className="max-w-3xl text-xs leading-relaxed text-slate-500">每个文件最多 64 MiB（{formatBytes(MAX_INPUT_BYTES)}），超限或空文件单独提示，不影响其它任务。文件按并发上限排队，开始处理时才读取；大文件模型可能占用数百 MiB 内存，低内存设备建议选择 1 个任务。高并发（24 个以上）会同时驻留多份模型，请确认内存充足。</p>
             <input ref={fileRef} type="file" multiple aria-label="选择待压缩文件" disabled={!!stage || benchBusy} hidden onChange={e => { onFiles(e.target.files); e.target.value = '' }} />
             <input ref={uczRef} type="file" accept=".ucz" aria-label="选择待还原文件" disabled={busy || !!stage || benchBusy} hidden onChange={e => { onRestore(e.target.files?.[0]); e.target.value = '' }} />
           </div>
@@ -245,7 +245,7 @@ export default function App() {
               <select aria-label="同时压缩任务数" value={concurrency} disabled={busy || !!stage || benchBusy} onChange={event => queue.setConcurrency(Number(event.target.value))} className="rounded-lg border border-white/20 bg-[#101827] px-3 py-2 text-slate-200 disabled:opacity-50">
                 {CONCURRENCY_CHOICES.map(n => (
                   <option key={n} value={n}>
-                    {n === 1 ? '1 个文件 · 节省内存' : `${n} 个文件 · 并行压缩`}
+                    {n === 1 ? '1 个文件 · 节省内存' : n <= 8 ? `${n} 个文件 · 并行压缩` : n <= 16 ? `${n} 个文件 · 多核并行` : `${n} 个文件 · 高并发（内存占用高）`}
                   </option>
                 ))}
               </select>

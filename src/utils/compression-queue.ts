@@ -67,8 +67,14 @@ export function completedTotals(tasks: readonly CompressionTask[]) {
  * worker with its own model, so raising the cap only changes scheduling — never
  * the bytes any single file produces.
  */
-export const MAX_CONCURRENCY = 16
-export const CONCURRENCY_CHOICES: readonly number[] = [1, 2, 3, 4, 6, 8, 12, 16]
+export const MAX_CONCURRENCY = 64
+/**
+ * P18: the selector now reaches past a single 16-thread desktop so that batch
+ * runs on many-core workstations (and the CLI's `--jobs`) never have to be
+ * capped by the UI. Each entry is still a plain scheduling limit: one worker
+ * and one model per task, so no file's bytes depend on this value.
+ */
+export const CONCURRENCY_CHOICES: readonly number[] = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64]
 const boundedConcurrency = (value: number) =>
   Number.isFinite(value) ? Math.max(1, Math.min(MAX_CONCURRENCY, Math.floor(value))) : 1
 
