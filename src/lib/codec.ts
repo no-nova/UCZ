@@ -109,7 +109,7 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
   // P17.7: the line/field column predictors run the same `text` CM on the same
   // raw text stream as text-sparse5 — they substitute three of that model's nine
   // contexts, so the eligibility rule is identical (no WORD-PRE dictionary).
-  if (context === 'text-linecol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
+  if (context === 'text-linecol' || context === 'text-lexcol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   if (context === 'wide-geom') return !wordPre && sp.id === ID.WIDE_GRAD && sp.s >= 6 && sp.s <= 8 && sp.r >= 256 && sp.r <= 8192 && sp.r % 2 === 0
   if (context === 'wp-merge') return wordPre && sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1
   // P17.6: the word-trigram H[8] is orthogonal to WORD-PRE dictionary collapsing.
@@ -196,8 +196,13 @@ const sameSpec = (a: Spec, b: Spec) => a.id === b.id && a.s === b.s && a.r === b
  * `rawLen`. Two contiguous members of the same group with the same rule are
  * therefore indistinguishable from a single longer member: the seam is not in
  * the wire format at all. Used by the post-plan coalescer below. */
+// Rules whose transform runs over the whole GROUP stream (or over nothing at all),
+// so re-cutting the header at a different boundary cannot change a single decoded
+// byte. `BCJ*` is deliberately absent: it converts E8/E9 words relative to each
+// PART's absolute position, so the boundaries are part of the bitstream contract.
 const CONCAT_INVARIANT_IDS = new Set<number>([
   ID.STORE, ID.RLE, ID.O0, ID.TEXT, ID.BIN, ID.TEXT_V2, ID.BIN_V2, ID.TEXT_V3, ID.BIN_V3,
+  ID.DELTA, ID.DELTA_V3, ID.GRAD, ID.GRAD_V2, ID.GRAD_V3, ID.WIDE_GRAD, ID.D16, ID.ANCHOR_FOLD,
 ])
 
 /**
@@ -1255,7 +1260,7 @@ export function encodeTerrainGroup(parts: Uint8Array[], sp: Spec, cost?: Float32
         return markPayloadModel(p,payloadModelFlags(p)|V21_FLAG_CONTEXTS)
       }
       if(options?.context==='wide-geom') { checkWide(sp,parts.map(p=>p.length));return encodeWide16(parts,sp,cost,blockCost,onProgress,kernel,options) }
-      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol')
+      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol')
         return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,options.context==='wp-token3',options)
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return encodeGroupedTranspose(parts,sp.s,blockCost ?? (cost ? {values:cost,blockSize:1} : undefined),onProgress,true,undefined,'v20',options)
       if(options?.context==='bin-stride4') {
@@ -1301,7 +1306,7 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
         return lengths.map(len=>{const p=joined.subarray(at,at+len);at+=len;return sp.id===ID.GRAD_V3?medInv(p,sp.s,sp.r):deltaInv(p,sp.s)})
       }
       if(options?.context==='wide-geom') {checkWide(sp,lengths);return decodeWide16(payload,lengths,sp,onProgress,kernel,options)}
-      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol') && !wordPre) {
+      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol') && !wordPre) {
         const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,options.context==='wp-token3',options)
         let p=0;return lengths.map(n=>{const part=joined.subarray(p,p+n);p+=n;return part})
       }
@@ -2061,6 +2066,7 @@ export interface Compressed {
   contextComparison?: ContextComparison
   /** P17.7: conservative low-entropy pocket carve-out inside coarse STORE/O0 groups. */
   pocketComparison?: PocketComparison
+  bcjComparison?: { baselineBytes: number; candidateBytes: number; accepted: boolean; seams: number }
   rec2Comparison?: { baselineBytes:number; candidateBytes?:number; accepted:boolean; params?:{op:number;a:number;b:number}; error?:string }
 }
 
@@ -3762,7 +3768,8 @@ export async function compressAdaptive(
     const baseline=await compressAdaptiveImpl(data,onStage,options)
     if(options?.contextCandidates===false || !cmV20Tuning.enabled) return baseline
     const chosen=await refineContextCandidates(data,baseline,{serial:!!options?.serial||!workerTuningMatchesDefaults()},onStage)
-    const carved=refineNoisePockets(data,chosen)
+    const coalescedBcj=refineBcjSegments(data,chosen)
+    const carved=refineNoisePockets(data,coalescedBcj)
     const rec2=refineRec2(data,carved)
     const bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
     return bp
@@ -3783,8 +3790,8 @@ export async function compressAdaptive(
 const POCKET_BLOCK = 512
 const POCKET_ENTROPY_LIMIT = 7.40
 const POCKET_SAVINGS_MIN = 32
-const POCKET_MIN_GAIN = 24
 const POCKET_PARENT_IDS = new Set<number>([ID.STORE, ID.O0, ID.SUB_ANCHOR, ID.TRANSPOSE_GROUP_V3])
+const POCKET_RES_IGNORED = new Set<number>([ID.DELTA, ID.DELTA_V3, ID.O0, ID.BIN_V3])
 const POCKET_SPECS: readonly Spec[] = [
   { id: ID.BIN, s: 1, r: 1 },
   { id: ID.DELTA, s: 1, r: 1 },
@@ -3792,6 +3799,101 @@ const POCKET_SPECS: readonly Spec[] = [
   { id: ID.DELTA, s: 4, r: 1 },
   { id: ID.DELTA_V3, s: 1, r: 1 },
 ]
+const BCJ_RUN_IDS = new Set<number>([ID.BCJ, ID.BCJ_V2, ID.BCJ_V3])
+
+/**
+ * P17.8: pre-encoding BCJ coalescing. `bcjFwd`/`bcjMsbFwd` convert E8/E9 words to a
+ * position-relative form, so the encoder and the decoder must cut the stream at the
+ * SAME boundaries. Re-encoding a run of contiguous `BCJ*` segments as one part both
+ * fixes the calls that straddle a seam and removes one header length per seam. The
+ * whole container must still shrink; otherwise the untouched plan is returned.
+ */
+export function refineBcjSegments(data: Uint8Array, baseline: Compressed): Compressed {
+  const comparison: NonNullable<Compressed['bcjComparison']> = {
+    baselineBytes: baseline.container.length, candidateBytes: baseline.container.length,
+    accepted: false, seams: 0,
+  }
+  try {
+    const groups = retainedPlanGroups.get(baseline.container)
+    if (!groups) return { ...baseline, bcjComparison: comparison }
+    const owner = new Int32Array(baseline.segs.length).fill(-1)
+    for (let gi = 0; gi < groups.length; gi++) for (const i of groups[gi].members) owner[i] = gi
+    const merged: SegResult[] = []
+    const oldToNew = new Int32Array(baseline.segs.length).fill(-1)
+    const groupOfNew: number[] = []
+    const firstOfNew: number[] = []
+    for (let i = 0; i < baseline.segs.length;) {
+      const seg = baseline.segs[i]
+      let j = i
+      if (BCJ_RUN_IDS.has(seg.spec.id) && owner[i] >= 0) {
+        while (j + 1 < baseline.segs.length
+          && BCJ_RUN_IDS.has(baseline.segs[j + 1].spec.id)
+          && sameSpec(seg.spec, baseline.segs[j + 1].spec)
+          && owner[j + 1] === owner[i]
+          && baseline.segs[j].end === baseline.segs[j + 1].start) j++
+      }
+      if (j > i) comparison.seams += j - i
+      const mi = merged.length
+      merged.push(j > i ? { ...seg, end: baseline.segs[j].end, rawLen: baseline.segs[j].end - seg.start, compLen: 0 } : seg)
+      groupOfNew.push(owner[i])
+      firstOfNew.push(i)
+      for (let k = i; k <= j; k++) oldToNew[k] = mi
+      i = j + 1
+    }
+    if (!comparison.seams) return { ...baseline, bcjComparison: comparison }
+    const nextGroups: PlanGroup[] = []
+    for (let gi = 0; gi < groups.length; gi++) {
+      const prev = groups[gi]
+      const members: number[] = []
+      for (let mi = 0; mi < merged.length; mi++) if (groupOfNew[mi] === gi) members.push(mi)
+      if (members.length === prev.members.length) { nextGroups.push({ ...prev, members }); continue }
+      const parts = members.map(i => data.subarray(merged[i].start, merged[i].end))
+      const positions = members.map(i => merged[i].start)
+      const prevFlags = payloadModelFlags(prev.payload)
+      const kernel: CMVariant = (prevFlags & V20_FLAG_CM) ? 'v20' : prev.v15 ? 'v15' : false
+      const payload = encodeTerrainGroup(parts, prev.spec, undefined, undefined, undefined, positions, kernel,
+        prev.context || prev.matchDist ? { context: prev.context, matchDist: prev.matchDist } : undefined)
+      nextGroups.push({ ...prev, members, payload, v15: !!kernel })
+    }
+    for (const g of nextGroups) {
+      let allocated = 0, cumulative = 0
+      const total = g.members.reduce((n, i) => n + merged[i].rawLen, 0)
+      for (let j = 0; j < g.members.length; j++) {
+        const i = g.members[j]
+        cumulative += merged[i].rawLen
+        const end = j === g.members.length - 1 ? g.payload.length : Math.round(g.payload.length * cumulative / Math.max(1, total))
+        merged[i].compLen = end - allocated
+        merged[i].modelFlags = payloadModelFlags(g.payload)
+        allocated = end
+      }
+    }
+    const header = planHeader(data.length, merged, nextGroups)
+    const total = header.length + nextGroups.reduce((n, g) => n + g.payload.length, 0)
+    comparison.candidateBytes = total
+    if (total >= baseline.container.length) return { ...baseline, bcjComparison: comparison }
+    const container = new Uint8Array(total)
+    container.set(header)
+    let w = header.length
+    for (const g of nextGroups) { container.set(g.payload, w); w += g.payload.length }
+    const blockCost = new Float32Array(baseline.blockCost.length), blockSeg = new Int32Array(baseline.blockSeg.length)
+    let si = 0
+    for (let b = 0; b < baseline.blockCost.length; b++) {
+      const bl = baseline.analysis.blocks[b]
+      while (si + 1 < merged.length && bl.start >= merged[si].end) si++
+      const sg = merged[si]
+      blockCost[b] = sg.rawLen > 0 ? (sg.compLen ?? 0) * 8 / sg.rawLen : 0
+      blockSeg[b] = si
+    }
+    comparison.accepted = true
+    retainedPlanGroups.set(container, nextGroups)
+    return { ...baseline, container, segs: merged, blockCost, blockSeg, overhead: header.length, bcjComparison: comparison }
+  } catch (error) {
+    comparison.accepted = false
+    comparison.candidateBytes = baseline.container.length
+    return { ...baseline, bcjComparison: comparison }
+  }
+}
+
 export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Compressed {
   const comparison: PocketComparison = { baselineBytes: baseline.container.length, candidateBytes: baseline.container.length, accepted: false, scannedBytes: 0, pockets: [] }
   const finish = (chosen: Compressed) => ({ ...chosen, pocketComparison: comparison })
@@ -3801,13 +3903,22 @@ export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Comp
     if (!groups) return finish(baseline)
     const owner = new Int32Array(baseline.segs.length).fill(-1)
     for (let gi = 0; gi < groups.length; gi++) for (const i of groups[gi].members) owner[i] = gi
-    // seg index -> accepted non-parent pieces (empty pocket list = untouched)
-    const replacements = new Map<number, { start: number; end: number; spec: Spec; payload: Uint8Array }[]>()
+    // P17.8: every segment of a carvable rule is scanned, including segments inside a
+    // group that already holds several members. P17.7 skipped those (`members.length
+    // !== 1`), which made a second pass impossible: the first carve splits the STORE
+    // group into many members, and the leftovers of that same pass were then invisible
+    // to every later pass (measured on AITDCC/P: 18 pockets worth 2,670 B).
+    interface PocketCandidate { seg: number; start: number; end: number; savings: number; parent: number }
+    const candidates: PocketCandidate[] = []
     for (let i = 0; i < baseline.segs.length; i++) {
       const seg = baseline.segs[i], gi = owner[i]
       if (gi < 0) continue
       const g = groups[gi]
-      if (g.members.length !== 1 || g.wordPre || g.context || g.matchDist) continue
+      // Word-PRE / context / matchDist groups are excluded because a carved pocket
+      // would have to be coded in the *same* model as the parent for the header to
+      // stay legal; a plain v20 BIN/DELTA pocket inside them would change the group's
+      // context code and the header would be rejected.
+      if (g.wordPre || g.context || g.matchDist) continue
       if (!POCKET_PARENT_IDS.has(seg.spec.id) || seg.rawLen < 1024) continue
       if ((seg.compLen ?? seg.rawLen) < seg.rawLen * 0.985) continue
       comparison.scannedBytes += seg.rawLen
@@ -3816,7 +3927,6 @@ export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Comp
         blockStarts.push(b)
         blockEntropy.push(blockMinEntropy(data, b, b + POCKET_BLOCK))
       }
-      const pieces: { start: number; end: number; spec: Spec; payload: Uint8Array }[] = []
       let k = 0
       while (k < blockStarts.length) {
         if (blockEntropy[k] >= POCKET_ENTROPY_LIMIT) { k++; continue }
@@ -3825,84 +3935,136 @@ export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Comp
           savings += POCKET_BLOCK * (8 - blockEntropy[j]) / 8
           j++
         }
-        if (savings >= POCKET_SAVINGS_MIN) {
-          const pStart = blockStarts[k], pEnd = blockStarts[j - 1] + POCKET_BLOCK
-          const pocket = data.subarray(pStart, pEnd)
-          let best: { spec: Spec; payload: Uint8Array } | null = null
-          for (const sp of POCKET_SPECS) {
-            let payload: Uint8Array
-            try { payload = withCMProbe(() => encodeTerrainGroup([pocket], sp, undefined, undefined, undefined, [pStart], 'v20')) } catch { continue }
-            if (!best || payload.length < best.payload.length) best = { spec: sp, payload }
-          }
-          if (best && best.payload.length + POCKET_MIN_GAIN < pEnd - pStart) pieces.push({ start: pStart, end: pEnd, spec: best.spec, payload: best.payload })
-        }
+        if (savings >= POCKET_SAVINGS_MIN) candidates.push({ seg: i, start: blockStarts[k], end: blockStarts[j - 1] + POCKET_BLOCK, savings, parent: seg.spec.id })
         k = j
       }
-      if (pieces.length) replacements.set(i, pieces)
     }
-    if (!replacements.size) return finish(baseline)
-    // A plan may hold only ONE group per (id,s,r) key, so a split must not emit
-    // two groups of the parent's rule: the parent's remaining pieces stay in one
-    // group (its payload is the concatenation of its members), and every pocket
-    // joins the group of its own winning rule. Untouched groups keep their exact
-    // payload; only the modified buckets are re-encoded.
-    const nextSegs: SegResult[] = []
-    for (let i = 0; i < baseline.segs.length; i++) {
-      const seg = baseline.segs[i], pieces = replacements.get(i)
-      if (!pieces) { nextSegs.push(seg); continue }
-      let p = seg.start
-      for (const piece of pieces) {
-        if (piece.start > p) nextSegs.push({ ...seg, start: p, end: piece.start, rawLen: piece.start - p })
-        nextSegs.push({ start: piece.start, end: piece.end, cls: seg.cls, spec: { ...piece.spec }, label: specLabel(piece.spec), rawLen: piece.end - piece.start, compLen: piece.payload.length, trials: [], modelFlags: payloadModelFlags(piece.payload) })
-        comparison.pockets.push({ start: piece.start, end: piece.end, parent: seg.spec.id, spec: { ...piece.spec }, payloadBytes: piece.payload.length })
-        p = piece.end
-      }
-      if (seg.end > p) nextSegs.push({ ...seg, start: p, rawLen: seg.end - p })
-    }
-    const prevByKey = new Map<string, PlanGroup>()
-    for (const g of groups) prevByKey.set(`${g.spec.id},${g.spec.s},${g.spec.r}`, g)
+    if (!candidates.length) return finish(baseline)
+    // Largest estimated local win first: a pocket that is worth little on its own can
+    // still be accepted later, but it must never consume the header/gate budget that a
+    // big pocket needs.
+    candidates.sort((a, b) => b.savings - a.savings)
+    const priceCache = new Map<string, Uint8Array>()
+    const groupKey = (sp: Spec) => `${sp.id},${sp.s},${sp.r}`
     const rangeKey = (segs: readonly { start: number; end: number }[], members: readonly number[]) => members.map(i => `${segs[i].start}:${segs[i].end}`).join(',')
-    const buckets = new Map<string, { spec: Spec; members: number[] }>()
-    for (let i = 0; i < nextSegs.length; i++) {
-      const spec = nextSegs[i].spec, key = `${spec.id},${spec.s},${spec.r}`
-      const bucket = buckets.get(key)
-      if (bucket) bucket.members.push(i)
-      else buckets.set(key, { spec, members: [i] })
-    }
-    const nextGroups: PlanGroup[] = []
-    for (const [key, bucket] of buckets) {
-      const prev = prevByKey.get(key)
-      if (prev && rangeKey(nextSegs, bucket.members) === rangeKey(baseline.segs, prev.members)) {
-        nextGroups.push({ ...prev, members: bucket.members })
-        continue
+    const prevByKey = new Map<string, PlanGroup>()
+    for (const g of groups) prevByKey.set(groupKey(g.spec), g)
+    const usedRes = new Set<string>()
+    for (const g of groups) usedRes.add(groupKey(g.spec))
+    interface AcceptedPocket { candidate: PocketCandidate; spec: Spec }
+    const buildPlan = (accepted: readonly AcceptedPocket[]) => {
+      const nextSegs: SegResult[] = []
+      const bySeg = new Map<number, AcceptedPocket[]>()
+      for (const p of accepted) { const list = bySeg.get(p.candidate.seg); if (list) list.push(p); else bySeg.set(p.candidate.seg, [p]) }
+      for (let i = 0; i < baseline.segs.length; i++) {
+        const seg = baseline.segs[i], pieces = bySeg.get(i)
+        if (!pieces) { nextSegs.push(seg); continue }
+        pieces.sort((a, b) => a.candidate.start - b.candidate.start)
+        let p = seg.start
+        for (const piece of pieces) {
+          if (piece.candidate.start > p) nextSegs.push({ ...seg, start: p, end: piece.candidate.start, rawLen: piece.candidate.start - p })
+          nextSegs.push({ start: piece.candidate.start, end: piece.candidate.end, cls: seg.cls, spec: { ...piece.spec }, label: specLabel(piece.spec), rawLen: piece.candidate.end - piece.candidate.start, compLen: 0, trials: [] })
+          p = piece.candidate.end
+        }
+        if (seg.end > p) nextSegs.push({ ...seg, start: p, rawLen: seg.end - p })
       }
-      const parts = bucket.members.map(i => data.subarray(nextSegs[i].start, nextSegs[i].end))
-      const positions = bucket.members.map(i => nextSegs[i].start)
-      // Keep the group's ACTUAL kernel: a v20 payload (CM bit) must never be
-      // re-encoded under the weaker v15/v13 model just because v15 is also set.
-      const prevFlags = prev ? payloadModelFlags(prev.payload) : 0
-      const kernel: CMVariant = prev ? ((prevFlags & V20_FLAG_CM) ? 'v20' : prev.v15 ? 'v15' : false) : 'v20'
-      const payload = encodeTerrainGroup(parts, bucket.spec, undefined, undefined, undefined, positions, kernel,
-        prev && (prev.context || prev.matchDist) ? { context: prev.context, matchDist: prev.matchDist } : undefined)
-      comparison.buckets ??= []
-      comparison.buckets.push({ key, oldPayload: prev ? prev.payload.length : null, newPayload: payload.length, members: bucket.members.length })
-      nextGroups.push({ spec: { ...bucket.spec }, members: bucket.members, payload, v15: !!kernel, ...(prev?.wordPre ? { wordPre: true } : {}), ...(prev?.context ? { context: prev.context } : {}), ...(prev?.matchDist ? { matchDist: true } : {}) })
-      for (const i of bucket.members) { nextSegs[i].compLen = 0; nextSegs[i].modelFlags = payloadModelFlags(payload) }
-      let allocated = 0, cumulative = 0
-      const total = bucket.members.reduce((n, i) => n + nextSegs[i].rawLen, 0)
-      for (let j = 0; j < bucket.members.length; j++) {
-        const i = bucket.members[j]
-        cumulative += nextSegs[i].rawLen
-        const end = j === bucket.members.length - 1 ? payload.length : Math.round(payload.length * cumulative / Math.max(1, total))
-        nextSegs[i].compLen = end - allocated
-        allocated = end
+      const buckets = new Map<string, { spec: Spec; members: number[] }>()
+      for (let i = 0; i < nextSegs.length; i++) {
+        const spec = nextSegs[i].spec, key = groupKey(spec)
+        const bucket = buckets.get(key)
+        if (bucket) bucket.members.push(i)
+        else buckets.set(key, { spec, members: [i] })
+      }
+      const nextGroups: PlanGroup[] = []
+      for (const [key, bucket] of buckets) {
+        const prev = prevByKey.get(key)
+        if (prev && rangeKey(nextSegs, bucket.members) === rangeKey(baseline.segs, prev.members)) {
+          nextGroups.push({ ...prev, members: bucket.members })
+          continue
+        }
+        const prevFlags = prev ? payloadModelFlags(prev.payload) : 0
+        const kernel: CMVariant = prev ? ((prevFlags & V20_FLAG_CM) ? 'v20' : prev.v15 ? 'v15' : false) : 'v20'
+        const cacheKey = `${key}|${rangeKey(nextSegs, bucket.members)}`
+        let payload = priceCache.get(cacheKey)
+        if (!payload) {
+          const parts = bucket.members.map(i => data.subarray(nextSegs[i].start, nextSegs[i].end))
+          const positions = bucket.members.map(i => nextSegs[i].start)
+          payload = encodeTerrainGroup(parts, bucket.spec, undefined, undefined, undefined, positions, kernel,
+            prev && (prev.context || prev.matchDist) ? { context: prev.context, matchDist: prev.matchDist } : undefined)
+          priceCache.set(cacheKey, payload)
+        }
+        nextGroups.push({ spec: { ...bucket.spec }, members: bucket.members, payload, v15: !!kernel, ...(prev?.wordPre ? { wordPre: true } : {}), ...(prev?.context ? { context: prev.context } : {}), ...(prev?.matchDist ? { matchDist: true } : {}) })
+        for (const i of bucket.members) {
+          nextSegs[i].modelFlags = payloadModelFlags(payload)
+          nextSegs[i].compLen = 0
+        }
+        let allocated = 0, cumulative = 0
+        const total = bucket.members.reduce((n, i) => n + nextSegs[i].rawLen, 0)
+        for (let j = 0; j < bucket.members.length; j++) {
+          const i = bucket.members[j]
+          cumulative += nextSegs[i].rawLen
+          const end = j === bucket.members.length - 1 ? payload.length : Math.round(payload.length * cumulative / Math.max(1, total))
+          nextSegs[i].compLen = end - allocated
+          allocated = end
+        }
+      }
+      const header = planHeader(data.length, nextSegs, nextGroups)
+      const total = header.length + nextGroups.reduce((n, x) => n + x.payload.length, 0)
+      return { nextSegs, nextGroups, header, total }
+    }
+    // P17.8: greedy, one pocket at a time. Each pocket is priced against the CURRENT
+    // best container, so a pocket that only pays because it rides along with another
+    // one cannot drag a losing bucket in. The accepted set is monotone (only
+    // strictly smaller containers are kept), so the final result can never be worse
+    // than the P17.7 baseline.
+    const accepted: AcceptedPocket[] = []
+    let bestTotal = baseline.container.length
+    let best = buildPlan(accepted)
+    for (const candidate of candidates) {
+      const pocket = data.subarray(candidate.start, candidate.end)
+      // Spec options: the merged r=1 group (each pocket of a rule shares one stream)
+      // and, for rules whose decoder ignores `res`, one isolated group with a fresh
+      // res tag. Isolated groups pay ~8 B of header but avoid the cold-start cost of
+      // a shared stream, which is what made P17.7 reject the cheap STORE pockets.
+      const options: Spec[] = []
+      const standalone: { spec: Spec; bytes: number }[] = []
+      for (const sp of POCKET_SPECS) {
+        let payload: Uint8Array | undefined
+        try { payload = withCMProbe(() => encodeTerrainGroup([pocket], sp, undefined, undefined, undefined, [candidate.start], 'v20')) } catch { payload = undefined }
+        if (payload) standalone.push({ spec: sp, bytes: payload.length })
+      }
+      standalone.sort((a, b) => a.bytes - b.bytes)
+      for (const entry of standalone.slice(0, 2)) {
+        // Isolated group first: a fresh `res` tag is a distinct group key, so the
+        // pocket's stream is coded from a cold start that belongs to the pocket alone
+        // and no pre-existing group payload has to be re-encoded.
+        if (POCKET_RES_IGNORED.has(entry.spec.id)) {
+          for (let r = 2; r <= 200; r++) {
+            const iso = { ...entry.spec, r }
+            if (usedRes.has(groupKey(iso))) continue
+            options.push(iso)
+            break
+          }
+        }
+        options.push(entry.spec)
+      }
+      let chosen: AcceptedPocket | undefined
+      for (const spec of options) {
+        const trial = [...accepted, { candidate, spec }]
+        let plan: ReturnType<typeof buildPlan>
+        try { plan = buildPlan(trial) } catch { continue }
+        if (plan.total < bestTotal) { bestTotal = plan.total; best = plan; chosen = { candidate, spec } }
+      }
+      if (chosen) {
+        accepted.push(chosen)
+        usedRes.add(groupKey(chosen.spec))
+        comparison.pockets.push({ start: chosen.candidate.start, end: chosen.candidate.end, parent: chosen.candidate.parent, spec: { ...chosen.spec }, payloadBytes: best.nextGroups.find(g => groupKey(g.spec) === groupKey(chosen!.spec))?.payload.length ?? 0 })
       }
     }
-    const header = planHeader(data.length, nextSegs, nextGroups)
-    const total = header.length + nextGroups.reduce((n, x) => n + x.payload.length, 0)
-    comparison.candidateBytes = total
-    if (total >= baseline.container.length) return finish(baseline)
-    const container = new Uint8Array(total)
+    comparison.candidateBytes = bestTotal
+    if (!accepted.length || bestTotal >= baseline.container.length) return finish(baseline)
+    const { nextSegs, nextGroups, header } = best
+    const container = new Uint8Array(bestTotal)
     container.set(header)
     let w = header.length
     for (const g of nextGroups) { container.set(g.payload, w); w += g.payload.length }
@@ -3912,7 +4074,7 @@ export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Comp
       const bl = baseline.analysis.blocks[b]
       while (si + 1 < nextSegs.length && bl.start >= nextSegs[si].end) si++
       const sg = nextSegs[si]
-      blockCost[b] = sg.rawLen > 0 ? sg.compLen * 8 / sg.rawLen : 0
+      blockCost[b] = sg.rawLen > 0 ? (sg.compLen ?? 0) * 8 / sg.rawLen : 0
       blockSeg[b] = si
     }
     comparison.accepted = true
@@ -4361,7 +4523,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol']
+    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol','text-lexcol']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     if(!modes.length||rawBytes<CONTEXT_MIN_BYTES){result.skipped='ineligible-or-small';return result}
@@ -4489,9 +4651,15 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
       // 0.5% of the sample winner (AITDCC/B: linecol won the 192 KiB sample by 0.1%
       // and lost 142 B on the 1.1 MiB group). The complete-container gate still
       // decides adoption, so the extra encode can only ever remove bytes.
-      if(pick && rawText && !wordPre) {
-        const runner=positive.find(t=>t.context!==pick!.context)
-        if(runner && runner.bytes<=pick.bytes*1.005) modes.push(runner.context)
+      // P17.8: the close-contender promotion is generalised to the top three
+      // distinct contexts within 0.5% of the sample winner (not just the runner-up).
+      // A bounded sample can rank contexts inside noise; the complete-container gate
+      // still decides adoption, so an extra full encode can only ever remove bytes.
+      if(pick) {
+        for(const t of positive) {
+          if(modes.length>=3) break
+          if(t.bytes<=pick.bytes*1.005 && !modes.includes(t.context)) modes.push(t.context)
+        }
       }
       result.screen={rawBytes:sample.bytes,controlBytes,trials,selected:[...modes],matchDist:!!pick?.matchDist}
       if(!pick){result.skipped='probe-not-better';return result}

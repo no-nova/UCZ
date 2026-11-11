@@ -23,8 +23,13 @@ export const GROUP_MATCH_DIST_BIT = 0x100000
 export const GROUP_CONTEXT_EXT_BIT = 0x200000
 /** Codes 1..7 inside the base namespace; 0 means "no context". */
 export const CONTEXT_CODES = { 'bin-stride4': 1, 'wide-geom': 2, 'wp-token3': 3, 'wp-merge': 4, 'text-sparse5': 5, 'xform-bin': 6, 'xform-bin-stride4': 7 } as const
-/** Codes 1..7 when `GROUP_CONTEXT_EXT_BIT` is set. */
-export const EXT_CONTEXT_CODES = { 'text-linecol': 1 } as const
+/**
+ * Codes 1..7 when `GROUP_CONTEXT_EXT_BIT` is set. Extended code 0 is unavailable:
+ * an all-zero three-bit field already means "no context" in the base namespace and
+ * `contextFromGroupBits` returns `undefined` for it, so the extended namespace
+ * starts at 1 exactly like the base one.
+ */
+export const EXT_CONTEXT_CODES = { 'text-linecol': 1, 'text-lexcol': 2 } as const
 export type CMContext = keyof typeof CONTEXT_CODES | keyof typeof EXT_CONTEXT_CODES
 /** Split a context into the three-bit field value and the namespace bit it needs. */
 export function contextCodeOf(context: CMContext): { code: number; ext: boolean } {

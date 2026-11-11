@@ -723,7 +723,7 @@ class Model {
         || (this.context === 'bin-stride4' && (profile !== 'bin' || wordTokens))
         || (this.context === 'wide-geom' && (profile !== 'res2d' || geomStride <= 0 || wordTokens))
         || (this.context === 'text-sparse5' && (profile !== 'text' || geomStride !== 0 || wordTokens))
-        || (this.context === 'text-linecol' && (profile !== 'text' || geomStride !== 0 || wordTokens))
+        || ((this.context === 'text-linecol' || this.context === 'text-lexcol') && (profile !== 'text' || geomStride !== 0 || wordTokens))
         || ((this.context === 'wp-token3' || this.context === 'wp-merge') && (profile !== 'text' || !wordTokens || geomStride !== 0)))
         throw Error('无效的 v21 CM 上下文 / profile / 格式标志')
       this.requiredFlags |= V21_FLAG_CONTEXTS
@@ -753,7 +753,7 @@ class Model {
     this.geomStride = geomStride
     // WORD-PRE 词元只对 v15 内核有意义：v13/v2 的比特流必须一字节不变。
     this.wordTokens = wordTokens && isAPMKernel(variant)
-    if (this.context === 'text-linecol') {
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol') {
       this.lineColBytes = new Uint8Array(256)
       this.fieldColBytes = new Uint8Array(8 * 64)
     }
@@ -920,23 +920,34 @@ class Model {
         return
       }
       if(this.profile === 'text') {
-        if (this.context === 'text-linecol') {
-          // P17.7: replace the three weakest text contexts with the column
-          // predictors. H[5] is field-aligned (does this field start the same way
-          // as the same field of the previous line?), H[6] is the adaptive
-          // line-prefix predictor with a current-word fallback inside the free-text
-          // body, H[7] is the word trigram. H[8] keeps a sparse order-5 context so
-          // the topology stays a strict substitution on the same 9 inputs.
+        if (this.context === 'text-linecol' || this.context === 'text-lexcol') {
+          // P17.8: `text-lexcol` is the source-code variant of the column model. It
+          // keeps BOTH word slots (`word0 = hh(curWord,b1)` and the word bigram) and
+          // spends the remaining two slots on the field/line hashes. `text-linecol`
+          // keeps its P17.7 slot layout byte-for-byte: there the field hash is the
+          // dominant source-code predictor (indentation column), and replacing it
+          // with the word slot was measured to cost 1,298 B on AITDCC/B, so the two
+          // layouts stay separate wire contexts and the group screen picks per file.
           const fPos = (this.fieldIdx << 6) | this.fieldCol
-          const predField = this.fieldColBytes[fPos]
-          const predLine = this.lineColBytes[this.lineCol]
+          const prevF = this.fieldColBytes[fPos]
+          const prevL = this.lineColBytes[this.lineCol]
           H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4)
-          H[5]=mix32((predField | (this.fieldCol << 8) | (this.fieldIdx << 14) | ((this.fieldEqMask & 0x1f) << 17) | (b1 << 22)) | 0)
-          H[6]=(this.lineEqMask & 0x07) !== 0 && this.lineCol < 32
-            ? mix32((predLine | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
+          const fieldHash = mix32((prevF | (this.fieldCol << 8) | (this.fieldIdx << 14) | ((this.fieldEqMask & 0x1f) << 17) | (b1 << 22)) | 0)
+          const lineHash = (this.lineEqMask & 0x07) !== 0 && this.lineCol < 32
+            ? mix32((prevL | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
             : hh(this.curWord, b1)
-          H[7]=hh(this.prevPrevWord, this.prevWord, this.curWord||b1)
-          H[8]=hh(b1,b3,this.g(5));return
+          if (this.context === 'text-lexcol') {
+            H[5] = hh(this.curWord, b1)
+            H[6] = hh(this.prevWord, this.curWord || b1)
+            H[7] = fieldHash
+            H[8] = lineHash
+          } else {
+            H[5] = fieldHash
+            H[6] = lineHash
+            H[7] = hh(this.prevPrevWord, this.prevWord, this.curWord || b1)
+            H[8] = hh(b1, b3, this.g(5))
+          }
+          return
         }
         H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=hh(this.curWord,b1);H[7]=hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
       }
@@ -1306,7 +1317,7 @@ class Model {
   }
 
   private byteUpdate(byte: number) {
-    if (this.context === 'text-linecol') this.updateLineCol(byte)
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
       const lower = byte | 32
       const asciiLetter = lower >= 97 && lower <= 122
