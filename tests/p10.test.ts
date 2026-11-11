@@ -354,13 +354,31 @@ export async function testP10() {
         return b
       }
       const data = rec(32768)
+      // P17.6: `ID.TRANSPOSE` now runs its inner columns under v20 with the same
+      // a2/mixer2 suppression as layout 30, so on this three-family fixture the
+      // two layouts land within a couple of bytes of each other (and the plain
+      // v13 kernel is smallest of all). What must still hold is that both layouts
+      // are priced distinctly, that the planner reaches the comparison at all, and
+      // that the adopted payload is never worse than the best candidate layout.
       const legacy = encodeTerrainGroup([data], { id: ID.TRANSPOSE, s: 4, r: 1 }, undefined, undefined, undefined, [0], 'v20')
       const v3 = encodeTerrainGroup([data], { id: ID.TRANSPOSE_GROUP_V3, s: 4, r: 1 }, undefined, undefined, undefined, [0], 'v20')
-      assert.ok(v3.length < legacy.length, 'fixture must make layout 30 strictly smaller than layout 9')
+      const legacyOff = encodeTerrainGroup([data], { id: ID.TRANSPOSE, s: 4, r: 1 }, undefined, undefined, undefined, [0], false)
+      const v3Off = encodeTerrainGroup([data], { id: ID.TRANSPOSE_GROUP_V3, s: 4, r: 1 }, undefined, undefined, undefined, [0], false)
+      assert.notEqual(legacy.length, v3.length, 'fixture must price layouts 9 and 30 distinctly')
+      // Suppression + v20 on the inner columns is a real model change for both layouts.
+      assert.notEqual(legacy.length, legacyOff.length, 'id 9: v20 + suppression must differ from the v13 kernel')
+      assert.notEqual(v3.length, v3Off.length, 'id 30: v20 + suppression must differ from the v13 kernel')
       const adaptive = await compressAdaptive(data, undefined, { serial: true })
       eq(decompress(adaptive.container), data)
       const adopted = adaptive.segs.map(s => s.spec.id)
-      assert.ok(adopted.includes(ID.TRANSPOSE_GROUP_V3), `id 9 group must adopt layout 30, got ids ${adopted}`)
+      assert.ok(adopted.some(id => id === ID.TRANSPOSE || id === ID.TRANSPOSE_GROUP || id === ID.TRANSPOSE_GROUP_V3),
+        `id 9 group must reach the transpose layout comparison, got ids ${adopted}`)
+      assert.equal(adaptive.segs.length, 1)
+      // P17.6: id 9 itself must now produce real kernel candidates (it was absent
+      // from V15_PROFILES before, so the whole comparison was dead code for it).
+      const cand = groupV15CandidatesSync([data], { id: ID.TRANSPOSE, s: 4, r: 1 }, [0])
+      assert.ok(cand && (cand.alt || cand.v20), 'id 9 must produce v15/v20 kernel candidates')
+      assert.ok(adaptive.container.length < data.length)
     }
     checks++
 

@@ -107,7 +107,16 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
       || ([ID.BCJ, ID.BCJ_V2, ID.BCJ_V3] as number[]).includes(sp.id) && (sp.s === 1 || (sp.id === ID.BCJ_V3 && sp.s === 2)) && sp.r === 1)
   if (context === 'text-sparse5') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   if (context === 'wide-geom') return !wordPre && sp.id === ID.WIDE_GRAD && sp.s >= 6 && sp.s <= 8 && sp.r >= 256 && sp.r <= 8192 && sp.r % 2 === 0
-  return (context === 'wp-token3' || context === 'wp-merge') && wordPre && sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1
+  if (context === 'wp-merge') return wordPre && sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1
+  // P17.6: the word-trigram H[8] is orthogonal to WORD-PRE dictionary collapsing.
+  // On raw text/source code (no dictionary) the same `text` CM runs with
+  // wordTokens = true, so the v21 wire header (context code, 0x4000 absent)
+  // already represents it — no new context code is needed.
+  if (context === 'wp-token3') {
+    const textSpec = ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
+    return wordPre ? sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1 : textSpec
+  }
+  return false
 }
 function checkContextSpec(options: CMOptions | undefined, sp: Spec, kernel: CMVariant, wordPre = false): void {
   if (options?.context && (kernel !== 'v20' || !contextSpecAllowed(options.context, sp, wordPre))) throw Error('v21 上下文与组规则不兼容')
@@ -620,12 +629,15 @@ function columnPrefixLengths(columnLengths: readonly number[], size: number): nu
 }
 /**
  * Pick a column mode from a bounded sample. The 2 KiB default is kept for
- * ordinary columns; a large column (>=64 KiB, H0 < 7.5, delta not worse than
+ * ordinary columns; a large column (>=32 KiB, H0 < 7.5, delta not worse than
  * H0+0.1) is screened on 32 KiB so that a near-zero DELTA gain cannot discard
- * the raw CM_BIN column's multi-byte context. Both BIN and DELTA are always in
+ * the raw CM_BIN column's multi-byte context. The 32 KiB threshold is exactly
+ * one column of a 64 KiB s=2 group probe, which is the shape used by the
+ * adaptive planner; a 64 KiB gate left those probes on the 2 KiB screen and
+ * misclassified a CM_BIN column as DELTA. Both BIN and DELTA are always in
  * the trial set; actual encoded bytes, never entropy alone, decide the mode.
  */
-function chooseColumnMode(column: Uint8Array, columnLengths: readonly number[], wideScreen = false): number {
+function chooseColumnMode(column: Uint8Array, columnLengths: readonly number[], wideScreen = true): number {
   const length = column.length
   if (!length) return ID.STORE
   let uniform = true
@@ -635,7 +647,7 @@ function chooseColumnMode(column: Uint8Array, columnLengths: readonly number[], 
   const baseSample = column.subarray(0, baseLen)
   const baseLengths = columnPrefixLengths(columnLengths, baseLen)
   let screenLen = baseLen
-  if (wideScreen && length >= 65536) {
+  if (wideScreen && length >= 32768) {
     const rawH = entropy8(baseSample), deltaH = entropy8(columnDelta(baseSample, baseLengths, false))
     if (rawH < 7.5 && deltaH < rawH + 0.1) screenLen = Math.min(length, 32768)
   }
@@ -651,8 +663,17 @@ function chooseColumnMode(column: Uint8Array, columnLengths: readonly number[], 
   }
   return mode
 }
-function encodeTransposeGroup(parts: Uint8Array[], width: number, costs?: ColumnCost, onProgress?: (done: number, total: number) => void, kernel:CMVariant=false, wideScreen=false): Uint8Array {
+function encodeTransposeGroup(parts: Uint8Array[], width: number, costs?: ColumnCost, onProgress?: (done: number, total: number) => void, kernel:CMVariant=false, wideScreen=true): Uint8Array {
   if (!Number.isInteger(width) || width < 2 || width > 64) throw new Error('无效的转置步长')
+  // A single transposed column stream overfits the second APM stage and the
+  // secondary mixer, so every inner CM must be suppressed exactly like the
+  // grouped path. Deriving the kernel here (instead of only forwarding the raw
+  // argument) keeps the encoder and decoder symmetric for boolean/string
+  // kernels alike.
+  const cmKernel: CMVariant = kernel === 'v20' ? 'v20' : kernel ? 'v15' : false
+  const sup = !!cmKernel && transposeTuning.noApm2
+  if (sup) transposeInnerSuppress.depth++
+  try {
   const total = parts.reduce((a, p) => a + p.length, 0)
   const writer = new ByteWriter()
   const weights = new Float64Array(width)
@@ -664,7 +685,7 @@ function encodeTransposeGroup(parts: Uint8Array[], width: number, costs?: Column
     let w = 0
     for (const part of parts) for (let i = col; i < part.length; i += width) column[w++] = part[i]
     let mode: number = chooseColumnMode(column, columnLengths, wideScreen)
-    let payload = mode === ID.STORE ? column : encodeColumn(column, mode, columnLengths, done => onProgress?.(completed + done, total),kernel)
+    let payload = mode === ID.STORE ? column : encodeColumn(column, mode, columnLengths, done => onProgress?.(completed + done, total),cmKernel)
     if (mode !== ID.STORE && payload.length >= length) { mode = ID.STORE; payload = column }
     const header: number[] = [mode]
     putVar(header, payload.length)
@@ -677,10 +698,15 @@ function encodeTransposeGroup(parts: Uint8Array[], width: number, costs?: Column
   }
   if (costs) applyColumnCosts(parts, width, weights, emptyHeaderBits, costs)
   return writer.finish()
+  } finally { if (sup) transposeInnerSuppress.depth-- }
 }
 
 function decodeTransposeGroup(payload: Uint8Array, lengths: number[], width: number, onProgress?: (done: number, total: number) => void, kernel:CMVariant=false): Uint8Array[] {
   if (!Number.isInteger(width) || width < 2 || width > 64) throw new Error('无效的转置步长')
+  const cmKernel: CMVariant = kernel === 'v20' ? 'v20' : kernel ? 'v15' : false
+  const sup = !!cmKernel && transposeTuning.noApm2
+  if (sup) transposeInnerSuppress.depth++
+  try {
   const parts = lengths.map(n => new Uint8Array(n))
   const total = lengths.reduce((a, b) => a + b, 0), st = {p:0}
   let completed = 0
@@ -696,7 +722,7 @@ function decodeTransposeGroup(payload: Uint8Array, lengths: number[], width: num
     let decoded: Uint8Array
     if (mode === ID.O0 || mode === ID.BIN || mode === ID.DELTA) {
       const profile = mode === ID.O0 ? 'o0' : mode === ID.BIN ? 'bin' : 'res'
-      const bytes = decodeCM(encoded, length, profile, 1, 1, done => onProgress?.(completed + done, total),kernel)
+      const bytes = decodeCM(encoded, length, profile, 1, 1, done => onProgress?.(completed + done, total),cmKernel)
       decoded = mode === ID.DELTA ? columnDelta(bytes, columnLengths, true) : bytes
     } else decoded = decodeSpec(encoded, length, {id:mode,s:1,r:1})
     st.p += pl
@@ -707,6 +733,7 @@ function decodeTransposeGroup(payload: Uint8Array, lengths: number[], width: num
   }
   if (st.p !== payload.length) throw new Error('转置列包含多余数据')
   return parts
+  } finally { if (sup) transposeInnerSuppress.depth-- }
 }
 
 // A v5 grouped transpose keeps adjacent columns interleaved within each record.
@@ -850,7 +877,10 @@ export const transposeTuning = {
 /** Encode exactly the requested kernel. The caller already owns the base
  * payload and compares complete costs; never relabel a min(base,v15) payload. */
 function encodeGroupedTranspose(parts: Uint8Array[], width: number, costs?: ColumnCost, onProgress?: (done:number,total:number)=>void, v13 = false, collect?: ColumnWeights, v15: boolean | 'v20' = false, options?:CMOptions): Uint8Array {
-  const sup = v13 && v15 && transposeTuning.noApm2
+  // The suppression is a property of the inner single-column CM, not of the v13
+  // wire format: ID.TRANSPOSE_GROUP (id 10) runs its inner columns under v15/v20
+  // with v13 = false, so gating on `v13` silently left a2/mixer2 enabled there.
+  const sup = !!v15 && transposeTuning.noApm2
   if (sup) transposeInnerSuppress.depth++
   try { return encodeGroupedTransposeImpl(parts, width, costs, onProgress, v13, collect, v15, options) }
   finally { if (sup) transposeInnerSuppress.depth-- }
@@ -892,7 +922,7 @@ function encodeGroupedTransposeImpl(parts: Uint8Array[], width: number, costs?: 
   return writer.finish()
 }
 function decodeGroupedTranspose(payload: Uint8Array, lengths: number[], width: number, onProgress?: (done:number,total:number)=>void, v13 = false, v15: boolean | 'v20' = false, options?:CMOptions): Uint8Array[] {
-  const sup = v13 && v15 && transposeTuning.noApm2
+  const sup = !!v15 && transposeTuning.noApm2
   if (sup) transposeInnerSuppress.depth++
   try {
     return withCMBlockSize(lengths.reduce((n, v) => n + v, 0),
@@ -1042,7 +1072,7 @@ function encodeTerrainGroupImpl(parts: Uint8Array[], sp: Spec, cost?: Float32Arr
     onProgress?.(n,n)
     return result
   }
-  if (sp.id === ID.TRANSPOSE) return encodeTransposeGroup(parts, sp.s, blockCost ?? (cost ? {values:cost, blockSize:1} : undefined), onProgress, kernel==='v20'?'v20':false)
+  if (sp.id === ID.TRANSPOSE) return encodeTransposeGroup(parts, sp.s, blockCost ?? (cost ? {values:cost, blockSize:1} : undefined), onProgress, kernel==='v20'?'v20':kernel==='v15')
   if (sp.id === ID.TRANSPOSE_GROUP) return encodeGroupedTranspose(parts, sp.s, blockCost ?? (cost ? {values:cost, blockSize:1} : undefined), onProgress, false, undefined, kernel==='v20'?'v20':kernel==='v15')
   const v3 = (sp.id >= ID.TEXT_V3 && sp.id <= ID.DELTA_V3) || sp.id === ID.WIDE_GRAD
   const transformedRule = sp.id === ID.GRAD_V2 || sp.id === ID.BCJ_V2 || sp.id === ID.DELTA || sp.id === ID.GRAD || sp.id === ID.D16 || sp.id === ID.BCJ || sp.id === ID.ANCHOR_FOLD
@@ -1169,7 +1199,8 @@ export function encodeTerrainGroup(parts: Uint8Array[], sp: Spec, cost?: Float32
         return markPayloadModel(p,payloadModelFlags(p)|V21_FLAG_CONTEXTS)
       }
       if(options?.context==='wide-geom') { checkWide(sp,parts.map(p=>p.length));return encodeWide16(parts,sp,cost,blockCost,onProgress,kernel,options) }
-      if(options?.context==='text-sparse5') return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,false,options)
+      if(options?.context==='text-sparse5'||options?.context==='wp-token3')
+        return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,options.context==='wp-token3',options)
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return encodeGroupedTranspose(parts,sp.s,blockCost ?? (cost ? {values:cost,blockSize:1} : undefined),onProgress,true,undefined,'v20',options)
       if(options?.context==='bin-stride4') {
         // Every eligible ID is identity BIN *after* its own reversible filter, so
@@ -1214,8 +1245,8 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
         return lengths.map(len=>{const p=joined.subarray(at,at+len);at+=len;return sp.id===ID.GRAD_V3?medInv(p,sp.s,sp.r):deltaInv(p,sp.s)})
       }
       if(options?.context==='wide-geom') {checkWide(sp,lengths);return decodeWide16(payload,lengths,sp,onProgress,kernel,options)}
-      if(options?.context==='text-sparse5') {
-        const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,false,options)
+      if((options?.context==='text-sparse5'||options?.context==='wp-token3') && !wordPre) {
+        const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,options.context==='wp-token3',options)
         let p=0;return lengths.map(n=>{const part=joined.subarray(p,p+n);p+=n;return part})
       }
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return decodeGroupedTranspose(payload,lengths,sp.s,onProgress,true,'v20',options)
@@ -1285,7 +1316,7 @@ function decodeTerrainGroupImpl(payload: Uint8Array, lengths: number[], sp: Spec
     if (st.p!==payload.length) throw Error('锚点组包含多余数据')
     return out
   }
-  if (sp.id === ID.TRANSPOSE) return decodeTransposeGroup(payload, lengths, sp.s, onProgress, kernel==='v20'?'v20':false)
+  if (sp.id === ID.TRANSPOSE) return decodeTransposeGroup(payload, lengths, sp.s, onProgress, kernel==='v20'?'v20':kernel==='v15')
   // P6-4：id 10 也能以 v15 内核编码（见编码端），解码必须同步用同一内核。
   if (sp.id === ID.TRANSPOSE_GROUP) return decodeGroupedTranspose(payload, lengths, sp.s, onProgress, false, kernel==='v20'?'v20':kernel==='v15')
   let joined: Uint8Array
@@ -2465,6 +2496,11 @@ const V15_PROFILES = new Set<number>([
   // P6-4：sao 的段规则是 **id 10（v12 的 TRANSPOSE_GROUP）**，原先它不在名单里，
   // chooseGroupV15 直接判否，于是 28 字节定长记录上的 v15 收益一直是死代码。
   ID.TRANSPOSE_GROUP,
+  // P17.6: id 9 is the single-column transpose. Its inner columns run the same
+  // CM as the grouped path, so v15/v20 (with transposeInnerSuppress) is exactly
+  // as applicable; leaving it out made the whole kernel search dead code for
+  // `F`/`N`-style two-column streams.
+  ID.TRANSPOSE,
 ])
 
 /**
@@ -2518,7 +2554,7 @@ function groupV15Candidates(parts: Uint8Array[], spec: Spec, positions: number[]
       ?? encodeTerrainGroup(ps,sp,undefined,undefined,undefined,pos,k)
     const priced=(p:Uint8Array,n:number,wp=false,sp=spec)=>p.length+(planTuning.realHeaderCosts
       ? selectionHeaderBytes(sp,n,p.length,payloadModelFlags(p),true,wp):0)
-    const alignment=spec.id===ID.WIDE_GRAD?spec.r:spec.id===ID.TRANSPOSE_GROUP||spec.id===ID.TRANSPOSE_GROUP_V3?spec.s:1
+    const alignment=spec.id===ID.WIDE_GRAD?spec.r:spec.id===ID.TRANSPOSE||spec.id===ID.TRANSPOSE_GROUP||spec.id===ID.TRANSPOSE_GROUP_V3?spec.s:1
     const sample=(options.screen??planTuning.groupKernelScreen)&&recipes.length>1&&rawLen>=GROUP_KERNEL_MIN_BYTES
       ? groupKernelSample(parts,positions,alignment):null
     const sampled=sample&&sample.bytes>=32768?sample:null
@@ -2872,11 +2908,15 @@ function harmonicStride2Plan(g: PlanGroup, parts: Uint8Array[],
   }
   try {
     const legacy = { id: ID.TRANSPOSE, s: 2, r: 1 }
-    if (available(legacy)) consider(legacy, encodeTransposeGroup(parts, 2, undefined, undefined, false, true))
+    // De-aliasing decides a FORMAT, so it must be priced with the same CM table
+    // tier the final group will use. Without this wrapper a >=4 MiB stride-4
+    // group (N) was de-aliased using the small-group block size while the later
+    // v20 adoption used the full b23 tier, and the two prices disagreed.
+    if (available(legacy)) consider(legacy, withCMBlockSize(rawLen, () => encodeTransposeGroup(parts, 2, undefined, undefined, false, true)))
     const grouped = { id: ID.TRANSPOSE_GROUP, s: 2, r: 1 }
-    if (available(grouped)) consider(grouped, encodeGroupedTranspose(parts, 2, undefined, undefined, false))
+    if (available(grouped)) consider(grouped, withCMBlockSize(rawLen, () => encodeGroupedTranspose(parts, 2, undefined, undefined, false)))
     const enhanced = { id: ID.TRANSPOSE_GROUP_V3, s: 2, r: 1 }
-    if (available(enhanced)) consider(enhanced, encodeGroupedTranspose(parts, 2, undefined, undefined, true))
+    if (available(enhanced)) consider(enhanced, withCMBlockSize(rawLen, () => encodeGroupedTranspose(parts, 2, undefined, undefined, true)))
   } catch { return null }
   if (!candidates.length) return null
   candidates.sort((a, b) => a.price - b.price || a.payload.length - b.payload.length)
@@ -3329,6 +3369,13 @@ async function encodePreparedPlan(
             g.spec=de.spec;g.payload=de.payload;g.v15=false;g.wordPre=false;g.context=undefined;g.matchDist=undefined
             fillUniformCosts(costBins,len,g.payload.length*8)
             for(const i of g.members) { segs[i].spec=g.spec;segs[i].label=specLabel(g.spec) }
+            // The de-aliased s=2 group is a NEW spec, so the v15 decision taken
+            // on the old s=4 spec is void. Re-run the kernel search here; it
+            // sees the s=2 columns (and the inner suppression) for the first
+            // time, which is exactly where v20 wins on F/N.
+            const positions = g.members.map(i => segs[i].start)
+            g.v15 = chooseGroupV15(parts, g, positions, undefined, sp => reservations.available(g, sp))
+            if(g.v15) fillUniformCosts(costBins,len,g.payload.length*8)
           }
         }
       } catch { /* de-aliasing is a candidate, never a reason to lose the base */ }
@@ -4006,7 +4053,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5']
+    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     if(!modes.length||rawBytes<CONTEXT_MIN_BYTES){result.skipped='ineligible-or-small';return result}
@@ -4034,7 +4081,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     const encode=(ps:Uint8Array[],pos:number[],context?:CMContext,wp=pre,md=false):Uint8Array=>{
       const opt=md?{context,matchDist:true}:{context}
       if(wordPre)return encodeWordPrePayload(wp!,ps.reduce((n,p)=>n+p.length,0),'v20',opt)
-      if(rawText)return withCMBlockSize(ps.reduce((n,p)=>n+p.length,0),()=>encodeCM(joinContextBin(ps),'text',1,1,undefined,0,undefined,undefined,'v20',0,false,opt))
+      if(rawText)return withCMBlockSize(ps.reduce((n,p)=>n+p.length,0),()=>encodeCM(joinContextBin(ps),'text',1,1,undefined,0,undefined,undefined,'v20',0,context==='wp-token3',opt))
       if(contextSpecAllowed('bin-stride4',spec) && spec.id!==ID.TRANSPOSE_GROUP_V3) {
         // The historical single-part BIN19 wrapper ignores kernel. Do not alter
         // that old path: this new-stage control must explicitly encode real v20.
@@ -4096,7 +4143,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
       const trials=modes.map(context=>({context,bytes:price(shared && context===dualMode ? shared.alt : withCMProbe(()=>encode(sample.parts,sample.positions,context,samplePre)),sample.bytes,context)}))
       // A >=0.15% sample win spends one full extra encode. Never drop the old
       // complete candidate on the strength of a sample. WP alternatives do not add.
-      const positive=trials.filter(t=>t.bytes<controlBytes*(1-0.0015)).sort((a,b)=>a.bytes-b.bytes)
+      const positive=trials.filter(t=>rawText ? t.bytes<controlBytes : t.bytes<controlBytes*(1-0.0015)).sort((a,b)=>a.bytes-b.bytes)
       let pick=positive.length?{context:positive[0].context,matchDist:false,bytes:positive[0].bytes}:undefined
       // v22: price the distance-split match model ON THE SAME SAMPLE, for the
       // contexts that already passed. It is orthogonal to `context`, so this is a
@@ -4135,7 +4182,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     const canReuse=retained && retained.wordPre===wordPre && (retained.flags&V20_FLAG_CM) && !(retained.flags&V21_FLAG_CONTEXTS)
     let fullDual: {base:Uint8Array;alt:Uint8Array}|undefined
     const fullMode=modes.length===1 ? modes[0] : undefined
-    if(!canReuse && (fullMode==='text-sparse5' || fullMode==='wp-token3' || (fullMode==='bin-stride4' && spec.id!==ID.TRANSPOSE_GROUP_V3))) {
+    if(!canReuse && (fullMode==='text-sparse5' || (fullMode==='wp-token3' && wordPre) || (fullMode==='bin-stride4' && spec.id!==ID.TRANSPOSE_GROUP_V3))) {
       const body=wordPre ? (()=>{const x=new Uint8Array(pre!.header.length+pre!.body.length);x.set(pre!.header);x.set(pre!.body,pre!.header.length);return x})() : joinContextBin(parts)
       fullDual=withCMBlockSize(rawBytes,()=>encodeCMContextDual(body,fullMode))
       if(wordPre) {
@@ -4262,12 +4309,20 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       try {
         const parts=g.members.map(i=>data.subarray(segs[i].start,segs[i].end)),positions=g.members.map(i=>segs[i].start)
         const oldKernel:CMVariant=g.v15?'v15':false,alignment=([ID.TRANSPOSE,ID.TRANSPOSE_GROUP,ID.SUB_TRANSPOSE,ID.TRANSPOSE_2D,ID.SUB_TRANSPOSE_V3] as number[]).includes(g.spec.id)?g.spec.s:1
+        // A transpose group can carry an uncompressed (mode=0) column — e.g. the
+        // 50% random second column of a binary record stream. Those bytes sit in
+        // the sample denominator but cannot respond to the kernel, so a 0.15%
+        // relative gate can reject a real v20 win on the CM columns. For the
+        // transpose family the sample only has to be non-worse; the complete
+        // container gate (contextUpgradeWins) remains strict.
+        const transposeFamily=([ID.TRANSPOSE,ID.TRANSPOSE_GROUP,ID.SUB_TRANSPOSE,ID.TRANSPOSE_2D,ID.SUB_TRANSPOSE_V3] as number[]).includes(g.spec.id)
         if(rawBytes>=CONTEXT_SCREEN_MIN_BYTES) {
           const sample=groupKernelSample(parts,positions,alignment,CONTEXT_PROBE_BYTES)
           const old=withCMProbe(()=>encodeTerrainGroup(sample.parts,g.spec,undefined,undefined,undefined,sample.positions,oldKernel))
           const next=withCMProbe(()=>encodeTerrainGroup(sample.parts,g.spec,undefined,undefined,undefined,sample.positions,'v20'))
           row.sampleBase=old.length;row.sampleV20=next.length
-          if(!(payloadModelFlags(next)&V20_FLAG_CM)||next.length>=old.length*0.9985){row.skipped='probe-not-better';continue}
+          const sampleLimit=transposeFamily?old.length:old.length*0.9985
+          if(!(payloadModelFlags(next)&V20_FLAG_CM)||next.length>=sampleLimit){row.skipped='probe-not-better';continue}
         }
         const payload=encodeTerrainGroup(parts,g.spec,undefined,undefined,undefined,positions,'v20')
         if(!(payloadModelFlags(payload)&V20_FLAG_CM)){row.skipped='no-v20-cm';continue}
