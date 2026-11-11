@@ -1,5 +1,5 @@
 import { ByteWriter } from './byte-writer'
-import { V21_FLAG_CONTEXTS, CONTEXT_CODES, type CMContext, type CMOptions } from './context-policy'
+import { V21_FLAG_CONTEXTS, contextCodeOf, type CMContext, type CMOptions } from './context-policy'
 export type { CMOptions, CMContext } from './context-policy'
 import { markPayloadModel } from './payload-model'
 
@@ -528,6 +528,13 @@ const FNV_P = 0x01000193
 /** P^k mod 2^32 for k trailing zero words — applied with a single imul. */
 const FNV_TAIL = [1, 0x01000193, 0x26027a69, 0x3ee6b34b, 0x502c3f11, 0x46a747c3].map(v => v | 0)
 
+/** 32-bit integer mixer for the P17.7 column predictors (all inputs pre-packed). */
+function mix32(x: number): number {
+  let h = Math.imul(x ^ (x >>> 16), 0x45d9f3b)
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b)
+  return (h ^ (h >>> 16)) | 0
+}
+
 function hh(a: number, b = 0, c = 0, d = 0, e = 0, f = 0): number {
   let h = 0x811c9dc5
   h = Math.imul(h ^ a, FNV_P)
@@ -681,6 +688,27 @@ class Model {
    * 只有显式打开时 `byteUpdate` 才把高位字节当成词元，历史内核（v13/v2）不受影响。
    */
   wordTokens = false
+  // ---- P17.7 'text-linecol' state -------------------------------------------
+  // Column predictors for line-oriented / delimiter-structured text: every line
+  // starts after '\n' with fields that tend to repeat or increment the
+  // corresponding field of the previous line (<offset>:<id>:<title>). For the
+  // first bytes of a line the 8-byte match window and orders 2..7 still straddle
+  // the unique tail of the previous line, so those contexts are blind exactly
+  // where the data is most predictable. These tables are tiny (256 + 8*64 bytes)
+  // and are only allocated for this context.
+  /** Byte offset since the last '\n' (0..255). */
+  lineCol = 0
+  /** Delimiter count since the last '\n' (0..7). */
+  fieldIdx = 0
+  /** Byte offset since the last '\n' or field delimiter (0..63). */
+  fieldCol = 0
+  /** Byte at `lineCol` on the previous line. */
+  lineColBytes = new Uint8Array(0)
+  /** Byte at `(fieldIdx << 6) | fieldCol` on the previous line. */
+  fieldColBytes = new Uint8Array(0)
+  /** Shift masks of recent line/field matches (low bit = most recent byte). */
+  lineEqMask = 0xff
+  fieldEqMask = 0xff
   /** Non-P7 features actually used by this stream (not the global policy). */
   requiredFlags = 0
   geometry: CMTableShape
@@ -690,11 +718,12 @@ class Model {
     if (contextPeer) this.msm = contextPeer.msm
     this.context = options?.context
     if (this.context !== undefined) {
-      if (!Object.prototype.hasOwnProperty.call(CONTEXT_CODES, this.context) || variant !== 'v20'
+      if (!(() => { try { contextCodeOf(this.context!) ; return true } catch { return false } })() || variant !== 'v20'
         || (containerModel && !containerModel.contextsV21)
         || (this.context === 'bin-stride4' && (profile !== 'bin' || wordTokens))
         || (this.context === 'wide-geom' && (profile !== 'res2d' || geomStride <= 0 || wordTokens))
         || (this.context === 'text-sparse5' && (profile !== 'text' || geomStride !== 0 || wordTokens))
+        || (this.context === 'text-linecol' && (profile !== 'text' || geomStride !== 0 || wordTokens))
         || ((this.context === 'wp-token3' || this.context === 'wp-merge') && (profile !== 'text' || !wordTokens || geomStride !== 0)))
         throw Error('无效的 v21 CM 上下文 / profile / 格式标志')
       this.requiredFlags |= V21_FLAG_CONTEXTS
@@ -724,6 +753,10 @@ class Model {
     this.geomStride = geomStride
     // WORD-PRE 词元只对 v15 内核有意义：v13/v2 的比特流必须一字节不变。
     this.wordTokens = wordTokens && isAPMKernel(variant)
+    if (this.context === 'text-linecol') {
+      this.lineColBytes = new Uint8Array(256)
+      this.fieldColBytes = new Uint8Array(8 * 64)
+    }
     this.profile = profile
     this.s = Math.max(1, s)
     this.r = Math.max(1, r)
@@ -887,6 +920,24 @@ class Model {
         return
       }
       if(this.profile === 'text') {
+        if (this.context === 'text-linecol') {
+          // P17.7: replace the three weakest text contexts with the column
+          // predictors. H[5] is field-aligned (does this field start the same way
+          // as the same field of the previous line?), H[6] is the adaptive
+          // line-prefix predictor with a current-word fallback inside the free-text
+          // body, H[7] is the word trigram. H[8] keeps a sparse order-5 context so
+          // the topology stays a strict substitution on the same 9 inputs.
+          const fPos = (this.fieldIdx << 6) | this.fieldCol
+          const predField = this.fieldColBytes[fPos]
+          const predLine = this.lineColBytes[this.lineCol]
+          H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4)
+          H[5]=mix32((predField | (this.fieldCol << 8) | (this.fieldIdx << 14) | ((this.fieldEqMask & 0x1f) << 17) | (b1 << 22)) | 0)
+          H[6]=(this.lineEqMask & 0x07) !== 0 && this.lineCol < 32
+            ? mix32((predLine | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
+            : hh(this.curWord, b1)
+          H[7]=hh(this.prevPrevWord, this.prevWord, this.curWord||b1)
+          H[8]=hh(b1,b3,this.g(5));return
+        }
         H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=hh(this.curWord,b1);H[7]=hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
       }
     }
@@ -1225,7 +1276,37 @@ class Model {
     }
   }
 
+  /**
+   * Advance the line/field column predictors with the byte that was just coded.
+   * The predictors themselves are READ in `computeContexts` (which runs at the
+   * end of `byteUpdate`), so the order here is: score against the previous
+   * line's byte at this column, then store this byte for the next line.
+   */
+  private updateLineCol(byte: number) {
+    const fPos = (this.fieldIdx << 6) | this.fieldCol
+    const matchedLine = byte === this.lineColBytes[this.lineCol] ? 1 : 0
+    const matchedField = byte === this.fieldColBytes[fPos] ? 1 : 0
+    this.lineColBytes[this.lineCol] = byte
+    this.fieldColBytes[fPos] = byte
+    if (byte === 10) {
+      this.lineCol = 0; this.fieldIdx = 0; this.fieldCol = 0
+      this.lineEqMask = 0xff; this.fieldEqMask = 0xff
+    } else if (byte === 58 || byte === 9 || byte === 44) {
+      this.lineCol = (this.lineCol + 1) & 0xff
+      this.lineEqMask = ((this.lineEqMask << 1) | matchedLine) & 0xff
+      this.fieldIdx = Math.min(7, this.fieldIdx + 1)
+      this.fieldCol = 0
+      this.fieldEqMask = 0xff
+    } else {
+      this.lineCol = (this.lineCol + 1) & 0xff
+      this.lineEqMask = ((this.lineEqMask << 1) | matchedLine) & 0xff
+      this.fieldCol = Math.min(63, this.fieldCol + 1)
+      this.fieldEqMask = ((this.fieldEqMask << 1) | matchedField) & 0xff
+    }
+  }
+
   private byteUpdate(byte: number) {
+    if (this.context === 'text-linecol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
       const lower = byte | 32
       const asciiLetter = lower >= 97 && lower <= 122

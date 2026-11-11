@@ -8,8 +8,43 @@ export const GROUP_CONTEXT_MASK = 0xe0000
  * that candidate keep their exact old bytes inside a v22 container.
  */
 export const GROUP_MATCH_DIST_BIT = 0x100000
+/**
+ * P17.7: second group-context namespace.
+ *
+ * All eight values of the three-bit group context field were already assigned
+ * (0 = no context, 1..7 = the base contexts), and bit 20 carries `matchDist`, so
+ * a new context cannot simply take "the next free code" without reinterpreting
+ * every group payload written before it. This bit re-uses the *same* three-bit
+ * field as an index into `EXT_CONTEXT_CODES` instead. Every pre-P17.7 container
+ * has it clear and therefore decodes byte-identically, and the payload stays
+ * self-describing (no container version bump), exactly like
+ * `GROUP_MATCH_DIST_BIT` did for v22.
+ */
+export const GROUP_CONTEXT_EXT_BIT = 0x200000
+/** Codes 1..7 inside the base namespace; 0 means "no context". */
 export const CONTEXT_CODES = { 'bin-stride4': 1, 'wide-geom': 2, 'wp-token3': 3, 'wp-merge': 4, 'text-sparse5': 5, 'xform-bin': 6, 'xform-bin-stride4': 7 } as const
-export type CMContext = keyof typeof CONTEXT_CODES
+/** Codes 1..7 when `GROUP_CONTEXT_EXT_BIT` is set. */
+export const EXT_CONTEXT_CODES = { 'text-linecol': 1 } as const
+export type CMContext = keyof typeof CONTEXT_CODES | keyof typeof EXT_CONTEXT_CODES
+/** Split a context into the three-bit field value and the namespace bit it needs. */
+export function contextCodeOf(context: CMContext): { code: number; ext: boolean } {
+  const base = (CONTEXT_CODES as Record<string, number | undefined>)[context]
+  if (base !== undefined) return { code: base, ext: false }
+  const ext = (EXT_CONTEXT_CODES as Record<string, number | undefined>)[context]
+  if (ext === undefined) throw Error('未知的 v21 分组上下文')
+  return { code: ext, ext: true }
+}
+/** Decode the context of a group from its raw `r` field. */
+export function contextFromGroupBits(rRaw: number): CMContext | undefined {
+  const code = (rRaw & GROUP_CONTEXT_MASK) >>> GROUP_CONTEXT_SHIFT
+  if (!code) return undefined
+  if (rRaw & GROUP_CONTEXT_EXT_BIT) {
+    const mode = (Object.keys(EXT_CONTEXT_CODES) as (keyof typeof EXT_CONTEXT_CODES)[]).find(m => EXT_CONTEXT_CODES[m] === code)
+    if (!mode) throw Error('未知的 v21 扩展分组上下文')
+    return mode
+  }
+  return contextFromCode(code)
+}
 export interface CMOptions {
   context?: CMContext
   /**
@@ -30,7 +65,7 @@ export const CONTEXT_PROBE_BYTES = 192 * 1024
 
 export function contextFromCode(code: number): CMContext | undefined {
   if (code === 0) return undefined
-  const mode = (Object.keys(CONTEXT_CODES) as CMContext[]).find(mode => CONTEXT_CODES[mode] === code)
+  const mode = (Object.keys(CONTEXT_CODES) as (keyof typeof CONTEXT_CODES)[]).find(mode => CONTEXT_CODES[mode] === code)
   if (!mode) throw Error('未知的 v21 分组上下文')
   return mode
 }

@@ -122,7 +122,10 @@ export async function testP11() {
     assert.equal(coldBases - warmBases, 1, 'exactly one full base pass removed')
     assert.equal(warm.orphanComparison!.accepted, false)
     assert.equal(warm.macroComparison!.accepted, true)
-    assert.equal(warm.macroComparison!.baselineBytes - warm.container.length, 1)
+    // P17.7: the container also coalesces contiguous identical-spec seams, so the
+    // macro payoff is now the one-byte plan win plus that header saving (>= 1 B).
+    assert.ok(warm.macroComparison!.baselineBytes - warm.container.length >= 1,
+      'macro must still be accepted by a real byte win')
     eq(cold.container, warm.container); eq(decompress(warm.container), data)
     assert.deepEqual(warm.blockCost, cold.blockCost)
     assert.equal(JSON.stringify(picks), before)

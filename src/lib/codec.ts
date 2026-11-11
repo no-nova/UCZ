@@ -1,6 +1,6 @@
 import { groupKernelSample, clearProbeWinners, GROUP_KERNEL_MIN_BYTES, GROUP_KERNEL_PROBE_BYTES, BCJ_UPGRADE_MIN_BYTES, type GroupKernel, type KernelScreen, type KernelVariant, type GroupCandidateOptions } from './group-policy'
 import { ByteWriter } from './byte-writer'
-import { V21_FLAG_CONTEXTS, GROUP_CONTEXT_MASK, GROUP_MATCH_DIST_BIT, GROUP_CONTEXT_SHIFT, CONTEXT_CODES, contextFromCode, contextUpgradeWins, CONTEXT_MIN_BYTES, CONTEXT_SCREEN_MIN_BYTES, CONTEXT_PROBE_BYTES, type CMContext, type CMOptions } from './context-policy'
+import { V21_FLAG_CONTEXTS, GROUP_CONTEXT_MASK, GROUP_CONTEXT_EXT_BIT, GROUP_MATCH_DIST_BIT, GROUP_CONTEXT_SHIFT, contextCodeOf, contextFromGroupBits, contextUpgradeWins, CONTEXT_MIN_BYTES, CONTEXT_SCREEN_MIN_BYTES, CONTEXT_PROBE_BYTES, type CMContext, type CMOptions } from './context-policy'
 import { payloadModelFlags, markPayloadModel, inheritPayloadModel } from './payload-model'
 import { MAX_SINGLE_CM_BYTES, MAX_OUTPUT_BYTES } from './limits'
 import { detectRec2, rec2Forward, rec2Inverse } from './rec2'
@@ -106,6 +106,10 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
     : ([ID.BIN, ID.BIN_V2, ID.BIN_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
       || ([ID.BCJ, ID.BCJ_V2, ID.BCJ_V3] as number[]).includes(sp.id) && (sp.s === 1 || (sp.id === ID.BCJ_V3 && sp.s === 2)) && sp.r === 1)
   if (context === 'text-sparse5') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
+  // P17.7: the line/field column predictors run the same `text` CM on the same
+  // raw text stream as text-sparse5 — they substitute three of that model's nine
+  // contexts, so the eligibility rule is identical (no WORD-PRE dictionary).
+  if (context === 'text-linecol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   if (context === 'wide-geom') return !wordPre && sp.id === ID.WIDE_GRAD && sp.s >= 6 && sp.s <= 8 && sp.r >= 256 && sp.r <= 8192 && sp.r % 2 === 0
   if (context === 'wp-merge') return wordPre && sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1
   // P17.6: the word-trigram H[8] is orthogonal to WORD-PRE dictionary collapsing.
@@ -186,6 +190,58 @@ export function specLabel(sp: Spec): string {
 }
 
 const sameSpec = (a: Spec, b: Spec) => a.id === b.id && a.s === b.s && a.r === b.r
+
+/** Stream rules whose encoder consumes the group's members as one flat
+ * concatenation (in ascending segment order) and slices the decoded stream by
+ * `rawLen`. Two contiguous members of the same group with the same rule are
+ * therefore indistinguishable from a single longer member: the seam is not in
+ * the wire format at all. Used by the post-plan coalescer below. */
+const CONCAT_INVARIANT_IDS = new Set<number>([
+  ID.STORE, ID.RLE, ID.O0, ID.TEXT, ID.BIN, ID.TEXT_V2, ID.BIN_V2, ID.TEXT_V3, ID.BIN_V3,
+])
+
+/**
+ * Merge adjacent plan segments that are contiguous, belong to the same group
+ * and share a concatenation-invariant rule. Pure plan bookkeeping: no payload is
+ * re-encoded, and every group's payload/spec/kernel/context metadata is kept
+ * untouched. Returns `adopted: false` (and the inputs) when the header does not
+ * actually shrink, so the caller can gate on real bytes.
+ */
+type CoalesceFields = { rawLen?: number; compLen?: number }
+export function coalesceContiguousPlanSegments<T extends PlanSegment & CoalesceFields>(dataLen: number, segs: readonly T[], groups: readonly PlanGroup[]):
+  { segs: T[]; groups: PlanGroup[]; adopted: boolean } {
+  const owner = new Int32Array(segs.length).fill(-1)
+  for (let gi = 0; gi < groups.length; gi++) for (const m of groups[gi].members) if (m >= 0 && m < segs.length) owner[m] = gi
+  const out: T[] = [], source: number[] = [], mapped = new Int32Array(segs.length).fill(-1)
+  for (let i = 0; i < segs.length; i++) {
+    const seg = segs[i], prev = out.length ? out[out.length - 1] : undefined, prevSrc = source[source.length - 1]
+    const merge = !!prev && prev.end === seg.start && owner[i] === owner[prevSrc] && owner[i] >= 0
+      && sameSpec(prev.spec, seg.spec) && CONCAT_INVARIANT_IDS.has(seg.spec.id)
+    if (merge) {
+      prev!.end = seg.end
+      prev!.rawLen = (prev!.rawLen ?? 0) + (seg.rawLen ?? 0)
+      prev!.compLen = (prev!.compLen ?? 0) + (seg.compLen ?? 0)
+      mapped[i] = out.length - 1
+      continue
+    }
+    out.push({ ...seg, spec: { ...seg.spec } })
+    source.push(i)
+    mapped[i] = out.length - 1
+  }
+  if (out.length === segs.length) return { segs: segs as T[], groups: groups as PlanGroup[], adopted: false }
+  const nextGroups = groups.map(g => {
+    const members: number[] = []
+    let last = -1
+    for (const m of g.members) {
+      const to = mapped[m]
+      if (to < 0 || to === last) continue
+      members.push(to); last = to
+    }
+    return { ...g, spec: { ...g.spec }, members }
+  })
+  const adopted = planHeader(dataLen, out, nextGroups).length < planHeader(dataLen, segs, groups).length
+  return adopted ? { segs: out, groups: nextGroups, adopted } : { segs: segs as unknown as T[], groups: groups as PlanGroup[], adopted: false }
+}
 
 // ---------- 变长整数 ----------
 function putVar(out: number[], v: number) {
@@ -1199,7 +1255,7 @@ export function encodeTerrainGroup(parts: Uint8Array[], sp: Spec, cost?: Float32
         return markPayloadModel(p,payloadModelFlags(p)|V21_FLAG_CONTEXTS)
       }
       if(options?.context==='wide-geom') { checkWide(sp,parts.map(p=>p.length));return encodeWide16(parts,sp,cost,blockCost,onProgress,kernel,options) }
-      if(options?.context==='text-sparse5'||options?.context==='wp-token3')
+      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol')
         return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,options.context==='wp-token3',options)
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return encodeGroupedTranspose(parts,sp.s,blockCost ?? (cost ? {values:cost,blockSize:1} : undefined),onProgress,true,undefined,'v20',options)
       if(options?.context==='bin-stride4') {
@@ -1245,7 +1301,7 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
         return lengths.map(len=>{const p=joined.subarray(at,at+len);at+=len;return sp.id===ID.GRAD_V3?medInv(p,sp.s,sp.r):deltaInv(p,sp.s)})
       }
       if(options?.context==='wide-geom') {checkWide(sp,lengths);return decodeWide16(payload,lengths,sp,onProgress,kernel,options)}
-      if((options?.context==='text-sparse5'||options?.context==='wp-token3') && !wordPre) {
+      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol') && !wordPre) {
         const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,options.context==='wp-token3',options)
         let p=0;return lengths.map(n=>{const part=joined.subarray(p,p+n);p+=n;return part})
       }
@@ -1402,6 +1458,10 @@ export const planTuning = {
   perCandidateAlign: true,
   /** P7-2：候选池按多维特征并集生成（不再被 analyze 的单一 kind 封锁）。 */
   featureCandidates: true,
+  /** P17.7: 'noise' pools also try DELTA at the lowest-entropy small stride. */
+  pocketDeltaCandidates: true,
+  /** P17.7: carve low-entropy pockets out of coarse incompressible segments. */
+  pocketCarve: true,
   /** P7-3：孤儿小分组坍缩进主力共享 CM 组（真实 A/B，严格更小才吸收）。 */
   orphanConsolidation: true,
   /**
@@ -1594,6 +1654,40 @@ function segFeatures(sample: Uint8Array): { h0: number; hd: number; rep: number 
   return { h0: ent(h, n), hd: ent(hdd, Math.max(1, n - 1)), rep: rep / Math.max(1, n - 1) }
 }
 
+/** Order-0 entropy of the first-order delta sequence `data[i] - data[i-s]`.
+ *
+ * A smooth multi-byte signal (audio ramp, 16/32-bit counter, slowly drifting
+ * sensor value) has a byte entropy near 8.0 but a very narrow delta
+ * distribution, which is exactly the structure the DELTA family removes. No
+ * name, size or offset knowledge is involved: only the sample's own histogram. */
+function deltaEntropy(sample: Uint8Array, stride: number): number {
+  if (stride <= 0 || sample.length <= stride + 1) return 8
+  const h = new Float64Array(256)
+  const n = sample.length - stride
+  for (let i = stride; i < sample.length; i++) h[(sample[i] - sample[i - stride]) & 255]++
+  let e = 0
+  for (let i = 0; i < 256; i++) if (h[i]) { const p = h[i] / n; e -= p * Math.log2(p) }
+  return e
+}
+
+/** Min of H0 and the first-order delta entropies for strides 1, 2 and 4.
+ *
+ * Used only as a cheap content screen (never as a size decision): a block whose
+ * minimum entropy is far below 8 cannot be incompressible white noise. */
+function blockMinEntropy(data: Uint8Array, start: number, end: number): number {
+  const n = end - start
+  if (n < 8) return 8
+  const h = new Float64Array(256)
+  for (let i = start; i < end; i++) h[data[i]]++
+  let best = 0
+  for (let i = 0; i < 256; i++) if (h[i]) { const p = h[i] / n; best -= p * Math.log2(p) }
+  for (const stride of [1, 2, 4]) {
+    const d = deltaEntropy(data.subarray(start, end), stride)
+    if (d < best) best = d
+  }
+  return best
+}
+
 export function candidatesFor(seg: Uint8Array, cls: Cls, bestS: number, lagSample: Uint8Array): Spec[] {
   const c: Spec[] = []
   const add = (id: number, s = 1, r = 1) => {
@@ -1661,6 +1755,17 @@ export function candidatesFor(seg: Uint8Array, cls: Cls, bestS: number, lagSampl
       if (seg.length >= 65536) add(ID.BIN)
       add(ID.O0)
       if (f!.hd < f!.h0 - 0.15) { add(ID.DELTA, bestS); add(ID.DELTA_V3, bestS); if (bestS !== 1) add(ID.DELTA, 1) }
+      // 小幅慢变信号（相邻样本只差 ±1..±15）在 O0 眼里仍是 7.95 bit/byte 的
+      // "噪声"，但差分分布极窄。只有当某个小步长的差分熵确实很低、并且这个
+      // 步长不等于最佳同字节步长时才加候选，避免拿噪声采样去赌。
+      if (planTuning.pocketDeltaCandidates && seg.length >= 512) {
+        let ds = 0, dh = 8
+        for (const stride of [1, 2, 4]) {
+          const e = deltaEntropy(lagSample, stride)
+          if (e < dh) { dh = e; ds = stride }
+        }
+        if (ds && dh < 7.45 && ds !== bestS) { add(ID.DELTA, ds); add(ID.DELTA_V3, ds) }
+      }
       break
     }
     case 'text': {
@@ -1954,7 +2059,19 @@ export interface Compressed {
   guardStats?: GuardStats
   wideComparison?: MacroComparison
   contextComparison?: ContextComparison
+  /** P17.7: conservative low-entropy pocket carve-out inside coarse STORE/O0 groups. */
+  pocketComparison?: PocketComparison
   rec2Comparison?: { baselineBytes:number; candidateBytes?:number; accepted:boolean; params?:{op:number;a:number;b:number}; error?:string }
+}
+
+export interface PocketComparison {
+  baselineBytes: number
+  candidateBytes: number
+  accepted: boolean
+  scannedBytes: number
+  pockets: { start: number; end: number; parent: number; spec: Spec; payloadBytes: number }[]
+  buckets?: { key: string; oldPayload: number | null; newPayload: number; members: number }[]
+  error?: string
 }
 
 export interface MacroComparison {
@@ -2837,7 +2954,7 @@ export function planHeader(n:number,segs:readonly PlanSegment[],groups:readonly 
   // v20 新增 0x10000 指定新 CM；未置位的 APM 组仍用 legacy-v15。
   // v21 的 17..19 位是上下文模式 1..7；低 14 位仍是原 r。
   // r 本身的 0x2000（8192）保持不变；容器旗标是独立的 uint16 字段。
-  for(const g of groups){putVar(hdr,g.spec.id);putVar(hdr,g.spec.s);putVar(hdr,(g.spec.r|(g.v15?0x8000:0)|(g.wordPre?0x4000:0)|(g.v15 && ((g.modelFlags??payloadModelFlags(g.payload))&V20_FLAG_CM)?0x10000:0)|(g.context?CONTEXT_CODES[g.context]<<GROUP_CONTEXT_SHIFT:0)|(g.matchDist?GROUP_MATCH_DIST_BIT:0)));putVar(hdr,g.payload.length)}
+  for(const g of groups){const cc=g.context?contextCodeOf(g.context):undefined;putVar(hdr,g.spec.id);putVar(hdr,g.spec.s);putVar(hdr,(g.spec.r|(g.v15?0x8000:0)|(g.wordPre?0x4000:0)|(g.v15 && ((g.modelFlags??payloadModelFlags(g.payload))&V20_FLAG_CM)?0x10000:0)|(cc?cc.code<<GROUP_CONTEXT_SHIFT:0)|(cc?.ext?GROUP_CONTEXT_EXT_BIT:0)|(g.matchDist?GROUP_MATCH_DIST_BIT:0)));putVar(hdr,g.payload.length)}
   for(const sg of segs) putVar(hdr,sg.end-sg.start)
   let pending=segs.map((_,i)=>i),byte=0,bits=0
   for(let gi=0;gi+1<groups.length;gi++) {
@@ -2978,7 +3095,11 @@ export function evaluatePlan(data:Uint8Array,picks:readonly PlanSegment[],option
     if(keys.has(key)) throw Error('自动转置产生重复的方案规则')
     keys.add(key)
   }
-  const headerBytes=planHeader(data.length,segs,groups).length
+  // The writer serializes the coalesced header for the concatenation-invariant
+  // codecs, so the evaluator must price exactly that header while still reporting
+  // the caller's own segment/group counts.
+  const coalesced=coalesceContiguousPlanSegments(data.length,segs,groups)
+  const headerBytes=planHeader(data.length,coalesced.segs,coalesced.groups).length
   const payloadBytes=groups.reduce((sum,g)=>sum+g.payload.length,0)
   return {totalBytes:headerBytes+payloadBytes,headerBytes,payloadBytes,groupCount:groups.length,segmentCount:segs.length}
 }
@@ -3080,6 +3201,7 @@ async function tryParallelGroups(
   const jobs: JobPayload[] = [], loads: number[] = [], targets: { gi: number; key: string; base?: { bytes: Uint8Array; cost: Float32Array } }[] = []
   for (let k = 0; k < proposed.jobs.length; k++) {
     const gi = proposed.index[k], key = finalGroupKey(unique[gi], segs), saved = run?.work.get(key)
+    if((globalThis as any).__KEYDBG && run?.prefetch)console.log('LOOKUP', key, '| extra', run.prefetch.key, 'hit', !!saved)
     if (saved) {
       out[gi] = saved; run!.work.delete(key); run!.stats.macroReused++
     } else { jobs.push(proposed.jobs[k]); loads.push(proposed.loads[k]); targets.push({ gi, key, base: unique[gi].baseCost ? { bytes: unique[gi].payload, cost: unique[gi].baseCost! } : undefined }) }
@@ -3121,7 +3243,7 @@ async function tryParallelGroups(
     for (let k = 0; k < restored.length; k++) {
       const t = targets[k]
       if (t.gi >= 0) out[t.gi] = restored[k]
-      else { run!.work.set(t.key, restored[k]); run!.stats.macroPrefetched++ }
+      else { run!.work.set(t.key, restored[k]); run!.stats.macroPrefetched++; if((globalThis as any).__KEYDBG)console.log('PREFETCH', t.key) }
     }
     parallelReport.used = true; parallelReport.groups += jobs.length
     if (run) {
@@ -3269,13 +3391,23 @@ async function encodePreparedPlan(
       // planner itself starts proposing transpose candidates at all.
       const isTgV3 = g.spec.id === ID.TRANSPOSE_GROUP_V3
       const v3spec = { id: ID.TRANSPOSE_GROUP_V3, s: g.spec.s, r: 1 }
-      if ((isTgV3 || g.spec.id === ID.TRANSPOSE_GROUP || g.spec.id === ID.TRANSPOSE)
-        && len >= 32768 && reservations.available(g,v3spec)) {
-        const candidates=groupV15Candidates(parts,v3spec,g.members.map(i=>segs[i].start))
+      if ((isTgV3 || g.spec.id === ID.TRANSPOSE_GROUP || g.spec.id === ID.TRANSPOSE) && len >= 32768) {
+        // P17.7: price the kernel on the layout that actually won the plan, not
+        // only on the V3 alternative. On two-column streams id 10 keeps the
+        // columns split while id 30 merges them into one central window, so
+        // `encodePlanTranspose` legitimately keeps id 10 — and that winner never
+        // reached a kernel search at all. Both layouts are complete payloads of
+        // the same group, so they are priced against the same base and only the
+        // strictly cheapest one is adopted.
+        const layouts: Spec[] = []
+        if (V15_PROFILES.has(g.spec.id)) layouts.push({ ...g.spec })
+        if (g.spec.id !== ID.TRANSPOSE_GROUP_V3 && reservations.available(g, v3spec)) layouts.push(v3spec)
+        for (const layout of layouts) {
+        const candidates=groupV15Candidates(parts,layout,g.members.map(i=>segs[i].start))
         for(const cand of [candidates?.alt,candidates?.v20]) {
         if(!cand)continue
         const candidateCost = cand.length + (planTuning.realHeaderCosts
-          ? selectionHeaderBytes(v3spec, len, cand.length, payloadModelFlags(cand), true) : 0)
+          ? selectionHeaderBytes(layout, len, cand.length, payloadModelFlags(cand), true) : 0)
         const baseCost = g.payload.length + (planTuning.realHeaderCosts
           ? selectionHeaderBytes(g.spec, len, g.payload.length, payloadModelFlags(g.payload),!!g.v15) : 0)
         const took = candidateCost < baseCost
@@ -3285,16 +3417,17 @@ async function encodePreparedPlan(
           // `s=undefined / fl=0x0` — those fields were never sampled, not lost.
           ;((globalThis as any).__V15_STATS as any[]).push({ id: g.spec.id, s: g.spec.s,
             parts: g.members.length, rawBytes: len, base: g.payload.length, alt: cand.length,
-            selectedSpec: v3spec, selectedFlags: payloadModelFlags(cand),
+            selectedSpec: layout, selectedFlags: payloadModelFlags(cand),
             selectedBytes: cand.length, took, source: 'g3-layout-upgrade' })
         }
         if (took) {
-          reservations.claim(g,v3spec)
-          g.spec = v3spec
+          reservations.claim(g,layout)
+          g.spec = layout
           g.payload = cand
           g.v15 = true
           fillUniformCosts(costBins, len, g.payload.length * 8)
           for (const i of g.members) { segs[i].spec = g.spec; segs[i].label = specLabel(g.spec) }
+        }
         }
         }
       }
@@ -3429,11 +3562,18 @@ async function encodePreparedPlan(
     onStage?.(`编码地形 ${gi + 1}/${unique.length}`, 50 + 35 * (gi + 1) / unique.length)
     yieldIfNeeded?.()
   }
-  const hdr=planHeader(n,segs,unique)
-  const container = new Uint8Array(hdr.length + unique.reduce((sum, g) => sum + g.payload.length, 0))
+  // P17.7: family unification and the guarded rewrites overwrite many adjacent
+  // segments with the same rule. For the concatenation-invariant stream codecs
+  // such a seam is pure header cost, so serialize the merged plan — payloads are
+  // untouched and cache keys, worker jobs and prefetches keep the unmerged
+  // identity, so nothing downstream sees a different plan shape.
+  const coalesced = coalesceContiguousPlanSegments(n, segs, unique)
+  const wireSegs = coalesced.segs, wireGroups = coalesced.groups
+  const hdr=planHeader(n,wireSegs,wireGroups)
+  const container = new Uint8Array(hdr.length + wireGroups.reduce((sum, g) => sum + g.payload.length, 0))
   container.set(hdr)
   let w = hdr.length
-  for (const g of unique) { container.set(g.payload, w); w += g.payload.length }
+  for (const g of wireGroups) { container.set(g.payload, w); w += g.payload.length }
   let si = 0
   for (let b = 0; b < nb; b++) {
     const bl = analysis.blocks[b]
@@ -3443,6 +3583,7 @@ async function encodePreparedPlan(
   }
   const result={ container, analysis, segs, blockCost, blockSeg, overhead: hdr.length }
   retainedContextGroups.set(container,unique.map(g=>({spec:{...g.spec},members:[...g.members],payload:g.payload,v15:g.v15,wordPre:g.wordPre})))
+  retainedPlanGroups.set(container,unique)
   return result
 }
 
@@ -3621,11 +3762,168 @@ export async function compressAdaptive(
     const baseline=await compressAdaptiveImpl(data,onStage,options)
     if(options?.contextCandidates===false || !cmV20Tuning.enabled) return baseline
     const chosen=await refineContextCandidates(data,baseline,{serial:!!options?.serial||!workerTuningMatchesDefaults()},onStage)
-    const rec2=refineRec2(data,chosen)
+    const carved=refineNoisePockets(data,chosen)
+    const rec2=refineRec2(data,carved)
     const bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
     return bp
   }
   finally { await closeNodePool() }
+}
+/** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
+ * incompressible segments.
+ *
+ * A 512 B..8 KiB stretch of a ratio≈1 STORE/O0/SUB_ANCHOR/TRANSPOSE_GROUP_V3
+ * segment can be a smooth multi-byte ramp whose byte entropy is ~8.0 but whose
+ * small-stride delta entropy is far lower. The pocket is detected purely from
+ * the block's own histogram (no offsets, names or sizes are known in advance),
+ * each candidate rule is priced by a real encode, and the refined plan replaces
+ * the old one only when the serialized container is strictly smaller. Because
+ * only single-member groups are split, every untouched group keeps its exact
+ * payload, and the parent pieces are re-encoded with the parent's own rule. */
+const POCKET_BLOCK = 512
+const POCKET_ENTROPY_LIMIT = 7.40
+const POCKET_SAVINGS_MIN = 32
+const POCKET_MIN_GAIN = 24
+const POCKET_PARENT_IDS = new Set<number>([ID.STORE, ID.O0, ID.SUB_ANCHOR, ID.TRANSPOSE_GROUP_V3])
+const POCKET_SPECS: readonly Spec[] = [
+  { id: ID.BIN, s: 1, r: 1 },
+  { id: ID.DELTA, s: 1, r: 1 },
+  { id: ID.DELTA, s: 2, r: 1 },
+  { id: ID.DELTA, s: 4, r: 1 },
+  { id: ID.DELTA_V3, s: 1, r: 1 },
+]
+export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Compressed {
+  const comparison: PocketComparison = { baselineBytes: baseline.container.length, candidateBytes: baseline.container.length, accepted: false, scannedBytes: 0, pockets: [] }
+  const finish = (chosen: Compressed) => ({ ...chosen, pocketComparison: comparison })
+  try {
+    if (!planTuning.pocketCarve || data.length < 2 * POCKET_BLOCK) return finish(baseline)
+    const groups = retainedPlanGroups.get(baseline.container)
+    if (!groups) return finish(baseline)
+    const owner = new Int32Array(baseline.segs.length).fill(-1)
+    for (let gi = 0; gi < groups.length; gi++) for (const i of groups[gi].members) owner[i] = gi
+    // seg index -> accepted non-parent pieces (empty pocket list = untouched)
+    const replacements = new Map<number, { start: number; end: number; spec: Spec; payload: Uint8Array }[]>()
+    for (let i = 0; i < baseline.segs.length; i++) {
+      const seg = baseline.segs[i], gi = owner[i]
+      if (gi < 0) continue
+      const g = groups[gi]
+      if (g.members.length !== 1 || g.wordPre || g.context || g.matchDist) continue
+      if (!POCKET_PARENT_IDS.has(seg.spec.id) || seg.rawLen < 1024) continue
+      if ((seg.compLen ?? seg.rawLen) < seg.rawLen * 0.985) continue
+      comparison.scannedBytes += seg.rawLen
+      const blockStarts: number[] = [], blockEntropy: number[] = []
+      for (let b = seg.start; b + POCKET_BLOCK <= seg.end; b += POCKET_BLOCK) {
+        blockStarts.push(b)
+        blockEntropy.push(blockMinEntropy(data, b, b + POCKET_BLOCK))
+      }
+      const pieces: { start: number; end: number; spec: Spec; payload: Uint8Array }[] = []
+      let k = 0
+      while (k < blockStarts.length) {
+        if (blockEntropy[k] >= POCKET_ENTROPY_LIMIT) { k++; continue }
+        let j = k, savings = 0
+        while (j < blockStarts.length && blockEntropy[j] < POCKET_ENTROPY_LIMIT) {
+          savings += POCKET_BLOCK * (8 - blockEntropy[j]) / 8
+          j++
+        }
+        if (savings >= POCKET_SAVINGS_MIN) {
+          const pStart = blockStarts[k], pEnd = blockStarts[j - 1] + POCKET_BLOCK
+          const pocket = data.subarray(pStart, pEnd)
+          let best: { spec: Spec; payload: Uint8Array } | null = null
+          for (const sp of POCKET_SPECS) {
+            let payload: Uint8Array
+            try { payload = withCMProbe(() => encodeTerrainGroup([pocket], sp, undefined, undefined, undefined, [pStart], 'v20')) } catch { continue }
+            if (!best || payload.length < best.payload.length) best = { spec: sp, payload }
+          }
+          if (best && best.payload.length + POCKET_MIN_GAIN < pEnd - pStart) pieces.push({ start: pStart, end: pEnd, spec: best.spec, payload: best.payload })
+        }
+        k = j
+      }
+      if (pieces.length) replacements.set(i, pieces)
+    }
+    if (!replacements.size) return finish(baseline)
+    // A plan may hold only ONE group per (id,s,r) key, so a split must not emit
+    // two groups of the parent's rule: the parent's remaining pieces stay in one
+    // group (its payload is the concatenation of its members), and every pocket
+    // joins the group of its own winning rule. Untouched groups keep their exact
+    // payload; only the modified buckets are re-encoded.
+    const nextSegs: SegResult[] = []
+    for (let i = 0; i < baseline.segs.length; i++) {
+      const seg = baseline.segs[i], pieces = replacements.get(i)
+      if (!pieces) { nextSegs.push(seg); continue }
+      let p = seg.start
+      for (const piece of pieces) {
+        if (piece.start > p) nextSegs.push({ ...seg, start: p, end: piece.start, rawLen: piece.start - p })
+        nextSegs.push({ start: piece.start, end: piece.end, cls: seg.cls, spec: { ...piece.spec }, label: specLabel(piece.spec), rawLen: piece.end - piece.start, compLen: piece.payload.length, trials: [], modelFlags: payloadModelFlags(piece.payload) })
+        comparison.pockets.push({ start: piece.start, end: piece.end, parent: seg.spec.id, spec: { ...piece.spec }, payloadBytes: piece.payload.length })
+        p = piece.end
+      }
+      if (seg.end > p) nextSegs.push({ ...seg, start: p, rawLen: seg.end - p })
+    }
+    const prevByKey = new Map<string, PlanGroup>()
+    for (const g of groups) prevByKey.set(`${g.spec.id},${g.spec.s},${g.spec.r}`, g)
+    const rangeKey = (segs: readonly { start: number; end: number }[], members: readonly number[]) => members.map(i => `${segs[i].start}:${segs[i].end}`).join(',')
+    const buckets = new Map<string, { spec: Spec; members: number[] }>()
+    for (let i = 0; i < nextSegs.length; i++) {
+      const spec = nextSegs[i].spec, key = `${spec.id},${spec.s},${spec.r}`
+      const bucket = buckets.get(key)
+      if (bucket) bucket.members.push(i)
+      else buckets.set(key, { spec, members: [i] })
+    }
+    const nextGroups: PlanGroup[] = []
+    for (const [key, bucket] of buckets) {
+      const prev = prevByKey.get(key)
+      if (prev && rangeKey(nextSegs, bucket.members) === rangeKey(baseline.segs, prev.members)) {
+        nextGroups.push({ ...prev, members: bucket.members })
+        continue
+      }
+      const parts = bucket.members.map(i => data.subarray(nextSegs[i].start, nextSegs[i].end))
+      const positions = bucket.members.map(i => nextSegs[i].start)
+      // Keep the group's ACTUAL kernel: a v20 payload (CM bit) must never be
+      // re-encoded under the weaker v15/v13 model just because v15 is also set.
+      const prevFlags = prev ? payloadModelFlags(prev.payload) : 0
+      const kernel: CMVariant = prev ? ((prevFlags & V20_FLAG_CM) ? 'v20' : prev.v15 ? 'v15' : false) : 'v20'
+      const payload = encodeTerrainGroup(parts, bucket.spec, undefined, undefined, undefined, positions, kernel,
+        prev && (prev.context || prev.matchDist) ? { context: prev.context, matchDist: prev.matchDist } : undefined)
+      comparison.buckets ??= []
+      comparison.buckets.push({ key, oldPayload: prev ? prev.payload.length : null, newPayload: payload.length, members: bucket.members.length })
+      nextGroups.push({ spec: { ...bucket.spec }, members: bucket.members, payload, v15: !!kernel, ...(prev?.wordPre ? { wordPre: true } : {}), ...(prev?.context ? { context: prev.context } : {}), ...(prev?.matchDist ? { matchDist: true } : {}) })
+      for (const i of bucket.members) { nextSegs[i].compLen = 0; nextSegs[i].modelFlags = payloadModelFlags(payload) }
+      let allocated = 0, cumulative = 0
+      const total = bucket.members.reduce((n, i) => n + nextSegs[i].rawLen, 0)
+      for (let j = 0; j < bucket.members.length; j++) {
+        const i = bucket.members[j]
+        cumulative += nextSegs[i].rawLen
+        const end = j === bucket.members.length - 1 ? payload.length : Math.round(payload.length * cumulative / Math.max(1, total))
+        nextSegs[i].compLen = end - allocated
+        allocated = end
+      }
+    }
+    const header = planHeader(data.length, nextSegs, nextGroups)
+    const total = header.length + nextGroups.reduce((n, x) => n + x.payload.length, 0)
+    comparison.candidateBytes = total
+    if (total >= baseline.container.length) return finish(baseline)
+    const container = new Uint8Array(total)
+    container.set(header)
+    let w = header.length
+    for (const g of nextGroups) { container.set(g.payload, w); w += g.payload.length }
+    const blockCost = new Float32Array(baseline.blockCost.length), blockSeg = new Int32Array(baseline.blockSeg.length)
+    let si = 0
+    for (let b = 0; b < baseline.blockCost.length; b++) {
+      const bl = baseline.analysis.blocks[b]
+      while (si + 1 < nextSegs.length && bl.start >= nextSegs[si].end) si++
+      const sg = nextSegs[si]
+      blockCost[b] = sg.rawLen > 0 ? sg.compLen * 8 / sg.rawLen : 0
+      blockSeg[b] = si
+    }
+    comparison.accepted = true
+    retainedPlanGroups.set(container, nextGroups)
+    return finish({ ...baseline, container, segs: nextSegs, blockCost, blockSeg, overhead: header.length })
+  } catch (error) {
+    comparison.error = error instanceof Error ? error.message : String(error)
+    comparison.accepted = false
+    comparison.candidateBytes = baseline.container.length
+    return finish(baseline)
+  }
 }
 /** Whole-file REC2 is a late strictly-smaller alternative, never a terrain hint. */
 export function refineRec2(data:Uint8Array,baseline:Compressed):Compressed {
@@ -3867,12 +4165,18 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     const contextCode=(rRaw & GROUP_CONTEXT_MASK) >>> GROUP_CONTEXT_SHIFT
     if(contextCode && c[3]!==21 && c[3]!==22)throw Error('旧容器包含 v21 组标记')
     const matchDist = !!(rRaw & GROUP_MATCH_DIST_BIT)
+    // v22 owns bit 20; P17.7 adds the extended-context namespace bit at 21. Every
+    // earlier version (and every pre-P17.7 v22 stream) has bit 21 clear, so the
+    // rejection stays exact for containers that could not have set it.
+    const contextExt = !!(rRaw & GROUP_CONTEXT_EXT_BIT)
+    if(contextExt && c[3]<21)throw Error('旧容器包含 v21 扩展上下文标记')
     // v22 owns bit 20; every earlier version must reject it rather than silently
-    // reinterpret the group's r as a larger value.
-    if(c[3]===21 && (rRaw>0xfffff || ((rRaw&0x10000)!==0 && !v15)))throw Error('未知组标志位或缺少 APM 内核')
+    // reinterpret the group's r as a larger value. Bit 21 is the P17.7 extended
+    // context namespace, so it is legal from v21 on (and rejected below v21).
+    if(c[3]===21 && (rRaw>0x3fffff || (rRaw&GROUP_MATCH_DIST_BIT)!==0 || ((rRaw&0x10000)!==0 && !v15)))throw Error('未知组标志位或缺少 APM 内核')
     if(matchDist && c[3]!==22)throw Error('旧容器包含 v22 组匹配模型标记')
-    if(c[3]>=22 && rRaw>0x1fffff)throw Error('未知组标志位')
-    const context=contextFromCode(contextCode)
+    if(c[3]>=22 && rRaw>0x3fffff)throw Error('未知组标志位')
+    const context=contextFromGroupBits(rRaw)
     const r = v15 || wp || context || matchDist ? rRaw & 0x3fff : rRaw
     const cm20=c[3]>=20 && v15 && !!(rRaw&0x10000)
     if(cm20 && !((c[4]|c[5]<<8)&V20_FLAG_CM))throw Error('v20 分组缺少 CM 标志')
@@ -3980,6 +4284,10 @@ export { BLOCK }
 // P14.1 runs only AFTER the exact P13.1 container has won all existing guards.
 // Keying by container survives result-object copies used by those guards.
 const retainedContextGroups = new WeakMap<Uint8Array, PlanGroup[]>()
+/** Full-fidelity plan for the exact container that won, so later stages can
+ * rebuild a header without guessing group contexts. Keyed by the same container
+ * object identity as `retainedContextGroups`. */
+const retainedPlanGroups = new WeakMap<Uint8Array, PlanGroup[]>()
 export interface ContextPayload { payload: Uint8Array; flags: number }
 export interface ContextCandidates {
   spec: Spec; rawBytes: number; wordPre: boolean
@@ -4053,7 +4361,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3']
+    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     if(!modes.length||rawBytes<CONTEXT_MIN_BYTES){result.skipped='ineligible-or-small';return result}
@@ -4176,6 +4484,15 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
         if(best && best.bytes<controlBytes && (!pick || best.bytes<pick.bytes)) pick=best
       }
       modes=pick?[pick.context]:[]
+      // P17.7: a bounded sample can rank two contexts inside noise. On raw text the
+      // runner-up is therefore also priced on the FULL group whenever it is within
+      // 0.5% of the sample winner (AITDCC/B: linecol won the 192 KiB sample by 0.1%
+      // and lost 142 B on the 1.1 MiB group). The complete-container gate still
+      // decides adoption, so the extra encode can only ever remove bytes.
+      if(pick && rawText && !wordPre) {
+        const runner=positive.find(t=>t.context!==pick!.context)
+        if(runner && runner.bytes<=pick.bytes*1.005) modes.push(runner.context)
+      }
       result.screen={rawBytes:sample.bytes,controlBytes,trials,selected:[...modes],matchDist:!!pick?.matchDist}
       if(!pick){result.skipped='probe-not-better';return result}
     }
@@ -4373,6 +4690,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
     for(let b=0;b<blockCost.length;b++)blockCost[b]/=Math.max(1,baseline.analysis.blocks[b].end-baseline.analysis.blocks[b].start)
     comparison.accepted=true;comparison.candidateBytes=container.length
     retainedContextGroups.set(container,groups)
+    retainedPlanGroups.set(container,groups)
     onStage?.(`v21 完整容器严格择优：${baseline.container.length} → ${container.length} B`,87)
     return finish({...baseline,container,segs:nextSegs,blockCost,overhead:header.length})
   } catch(error) {
