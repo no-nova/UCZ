@@ -1,0 +1,685 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent3",
+  "name": "osdb-mid",
+  "variant": "stats",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent3",
+    "osdb-mid",
+    "stats"
+  ],
+  "commit": "de127eb5248d7fd7d0aa0a6a1392d63a1363b707",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "a79e798981cec51e361e9359e6c65a92c86897a652475e41c8207a4665084ff0",
+    "patches.mjs": "61720967456e076d425023588371dfad10eedddcdbb7a71d5cfa6f646d2bf861",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent3.ts": "3cbce65dc8751b6d70834aa1472e59214bac1d705d7dba0f9b662cd8aa52abda"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 864,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "osdb-mid",
+      "file": "osdb",
+      "offset": 5042688,
+      "bytes": 262144,
+      "sha256": "16caaa3890e86d51f8dd427b742f3a350a11a4adb45e2be2a32f928aae6fce3b",
+      "corpusBytes": 10085684,
+      "corpusSha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0aaaae36ed18ee264f8320fc21a669209e008ce3",
+        "bytes": 10085684,
+        "sha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "16caaa3890e86d51f8dd427b742f3a350a11a4adb45e2be2a32f928aae6fce3b"
+    },
+    "variant": "stats",
+    "roundtrip": null,
+    "short": {
+      "recordStride": 2,
+      "segments": 4,
+      "byClass": {
+        "binary": 17920,
+        "repeat": 244224
+      },
+      "largestSegments": [
+        {
+          "start": 21504,
+          "end": 262144,
+          "cls": "repeat",
+          "bestS": 2,
+          "b0": 42,
+          "b1": 512,
+          "candidateSpecs": [
+            {
+              "id": 11,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 20,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 25,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 15,
+              "s": 2,
+              "r": 2
+            },
+            {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 16,
+              "s": 0,
+              "r": 136
+            },
+            {
+              "id": 29,
+              "s": 0,
+              "r": 136
+            },
+            {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            }
+          ],
+          "anchors": [
+            {
+              "s": 0,
+              "r": 136
+            }
+          ]
+        },
+        {
+          "start": 0,
+          "end": 16384,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 0,
+          "b1": 32,
+          "candidateSpecs": [
+            {
+              "id": 11,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 20,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 25,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 15,
+              "s": 2,
+              "r": 2
+            },
+            {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            {
+              "id": 26,
+              "s": 2,
+              "r": 3760
+            },
+            {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 16,
+              "s": 0,
+              "r": 136
+            },
+            {
+              "id": 29,
+              "s": 0,
+              "r": 136
+            },
+            {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            }
+          ],
+          "anchors": [
+            {
+              "s": 0,
+              "r": 136
+            }
+          ]
+        },
+        {
+          "start": 16384,
+          "end": 19968,
+          "cls": "repeat",
+          "bestS": 2,
+          "b0": 32,
+          "b1": 39,
+          "candidateSpecs": [
+            {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 16,
+              "s": 0,
+              "r": 136
+            },
+            {
+              "id": 29,
+              "s": 0,
+              "r": 136
+            },
+            {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            }
+          ],
+          "anchors": [
+            {
+              "s": 0,
+              "r": 136
+            }
+          ]
+        },
+        {
+          "start": 19968,
+          "end": 21504,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 39,
+          "b1": 42,
+          "candidateSpecs": [
+            {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            }
+          ],
+          "anchors": [
+            {
+              "s": 0,
+              "r": 136
+            }
+          ]
+        }
+      ],
+      "asciiFraction": 0.8034858703613281,
+      "zeroFraction": 0.0658721923828125,
+      "h0": 6.591311069428145,
+      "lagStats": [
+        {
+          "lag": 4,
+          "equality": 0.057572289616235596,
+          "deltaH": 7.300355038137295
+        },
+        {
+          "lag": 8,
+          "equality": 0.041688283944212166,
+          "deltaH": 7.423218247265095
+        },
+        {
+          "lag": 64,
+          "equality": 0.008028083028083027,
+          "deltaH": 7.8060792195488204
+        },
+        {
+          "lag": 512,
+          "equality": 0.01776541095890411,
+          "deltaH": 7.766555417079161
+        },
+        {
+          "lag": 4096,
+          "equality": 0.020100911458333332,
+          "deltaH": 7.759420766568803
+        },
+        {
+          "lag": 8192,
+          "equality": 0.01839717741935484,
+          "deltaH": 7.772265422886492
+        },
+        {
+          "lag": 16384,
+          "equality": 0.018798828125,
+          "deltaH": 7.767552580824781
+        }
+      ],
+      "byteScannerCounts": {
+        "e8e9": 139,
+        "jcc": 13
+      },
+      "alphaOpcodes": [
+        [
+          12,
+          7888
+        ],
+        [
+          0,
+          6704
+        ],
+        [
+          13,
+          5668
+        ],
+        [
+          14,
+          4290
+        ],
+        [
+          24,
+          2834
+        ],
+        [
+          11,
+          2499
+        ],
+        [
+          17,
+          2314
+        ],
+        [
+          21,
+          2276
+        ],
+        [
+          18,
+          2231
+        ],
+        [
+          26,
+          2221
+        ],
+        [
+          27,
+          2180
+        ],
+        [
+          19,
+          2160
+        ],
+        [
+          29,
+          2149
+        ],
+        [
+          25,
+          2145
+        ],
+        [
+          20,
+          2120
+        ],
+        [
+          28,
+          2068
+        ],
+        [
+          22,
+          1686
+        ],
+        [
+          16,
+          1677
+        ],
+        [
+          30,
+          1670
+        ],
+        [
+          2,
+          1488
+        ],
+        [
+          8,
+          620
+        ],
+        [
+          1,
+          323
+        ],
+        [
+          4,
+          258
+        ],
+        [
+          5,
+          235
+        ],
+        [
+          10,
+          234
+        ],
+        [
+          7,
+          228
+        ],
+        [
+          3,
+          222
+        ],
+        [
+          9,
+          221
+        ],
+        [
+          37,
+          187
+        ],
+        [
+          48,
+          180
+        ],
+        [
+          33,
+          173
+        ],
+        [
+          52,
+          172
+        ],
+        [
+          39,
+          171
+        ],
+        [
+          55,
+          169
+        ],
+        [
+          31,
+          167
+        ],
+        [
+          43,
+          165
+        ],
+        [
+          56,
+          165
+        ],
+        [
+          46,
+          164
+        ],
+        [
+          59,
+          163
+        ],
+        [
+          42,
+          158
+        ],
+        [
+          34,
+          157
+        ],
+        [
+          41,
+          156
+        ],
+        [
+          47,
+          156
+        ],
+        [
+          51,
+          155
+        ],
+        [
+          38,
+          153
+        ],
+        [
+          62,
+          151
+        ],
+        [
+          44,
+          150
+        ],
+        [
+          54,
+          150
+        ],
+        [
+          6,
+          143
+        ],
+        [
+          50,
+          140
+        ],
+        [
+          63,
+          136
+        ],
+        [
+          57,
+          135
+        ],
+        [
+          60,
+          124
+        ],
+        [
+          35,
+          123
+        ],
+        [
+          23,
+          112
+        ],
+        [
+          45,
+          111
+        ],
+        [
+          49,
+          98
+        ],
+        [
+          15,
+          83
+        ],
+        [
+          32,
+          82
+        ],
+        [
+          40,
+          80
+        ],
+        [
+          61,
+          80
+        ],
+        [
+          36,
+          74
+        ],
+        [
+          53,
+          73
+        ],
+        [
+          58,
+          71
+        ]
+      ],
+      "alphaBranchWords": 2162
+    },
+    "scope": "bounded input metadata/candidate eligibility scan only; no chooser, no encoding, no final group inference",
+    "maxRSSMiB": 63.02734375
+  }
+}

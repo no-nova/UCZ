@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict'
+import { compressAdaptive, decompress } from '@stock/codec'
+import { analyze, detectWide16Lag, detectLagCandidates } from '@stock/analyze'
+import { encodeCM, decodeCM, a2Suppress, withCMBlockSize, p15 } from '@lib/coder'
+import { d16Fwd, d16Inv, wide16Fwd, wide16Inv, medFwd, medInv } from '@lib/transforms'
+import { load, eq, sha, ms, cat, varint, stats, done } from './common'
+const [name,variant,b='65536',o='0']=process.argv.slice(2),{data,input}=load(name,Number(b),Number(o)),start=performance.now()
+const swap=(x:Uint8Array)=>{const out=new Uint8Array(x);for(let i=0;i+1<x.length;i+=2){out[i]=x[i+1];out[i+1]=x[i]}return out}
+const baseRow=name.startsWith('synthetic-')?512:name.startsWith('mr-')?1024:3800
+function cm(x:Uint8Array,p:'res'|'res2d',s:number,r:number,g=0,context?:'wide-geom'){
+ const t=performance.now(),packed=withCMBlockSize(data.length,()=>encodeCM(x,p,s,r,undefined,0,undefined,undefined,'v20',g,false,context?{context}:undefined)),encodeMs=ms(performance.now()-t),dt=performance.now()
+ const out=withCMBlockSize(data.length,()=>decodeCM(packed,x.length,p,s,r,undefined,'v20',g,false,context?{context}:undefined));eq(out,x)
+ return {packed,out,meta:{profile:p,s,r,g,context:context??null,cmInputBytes:x.length,cmInputSha256:sha(x),payloadBytes:packed.length,payloadSha256:sha(packed),encodeMs,decodeMs:ms(performance.now()-dt),roundtrip:true}}
+}
+async function main(){
+ if(variant==='adaptive'||variant==='inspect'){
+  const a=analyze(data),analysis={inputStats:stats(data),wide16Lag:detectWide16Lag(data),lag1:detectLagCandidates(data,1),lag2:detectLagCandidates(data,2),segments:a.segs}
+  if(variant==='inspect'){done({unit:2,input,variant,analysis,analysisOnly:true});return}
+  const stages:any[]=[];const t=performance.now(),result=await compressAdaptive(data,(msg,pct)=>{stages.push({msg,pct,ms:ms(performance.now()-t)});if(stages.length%5===0)console.error(msg)},{serial:true}),encodeMs=ms(performance.now()-t),dt=performance.now(),out=decompress(result.container)
+  eq(out,data);assert.equal(sha(out),input.sha256)
+  assert.equal(result.overhead+result.segs.reduce((n,s)=>n+s.compLen,0),result.container.length)
+  done({unit:2,input,variant,analysis,containerBytes:result.container.length,containerSha256:sha(result.container),version:result.container[3],headerBytes:result.overhead,encodeMs,decodeMs:ms(performance.now()-dt),roundtrip:true,decodedSha256:sha(out),segs:result.segs,contexts:result.contextComparison,stages,scope:'unmodified stock compressAdaptive -> UCZ -> stock decompress; genuine bounded endpoint only'});return
+ }
+ a2Suppress.depth++
+ try{
+  const swapped=variant.endsWith('-be'),source=swapped?swap(data):data
+  eq(swapped?swap(source):source,data)
+  if(/^d16-(le|be)$/.test(variant)){
+   const rows=[]
+   for(const order of [1,2]){const residual=d16Fwd(source,1,order),x=cm(residual,'res',2,1);eq(d16Inv(x.out,1,order),source);eq(swapped?swap(d16Inv(x.out,1,order)):d16Inv(x.out,1,order),data)
+    rows.push({order,...x.meta,experimentalEndianTagBytes:swapped?1:0,framedBytes:x.packed.length+(swapped?1:0)})}
+   done({unit:2,input,variant,stats:stats(data),rows,roundtrip:true,scope:'fixed D16 transform + real CM, swapped BE input/inverse; one candidate endian byte priced, complete UCZ header not implemented'})
+  }else if(/^wide[678]-(le|be|gradclass)$/.test(variant)){
+   assert.equal(data.length%2,0);const mode=Number(variant[4]),row=baseRow,residual=wide16Fwd(source,row,mode),half=residual.length/2,high=residual.subarray(0,half),low=residual.subarray(half)
+   eq(wide16Inv(residual,row,mode),source)
+   const h=cm(high,'res',1,1),rows=[]
+   for(const kind of variant.endsWith('-gradclass')?['geom-control','geom-gradclass']:['standard','geom']){
+    p15.resContext=kind==='geom-gradclass'?'gradclass':'control'
+    const g=kind==='standard'?0:row/2,l=cm(low,'res2d',1,row/2,g,g?'wide-geom':undefined),payload=cat(varint(h.packed.length),h.packed,l.packed)
+    const restored=wide16Inv(cat(h.out,l.out),row,mode);eq(restored,source);eq(swapped?swap(restored):restored,data)
+    rows.push({kind,low:l.meta,payloadBytes:payload.length,payloadSha256:sha(payload),endianTagBytes:swapped?1:0,experimentalContextTagBytes:kind==='geom-gradclass'?1:0,framedBytes:payload.length+(swapped?1:0)+(kind==='geom-gradclass'?1:0),roundtrip:true})
+   }
+   done({unit:2,input,variant,mode,rowBytes:row,swapped,stats:stats(data),high:h.meta,highPlaneIdenticalAcrossContexts:true,rows,roundtrip:true,scope:'fixed WIDE high/low payload plus actual high-length framing. BE/tagged H8 are experimental; not adaptive'})
+  }else if(/^med8-(1900|3800|1024)-(le|be)$/.test(variant)){
+   const row=Number(variant.split('-')[1]),residual=medFwd(source,1,row),rows=[]
+   for(const g of [0,row]){const x=cm(residual,'res2d',1,row,g,g?'wide-geom':undefined),restored=medInv(x.out,1,row);eq(restored,source);eq(swapped?swap(restored):restored,data);rows.push({...x.meta,endianTagBytes:swapped?1:0,framedBytes:x.packed.length+(swapped?1:0)})}
+   done({unit:2,input,variant,rowBytes:row,rows,roundtrip:true,scope:'fixed byte MED, g=0 vs row geometry; candidate not assigned a UCZ mode'})
+  }else throw Error(`unknown unit2 variant ${variant}`)
+ }finally{a2Suppress.depth--;p15.resContext='control'}
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

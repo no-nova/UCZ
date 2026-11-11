@@ -1,0 +1,159 @@
+{
+  "referenceCommit": "f2de6fbc2541a996b65dbc2bee178fa1ea216820",
+  "source": {
+    "sha256": "2979a4956e72487bd5c5a9f88f8ae2f6756163c4b62fe3dcf9f21d5d7e9fb878",
+    "files": {
+      "src/lib/analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "src/lib/anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+      "src/lib/byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+      "src/lib/codec-jobs.ts": "92d16ae81af9aad184ad28c36df5cdbc1a020fee4bc8cd3da882a358b11d4f8b",
+      "src/lib/codec.ts": "a36a98208c386b1a080da9cea2f48967523017179c649ecaf6b017a862ae6d7a",
+      "src/lib/coder.ts": "8a2097d42f9fcb7983dc1af8307f269c96326d4cf23a2ce4389d2da7e1245451",
+      "src/lib/compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+      "src/lib/limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+      "src/lib/lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+      "src/lib/micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+      "src/lib/parallel-jobs.ts": "5f57c42e842592c68cb1b490359f8a05e3d660405f2c7e8f58cb9bbad45816cf",
+      "src/lib/parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+      "src/lib/parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+      "src/lib/parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+      "src/lib/parallel-worker-code.ts": "0825e7682329f075cdd8e98ea2ff19537dbabfdaa2c62a73da33067ea3986346",
+      "src/lib/parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+      "src/lib/parallel.ts": "7ea8f0b17ec17ce0e89b17aec98b3ccee946541d98ff0fba89a42dd23ce27461",
+      "src/lib/payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+      "src/lib/samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+      "src/lib/sub-peel.ts": "45c4021b668fc60ce1bcb9ca4d5c57a9fa11368187d1cbdd0d7be53eda6200e6",
+      "src/lib/transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+      "src/lib/transpose2d.ts": "18e3e11ec171ce513e82491bc5b5a11319525dbd8b17df6938d68fb69d359e0a",
+      "src/lib/unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+      "src/lib/viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+      "src/lib/wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a",
+      "package.json": "31fa4a02c65c04000665889e07e032daf094b3421c0fb56e2600a928b5f27d9e",
+      "package-lock.json": "df13cb90fea7667a92d96dec1f7dae61a79b3b49aa38db8113f50b33a839341d",
+      "tsconfig.json": "2a760f56fa49b96935783a2c3b4ce63d67e4547fdace88c4f4361a0c4fc10848",
+      "scripts/diag/run.mjs": "0f30da9be2f5fadf3ca9e3957a71fbe7125c0aea95e5c3bcd789e86d81628bdd",
+      "scripts/diag/run-p9.mjs": "4beecd0f6027065e447221effe5fb23160999325ef94c14d1b33b9cf9545f744",
+      "scripts/diag/probe-p9-ab.ts": "c79739707eac1da74d97c683665a3c39a7e0d5e3b9daebda787b57cb6d2b440b",
+      "scripts/diag/p9-checkpoint.mjs": "d3da6229b8346b1910839bfd4b20508f18b9879de85d80798be5cbfda3cacd75",
+      "scripts/diag/baseline.json": "4db78f40e895dbcf06285801aa782342e29409be36627ce8924df7b893b269eb",
+      "scripts/diag/bench-one.ts": "e34b829e73a055531db167616e457653a1ac3cf6f344f48e267e5097793bb18b"
+    }
+  },
+  "checks": [
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeSpec",
+      "sha256": "92efd6f2bb5e627c8dc0d70a706b8bf7875bfebd1ac4bfb2cbab30f255141e23",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeMicroGroup",
+      "sha256": "0fd3428e16ca5a445a42874b9a60b5a7a25f4e38e0631ac139be04823c7b4376",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeSubGroups",
+      "sha256": "f4fca399631086b7aca9fb76d8ab1b608dcbdbd71cd227335053b1dbe3d65ebc",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodePeel",
+      "sha256": "dccecf8a248e84a79ad24dc472ed1027dc76db08d7b37170b59a7bc02235322c",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeTransposeGroup",
+      "sha256": "458bac9c47dbbbb405c378782fdda10326b8ef8f0454a6fd5fb59b690e104ccf",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeGroupedTranspose",
+      "sha256": "3f567014c702ca63a307897b4e03cd84b0b2c05fa4e9d5a2281eb06494206e5d",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeGroupedTransposeImpl",
+      "sha256": "c705f470fda5003bf1245fe76c3119562604dfc56991dd8c40b6dd6dcfcaeabf",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeTerrainGroupWordPre",
+      "sha256": "f3b99f2c28d5929397193e559c3ccd0352026d656e161a4ed25f47de47a87b53",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeTerrainGroup",
+      "sha256": "75305d3a889a72ddb2bf1040112de501b7fedb3d7cee4dc6a30bb13447db427b",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decodeTerrainGroupImpl",
+      "sha256": "cab01a01bee79e3172fceaef22dae11302090fe6082687aa64424ee23c040bdc",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decompress",
+      "sha256": "997305704edccb94956d5bb67f3a04c5a5d499fc0eb16db3107e4439638cfd61",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/codec.ts",
+      "name": "decompressImpl",
+      "sha256": "e55ecca77b9c43e4841eff2bd124fc2a2aab5a59fb73cd00ea888346c2cf72ab",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/coder.ts",
+      "name": "decodeCM",
+      "sha256": "0ba5c3fb3dc127ea47205aaaee3fb2a2f605f3f2b63d05ae64d1739c6fcd7604",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/coder.ts",
+      "name": "decodeCMImpl",
+      "sha256": "2862559d1a476aa0b68b888479a51baf4dbf102106770fce4286ed57e934d78e",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/coder.ts",
+      "name": "decodeMatchExperiment",
+      "sha256": "0de35241c1c8986ccf34fbb4682777dcb1d235df9e9c1b2dec474c6aa491bf0b",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/anchor.ts",
+      "name": "decodeAnchor",
+      "sha256": "f8cd1868d8437e038d4e3603e0818eae2396fe5409caa6232f52ab595ce39a3b",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/sub-peel.ts",
+      "name": "decodePeeledTranspose",
+      "sha256": "827dc8f106d00069ae1724a8b856e3e754886616d51c9eb730834152efa62401",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/sub-peel.ts",
+      "name": "decodePeeledAnchor",
+      "sha256": "93fb509c34e91c476e662a4e2d483929f7577b86b525c93d7f113b0fbfbd41a5",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/transpose2d.ts",
+      "name": "decodeTranspose2d",
+      "sha256": "f2ebf5f11274b2ef925238eb3f153db5da79a1272710eaa16ab2a1f611484d44",
+      "unchanged": true
+    }
+  ],
+  "note": "Named decoder function bodies unchanged. ContainerModel policy and Model constructor are intentionally extended with distinct v17 flags; frozen compatibility tests cover semantics."
+}

@@ -1,0 +1,88 @@
+// Applied only to disposable copies. Every exact replacement is archived in receipts.
+export const CASES={
+ unit1:['control','raw','wp-merge','wp-lexical','wp-token3','text-class'],
+ unit2:['control','geom','msb','msb-detail','high2d','high2d-msb','wide3','wide3-geom','tg-plan','tg-control','tg-side','tg-flat','tg-flat-side'],
+ unit3:['control','bcj2','stride4','opcode','word-prefix','sparse-off','bcj2-stride4','bcj2-opcode','inspect'],
+ unit4:['control','text','profile','profile-text','lr-main4','lr-secondary1','count160','near8','no-mht8','text-class','structure']
+}
+export function applyPatches(unit,variant,patch,read) {
+ patch('coder.ts','  const n = data.length\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens)',
+  '  const n = data.length\n  if(n>524288)throw Error("P14 CM hard budget exceeded")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens)')
+ patch('coder.ts','  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens)',
+  '  if(n>524288)throw Error("P14 CM decode hard budget exceeded")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens)')
+ patch('coder.ts',"import { ByteWriter } from './byte-writer'",`import { ByteWriter } from './byte-writer'
+export const p14 = { side: undefined as Uint8Array|undefined, planeLen:0, learnHook: null as null|((m:any,y:number)=>void) }
+`)
+ patch('coder.ts','  learn(y: number, prOverride?: number): void {','  learn(y: number, prOverride?: number): void {\n    if(p14.learnHook)p14.learnHook(this,y)')
+ patch('codec.ts','function planColumnGroups(parts:', 'export function planColumnGroups(parts:')
+ patch('codec.ts','function gatherGroup(parts:', 'export function gatherGroup(parts:')
+ patch('codec.ts','function groupDelta(input:', 'export function groupDelta(input:')
+ if(variant==='wp-merge') {
+  const s=read('coder.ts'),a=s.indexOf('      if (this.wordTokens && byte >= 128) {'),b=s.indexOf('      else if (this.curWord !== 0)',a)
+  if(a<0||b<a)throw Error('word model anchor')
+  patch('coder.ts',s.slice(a,b),'      if (asciiLetter || byte >= 128) this.curWord = (Math.imul(this.curWord, 16777619) ^ lower) >>> 0\n')
+ }
+ if(variant==='wp-lexical') {
+  patch('coder.ts','  wordTokens = false',`  p14Dict:string[]=[]
+  p14Count=-1
+  p14Length=-1
+  p14Entry=''
+  p14Ready=false
+  p14Escape=false
+  private p14Word(byte:number) {
+    // Current encoder emits <=120 entries and <=24-byte lengths: one varint byte each.
+    // Header parsing is causal from decoded bytes; no dictionary/raw lookahead oracle.
+    if(!this.p14Ready) {
+      if(this.p14Count<0)this.p14Count=byte
+      else if(this.p14Length<0)this.p14Length=byte
+      else {
+        this.p14Entry+=String.fromCharCode(byte)
+        if(this.p14Entry.length===this.p14Length) {
+          this.p14Dict.push(this.p14Entry);this.p14Entry='';this.p14Length=-1
+          if(this.p14Dict.length===this.p14Count){this.p14Ready=true;this.curWord=0;this.prevWord=0}
+        }
+      }
+      return
+    }
+    let word:string
+    if(this.p14Escape){word=String.fromCharCode(byte);this.p14Escape=false}
+    else if(byte===127){this.p14Escape=true;return}
+    else if(byte>=128){word=this.p14Dict[byte-128];if(word===undefined)throw Error('bad P14 token')}
+    else word=String.fromCharCode(byte)
+    for(let j=0;j<word.length;j++) {
+      const lower=word.charCodeAt(j)|32
+      if(lower>=97&&lower<=122)this.curWord=(Math.imul(this.curWord,16777619)^lower)>>>0
+      else if(this.curWord!==0){this.prevWord=this.curWord;this.curWord=0}
+    }
+  }
+  wordTokens = false`)
+  patch('coder.ts',"    if (this.profile === 'text' && this.variant) {\n      const lower", "    if(this.profile==='text'&&this.wordTokens)this.p14Word(byte)\n    else if (this.profile === 'text' && this.variant) {\n      const lower")
+ }
+ if(variant==='wp-token3') {
+  patch('coder.ts','  prevWord = 0','  prevWord = 0\n  p14PrevPrev = 0')
+  patch('coder.ts','        this.prevWord = this.curWord','        this.p14PrevPrev = this.prevWord\n        this.prevWord = this.curWord')
+  patch('coder.ts','else if (this.curWord !== 0) { this.prevWord = this.curWord; this.curWord = 0 }','else if (this.curWord !== 0) { this.p14PrevPrev=this.prevWord;this.prevWord = this.curWord; this.curWord = 0 }')
+  patch('coder.ts','H[8]=hh(b1,b3,b4);return','H[8]=hh(this.p14PrevPrev,this.prevWord,this.curWord||b1);return')
+ }
+ if(variant==='text-class')patch('coder.ts','H[8]=hh(b1,b3,b4);return','H[8]=hh(charClass8(b1),charClass8(b2),b1,this.curWord===0?1:0);return')
+ if(['msb','high2d-msb','msb-detail'].includes(variant)) {
+  const side=variant==='msb-detail'
+   ? 'const msb=p14.side[this.pos]??0;H[6]=hh(b1,msb,QV[gr]);H[8]=hh(32-Math.clz32(msb),QV[b1],QV[gr])'
+   : 'const msb=p14.side[this.pos]??0;H[8]=hh(QV[b1],QV[gr],msb===0?0:msb===1?1:2)'
+  patch('coder.ts','if(this.isV20)this.computeGeometry(b1,b2); return',`if(this.isV20)this.computeGeometry(b1,b2);if(p14.side){${side}} return`)
+ }
+ if(['tg-side','tg-flat-side'].includes(variant)) {
+  patch('coder.ts','        if(this.isV20)this.computeGeometry(b1,b2)\n        return',`        if(this.isV20)this.computeGeometry(b1,b2)
+        if(p14.side)H[8]=hh(b1,this.g(this.s),p14.side[this.pos]??0,this.pos%this.s)
+        if(p14.planeLen&&this.pos>=p14.planeLen)H[8]=hh(b1,this.g(p14.planeLen),this.g(p14.planeLen+1))
+        return`)
+  patch('coder.ts','H[7]=hh(phase,b1,QV[gs],QV[gs2]);return','H[7]=hh(phase,b1,QV[gs],QV[gs2]);if(p14.side)H[7]=hh(phase,b1,p14.side[this.pos]??0,QV[gs]);return')
+ }
+ const binExpr=variant.endsWith('stride4')?'hh(b4,this.g(8),this.g(12),this.pos&3)':variant.endsWith('opcode')?'hh(b4,this.g(8),this.g((this.pos&3)+1)>>>2,this.pos&3)':variant==='word-prefix'?'hh((this.pos&3)?this.buf[this.pos&~3]:b4,this.pos&3,b1)':null
+ if(binExpr)patch('coder.ts','this.isV20 ? hh(b2,b4)',`this.isV20 ? ${binExpr}`)
+ if(variant==='sparse-off')patch('coder.ts','H[5]=hh(b1,b3);H[6]=hh(b3,b4)','H[5]=hh(b1);H[6]=hh(b3,b4)')
+ if(variant==='lr-main4')patch('coder.ts','const err = ((y << 12) - (prOverride ?? this.pr)) * 8','const err = ((y << 12) - (prOverride ?? this.pr)) * 4')
+ if(variant==='lr-secondary1')patch('coder.ts','this.isV20 ? 2 : mixer2Tuning.lr2','this.isV20 ? 1 : mixer2Tuning.lr2')
+ if(variant==='count160')patch('coder.ts',"this.limit = profile === 'text' || profile === 'bin' ? 80 : 250", "this.limit = profile === 'text' || profile === 'bin' ? 160 : 250")
+ if(variant==='near8')patch('coder.ts','pos - cand8 > 64','pos - cand8 > 0')
+}

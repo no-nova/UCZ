@@ -1,0 +1,22 @@
+
+=== POSITIVE (real Silesia slices) ===
+dickens-mid      single=  73827 dual=  73704 ddist=  73646  Δ(ddist)=-181 (-0.245%)
+mozilla-mid      single=  81402 dual=  81372 ddist=  81174  Δ(ddist)=-228 (-0.280%)
+mr-mid           single=  64035 dual=  64037 ddist=  64042  Δ(ddist)=+7 (0.011%)
+nci-mid          single=  13998 dual=  13903 ddist=  13917  Δ(ddist)=-81 (-0.579%)
+ooffice-mid      single= 111333 dual= 111305 ddist= 111085  Δ(ddist)=-248 (-0.223%)
+osdb-mid         single=  72707 dual=  72708 ddist=  72626  Δ(ddist)=-81 (-0.111%)
+reymont-mid      single=  49384 dual=  49360 ddist=  49273  Δ(ddist)=-111 (-0.225%)
+samba-c          single=  33921 dual=  33913 ddist=  33763  Δ(ddist)=-158 (-0.466%)
+sao-mid          single= 164183 dual= 164161 ddist= 164153  Δ(ddist)=-30 (-0.018%)
+webster-mid      single=  59315 dual=  59330 ddist=  59255  Δ(ddist)=-60 (-0.101%)
+xml-mid          single=   6169 dual=   6008 ddist=   5986  Δ(ddist)=-183 (-2.966%)
+x-ray-mid        single= 125725 dual= 125716 ddist= 125719  Δ(ddist)=-6 (-0.005%)
+
+  wins 11/12   total Δ = -1360 B
+
+=== NULL CONTROL (structureless; must be ~0) ===
+iid-uniform      single= 263164 dual= 263164 ddist= 263164  Δ(ddist)=+0 (0.000%)
+iid-5-symbols    single=  76668 dual=  76667 ddist=  76667  Δ(ddist)=-1 (-0.001%)
+constant         single=    150 dual=    150 ddist=    150  Δ(ddist)=+0 (0.000%)
+unique-4grams    single=  68854 dual=  68854 ddist=  68854  Δ(ddist)=+0 (0.000%)

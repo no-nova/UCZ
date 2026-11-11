@@ -1,0 +1,11 @@
+{
+  "kind": "harness-preflight-error",
+  "durationMs": 163,
+  "cmCalls": 0,
+  "fullCMCalls": 0,
+  "measurementProduced": false,
+  "error": "Preparation source mismatch analyze.ts",
+  "cause": "git ls-tree of a subtree from project cwd returned an empty path list without --full-tree; stopped before building/running the probe",
+  "fix": "request --full-tree; then verify prepared source hashes against the selected Git source",
+  "productionSourceChanged": false
+}

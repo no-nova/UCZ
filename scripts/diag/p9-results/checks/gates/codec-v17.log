@@ -1,0 +1,12 @@
+
+> react-vite-tailwind@0.0.0 pretest:codec
+> node scripts/build-worker-code.mjs --check
+
+parallel-worker-code.ts 是最新的
+
+> react-vite-tailwind@0.0.0 test:codec
+> node tests/run.mjs && node tests/worker.mjs
+
+P9 format tests passed (69 checks; frozen P7, v17 flags, scope, worker)
+codec tests passed
+worker test passed

@@ -1,0 +1,119 @@
+{
+  "kind": "user-reported-local-full-files",
+  "sourceCommit": "51ced1f",
+  "reportedCores": 16,
+  "rawJsonUploaded": false,
+  "sourceSha256": null,
+  "invocation": null,
+  "reportedPassCount": 11,
+  "reportedTotalCount": 12,
+  "rows": [
+    {
+      "file": "xml",
+      "p12BestUcz": 339516,
+      "reportedP13Bytes": 351805,
+      "deltaBytes": 12289,
+      "reportedStatus": "FAIL byte regression",
+      "reportedEncSeconds": 57.7
+    },
+    {
+      "file": "dickens",
+      "p12BestUcz": 2214517,
+      "reportedP13Bytes": 2214517,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "ooffice",
+      "p12BestUcz": 1955064,
+      "reportedP13Bytes": 1890887,
+      "deltaBytes": -64177,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "mr",
+      "p12BestUcz": 1798884,
+      "reportedP13Bytes": 1798884,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "osdb",
+      "p12BestUcz": 2277558,
+      "reportedP13Bytes": 2277558,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "x-ray",
+      "p12BestUcz": 3548450,
+      "reportedP13Bytes": 3548450,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "sao",
+      "p12BestUcz": 3132317,
+      "reportedP13Bytes": 3132317,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "reymont",
+      "p12BestUcz": 1064930,
+      "reportedP13Bytes": 1064930,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": null
+    },
+    {
+      "file": "nci",
+      "p12BestUcz": 1217746,
+      "reportedP13Bytes": 1217746,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": 95.1
+    },
+    {
+      "file": "samba",
+      "p12BestUcz": 3349194,
+      "reportedP13Bytes": 3349194,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": 289.9
+    },
+    {
+      "file": "webster",
+      "p12BestUcz": 6276863,
+      "reportedP13Bytes": 6276863,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": 168.3
+    },
+    {
+      "file": "mozilla",
+      "p12BestUcz": 13122830,
+      "reportedP13Bytes": 13122830,
+      "deltaBytes": 0,
+      "reportedStatus": "PASS",
+      "reportedEncSeconds": 579.2
+    }
+  ],
+  "reportedTotalBytes": 40245981,
+  "computedTotalBytes": 40245981,
+  "reportedP12EncRowSeconds": 2137.5,
+  "previousArchivedP12EncRowSeconds": 2137.2,
+  "reportedP13EncRowSeconds": 1789.2,
+  "reportedEncRowReductionSeconds": 348.3,
+  "note": "New P12 timing reference differs by 0.3 s from the earlier archive; preserve both, do not silently rewrite the lock or timing protocol.",
+  "counterfactualXmlRestoredTotalBytes": 40233692,
+  "counterfactualIsMeasured": false,
+  "fullFilesEncodedInArena": false,
+  "baselineUpdated": false
+}

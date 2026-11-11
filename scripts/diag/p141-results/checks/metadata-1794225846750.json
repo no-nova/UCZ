@@ -1,0 +1,60 @@
+{
+  "kind": "P14.1-bounded-project-check",
+  "name": "metadata",
+  "status": "PASS",
+  "command": [
+    "node",
+    [
+      "--test",
+      "tests/p10-baseline.test.mjs",
+      "tests/p122-diagnostics.test.mjs",
+      "tests/p13-diagnostics.test.mjs"
+    ]
+  ],
+  "commit": "f08217bb73b7012c5e8cbc5e92181083e0e82945",
+  "sourceSha256": "539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "cc8f9bbe23e3849473cc8c93ed077e027017b52a96364470a55764d062e9e530",
+    "coder.ts": "424d87a1d85d380f3019f7b18269135020049dcba428297c158227596c6d08aa",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "scripts": {
+    "scripts/diag/p141/check.mjs": "952b42aae69e64dc9f9d600d54a535ed84b81c33ccca3a77400433182451aa72",
+    "package.json": "57571234862262bb1609ccb76c5dabc20fef29c5575d3ef78baa657eb1aade27",
+    "tsconfig.json": "2a760f56fa49b96935783a2c3b4ce63d67e4547fdace88c4f4361a0c4fc10848",
+    "tsconfig.p141.json": "9d9ae4f29f8a7a9356779d76869c6c7dc99f21988a45fb2ddefb757948db7cb2"
+  },
+  "node": "v22.22.3",
+  "durationMs": 2676,
+  "code": 0,
+  "signal": null,
+  "timedOut": false,
+  "stdout": "TAP version 13\n# Subtest: exact 12-file floor passes and sums to 40233692\nok 1 - exact 12-file floor passes and sums to 40233692\n  ---\n  duration_ms: 156.09133\n  type: 'test'\n  ...\n# Subtest: one byte regression fails even with permissive v14 tolerance\nok 2 - one byte regression fails even with permissive v14 tolerance\n  ---\n  duration_ms: 146.355183\n  type: 'test'\n  ...\n# Subtest: a gain elsewhere cannot hide one file regressing\nok 3 - a gain elsewhere cannot hide one file regressing\n  ---\n  duration_ms: 101.484917\n  type: 'test'\n  ...\n# Subtest: reported ratio cannot hide byte regression\nok 4 - reported ratio cannot hide byte regression\n  ---\n  duration_ms: 55.11417\n  type: 'test'\n  ...\n# Subtest: verified, size and SHA checks remain mandatory\nok 5 - verified, size and SHA checks remain mandatory\n  ---\n  duration_ms: 170.997531\n  type: 'test'\n  ...\n# Subtest: missing or duplicate standard rows fail full acceptance\nok 6 - missing or duplicate standard rows fail full acceptance\n  ---\n  duration_ms: 120.862268\n  type: 'test'\n  ...\n# Subtest: invalid byte counts do not pass a hard floor\nok 7 - invalid byte counts do not pass a hard floor\n  ---\n  duration_ms: 257.013562\n  type: 'test'\n  ...\n# Subtest: invalid tolerance fails instead of masking checks\nok 8 - invalid tolerance fails instead of masking checks\n  ---\n  duration_ms: 53.721454\n  type: 'test'\n  ...\n# Subtest: summary defaults to locked bestUcz and accepts an individual existing JSON path\nok 9 - summary defaults to locked bestUcz and accepts an individual existing JSON path\n  ---\n  duration_ms: 84.852192\n  type: 'test'\n  ...\n# Subtest: malformed Mozilla result is incomplete, never a twelve-file success\nok 10 - malformed Mozilla result is incomplete, never a twelve-file success\n  ---\n  duration_ms: 57.798668\n  type: 'test'\n  ...\n# Subtest: twelve valid same-source rows use the unchanged 40233692 ceiling\nok 11 - twelve valid same-source rows use the unchanged 40233692 ceiling\n  ---\n  duration_ms: 95.826388\n  type: 'test'\n  ...\n# Subtest: duplicates and unverified or mismatched inputs cannot inflate summary coverage\nok 12 - duplicates and unverified or mismatched inputs cannot inflate summary coverage\n  ---\n  duration_ms: 284.224751\n  type: 'test'\n  ...\n# Subtest: a one-byte regression cannot be offset by another gain; mixed sources stay explicit\nok 13 - a one-byte regression cannot be offset by another gain; mixed sources stay explicit\n  ---\n  duration_ms: 132.001577\n  type: 'test'\n  ...\n# Subtest: gitHead for a source-only directory returns null without leaking fatal Git stderr\nok 14 - gitHead for a source-only directory returns null without leaking fatal Git stderr\n  ---\n  duration_ms: 54.719637\n  type: 'test'\n  ...\n# Subtest: real bench-one CLI works from a foreign cwd on an archive without .git\nok 15 - real bench-one CLI works from a foreign cwd on an archive without .git\n  ---\n  duration_ms: 325.610299\n  type: 'test'\n  ...\n# Subtest: 40M is strict; the -35% encode-row threshold is inclusive and not wall time\nok 16 - 40M is strict; the -35% encode-row threshold is inclusive and not wall time\n  ---\n  duration_ms: 1.662487\n  type: 'test'\n  ...\n# Subtest: numeric timing gain is not accepted as comparable without explicit local confirmation\nok 17 - numeric timing gain is not accepted as comparable without explicit local confirmation\n  ---\n  duration_ms: 0.314037\n  type: 'test'\n  ...\n# Subtest: one-byte per-file regression cannot be offset by any other gain\nok 18 - one-byte per-file regression cannot be offset by any other gain\n  ---\n  duration_ms: 0.771772\n  type: 'test'\n  ...\n# Subtest: twelve locked-baseline rows are nonregressing, but do not pass the 40M target\nok 19 - twelve locked-baseline rows are nonregressing, but do not pass the 40M target\n  ---\n  duration_ms: 0.239054\n  type: 'test'\n  ...\n# Subtest: missing, duplicate, unverified, mixed-source and invalid-timing rows fail closed\nok 20 - missing, duplicate, unverified, mixed-source and invalid-timing rows fail closed\n  ---\n  duration_ms: 0.640004\n  type: 'test'\n  ...\n# Subtest: local target CLI reports nonacceptance with nonzero exit and never rewrites the lock\nok 21 - local target CLI reports nonacceptance with nonzero exit and never rewrites the lock\n  ---\n  duration_ms: 156.198916\n  type: 'test'\n  ...\n# Subtest: user-local wrapper has valid shell syntax; no full-file execution in this test\nok 22 - user-local wrapper has valid shell syntax; no full-file execution in this test\n  ---\n  duration_ms: 10.037943\n  type: 'test'\n  ...\n1..22\n# tests 22\n# suites 0\n# pass 22\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 2574.706667\n",
+  "stderr": "",
+  "fullCorpusEncoded": false,
+  "baselinePromoted": false
+}

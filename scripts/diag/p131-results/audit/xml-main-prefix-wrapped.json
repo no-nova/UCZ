@@ -1,0 +1,169 @@
+{
+  "phase": "audit",
+  "name": "xml-main",
+  "mode": "prefix-wrapped",
+  "commit": "51ced1f2826ec84c088c46302a8271b9d5fc64ae",
+  "workingSource": false,
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "97bf0e1fe00412ce484d5474cb2ac684b8a62695a9cb9aa55d6ef5fb22807bed",
+    "coder.ts": "bb775399134ccdbae66625c212affe958d9e7c7d41ed25478530b398fb96e05d",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "9c15653bd7039cc4233f8baea5d4054256d681f63684f5d906a3b6b1d2355bd2",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "0ef5ac0a4f4376aa1c4405faa52812b4f940c8c5b0897cf3b514f66613051e83",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "e3d88884183d8aa246a43c16af2b6b423545fbebd25727e2058d3590b3955cb0",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "33393e64dafd270aec1ac4e2d99c819979a938447c3565100d32ee3667ea2a6f",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "d26e57edf093235c746739342974639bb0ebb9a4867ba507a2d3e8f273d02603",
+  "injectedFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "c50a63483aa3508f8fd8f1c07e4f867e3aef921fa952ebb50fb10dd2d2cacbb4",
+    "coder.ts": "79732b7126e0d4264828919b56f4abef45234ba6fa14e5b8bbf958cd7cd25208",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "9c15653bd7039cc4233f8baea5d4054256d681f63684f5d906a3b6b1d2355bd2",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "0ef5ac0a4f4376aa1c4405faa52812b4f940c8c5b0897cf3b514f66613051e83",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "e3d88884183d8aa246a43c16af2b6b423545fbebd25727e2058d3590b3955cb0",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "33393e64dafd270aec1ac4e2d99c819979a938447c3565100d32ee3667ea2a6f",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "injectedSha256": "147561800ee56fc2e9fec79ffe620e5eaa9151bff1328df0e99eb7716c78935c",
+  "probeSha256": "102091c6022150d0e0e16e74cfcf148890bda17b61cc842c74984a99968ead14",
+  "runnerSha256": "98e626d593da655c46f23d4510509b57fe03cb18643b384c053e3cb4e89d8ea2",
+  "bundleSha256": "66ead9b2ff70835b339c01dde9bc7b73b31172bd6aeb7b8b9413ef090b1e3390",
+  "preparedMetaSha256": "f3ad67c03fdfc49bdd149a50dd235e0e7e5c935f5ebf7aba23aa1fe837b811dc",
+  "node": "v22.22.3",
+  "status": "PASS",
+  "durationMs": 2552,
+  "stdout": "{\"input\":{\"name\":\"xml-main\",\"file\":\"xml\",\"scope\":\"main\",\"corpusBytes\":5345280,\"corpusSha256\":\"0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c\",\"rawBytes\":5320900,\"rawSha256\":\"e21e718950fc5ea01f81e0c86854a37e7ceda16eff70c3136d71403472cb7f37\",\"parts\":19,\"bodyBytes\":3990596,\"bodySha256\":\"1112a3595125d4a357107c591ced2d9b503c26c02dddfbe4791e79838ca68a74\",\"dictionaryBytes\":554},\"decision\":{\"policy\":\"prefix-wrapped\",\"rawCosts\":[8630,8411],\"rawSelected\":[1],\"rawSampleBytes\":196608,\"trials\":[{\"kernel\":\"v15\",\"rawCost\":8630,\"wrappedPayloadBytes\":8631,\"cost\":8650,\"tokenPrefixBytes\":167170,\"accepted\":false},{\"kernel\":\"v20\",\"rawCost\":8411,\"wrappedPayloadBytes\":8483,\"cost\":8504,\"tokenPrefixBytes\":167170,\"accepted\":false}],\"wpCosts\":[null,null],\"wpSelected\":[],\"fullCandidateKernels\":[]},\"cmCalls\":[{\"bytes\":196608,\"profile\":\"text\",\"kernel\":\"v15\",\"wordTokens\":false,\"payloadBytes\":8611,\"ms\":535},{\"bytes\":196608,\"profile\":\"text\",\"kernel\":\"v20\",\"wordTokens\":false,\"payloadBytes\":8390,\"ms\":740},{\"bytes\":167724,\"profile\":\"text\",\"kernel\":\"v15\",\"wordTokens\":true,\"payloadBytes\":8627,\"ms\":537},{\"bytes\":167724,\"profile\":\"text\",\"kernel\":\"v20\",\"wordTokens\":true,\"payloadBytes\":8479,\"ms\":530}],\"decisionMs\":2361,\"under5Seconds\":true,\"proposedMacroRule\":{\"id\":23,\"s\":1,\"r\":1},\"routingScope\":\"macro metadata check uses analyze-derived TEXT_V3/BIN_V3 assignments, not unknown user final groups; no macro/family full encode\",\"fullCMCalls\":0,\"containerEmitted\":false,\"fullFileBytesMeasured\":false}\n",
+  "stderr": "",
+  "result": {
+    "input": {
+      "name": "xml-main",
+      "file": "xml",
+      "scope": "main",
+      "corpusBytes": 5345280,
+      "corpusSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "rawBytes": 5320900,
+      "rawSha256": "e21e718950fc5ea01f81e0c86854a37e7ceda16eff70c3136d71403472cb7f37",
+      "parts": 19,
+      "bodyBytes": 3990596,
+      "bodySha256": "1112a3595125d4a357107c591ced2d9b503c26c02dddfbe4791e79838ca68a74",
+      "dictionaryBytes": 554
+    },
+    "decision": {
+      "policy": "prefix-wrapped",
+      "rawCosts": [
+        8630,
+        8411
+      ],
+      "rawSelected": [
+        1
+      ],
+      "rawSampleBytes": 196608,
+      "trials": [
+        {
+          "kernel": "v15",
+          "rawCost": 8630,
+          "wrappedPayloadBytes": 8631,
+          "cost": 8650,
+          "tokenPrefixBytes": 167170,
+          "accepted": false
+        },
+        {
+          "kernel": "v20",
+          "rawCost": 8411,
+          "wrappedPayloadBytes": 8483,
+          "cost": 8504,
+          "tokenPrefixBytes": 167170,
+          "accepted": false
+        }
+      ],
+      "wpCosts": [
+        null,
+        null
+      ],
+      "wpSelected": [],
+      "fullCandidateKernels": []
+    },
+    "cmCalls": [
+      {
+        "bytes": 196608,
+        "profile": "text",
+        "kernel": "v15",
+        "wordTokens": false,
+        "payloadBytes": 8611,
+        "ms": 535
+      },
+      {
+        "bytes": 196608,
+        "profile": "text",
+        "kernel": "v20",
+        "wordTokens": false,
+        "payloadBytes": 8390,
+        "ms": 740
+      },
+      {
+        "bytes": 167724,
+        "profile": "text",
+        "kernel": "v15",
+        "wordTokens": true,
+        "payloadBytes": 8627,
+        "ms": 537
+      },
+      {
+        "bytes": 167724,
+        "profile": "text",
+        "kernel": "v20",
+        "wordTokens": true,
+        "payloadBytes": 8479,
+        "ms": 530
+      }
+    ],
+    "decisionMs": 2361,
+    "under5Seconds": true,
+    "proposedMacroRule": {
+      "id": 23,
+      "s": 1,
+      "r": 1
+    },
+    "routingScope": "macro metadata check uses analyze-derived TEXT_V3/BIN_V3 assignments, not unknown user final groups; no macro/family full encode",
+    "fullCMCalls": 0,
+    "containerEmitted": false,
+    "fullFileBytesMeasured": false
+  }
+}

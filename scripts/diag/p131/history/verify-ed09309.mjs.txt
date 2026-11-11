@@ -1,0 +1,94 @@
+// Read-only evidence verifier; never reads or encodes full corpus data.
+import assert from 'node:assert/strict'
+import { readFileSync,readdirSync,existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
+const sha=x=>createHash('sha256').update(x).digest('hex'),load=p=>JSON.parse(readFileSync(p,'utf8'))
+const root='scripts/diag/p131-results',preps=new Map()
+const prepareRunnerHashes=new Set(['scripts/diag/p131/prepare.mjs','scripts/diag/p131/history/prepare-initial.mjs.txt'].map(p=>sha(readFileSync(p))))
+for(const f of readdirSync(join(root,'preparation'))) {
+ const r=load(join(root,'preparation',f));assert.equal(r.status,'PASS');assert.ok(r.durationMs<19000)
+ assert.deepEqual(JSON.parse(r.stdout),r.result);assert.equal(r.result.cmCalls,0)
+ assert.equal(r.probeSha256,sha(readFileSync('scripts/diag/p131/prepare.ts')))
+ assert.ok(prepareRunnerHashes.has(r.runnerSha256))
+ preps.set(`${r.file}-${r.scope}`,r.result)
+}
+const audits=readdirSync(join(root,'audit')).filter(f=>f.endsWith('.json')).map(f=>load(join(root,'audit',f)))
+const fixed=existsSync(join(root,'fixed'))?readdirSync(join(root,'fixed')).filter(f=>f.endsWith('.json')).map(f=>load(join(root,'fixed',f))):[]
+const current=Object.fromEntries(readdirSync('src/lib').sort().filter(f=>f.endsWith('.ts')).map(f=>[f,sha(readFileSync(join('src/lib',f)))]))
+for(const r of [...audits,...fixed]) {
+ assert.equal(r.status,'PASS');assert.ok(r.durationMs<19000)
+ assert.equal(r.sourceSha256,sha(JSON.stringify(r.sourceFiles)))
+ assert.equal(r.injectedSha256,sha(JSON.stringify(r.injectedFiles)))
+ assert.equal(r.probeSha256,sha(readFileSync('scripts/diag/p131/decision.ts')))
+ assert.equal(r.runnerSha256,sha(readFileSync('scripts/diag/p131/run.mjs')))
+ assert.equal(r.preparedMetaSha256,sha(JSON.stringify(preps.get(r.name),null,2)+'\n'))
+ assert.deepEqual(JSON.parse(r.stdout),r.result)
+ const x=r.result,p=preps.get(r.name)
+ assert.equal(x.input.rawSha256,p.rawSha256);assert.equal(x.input.bodySha256,p.bodySha256)
+ assert.equal(x.input.rawBytes,p.rawBytes);assert.equal(x.input.dictionaryBytes,p.dictionaryBytes)
+ assert.equal(x.fullCMCalls,0);assert.equal(x.containerEmitted,false);assert.equal(x.fullFileBytesMeasured,false)
+ assert.equal(x.under5Seconds,true);assert.ok(x.decisionMs<5000)
+ assert.ok(x.cmCalls.every(c=>c.bytes>0&&c.bytes<=196608))
+ if(r.mode==='fixed'&&process.argv.includes('--current'))assert.deepEqual(r.sourceFiles,current)
+}
+assert.equal(preps.size,3);assert.equal(audits.length,8)
+const pick=(name,mode)=>audits.find(r=>r.name===name&&r.mode===mode).result.decision
+for(const name of ['xml-main','xml-macro']) {
+ assert.deepEqual(pick(name,'p13').fullCandidateKernels,[])
+ assert.deepEqual(pick(name,'p12').fullCandidateKernels,['v15','v20'])
+}
+assert.deepEqual(pick('xml-main','p13-no-dict').fullCandidateKernels,[])
+assert.deepEqual(pick('xml-main','prefix-wrapped').fullCandidateKernels,[])
+assert.deepEqual(pick('nci-main','p13').fullCandidateKernels,['v20'])
+if(fixed.length)assert.deepEqual(fixed.map(r=>r.name).sort(),['nci-main','xml-macro','xml-main'])
+for(const r of fixed) {
+ assert.equal(r.mode,'fixed')
+ const d=r.result.decision,g=d.gate.wordPreGate,p12=pick(r.name,'p12').trials.find(t=>t.kernel==='v20')
+ assert.deepEqual(d.fullCandidateKernels,['v20']);assert.deepEqual(d.gate.selected,[1])
+ assert.deepEqual(d.rawCosts,pick(r.name,'p13').rawCosts)
+ assert.deepEqual(g.eligible,d.rawSelected);assert.deepEqual(g.eligible,[1])
+ assert.equal(g.policy,'p12-contiguous-body');assert.equal(g.dictionaryBytes,preps.get(r.name).dictionaryBytes)
+ assert.deepEqual(g.plainBytes,[null,p12.plainProbe]);assert.deepEqual(g.bodyBytes,[null,p12.wpProbe])
+ assert.equal(g.rawPrefixBytes,p12.rawPrefixBytes);assert.equal(g.tokenPrefixBytes,p12.tokenPrefixBytes)
+ assert.equal(d.gate.trials[0].bytes,null);assert.equal(d.gate.trials[1].bytes,p12.wpProbe)
+ assert.ok(g.bodyBytes[1]<g.plainBytes[1]*0.99)
+ assert.equal(r.result.cmCalls.filter(c=>c.wordTokens).length,1)
+ assert.equal(r.result.cmCalls.find(c=>c.wordTokens).kernel,'v20')
+}
+if(process.argv.includes('--current')) {
+ assert.equal(fixed.length,3)
+ const oldFile=f=>execFileSync('git',['show',`51ced1f:universal-adaptive-compression-system/src/lib/${f}`],{encoding:'utf8',maxBuffer:4*1024*1024})
+ for(const f of Object.keys(current))if(!['codec.ts','group-policy.ts','parallel-worker-code.ts'].includes(f))
+   assert.equal(readFileSync(`src/lib/${f}`,'utf8'),oldFile(f),`unrelated production source changed: ${f}`)
+ const neutral=source=>{
+   const group=source.indexOf('function groupV15Candidates('),text=source.indexOf('    if(spec.id===ID.TEXT_V3)',group)
+   const a=source.indexOf('      if(sampled) {',text),b=source.indexOf('      } else {\n        wordPre=wordPreTry',a)
+   assert.ok(a>0&&b>a)
+   source=source.slice(0,a)+'WORD_PRE_SCREEN_ONLY\n'+source.slice(b)
+   const h=source.indexOf('/** P13.1 decision-only WORD-PRE screen')
+   if(h>=0){const end=source.indexOf('function encodeWordPrePayload(',h);assert.ok(end>h);source=source.slice(0,h)+source.slice(end)}
+   return source
+ }
+ assert.equal(neutral(readFileSync('src/lib/codec.ts','utf8')),neutral(oldFile('codec.ts')),
+   'Only the large-TEXT WORD-PRE branch and its new decision helper may change')
+ const policy=readFileSync('src/lib/group-policy.ts','utf8'),oldPolicy=oldFile('group-policy.ts')
+ assert.equal(policy.slice(policy.indexOf('/** Clear')),oldPolicy.slice(oldPolicy.indexOf('/** Clear')),
+   'raw kernel winner policy and representative sampler must stay byte-identical')
+}
+const slice=load('scripts/diag/p13-results/p131-fixed/xml-mid-text-policy-current.json')
+assert.equal(slice.status,'PASS');assert.equal(slice.result.input.bytes,262144)
+assert.equal(slice.result.bytes,4708);assert.equal(slice.result.selected,'wordpre-v20')
+assert.equal(slice.result.containerRoundtrip,true)
+assert.equal(slice.result.containerSha256,'e8f6e5f57d916b08205cb285ce934a498f2f4c4a2f0098145c1c19c51151eb77')
+assert.ok(!slice.result.candidates.some(c=>c.label==='wordpre-v15'))
+if(process.argv.includes('--current'))assert.deepEqual(slice.sourceFiles,current)
+const local=load(join(root,'user-local-51ced1f.json')),base=load('scripts/diag/baseline.json')
+assert.equal(local.rows.reduce((n,r)=>n+r.reportedP13Bytes,0),40245981)
+assert.equal(local.rows.filter(r=>r.deltaBytes<=0).length,11)
+assert.equal(local.counterfactualIsMeasured,false);assert.equal(local.baselineUpdated,false)
+assert.equal(base.total.bestUcz,40297869)
+console.log(JSON.stringify({preparations:preps.size,oldAndAblationDecisions:audits.length,fixedDecisions:fixed.length,
+ currentFixedSourceBound:process.argv.includes('--current'),protectedNonWordPreSourceChecked:process.argv.includes('--current'),allDecisionCMInputsAtMost192KiB:true,fullCorpusCMCalls:0,
+ baselineBytes:base.total.bestUcz,fullFileFixVerified:false}))

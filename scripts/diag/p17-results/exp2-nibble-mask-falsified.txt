@@ -1,0 +1,76 @@
+
+== x-ray-mid 262144 B  (target = full next byte, alpha 256)
+  real full-byte ctx k=1                     H=5.4514
+  real LO-MASKED  ctx k=1                    H=5.5851
+  real full-byte ctx k=2                     H=2.9140
+  real LO-MASKED  ctx k=2                    H=5.1639
+  real full-byte ctx k=3                     H=2.6001
+  real LO-MASKED  ctx k=3                    H=5.0618
+  real full-byte ctx k=4                     H=0.2933
+  real LO-MASKED  ctx k=4                    H=4.8887
+
+  null(same H0, no structure) full-byte ctx k=1 H=6.2646
+  null(same H0, no structure) LO-MASKED  ctx k=1 H=6.4547
+  null(same H0, no structure) full-byte ctx k=2 H=3.9344
+  null(same H0, no structure) LO-MASKED  ctx k=2 H=6.2857
+  null(same H0, no structure) full-byte ctx k=3 H=1.1613
+  null(same H0, no structure) LO-MASKED  ctx k=3 H=5.6761
+  null(same H0, no structure) full-byte ctx k=4 H=0.1627
+  null(same H0, no structure) LO-MASKED  ctx k=4 H=4.5918
+
+== sao-mid 262136 B  (target = full next byte, alpha 256)
+  real full-byte ctx k=1                     H=5.4616
+  real LO-MASKED  ctx k=1                    H=6.5943
+  real full-byte ctx k=2                     H=2.0959
+  real LO-MASKED  ctx k=2                    H=5.6342
+  real full-byte ctx k=3                     H=0.9816
+  real LO-MASKED  ctx k=3                    H=4.0658
+  real full-byte ctx k=4                     H=0.7438
+  real LO-MASKED  ctx k=4                    H=2.2977
+
+  null(same H0, no structure) full-byte ctx k=1 H=7.2691
+  null(same H0, no structure) LO-MASKED  ctx k=1 H=7.4561
+  null(same H0, no structure) full-byte ctx k=2 H=3.1053
+  null(same H0, no structure) LO-MASKED  ctx k=2 H=7.2692
+  null(same H0, no structure) full-byte ctx k=3 H=0.1570
+  null(same H0, no structure) LO-MASKED  ctx k=3 H=5.7464
+  null(same H0, no structure) full-byte ctx k=4 H=0.0021
+  null(same H0, no structure) LO-MASKED  ctx k=4 H=2.6814
+
+== osdb-mid 262144 B  (target = full next byte, alpha 256)
+  real full-byte ctx k=1                     H=4.9736
+  real LO-MASKED  ctx k=1                    H=5.8558
+  real full-byte ctx k=2                     H=1.8848
+  real LO-MASKED  ctx k=2                    H=5.0981
+  real full-byte ctx k=3                     H=0.7142
+  real LO-MASKED  ctx k=3                    H=4.1827
+  real full-byte ctx k=4                     H=0.5060
+  real LO-MASKED  ctx k=4                    H=3.0666
+
+  null(same H0, no structure) full-byte ctx k=1 H=6.4564
+  null(same H0, no structure) LO-MASKED  ctx k=1 H=6.5757
+  null(same H0, no structure) full-byte ctx k=2 H=4.2739
+  null(same H0, no structure) LO-MASKED  ctx k=2 H=6.4706
+  null(same H0, no structure) full-byte ctx k=3 H=0.6628
+  null(same H0, no structure) LO-MASKED  ctx k=3 H=5.9743
+  null(same H0, no structure) full-byte ctx k=4 H=0.0202
+  null(same H0, no structure) LO-MASKED  ctx k=4 H=4.7032
+
+== dickens-mid 262144 B  (target = full next byte, alpha 256)
+  real full-byte ctx k=1                     H=3.4834
+  real LO-MASKED  ctx k=1                    H=4.1915
+  real full-byte ctx k=2                     H=2.6815
+  real LO-MASKED  ctx k=2                    H=3.9628
+  real full-byte ctx k=3                     H=2.0023
+  real LO-MASKED  ctx k=3                    H=3.8258
+  real full-byte ctx k=4                     H=1.5350
+  real LO-MASKED  ctx k=4                    H=3.7038
+
+  null(same H0, no structure) full-byte ctx k=1 H=4.5244
+  null(same H0, no structure) LO-MASKED  ctx k=1 H=4.5329
+  null(same H0, no structure) full-byte ctx k=2 H=4.3472
+  null(same H0, no structure) LO-MASKED  ctx k=2 H=4.5269
+  null(same H0, no structure) full-byte ctx k=3 H=3.2212
+  null(same H0, no structure) LO-MASKED  ctx k=3 H=4.5048
+  null(same H0, no structure) full-byte ctx k=4 H=1.1759
+  null(same H0, no structure) LO-MASKED  ctx k=4 H=4.4370

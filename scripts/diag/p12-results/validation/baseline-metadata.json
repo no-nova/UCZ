@@ -1,0 +1,10 @@
+{
+  "kind": "P12-metadata-only-test",
+  "command": "node --test tests/p10-baseline.test.mjs",
+  "compressionExecuted": false,
+  "exitCode": 0,
+  "wallMs": 1419,
+  "baselineSha256": "c52770ea29faa8b9d9cc8697260ae38bb18dfcf174dbc5ad6e53ca01457f53a3",
+  "testSha256": "feff0105392dd365bc11a012ddc6032c6c972b41e09a3c132aaef73821afac07",
+  "status": "PASS"
+}

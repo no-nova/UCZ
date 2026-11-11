@@ -1,0 +1,3 @@
+// Display only; full evidence remains in the immutable probe receipt.
+let text='';for await(const part of process.stdin)text+=part
+for(const line of text.trim().split('\n').filter(Boolean)){const x=JSON.parse(line),r=x.result??{};console.log(JSON.stringify({path:x.path,status:x.status,wallMs:x.wallMs,bytes:r.bytes??r.payloadBytes,roundtrip:r.roundtrip,extra:r.short?.largestSegments?{recordStride:r.short.recordStride,segments:r.short.segments,byClass:r.short.byClass,h0:r.short.h0,lagStats:r.short.lagStats,byteScannerCounts:r.short.byteScannerCounts,alphaBranchWords:r.short.alphaBranchWords}:r.short??r.attribution??undefined}))}

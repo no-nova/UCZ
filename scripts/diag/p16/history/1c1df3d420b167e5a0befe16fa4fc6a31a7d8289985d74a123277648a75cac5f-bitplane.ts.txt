@@ -1,0 +1,160 @@
+import {encodeCM,decodeCM} from './coder'
+import {MAX_OUTPUT_BYTES} from './limits'
+import {inheritPayloadModel} from './payload-model'
+import {encodePlaneBitCM,decodePlaneBitCM,createBitCMModel} from './bitcm'
+
+/** P16.2: cheap first-order gate, kept from the REC2 lineage. A high first-2 KiB
+ * byte entropy is one trigger; see `bitplaneStoreTrigger` for the other. */
+export function bitplaneEntropyGate(data:Uint8Array):boolean {
+ if(data.length<16384)return false
+ const counts=new Uint32Array(256);for(let i=0;i<2048;i++)counts[data[i]]++
+ let h=0;for(const count of counts)if(count){const p=count/2048;h-=p*Math.log2(p)}
+ return h>7.5
+}
+
+/** AITDCC/L reaches the bit-plane stage while still failing the 7.5-bit gate:
+ * its high planes are near-random, so the byte-level CM models lose everywhere and
+ * the baseline keeps the whole file in STORE. Raw-STORE dominance is therefore the
+ * second, targeted trigger. Normal text/code/binaries compress and stay untouched. */
+export function bitplaneStoreTrigger(rawBytes:number,storedBytes:number):boolean {
+ return rawBytes>=16384 && storedBytes*2>rawBytes
+}
+
+export const BITPLANE_SCREEN_THRESHOLD=0.975
+/** Sample budget per plane before a full-plane encode is attempted. */
+export const BITPLANE_SAMPLE_BITS=16*1024
+/** A sample must beat the raw plane by this fraction before paying for a full encode. */
+export const BITPLANE_SAMPLE_MARGIN=0.03
+/** Plane format tags carried by the group's `r` (id33 keeps r=1 compatible). */
+export const BITPLANE_BYTE_CM=1
+export const BITPLANE_BIT_CM=2
+
+/** The legacy statistical screen. Retained for diagnostics and for old receipts;
+ * it is NOT the adoption gate any more, because at 16..20 orders the corrected
+ * entropy plus Laplace validation rejects real structure (see the P16.2 report). */
+export function bitplaneScreen(data:Uint8Array):{k:number;orders:number[];entropies:number[]} {
+ const m=Math.min(data.length,262144)
+ if(m<16384)throw Error('位平面筛选输入过短')
+ const k=Math.min(16,Math.max(13,Math.floor(Math.log2(m))-2)),orders=[12,k],entropies:number[]=[]
+ const xlog=new Float64Array(m+1),logFactorial=new Float64Array(m+2)
+ for(let i=2;i<=m;i++)xlog[i]=i*Math.log2(i)
+ for(let i=2;i<logFactorial.length;i++)logFactorial[i]=logFactorial[i-1]+Math.log2(i)
+ for(let b=0;b<8;b++){
+  const sizes=orders.map(o=>1<<o),zeros=sizes.map(size=>new Uint32Array(size)),ones=sizes.map(size=>new Uint32Array(size));let history=0
+  let midZeros:Uint32Array[]=[],midOnes:Uint32Array[]=[]
+  for(let i=0;i<m;i++){
+   if(i===Math.floor(m/2)){midZeros=zeros.map(x=>x.slice());midOnes=ones.map(x=>x.slice())}
+   const bit=(data[i]>>>b)&1
+   for(let j=0;j<2;j++)if(i>=orders[j]){const h=history&(sizes[j]-1);(bit?ones[j]:zeros[j])[h]++}
+   history=((history<<1)|bit)&(sizes[1]-1)
+  }
+  let best=1
+  for(let j=0;j<2;j++){
+   let cost=0,active=0,validation=0;const z=zeros[j],o=ones[j],total=m-orders[j],z0=midZeros[j],o0=midOnes[j]
+   const code=(a:number,c:number)=>logFactorial[a+c+1]-logFactorial[a]-logFactorial[c]
+   for(let i=0;i<z.length;i++){const a=z[i],c=o[i],n=a+c;if(n){active++;cost+=xlog[n]-xlog[a]-xlog[c];validation+=code(a,c)-code(z0[i],o0[i])}}
+   const corrected=cost/total+active/(2*Math.LN2*total)
+   if(validation/(m-Math.floor(m/2))<0.985)best=Math.min(best,corrected)
+  }
+  entropies.push(best)
+ }
+ return {k,orders,entropies}
+}
+
+/** Pack plane `b` (LSB-first) into bytes. */
+function packPlane(data:Uint8Array,b:number,q:number):Uint8Array {
+ const p=new Uint8Array(q)
+ for(let i=0;i<q*8;i++)p[i>>>3]|=((data[i]>>>b)&1)<<(i&7)
+ return p
+}
+
+/** Real-coder sample arbitration: never a statistical guess. A plane that looks
+ * structured but is not actually compressible by the model costs one sample encode
+ * and is dropped; a random plane cannot pass because the model's own output is
+ * larger than raw. */
+export function bitplaneSampleScreen(data:Uint8Array):{q:number;proof:boolean[];sampleBytes:number;codedBytes:number[];screenedMs:number} {
+ const start=Date.now(),q=Math.floor(data.length/8),bits=Math.min(q*8,BITPLANE_SAMPLE_BITS),proof:boolean[]=[],codedBytes:number[]=[]
+ for(let b=0;b<8;b++){
+  const sample=packPlane(data,b,q).subarray(0,Math.ceil(bits/8))
+  const coded=encodePlaneBitCM(sample,bits,createBitCMModel(BITPLANE_BIT_ORDERS))
+  codedBytes.push(coded.length)
+  proof.push(coded.length<sample.length*(1-BITPLANE_SAMPLE_MARGIN))
+ }
+ return {q,proof,sampleBytes:Math.ceil(bits/8),codedBytes,screenedMs:Date.now()-start}
+}
+
+/** Bit-CM payload: same mask/length layout as the legacy byte-CM payload.
+ * The order set is FIXED per payload (BITPLANE_BIT_ORDERS) so that `r` alone
+ * determines the model; a per-plane order choice would not be decodable. */
+export function encodeBitplanesBitCM(data:Uint8Array,proof:readonly boolean[]):Uint8Array|null {
+ if(data.length>MAX_OUTPUT_BYTES||data.length<8||proof.length!==8)throw Error('无效位平面输入')
+ const q=Math.floor(data.length/8),rem=data.length%8,planes:Uint8Array[]=[],compressed:boolean[]=[]
+ for(let b=0;b<8;b++){
+  const p=packPlane(data,b,q)
+  let out:Uint8Array=p,used=false
+  if(proof[b]){
+   const coded=encodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
+   if(coded.length+4<q){out=coded;used=true}
+  }
+  planes.push(out);compressed.push(used)
+ }
+ if(!compressed.some(Boolean))return null
+ const size=1+rem+planes.reduce((n,p,i)=>n+p.length+(compressed[i]?4:0),0)
+ const out=new Uint8Array(size);let pos=1
+ for(let b=0;b<8;b++){
+  const p=planes[b];if(compressed[b]){out[0]|=1<<b;const n=p.length;out[pos++]=n&255;out[pos++]=n>>>8&255;out[pos++]=n>>>16&255;out[pos++]=n>>>24&255}
+  out.set(p,pos);pos+=p.length
+ }
+ out.set(data.subarray(q*8),pos);return out
+}
+
+/** Legacy byte-level CM plane payload, kept for r=1 containers. */
+export function encodeBitplanes(data:Uint8Array,selected:readonly number[]):Uint8Array|null {
+ if(data.length>MAX_OUTPUT_BYTES||data.length<8||selected.length!==8)throw Error('无效位平面输入')
+ const q=Math.floor(data.length/8),rem=data.length%8,planes:Uint8Array[]=[],compressed:boolean[]=[]
+ for(let b=0;b<8;b++){
+  const p=packPlane(data,b,q)
+  let out:Uint8Array=p,used=false
+  if(selected[b]<BITPLANE_SCREEN_THRESHOLD){const candidate=encodeCM(p,'bin',1,1,undefined,0,undefined,undefined,'v20');if(candidate.length+4<q){out=candidate;used=true}}
+  planes.push(out);compressed.push(used)
+ }
+ if(!compressed.some(Boolean))return null
+ const size=1+rem+planes.reduce((n,p,i)=>n+p.length+(compressed[i]?4:0),0)
+ const out=new Uint8Array(size);let pos=1
+ for(let b=0;b<8;b++){
+  const p=planes[b];if(compressed[b]){out[0]|=1<<b;const n=p.length;out[pos++]=n&255;out[pos++]=n>>>8&255;out[pos++]=n>>>16&255;out[pos++]=n>>>24&255}
+  out.set(p,pos);pos+=p.length
+ }
+ out.set(data.subarray(q*8),pos);return inheritPayloadModel(out,...planes.filter((_,i)=>compressed[i]))
+}
+
+/** `r` in the group dictionary selects the plane model: 1 = legacy byte CM,
+ * 2 = bit CM with orders 16 and 16..20 tried per plane. */
+export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLANE_BYTE_CM):Uint8Array {
+ if(!Number.isSafeInteger(n)||n<8||n>MAX_OUTPUT_BYTES||!payload.length)throw Error('无效位平面长度')
+ if(format!==BITPLANE_BYTE_CM&&format!==BITPLANE_BIT_CM)throw Error('未知位平面模型')
+ const q=Math.floor(n/8),rem=n%8,mask=payload[0];if(!mask)throw Error('空位平面压缩掩码')
+ const pieces:{start:number;length:number;compressed:boolean}[]=[];let pos=1
+ for(let b=0;b<8;b++){
+  const compressed=!!(mask&(1<<b));let length=q
+  if(compressed){if(payload.length-pos<4)throw Error('位平面长度被截断');length=(payload[pos]|payload[pos+1]<<8|payload[pos+2]<<16|payload[pos+3]<<24)>>>0;pos+=4;if(!length||length+4>=q)throw Error('无效位平面压缩长度')}
+  if(length>payload.length-pos)throw Error('位平面载荷被截断')
+  pieces.push({start:pos,length,compressed});pos+=length
+ }
+ if(payload.length-pos!==rem)throw Error('位平面载荷长度错误')
+ const out=new Uint8Array(n)
+ for(let b=0;b<8;b++){
+  const entry=pieces[b],p=payload.subarray(entry.start,entry.start+entry.length)
+  let plane:Uint8Array
+  if(!entry.compressed)plane=p
+  else if(format===BITPLANE_BYTE_CM)plane=decodeCM(p,q,'bin',1,1,undefined,'v20')
+  else {
+   plane=decodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
+  }
+  for(let i=0;i<q*8;i++)out[i]|=((plane[i>>>3]>>>(i&7))&1)<<b
+ }
+ out.set(payload.subarray(pos),q*8);return out
+}
+
+/** Fixed order set for the r=2 wire format; the encoder must match. */
+export const BITPLANE_BIT_ORDERS:readonly number[]=[16,20]

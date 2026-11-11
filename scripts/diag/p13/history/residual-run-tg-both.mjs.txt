@@ -1,0 +1,43 @@
+// node scripts/diag/p13/residual-run.mjs <slice> <wideN|tgN> <experiment>
+// Patches only a disposable src/lib COPY. Never emits deployable UCZ bytes.
+import { build } from 'esbuild'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { readFileSync,writeFileSync,readdirSync,mkdirSync,existsSync } from 'node:fs'
+import { resolve,join,dirname } from 'node:path'
+import { createHash } from 'node:crypto'
+const begun=performance.now(),[slice,which,experiment]=process.argv.slice(2)
+if(!['none','res-match','res-mix','res-both','tg-mix','tg-both','ged','ged-both'].includes(experiment)||![slice,which].every(x=>x&&/^[\w.-]+$/.test(x)))throw Error('slice / wideN|tgN / experiment required')
+const sha=x=>createHash('sha256').update(x).digest('hex')
+const commit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()
+const sourceFiles=Object.fromEntries(readdirSync('src/lib').sort().filter(f=>f.endsWith('.ts')).map(f=>[f,sha(readFileSync(join('src/lib',f)))]))
+const folder=resolve('.diag-state/p13-residual',`${slice}-${which}-${experiment}-${process.pid}`),lib=join(folder,'src/lib')
+mkdirSync(lib,{recursive:true})
+for(const file of Object.keys(sourceFiles))writeFileSync(join(lib,file),readFileSync(join('src/lib',file)))
+const patches=[]
+function patch(file,from,to){const path=join(lib,file),s=readFileSync(path,'utf8');if(!s.includes(from))throw Error(`Patch anchor missing: ${file}`);writeFileSync(path,s.replace(from,to));patches.push({file,from,to})}
+if(['res-match','res-both','tg-both','ged-both'].includes(experiment))patch('coder.ts',"this.useMatch = profile === 'text' || profile === 'bin'","this.useMatch = profile === 'text' || profile === 'bin' || (this.isV20 && (profile === 'res' || profile === 'res2d'))")
+if(['res-mix','res-both','ged-both'].includes(experiment))patch('coder.ts',"transposeInnerSuppress.depth === 0 && (profile === 'bin' || profile === 'text')", "transposeInnerSuppress.depth === 0 && (profile === 'bin' || profile === 'text' || profile === 'res' || profile === 'res2d')")
+if(experiment==='tg-mix'||experiment==='tg-both')patch('coder.ts',"transposeInnerSuppress.depth === 0 && (profile === 'bin' || profile === 'text')", "(profile === 'bin' || profile === 'text' || profile === 'res')")
+if(experiment.startsWith('ged')) {
+ patch('transforms.ts','mode < 3 || mode > 8','mode < 3 || mode > 9')
+ patch('codec.ts','sp.s > (transformsV20Enabled() ? 8 : 2)','sp.s > (transformsV20Enabled() ? 9 : 2)')
+ patch('transforms.ts','    const p = j < row ? a', `    // Four-neighbor gradient-weighted candidate, NOT a standardized GED claim.
+    const d=j>=row&&col+1<row?get(j-row+1):b
+    const gx=Math.abs(b-c)+Math.abs(d-b),gy=2*Math.abs(a-c),sum=gx+gy
+    const edge=sum?Math.floor((gx*b+gy*a+sum/2)/sum):(a+b)>>1
+    const p = j < row ? a`)
+ patch('transforms.ts',': (a + b) >> 1',': predictor === 9 ? edge : (a + b) >> 1')
+}
+const experimentalFiles=Object.fromEntries(Object.keys(sourceFiles).map(f=>[f,sha(readFileSync(join(lib,f)))]))
+const path=resolve(`scripts/diag/p13-results/residual/${slice}-${which}-${experiment}.json`)
+if(existsSync(path))throw Error(`Refusing to overwrite ${path}`)
+const entry=resolve('scripts/diag/p13/residual-probe.ts'),bundle=join(folder,'probe.cjs')
+await build({entryPoints:[entry],bundle:true,platform:'node',format:'cjs',outfile:bundle,logLevel:'silent',plugins:[{name:'isolated-source',setup(b){b.onResolve({filter:/^@lib\//},a=>({path:join(lib,a.path.slice(5)+'.ts')}))}}]})
+const r=spawnSync(process.execPath,[bundle,slice,which,experiment],{encoding:'utf8',timeout:Math.max(1,17500-Math.ceil(performance.now()-begun)),killSignal:'SIGKILL',maxBuffer:2*1024*1024})
+const record={commit,sourceFiles,sourceSha256:sha(JSON.stringify(sourceFiles)),experimentalFiles,experimentalSha256:sha(JSON.stringify(experimentalFiles)),patches,
+ probeSha256:sha(readFileSync(entry)),runnerSha256:sha(readFileSync('scripts/diag/p13/residual-run.mjs')),bundleSha256:sha(readFileSync(bundle)),
+ slice,which,experiment,node:process.version,status:r.status===0&&!r.error?'PASS':'FAIL',durationMs:Math.round(performance.now()-begun),stdout:r.stdout,stderr:r.stderr,error:r.error?.message}
+if(record.status==='PASS')record.result=JSON.parse(r.stdout.trim())
+mkdirSync(dirname(path),{recursive:true});writeFileSync(path,JSON.stringify(record,null,2)+'\n',{flag:'wx'})
+console.log(JSON.stringify({receipt:path,status:record.status,durationMs:record.durationMs,result:record.result,error:record.error}))
+if(record.status!=='PASS'){console.error(r.stderr);process.exitCode=1}

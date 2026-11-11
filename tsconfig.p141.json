@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": { "@/*": ["src/*"], "@lib/*": ["src/lib/*"] }
+  },
+  "include": ["tests/p141-core.ts", "tests/p141-extra.ts", "scripts/diag/p141/*.ts"]
+}

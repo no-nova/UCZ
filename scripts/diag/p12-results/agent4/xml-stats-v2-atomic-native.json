@@ -1,0 +1,2036 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "xml-stats",
+  "variant": "v2-atomic",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "xml-stats",
+    "v2-atomic"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "4f48edc164e0fed5f869ff3120174ee9a5e8b2b3182930741214efb4f312c298"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "b284bcf37b2938101b136363b85d661bc969d6b767a88ffebc40c0ab9ce4b215",
+      "modified": true
+    }
+  ],
+  "wallMs": 6867,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "xml-stats",
+      "file": "xml",
+      "offset": 1279488,
+      "bytes": 262144,
+      "sha256": "3aa5db86dcd36a1c84b2106f90d82a0e741a0b6027e6da7bbcde2b1dd365aba5",
+      "corpusBytes": 5345280,
+      "corpusSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0d5f183f3943f34472b692b5300d196fed0f0dd2",
+        "bytes": 5345280,
+        "sha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+      },
+      "selection": "identified stats1.xml member, no archive header",
+      "parentSliceSha256": "3aa5db86dcd36a1c84b2106f90d82a0e741a0b6027e6da7bbcde2b1dd365aba5"
+    },
+    "variant": "v2-atomic",
+    "cmBytes": 12498,
+    "payloadBytes": 12503,
+    "bytes": 12503,
+    "outerHeaderBytes": null,
+    "containerSha256": null,
+    "payloadSha256": "d85085cb06c9791275b497da1bbabad8dbb00426891ee7bababdd9f2a2c6ca2a",
+    "roundtrip": true,
+    "preprocessMs": 5445.581198,
+    "encodeDecodeMs": 6502.958938,
+    "short": {
+      "dictTokens": 383,
+      "one": 127,
+      "two": 256,
+      "headerRawBytes": 4063,
+      "bodyRawBytes": 102999,
+      "cmInputBytes": 107062,
+      "bodyRatio": 0.3929100036621094,
+      "coverage": 0.7284431457519531,
+      "spaceSuffixHits": 0,
+      "punctuationSuffixHits": 6574,
+      "oneHits": 11694,
+      "twoHits": 10059,
+      "unusedTokens": 330,
+      "escapedOriginalBytes": 0,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 11694,
+      "twoHits": 10059,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 71187,
+      "coveredOriginalBytes": 190957,
+      "coverage": 0.7284431457519531,
+      "spaceSuffixHits": 0,
+      "punctuationSuffixHits": 6574,
+      "unusedTokens": 330,
+      "entries": [
+        {
+          "word": "GIVEN_NAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "HOME_RUNS",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "POSITION",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "STRUCK_OUT",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "S><",
+          "hits": 1151,
+          "tier": 1
+        },
+        {
+          "word": "SURNAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "HIT_BY_PITCH",
+          "hits": 503,
+          "tier": 1
+        },
+        {
+          "word": "AMES_STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_STARTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "MES_STARTED>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "WILD_PITCHES",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "RUNS",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "NUMBER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AMES_STARTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ES_STARTED>",
+          "hits": 468,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_START",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GIVEN_NAME>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "MES_STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "PLAYER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_BATTER>",
+          "hits": 226,
+          "tier": 1
+        },
+        {
+          "word": "RUNS>",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "EARNED_RUNS",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFICE_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AMES_START",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ES_STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_STAR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "HOME_RUNS>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "IVEN_NAME>",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "MES_STARTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "S_STARTED>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ES>",
+          "hits": 581,
+          "tier": 1
+        },
+        {
+          "word": "BATTER>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_BATTER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "HIT_BATTER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ACRIFICE_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFICE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "NAME>",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "AMES_STAR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ES_STARTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_STA",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GIVEN_NAM",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "IVEN_NAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "MES_START",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "OME_RUNS>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "POSITION>",
+          "hits": 228,
+          "tier": 1
+        },
+        {
+          "word": "STRUCK_OU",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "S_STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "TRUCK_OUT",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "VEN_NAME>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_STARTED>",
+          "hits": 12,
+          "tier": 1
+        },
+        {
+          "word": "SHUT_OUTS",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "T_BATTER>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "STRUCK_OUT_BATTER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AMES",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "UNS>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": ">0</",
+          "hits": 1512,
+          "tier": 1
+        },
+        {
+          "word": "GAMES>",
+          "hits": 252,
+          "tier": 1
+        },
+        {
+          "word": "_RUNS>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ACRIFICE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "CRIFICE_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFIC",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "CAUGHT_STEALING",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFICE_FLIES",
+          "hits": 151,
+          "tier": 1
+        },
+        {
+          "word": "ATTER>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "BATTER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_BATTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AMES_STA",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "EN_NAME>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ES_START",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_ST",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GIVEN_NA",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "HOME_RUN",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "IVEN_NAM",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "MES_STAR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ME_RUNS>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "OME_RUNS",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "OSITION>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "RUCK_OUT",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "STARTED>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "STRUCK_O",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "SURNAME>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "S_STARTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "TRUCK_OU",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "VEN_NAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ER>",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFICE_HITS",
+          "hits": 125,
+          "tier": 1
+        },
+        {
+          "word": "ES><",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "T_BATTER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ACRIFIC",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AT_BATS",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "CRIFICE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "DOUBLES",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "RIFICE_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFI",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "TRIPLES",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "RUNS><",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "S>0</",
+          "hits": 239,
+          "tier": 1
+        },
+        {
+          "word": "COMPLETE_GAMES",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "AME>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "NAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "N_NAME>",
+          "hits": 6,
+          "tier": 1
+        },
+        {
+          "word": "</GAMES",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "><GAMES",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "AMES_ST",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "EN_NAME",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ES_STAR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "E_RUNS>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_S",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "GIVEN_N",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "HOME_RU",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "IVEN_NA",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "MES_STA",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ME_RUNS",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "NUMBER>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "OME_RUN",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "OSITION",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "POSITIO",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "RUCK_OU",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "SITION>",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "STARTED",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "STRUCK_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "S_START",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "</SACRIFICE_",
+          "hits": 355,
+          "tier": 2
+        },
+        {
+          "word": "><SACRIFICE_",
+          "hits": 377,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFICE_FLI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFICE_HIT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AUGHT_STEALI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CAUGHT_STEAL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFICE_FLIE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFICE_HITS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GHT_STEALING",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HT_STEALING>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IFICE_FLIES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE_FLIES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE_HITS>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SACRIFICE_FL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SACRIFICE_HI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UGHT_STEALIN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IT_BY_PITCH>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "WALKED_BATTER",
+          "hits": 456,
+          "tier": 2
+        },
+        {
+          "word": "ES><GAMES",
+          "hits": 228,
+          "tier": 2
+        },
+        {
+          "word": "_BATTER><",
+          "hits": 230,
+          "tier": 2
+        },
+        {
+          "word": "TARTED>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TRUCK_O",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UCK_OUT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "URNAME>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "VEN_NAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_STARTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " </GIVEN_NAM",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "/GAMES><GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/GAMES_START",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/GIVEN_NAME>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/HOME_RUNS><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/NUMBER><SUR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/SURNAME><GI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</GAMES><GAM",
+          "hits": 468,
+          "tier": 2
+        },
+        {
+          "word": "</GAMES_STAR",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "</GIVEN_NAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</HOME_RUNS>",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "</NUMBER><SU",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "</POSITION><",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "</STRUCK_OUT",
+          "hits": 478,
+          "tier": 2
+        },
+        {
+          "word": "</SURNAME><G",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "<GAMES_START",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<GIVEN_NAME>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<PLAYER><NUM",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "><GAMES_STAR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><GIVEN_NAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><HOME_RUNS>",
+          "hits": 480,
+          "tier": 2
+        },
+        {
+          "word": "><STRUCK_OUT",
+          "hits": 228,
+          "tier": 2
+        },
+        {
+          "word": "AME><GIVEN_N",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AMES><GAMES_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AYER><NUMBER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "BER><SURNAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "E><GIVEN_NAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER><SURNAME>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ES><GAMES_ST",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ES_STARTED><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GAMES><GAMES",
+          "hits": 12,
+          "tier": 2
+        },
+        {
+          "word": "GIVEN_NAME><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HOME_RUNS><R",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "LAYER><NUMBE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MBER><SURNAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ME><GIVEN_NA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MES><GAMES_S",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NAME><GIVEN_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NUMBER><SURN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PLAYER>",
+          "hits": 479,
+          "tier": 2
+        },
+        {
+          "word": "PLAYER><NUMB",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RNAME><GIVEN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "S><GAMES_STA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "S><HOME_RUNS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SURNAME><GIV",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UMBER><SURNA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "URNAME><GIVE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "YER><NUMBER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INNINGS",
+          "hits": 456,
+          "tier": 2
+        },
+        {
+          "word": "T_BATTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ALKED_BATTER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CK_OUT_BATTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "COMPLETE_GAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "EARNED_RUNS>",
+          "hits": 456,
+          "tier": 2
+        },
+        {
+          "word": "ILD_PITCHES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "K_OUT_BATTER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "LKED_BATTER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MPLETE_GAMES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "OMPLETE_GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PLETE_GAMES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RUCK_OUT_BAT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "STRUCK_OUT_B",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TRUCK_OUT_BA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UCK_OUT_BATT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "WALKED_BATTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_OUT_BATTER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/SACRIFICE_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</SACRIFICE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<SACRIFICE_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><SACRIFICE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFICE_FL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFICE_HI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AUGHT_STEAL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CAUGHT_STEA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFICE_FLI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFICE_HIT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "FICE_FLIES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GHT_STEALIN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HT_STEALING",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IFICE_FLIES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IFICE_HITS>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE_FLIE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE_HITS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SACRIFICE_F",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SACRIFICE_H",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "STRUCK_OUT>",
+          "hits": 252,
+          "tier": 2
+        },
+        {
+          "word": "T_STEALING>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UGHT_STEALI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HIT_BY_PITC",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IT_BY_PITCH",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "T_BY_PITCH>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " </GIVEN_NA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/GAMES><GAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/GAMES_STAR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/GIVEN_NAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/HOME_RUNS>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/NUMBER><SU",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/POSITION><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/STRUCK_OUT",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "/SURNAME><G",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</GAMES><GA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</GAMES_STA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</GIVEN_NAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</HOME_RUNS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</NUMBER><S",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</POSITION>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</STRUCK_OU",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</SURNAME><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<GAMES_STAR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<GIVEN_NAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<HOME_RUNS>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<PLAYER><NU",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<STRUCK_OUT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><GAMES_STA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><GIVEN_NAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><HOME_RUNS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><POSITION>",
+          "hits": 252,
+          "tier": 2
+        },
+        {
+          "word": "><STRUCK_OU",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AME><GIVEN_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AMES><GAMES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AYER><NUMBE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "BER><SURNAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "E><GIVEN_NA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER><NUMBER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER><SURNAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ES><GAMES_S",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GAMES><GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HOME_RUNS><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IVEN_NAME><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "LAYER><NUMB",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MBER><SURNA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ME><GIVEN_N",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MES><GAMES_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NAME><GIVEN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NUMBER><SUR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "OME_RUNS><R",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PLAYER><NUM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "R><SURNAME>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RNAME><GIVE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "S><GAMES_ST",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "S><HOME_RUN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SURNAME><GI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "S_STARTED><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UMBER><SURN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "URNAME><GIV",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "YER><NUMBER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AMES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "T_BAT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_RUNS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ES><GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "S><GAMES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "BATTER><",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ATTER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "BATTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TTER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_BATT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ALKED_BATTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ARNED_RUNS>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CK_OUT_BATT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "COMPLETE_GA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HIT_BATTER>",
+          "hits": 456,
+          "tier": 2
+        },
+        {
+          "word": "ILD_PITCHES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "KED_BATTER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "K_OUT_BATTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "LD_PITCHES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "LETE_GAMES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "LKED_BATTER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MPLETE_GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "OMPLETE_GAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "OUT_BATTER>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PLETE_GAMES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RUCK_OUT_BA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "STRUCK_OUT_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TRUCK_OUT_B",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UCK_OUT_BAT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "WALKED_BATT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "WILD_PITCHE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_OUT_BATTER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFIC",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ERRORS",
+          "hits": 504,
+          "tier": 2
+        },
+        {
+          "word": "IFICE_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SACRIF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "STEALS",
+          "hits": 504,
+          "tier": 2
+        },
+        {
+          "word": "/SACRIFICE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</SACRIFIC",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<SACRIFICE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><SACRIFIC",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFICE_F",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ACRIFICE_H",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AUGHT_STEA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CAUGHT_STE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFICE_FL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CRIFICE_HI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "FICE_FLIES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "FICE_HITS>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GHT_STEALI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HT_STEALIN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ICE_FLIES>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IFICE_FLIE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IFICE_HITS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE_FLI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RIFICE_HIT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TRUCK_OUT>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "T_STEALING",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "UGHT_STEAL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_STEALING>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HIT_BY_PIT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IT_BY_PITC",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "T_BY_PITCH",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_BY_PITCH>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_NAME>",
+          "hits": 26,
+          "tier": 2
+        },
+        {
+          "word": "N_NAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "/GAMES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "</GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "<GAMES",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "><GAME",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "AMES_S",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ARTED>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "CK_OUT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "EN_NAM",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ES_STA",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "E_RUNS",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GAMES_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "GIVEN_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "HOME_R",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ITION>",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "IVEN_N",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "MES_ST",
+          "hits": 0,
+          "tier": 2
+        }
+      ]
+    },
+    "scope": "research-only v2 envelope: mode byte + u32 token-stream length + CM(dict||body); no compatible production UCZ outer header, no codec v2 dispatch",
+    "maxRSSMiB": 253.5859375
+  }
+}

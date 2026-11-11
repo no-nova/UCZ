@@ -1,0 +1,391 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "xml-stats",
+  "variant": "v1-prune",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "xml-stats",
+    "v1-prune"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "4f48edc164e0fed5f869ff3120174ee9a5e8b2b3182930741214efb4f312c298"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 7246,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "xml-stats",
+      "file": "xml",
+      "offset": 1279488,
+      "bytes": 262144,
+      "sha256": "3aa5db86dcd36a1c84b2106f90d82a0e741a0b6027e6da7bbcde2b1dd365aba5",
+      "corpusBytes": 5345280,
+      "corpusSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0d5f183f3943f34472b692b5300d196fed0f0dd2",
+        "bytes": 5345280,
+        "sha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+      },
+      "selection": "identified stats1.xml member, no archive header",
+      "parentSliceSha256": "3aa5db86dcd36a1c84b2106f90d82a0e741a0b6027e6da7bbcde2b1dd365aba5"
+    },
+    "variant": "v1-prune",
+    "cmBytes": 11849,
+    "payloadBytes": 11853,
+    "bytes": 11873,
+    "outerHeaderBytes": 20,
+    "containerSha256": "b1e0c79d855ae854bd93324fb3051c10f47cff53407ff88890748aef4d1cd60c",
+    "payloadSha256": "4199ef061c4520edffa1e66ad7dd0c8e02401792491c8a7b11af7bda048940fc",
+    "roundtrip": true,
+    "preprocessMs": 5552.546566,
+    "encodeDecodeMs": 6924.942457,
+    "short": {
+      "dictTokens": 54,
+      "one": 54,
+      "two": 0,
+      "headerRawBytes": 549,
+      "bodyRawBytes": 105842,
+      "cmInputBytes": 106391,
+      "bodyRatio": 0.40375518798828125,
+      "coverage": 0.6861000061035156,
+      "spaceSuffixHits": 0,
+      "punctuationSuffixHits": 6765,
+      "oneHits": 23555,
+      "twoHits": 0,
+      "unusedTokens": 0,
+      "escapedOriginalBytes": 0,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 23555,
+      "twoHits": 0,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 82287,
+      "coveredOriginalBytes": 179857,
+      "coverage": 0.6861000061035156,
+      "spaceSuffixHits": 0,
+      "punctuationSuffixHits": 6765,
+      "unusedTokens": 0,
+      "entries": [
+        {
+          "word": " </GIVEN_NAM",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "</CAUGHT_STE",
+          "hits": 142,
+          "tier": 1
+        },
+        {
+          "word": "</PB><WALKS>",
+          "hits": 34,
+          "tier": 1
+        },
+        {
+          "word": "</RBI><STEAL",
+          "hits": 219,
+          "tier": 1
+        },
+        {
+          "word": "<CAUGHT_STEA",
+          "hits": 252,
+          "tier": 1
+        },
+        {
+          "word": "<GAMES_START",
+          "hits": 10,
+          "tier": 1
+        },
+        {
+          "word": "><GIVEN_NAME",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "ALING><SACRI",
+          "hits": 142,
+          "tier": 1
+        },
+        {
+          "word": "CAUGHT_STEAL",
+          "hits": 110,
+          "tier": 1
+        },
+        {
+          "word": "COMPLETE_GAM",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "GAMES_STARTE",
+          "hits": 141,
+          "tier": 1
+        },
+        {
+          "word": "HIT_BY_PITCH",
+          "hits": 102,
+          "tier": 1
+        },
+        {
+          "word": "ING><SACRIFI",
+          "hits": 110,
+          "tier": 1
+        },
+        {
+          "word": "STARTED><AT_",
+          "hits": 226,
+          "tier": 1
+        },
+        {
+          "word": "WALKED_BATTE",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "WILD_PITCHES",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "tcher</POSIT",
+          "hits": 269,
+          "tier": 1
+        },
+        {
+          "word": "</SACRIFICE",
+          "hits": 379,
+          "tier": 1
+        },
+        {
+          "word": "</STRUCK_OU",
+          "hits": 445,
+          "tier": 1
+        },
+        {
+          "word": "><STRUCK_OU",
+          "hits": 228,
+          "tier": 1
+        },
+        {
+          "word": "EARNED_RUNS",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "</HOME_RUN",
+          "hits": 404,
+          "tier": 1
+        },
+        {
+          "word": "</POSITION",
+          "hits": 211,
+          "tier": 1
+        },
+        {
+          "word": "><HOME_RUN",
+          "hits": 252,
+          "tier": 1
+        },
+        {
+          "word": "><POSITION",
+          "hits": 252,
+          "tier": 1
+        },
+        {
+          "word": "SACRIFICE_",
+          "hits": 377,
+          "tier": 1
+        },
+        {
+          "word": "SHUT_OUTS>",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "STRUCK_OUT",
+          "hits": 287,
+          "tier": 1
+        },
+        {
+          "word": "</SURNAME",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "></PLAYER",
+          "hits": 460,
+          "tier": 1
+        },
+        {
+          "word": "HOME_RUNS",
+          "hits": 304,
+          "tier": 1
+        },
+        {
+          "word": "POSITION>",
+          "hits": 228,
+          "tier": 1
+        },
+        {
+          "word": "</NUMBER",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "AT_BATS>",
+          "hits": 278,
+          "tier": 1
+        },
+        {
+          "word": "INNINGS>",
+          "hits": 456,
+          "tier": 1
+        },
+        {
+          "word": "SURNAME>",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "T_BATTER",
+          "hits": 437,
+          "tier": 1
+        },
+        {
+          "word": "_BATTER>",
+          "hits": 475,
+          "tier": 1
+        },
+        {
+          "word": "</GAMES",
+          "hits": 809,
+          "tier": 1
+        },
+        {
+          "word": "<PLAYER",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "><GAMES",
+          "hits": 722,
+          "tier": 1
+        },
+        {
+          "word": "DOUBLES",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "ERRORS>",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "NUMBER>",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "PLAYER>",
+          "hits": 19,
+          "tier": 1
+        },
+        {
+          "word": "STEALS>",
+          "hits": 285,
+          "tier": 1
+        },
+        {
+          "word": "TRIPLES",
+          "hits": 504,
+          "tier": 1
+        },
+        {
+          "word": "</HIT",
+          "hits": 612,
+          "tier": 1
+        },
+        {
+          "word": "><HIT",
+          "hits": 480,
+          "tier": 1
+        },
+        {
+          "word": "RUNS>",
+          "hits": 960,
+          "tier": 1
+        },
+        {
+          "word": ">0</",
+          "hits": 1131,
+          "tier": 1
+        },
+        {
+          "word": "S>0<",
+          "hits": 365,
+          "tier": 1
+        },
+        {
+          "word": "ES>",
+          "hits": 2110,
+          "tier": 1
+        },
+        {
+          "word": "S><",
+          "hits": 1680,
+          "tier": 1
+        }
+      ]
+    },
+    "scope": "actual existing v1 WORD-PRE UCZ single TEXT3 group, dictionary and length prefix and model/header flags fully charged; forced dictionary, not chooser",
+    "maxRSSMiB": 249.18359375
+  }
+}

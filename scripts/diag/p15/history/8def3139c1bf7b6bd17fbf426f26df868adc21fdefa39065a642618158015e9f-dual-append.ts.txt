@@ -1,0 +1,41 @@
+// Appended to the isolated coder.ts, never imported by production.
+// Requires patchLibrary's per-model peer hooks. Only the H8 table differs.
+export function encodeCMContextDual(data:Uint8Array, context:'bin-stride4'|'wp-token3') {
+  if(context!=='bin-stride4'&&context!=='wp-token3')throw Error('only H8-compatible contexts may share')
+  if(p15.binStride||p15.textContext!=='control'||p15.resContext!=='control')throw Error('dual sharing requires unchanged H0..7 topology')
+  const n=data.length;if(n>524288)throw Error('P15 dual CM budget')
+  const profile=context==='bin-stride4'?'bin':'text',wordTokens=context==='wp-token3'
+  const base=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens)
+  const alt=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens,{context},base)
+  for(let k=0;k<8;k++)if(base.tables[k]!==alt.tables[k])throw Error('tables not actually shared')
+  if(base.mht!==alt.mht||base.mht8!==alt.mht8||base.msm!==alt.msm||base.buf!==alt.buf)throw Error('match/input not shared')
+  if(base.weights===alt.weights||base.weights2===alt.weights2||base.apmT===alt.apmT||base.apm2T===alt.apm2T)throw Error('stream-specific learning must be independent')
+  const bOut=new ByteWriter(),aOut=new ByteWriter()
+  let b1=0,b2=0xffffffff,a1=0,a2=0xffffffff
+  for(let i=0;i<n;i++)for(let bit=7;bit>=0;bit--){
+    const y=(data[i]>>>bit)&1
+    // Both predictions MUST see the same pre-update shared tables/MSM.
+    const bp=base.step(y,true),ap=alt.step(y,true)
+    let x=mid(b1,b2,bp);if(y)b2=x;else b1=x+1
+    x=mid(a1,a2,ap);if(y)a2=x;else a1=x+1
+    // Base writes shared tables/MSM/match state ONCE. Alt learns its H8,
+    // weights, secondary weights, a1/a2 only; at byte boundaries it copies
+    // the newly updated match pointers without inserting again into mht.
+    base.learn(y);alt.learn(y)
+    while(((b1^b2)&0xff000000)===0){bOut.push(b2>>>24);b1=(b1<<8)>>>0;b2=((b2<<8)|255)>>>0}
+    while(((a1^a2)&0xff000000)===0){aOut.push(a2>>>24);a1=(a1<<8)>>>0;a2=((a2<<8)|255)>>>0}
+  }
+  const flush=(x1:number,x2:number,out:ByteWriter)=>{
+    for(let k=0;k<=4;k++){
+      const unit=2**(32-8*k),v=Math.ceil(x1/unit)*unit
+      if(v<=x2&&v<4294967296){for(let j=0;j<k;j++)out.push(Math.floor(v/2**(24-8*j))&255);break}
+    }return out.finish()
+  }
+  const sharedTableBytes=base.tables.slice(0,8).reduce((n,t)=>n+t.byteLength,0)
+  const sharedMatchBytes=base.mht.byteLength+(base.mht8?.byteLength??0)+base.msm.byteLength
+  return {base:markPayloadModel(flush(b1,b2,bOut),n?base.requiredFlags:0),alt:markPayloadModel(flush(a1,a2,aOut),n?alt.requiredFlags:0),
+    sharing:{sharedTableCount:8,sharedTableBytes,sharedMatchBytes,sharedInputBytes:base.buf.byteLength,
+      // Exact live typed-array accounting, NOT measured peak RSS.
+      avoidedDuplicateBytes:sharedTableBytes+sharedMatchBytes+base.buf.byteLength,
+      independentMixerAndApm:true,geometry:base.geometry}}
+}

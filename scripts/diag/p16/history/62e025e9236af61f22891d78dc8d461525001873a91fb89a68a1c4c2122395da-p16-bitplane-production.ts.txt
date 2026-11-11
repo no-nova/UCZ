@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict'
+import {createHash,randomBytes} from 'node:crypto'
+import {bitplaneEntropyGate,bitplaneScreen,encodeBitplanes,decodeBitplanes} from '../src/lib/bitplane'
+import {withCMBlockSize} from '../src/lib/coder'
+import {MAX_OUTPUT_BYTES} from '../src/lib/limits'
+const [kind='structured',size='65536']=process.argv.slice(2),n=Number(size);assert.ok(n<=262144&&n>=16384)
+const bytes=new Uint8Array(randomBytes(n))
+if(kind==='structured'){
+ const state=[0x1a13,0x2b21,0x4c31],degrees=[13,14,15],taps=[1,5,1]
+ for(let i=0;i<n;i++)for(let b=0;b<3;b++){const bit=state[b]&1;bytes[i]=(bytes[i]&~(1<<b))|(bit<<b);state[b]=(state[b]>>>1)|(((state[b]^(state[b]>>>taps[b]))&1)<<(degrees[b]-1))}
+}
+assert.ok(bitplaneEntropyGate(bytes));const start=performance.now(),screen=bitplaneScreen(bytes),screenMs=performance.now()-start
+const payload=withCMBlockSize(n,()=>encodeBitplanes(bytes,screen.entropies))
+if(payload){assert.deepEqual(withCMBlockSize(n,()=>decodeBitplanes(payload,n)),bytes);assert.throws(()=>decodeBitplanes(payload.subarray(0,payload.length-1),n));assert.throws(()=>decodeBitplanes(payload,MAX_OUTPUT_BYTES+1))}
+console.log(JSON.stringify({kind,n,sha256:createHash('sha256').update(bytes).digest('hex'),screen,screenMs,payloadBytes:payload?.length??null,mask:payload?.[0]??0,roundtrip:!!payload,uncompressedSelection:screen.entropies.map((x,i)=>x<0.985?i:-1).filter(x=>x>=0)}))

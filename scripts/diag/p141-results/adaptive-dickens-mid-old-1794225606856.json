@@ -1,0 +1,174 @@
+{
+  "kind": "P14.1-bounded-implementation-test",
+  "case": "adaptive",
+  "slice": "dickens-mid",
+  "mode": "old",
+  "requestedBytes": 65536,
+  "status": "PASS",
+  "sourceRef": "ed09309a54155b799b7ea492b45df1422aab03ae",
+  "commit": "f08217bb73b7012c5e8cbc5e92181083e0e82945",
+  "sourceSha256": "3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "f39db04c365a43460cbacdee6765bce3030558c1f902671b11da9f5bba57cf46",
+    "coder.ts": "bb775399134ccdbae66625c212affe958d9e7c7d41ed25478530b398fb96e05d",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "0ef5ac0a4f4376aa1c4405faa52812b4f940c8c5b0897cf3b514f66613051e83",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "bad571c86c3ab0d73c132c909c3d4d44bb61a86842e74d22713c83c00b76c5b0",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "33393e64dafd270aec1ac4e2d99c819979a938447c3565100d32ee3667ea2a6f",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "scripts": {
+    "scripts/diag/p141/adaptive.ts": "733f41b9c0195779746094ba369a131f063af49611c77df09b2bb2963b5b57da",
+    "scripts/diag/p141/input.ts": "d72c1fa12d2a7e2842bd39f1148ff17f59841f1ef4dc60d224ede95ab707f69c",
+    "scripts/diag/p141/cases.json": "89344d78a8f2facb37cb13106d4c0e89052a86fa99d991dfba9c47ce4424a29f",
+    "scripts/diag/p14/slices.json": "0ac072ebbd31a2c7c3cf7b40aef3d3653d24d73b47fe5712bbf09348f1f5c18a",
+    "tests/p141-implementation.test.mjs": "e1f8ca312bb01eb6943c88099a58b38e4b962378680aaaf2127eb064c66525da"
+  },
+  "bundleSha256": "350d1ce10c0932a6c3857b30c02e10541f3b8d8c0a03832a01b26141a5ada6c7",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/tests/p141-implementation.test.mjs",
+    "adaptive",
+    "dickens-mid",
+    "old",
+    "65536"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 6060,
+  "exitCode": 0,
+  "stdout": "{\"test\":\"actual compressAdaptive -> production UCZ -> decompress\",\"input\":{\"name\":\"dickens-mid\",\"file\":\"dickens\",\"offset\":5095936,\"bytes\":65536,\"sha256\":\"3161662f21391137d755b82977d8da62131cada8ff9e4de94252129f5e836acc\",\"parentWindowBytes\":262144,\"parentWindowSha256\":\"ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a\",\"selection\":\"bounded prefix of P14 fixed window\"},\"mode\":\"old\",\"execution\":\"old\",\"serial\":true,\"requestedThreads\":1,\"scope\":\"unmodified adaptive chooser; no forced spec or plan\",\"containerBytes\":19649,\"containerSha256\":\"c1ff96f8fd08e7e5b576cb4309b53d43cc5e4bce8f679e7f0d78763a91381883\",\"version\":20,\"headerBytes\":22,\"encodeMs\":5496,\"decodeMs\":328,\"roundtrip\":true,\"decodedSha256\":\"3161662f21391137d755b82977d8da62131cada8ff9e4de94252129f5e836acc\",\"finalSpecs\":[\"23/1/1\"],\"stages\":[{\"msg\":\"扫描数据地形…\",\"pct\":5,\"ms\":1},{\"msg\":\"为每个区域试探最合适的编码规则…\",\"pct\":15,\"ms\":70},{\"msg\":\"区域 1/1 · 试探 CM-TEXT\",\"pct\":15,\"ms\":93},{\"msg\":\"区域 1/1 · 试探 CM-BIN\",\"pct\":15,\"ms\":268},{\"msg\":\"区域 1/1 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":15,\"ms\":431},{\"msg\":\"区域 1/1 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":15,\"ms\":773},{\"msg\":\"区域 1/1 · 试探 CM-TEXT2\",\"pct\":15,\"ms\":1238},{\"msg\":\"区域 1/1 · 试探 CM-TEXT3\",\"pct\":15,\"ms\":1370},{\"msg\":\"区域 1/1 · 试探 CM-BIN2\",\"pct\":15,\"ms\":1497},{\"msg\":\"区域 1/1 · 试探 CM-BIN3\",\"pct\":15,\"ms\":1624},{\"msg\":\"区域 1/1 → CM-TEXT3\",\"pct\":50,\"ms\":1761},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":50,\"ms\":1763},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":50,\"ms\":1787},{\"msg\":\"编码地形 1/1 · 100%\",\"pct\":65,\"ms\":2047},{\"msg\":\"编码地形 1/1\",\"pct\":65,\"ms\":5493},{\"msg\":\"完整容器择优完成\",\"pct\":85,\"ms\":5496}],\"fullFileMeasured\":false}\n",
+  "stderr": "773ms 15% 区域 1/1 · 试探 SUB-ANCHOR3('\\n', 0x08)\n1370ms 15% 区域 1/1 · 试探 CM-TEXT3\n2047ms 65% 编码地形 1/1 · 100%\n5493ms 65% 编码地形 1/1\n",
+  "result": {
+    "test": "actual compressAdaptive -> production UCZ -> decompress",
+    "input": {
+      "name": "dickens-mid",
+      "file": "dickens",
+      "offset": 5095936,
+      "bytes": 65536,
+      "sha256": "3161662f21391137d755b82977d8da62131cada8ff9e4de94252129f5e836acc",
+      "parentWindowBytes": 262144,
+      "parentWindowSha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a",
+      "selection": "bounded prefix of P14 fixed window"
+    },
+    "mode": "old",
+    "execution": "old",
+    "serial": true,
+    "requestedThreads": 1,
+    "scope": "unmodified adaptive chooser; no forced spec or plan",
+    "containerBytes": 19649,
+    "containerSha256": "c1ff96f8fd08e7e5b576cb4309b53d43cc5e4bce8f679e7f0d78763a91381883",
+    "version": 20,
+    "headerBytes": 22,
+    "encodeMs": 5496,
+    "decodeMs": 328,
+    "roundtrip": true,
+    "decodedSha256": "3161662f21391137d755b82977d8da62131cada8ff9e4de94252129f5e836acc",
+    "finalSpecs": [
+      "23/1/1"
+    ],
+    "stages": [
+      {
+        "msg": "扫描数据地形…",
+        "pct": 5,
+        "ms": 1
+      },
+      {
+        "msg": "为每个区域试探最合适的编码规则…",
+        "pct": 15,
+        "ms": 70
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-TEXT",
+        "pct": 15,
+        "ms": 93
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-BIN",
+        "pct": 15,
+        "ms": 268
+      },
+      {
+        "msg": "区域 1/1 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 15,
+        "ms": 431
+      },
+      {
+        "msg": "区域 1/1 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 15,
+        "ms": 773
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-TEXT2",
+        "pct": 15,
+        "ms": 1238
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-TEXT3",
+        "pct": 15,
+        "ms": 1370
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-BIN2",
+        "pct": 15,
+        "ms": 1497
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-BIN3",
+        "pct": 15,
+        "ms": 1624
+      },
+      {
+        "msg": "区域 1/1 → CM-TEXT3",
+        "pct": 50,
+        "ms": 1761
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 50,
+        "ms": 1763
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 50,
+        "ms": 1787
+      },
+      {
+        "msg": "编码地形 1/1 · 100%",
+        "pct": 65,
+        "ms": 2047
+      },
+      {
+        "msg": "编码地形 1/1",
+        "pct": 65,
+        "ms": 5493
+      },
+      {
+        "msg": "完整容器择优完成",
+        "pct": 85,
+        "ms": 5496
+      }
+    ],
+    "fullFileMeasured": false
+  },
+  "maxRawSliceBytes": 262144,
+  "fullCorpusEncoded": false,
+  "baselinePromoted": false
+}

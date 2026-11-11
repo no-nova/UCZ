@@ -1,0 +1,12 @@
+{
+  "kind": "P15-baseline-lock-metadata-check",
+  "status": "FAIL",
+  "evidenceKind": "transcribed from observed tool stdout; raw output not saved",
+  "reason": "Five stale P13.1 hard-coded expectation failures after authorized baseline promotion; no codec failure",
+  "tests": 15,
+  "pass": 10,
+  "fail": 5,
+  "productionCommit": "18f497d",
+  "command": "node --test tests/p10-baseline.test.mjs tests/p122-diagnostics.test.mjs tests/p13-diagnostics.test.mjs",
+  "fullCorpusEncoded": false
+}

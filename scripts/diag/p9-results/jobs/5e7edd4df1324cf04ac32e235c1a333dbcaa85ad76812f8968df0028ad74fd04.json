@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "key": "5e7edd4df1324cf04ac32e235c1a333dbcaa85ad76812f8968df0028ad74fd04",
+  "label": "recovery-smoke",
+  "file": "recovery-smoke.txt",
+  "n": 4096,
+  "sourceSha256": "70f701b4f727320634d41bb43945ea4dcfef2324f91185b3a9c60cc10ad8a0b4",
+  "resultPath": "/home/user/test/universal-adaptive-compression-system/scripts/diag/p9-results/5e7edd4df1324cf04ac32e235c1a333dbcaa85ad76812f8968df0028ad74fd04.json",
+  "startedAt": "2026-11-08T05:43:30.825Z",
+  "attempt": 1,
+  "pid": 3110,
+  "status": "complete",
+  "updatedAt": "2026-11-08T05:43:31.273Z"
+}

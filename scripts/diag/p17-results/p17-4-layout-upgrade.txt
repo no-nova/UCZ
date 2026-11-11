@@ -1,0 +1,56 @@
+P17.4 layout-upgrade evidence (sandbox, <=256 KiB inputs)
+
+A) encodePlanTranspose now reachable from ID.TRANSPOSE (9)
+   Synthetic 4-column records: col0 linear ramp, col1 incompressible PRNG,
+   col2 bimodal {0xaa,0x55}, col3 coarse 16-step. Columns share no structure
+   across the stride, which is exactly the layout-30 regime.
+
+     bytes    id9      id10     id22     id30     winner
+     32768    8333     8337     8338     8305     id30 (-28 vs id9)
+     65536   16539    16543    16544    16512     id30 (-27)
+    131072   32948    32952    32953    32920     id30 (-28)
+    262144   65763    65767    65768    65738     id30 (-25)
+
+   End-to-end through compressAdaptive (strict P_new<P_old && C_new<C_old):
+     131072 -> 32931 B  segs=[30/4]   (id9 payload alone was 32948)
+     262144 -> 65749 B  segs=[30/4]   (id9 payload alone was 65763)
+
+   Before P17.4 both of these stayed on id 9: the group never entered
+   encodePlanTranspose at all, so layouts 10/22/30 were never priced.
+
+B) G3 layout upgrade floor lowered from 1 MiB to 32 KiB
+   The 1 MiB floor made the entire upgrade path dead code below 1 MiB. It is
+   now reachable by <=256 KiB slices and by mozilla's 307 KiB TRANSPOSE-G group.
+
+C) ID.TRANSPOSE does not accept a kernel argument
+   Measured: id9 payloads are byte-identical for v13 / v15 / v20 (9/v13=24611
+   and 9/v15=24611 and 9/v20=24611 on the 32 KiB float fixture). The v15/v20
+   axis simply does not exist for id 9, which is why adopting layout 30 there
+   is the only way that group can reach a stronger model.
+
+D) planColumnGroups ignores matchDist entirely
+   `planColumnGroups` calls `encodeGroupData(...)` WITHOUT passing `options`, so
+   its column plan is independent of matchDist by construction (not because of
+   withCMProbe, as one brief claimed). Reusing the plan across the matchDist
+   axis is therefore safe. Note P17.3 measured that threading the REAL kernel
+   into that planner makes results worse (12,219 -> 12,551 B), so it stays as is.
+
+E) sao-mid (id 30, s=28): matchDist is byte-identical here
+   full base     132101  fl=0x3800
+   full matchDist 132101  fl=0x3800   <- same sha256, v22 flag never set
+   The column plan is [0+8 m=8][8+6 m=0][14+1 m=3][15+1 m=1][16+12 m=5].
+   Only the m=5 (BIN) group reaches a CM profile, and for these 112,344 bytes
+   the second distance table changes no coding decision at all. The v22 flag is
+   therefore correctly NOT set: no column group actually consumed it.
+   This is why P17.0's -30 B on sao did not reproduce - the stream is identical,
+   so the -30 B in that measurement cannot have come from id 30's columns.
+
+F) Real defect fixed: a losing matchDist probe cancelled the orthogonal axis
+   `contextGroupCandidatesSync` returned early with `skipped='probe-not-better'`
+   whenever the bounded matchDist probe lost, so the context axis was never
+   priced. sao-mid lost its bin-stride4 trial to a probe that failed by 9 bytes
+   on a 64 KiB sample, and the group reported zero trials.
+   After the fix the group does screen bin-stride4:
+     base 132101 | bin-stride4 132094 (payload -7 B) | container 132116 > 131922
+   The strict container gate correctly refuses it: 7 B of payload is less than
+   the 24 B the v21 namespace costs in the plan header. 0 B change, 0 regression.

@@ -1,0 +1,149 @@
+{
+  "kind": "validation-provenance-transcription-not-a-compression-measurement",
+  "provenance": "Manually structured transcription of completed Arena tool outputs. This JSON was not emitted by a test runner and does not add a compression receipt.",
+  "sourceSha256": "3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3",
+  "matrixCheckpoint": "0e720d8",
+  "baselineBytes": 40233692,
+  "frozenCounts": {
+    "receipts": 112,
+    "pass": 108,
+    "encodedRoundtrips": 98,
+    "distinctEncodedCases": 94,
+    "analysisOrPlan": 10,
+    "retainedFailures": 4
+  },
+  "outerCommandGuard": "timeout --signal=KILL 19s",
+  "checks": [
+    {
+      "command": "node scripts/diag/p14/check-types.mjs && node scripts/diag/p14/check-harness.mjs && node scripts/diag/p14/test-metadata.mjs",
+      "exitCode": 0,
+      "arenaToolDurationMs": 7783,
+      "results": [
+        {
+          "diagnosticTypes": "PASS",
+          "cmCalls": 0,
+          "productionWrites": 0
+        },
+        {
+          "patchCases": 43,
+          "syntax": true,
+          "cmCalls": 0,
+          "productionWrites": 0
+        },
+        {
+          "test": "actual production planHeader vs read-only directory parser",
+          "checks": 13,
+          "cmCalls": 0,
+          "corpusReads": 0,
+          "syntheticOnly": true
+        }
+      ]
+    },
+    {
+      "command": "npm run check:worker && npx tsc --noEmit && npm run build && npm run test:metadata && node scripts/diag/p14/verify.mjs --final && git diff --check",
+      "exitCode": 1,
+      "arenaToolDurationMs": 10792,
+      "completedSuccessfully": [
+        "worker freshness",
+        "production TypeScript",
+        "Vite build (2.22s)"
+      ],
+      "failure": "Missing script: test:metadata",
+      "notReached": [
+        "verify --final",
+        "git diff --check"
+      ],
+      "resolution": "Use the actual three node --test files in the next successful check. No production change and no compression probe."
+    },
+    {
+      "command": "node --test tests/p10-baseline.test.mjs tests/p122-diagnostics.test.mjs tests/p13-diagnostics.test.mjs && node scripts/diag/p14/verify.mjs --final && git diff --check",
+      "exitCode": 0,
+      "arenaToolDurationMs": 2167,
+      "testCounts": {
+        "tests": 22,
+        "pass": 22,
+        "fail": 0,
+        "skipped": 0
+      },
+      "suiteReportedDurationMs": 1714.865545,
+      "syntheticCliSmokeInputBytes": 64,
+      "newCorpusMeasurements": 0,
+      "verifier": {
+        "receipts": 112,
+        "pass": 108,
+        "encodedRoundtrips": 98,
+        "analysisOrPlanReceipts": 10,
+        "retainedFailures": 4,
+        "units": {
+          "unit1": 32,
+          "unit2": 30,
+          "unit3": 26,
+          "unit4": 20
+        },
+        "frozenMatrixAndSummaryChecked": true,
+        "productionExactlyP131": true,
+        "baselineBytes": 40233692,
+        "fullFilesEncoded": 0,
+        "reencodedByVerifier": 0
+      },
+      "diffWhitespace": "PASS"
+    }
+  ],
+  "otherRetainedDiagnostics": [
+    {
+      "phase": "initial probe preflight",
+      "failures": 4,
+      "evidence": "The four FAIL receipts remain in unit1..4; verify --final checks empty patches and absent bundle.",
+      "resolution": "Tightened unique constructor anchor; successful later measured phases retained."
+    },
+    {
+      "phase": "baseline metadata update",
+      "error": "The strict-40M synthetic test initially retained an old hard-coded savings delta.",
+      "resolution": "Use locked baseline to derive the boundary; 22 tests subsequently pass. Not a codec regression."
+    },
+    {
+      "phase": "initial header metadata test",
+      "error": "esbuild stdin default JS loader rejected TypeScript as const.",
+      "resolution": "Explicit TS loader; synthetic production-header test passes. No CM ran in this failure."
+    },
+    {
+      "phase": "final read-only ledger inspection",
+      "error": "KeyError: inventory (actual summary field is counts)",
+      "exitCode": 1,
+      "arenaToolDurationMs": 134,
+      "resolution": "Read counts; frozen counts unchanged."
+    },
+    {
+      "phase": "source/read-only inspection formatting",
+      "error": "A shell printf format beginning with dashes was parsed as an option.",
+      "resolution": "Use printf with an explicit %s format. Read-only output continued; no test or measurement was asserted from the printf."
+    },
+    {
+      "phase": "header test count label",
+      "correction": "The test contains 13 assertion calls; corrected its displayed checks field from 12 to 13. Assertions and production code unchanged."
+    }
+  ],
+  "limits": {
+    "fullLegacyCodecSuiteRun": false,
+    "fullSilesiaReencoded": false,
+    "newCompressionProbesAfterFreeze": 0,
+    "actualUserFinalGroupDirectoriesAvailable": false,
+    "productionCompressionLogicChanged": false,
+    "timingsAreThroughputBenchmark": false,
+    "userLocal12PassIsUserReportNotArenaRerun": true
+  },
+  "fileSha256": {
+    "docs/audits/P14_AUDIT.md": "2d55d78a7acde43af65f9e70d1ccc2b980dea1eece27f21e5f76ec6c6912005b",
+    "scripts/diag/p14-results/summary.json": "1ed37672d3fe2ac4cb50eab09f8327184d51d5325ced50901976af9722200f33",
+    "scripts/diag/p14/summary.mjs": "6d5e6ae8a84d5f7b7bb34d77a1146b18679ab4d0317b5bdda1b5a3bb7d840255",
+    "scripts/diag/p14/verify.mjs": "990542c481a440c9e0008f45ca5a271a2393c206a672b4ea887810bdfeba5bca",
+    "scripts/diag/p14/check-types.mjs": "d6b87d27a93e844bfea60278f4dffddfabbb58e38d09c088874abc7245356501",
+    "scripts/diag/p14/check-harness.mjs": "7bd8037e55cd68d627c1cab968110b37680f2de4288765ff14a836346f690ecc",
+    "scripts/diag/p14/inspect-container.mjs": "53f8a5deeb9608c985d8e2228749adbe69da866d6a74525c64646cce2f808889",
+    "scripts/diag/p14/test-metadata.mjs": "afe5613765e4bdfa7d970103e0dbbaae1b2c7c456a064b2f94b5077198659463",
+    "tests/p10-baseline.test.mjs": "60c5394718a03e733d74965103f1e8c769cc5eb7a403fefb740fd6d469cd0373",
+    "tests/p122-diagnostics.test.mjs": "438f3c13c94bda0cafc3d058b356880f9cdf160d46dae43be437d9aae91a7a16",
+    "tests/p13-diagnostics.test.mjs": "50bcc256a20ae51b73a359e26d88d25cc5a99b242c0b961db03c65c46f60e277",
+    "scripts/diag/baseline.json": "7f67d26fccf00baf58ca1083b19c2036a54e3668b2bcf0b6909802e787612f0d"
+  }
+}

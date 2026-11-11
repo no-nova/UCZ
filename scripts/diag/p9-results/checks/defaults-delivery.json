@@ -1,0 +1,78 @@
+{
+  "kind": "p9-defaults-delivery",
+  "verifiedAt": "2026-11-08T09:14:40.963Z",
+  "productionCommit": "6b860009b0fde3ba4d9727bd6592d2e8f4abc29e",
+  "productionSha256": "2979a4956e72487bd5c5a9f88f8ae2f6756163c4b62fe3dcf9f21d5d7e9fb878",
+  "testsCommit": "79e370c95ab91cbfc079d69afe0449ab731b8676",
+  "testsTree": "bf7a2275e730deea5414e940d9e6d9f4160bbba2",
+  "receiptTipCommit": "7416ae740b7455afe40b1e2839ffcfd33f81ea36",
+  "gates": [
+    {
+      "name": "worker-p9-defaults",
+      "command": [
+        "npm",
+        "run",
+        "check:worker"
+      ],
+      "passed": true,
+      "wallMs": 156,
+      "sourceUnchanged": true,
+      "receipt": "scripts/diag/p9-results/checks/gates/worker-p9-defaults.json",
+      "receiptCommit": "cb7ecc18989a9a939a8451493a9916dd421f8990",
+      "logSha256": "2123cb42ab3939a71094d102000a40b3eab1a7e4dd5375f83e6f66910f847a30"
+    },
+    {
+      "name": "codec-p9-defaults-complete",
+      "command": [
+        "npm",
+        "run",
+        "test:codec"
+      ],
+      "passed": true,
+      "wallMs": 165245,
+      "sourceUnchanged": true,
+      "receipt": "scripts/diag/p9-results/checks/gates/codec-p9-defaults-complete.json",
+      "receiptCommit": "7416ae740b7455afe40b1e2839ffcfd33f81ea36",
+      "logSha256": "426bede6ab38ce0ae0ff363fa1743aa4a33963822a3a375a26028c9d3c0b2589"
+    },
+    {
+      "name": "tsc-p9-defaults",
+      "command": [
+        "npx",
+        "tsc",
+        "--noEmit"
+      ],
+      "passed": true,
+      "wallMs": 3021,
+      "sourceUnchanged": true,
+      "receipt": "scripts/diag/p9-results/checks/gates/tsc-p9-defaults.json",
+      "receiptCommit": "bf4c851727ecdfff62e03613904fd56be7316cec",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build-p9-defaults",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "passed": true,
+      "wallMs": 1991,
+      "sourceUnchanged": true,
+      "receipt": "scripts/diag/p9-results/checks/gates/build-p9-defaults.json",
+      "receiptCommit": "7c97771d8aaec04c805c8bca71ad7dc82cd6f57b",
+      "logSha256": "1ac8023bbe140ff7aa73679ea972cb30d5f2957ee9aefc1b06b996b6de185d5f"
+    }
+  ],
+  "earlyAbortedCodec": {
+    "receipt": "scripts/diag/p9-results/checks/gates/codec-p9-defaults.json",
+    "passed": false,
+    "wallMs": 63605,
+    "reason": "Historical MICRO winner assertion conflicted with newly enabled 3a pruning; historical selector fixtures now use explicit legacy selection, with all assertions retained. Production and general/default/parallel tests were not reverted."
+  },
+  "smokeReceipts": [
+    "scripts/diag/p9-results/checks/defaults-small-smoke.json",
+    "scripts/diag/p9-results/checks/macro-header-cost-defaults.json"
+  ],
+  "remaining": "User-local full 12-file Silesia acceptance. No new full-corpus measurements or 200–400 KB / 30% gain claim."
+}

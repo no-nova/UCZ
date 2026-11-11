@@ -1,0 +1,47 @@
+// Read-only archive/source replay. Never re-encodes any input.
+import assert from 'node:assert/strict'
+import { readFileSync,readdirSync,existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+const sha=x=>createHash('sha256').update(x).digest('hex'),load=p=>JSON.parse(readFileSync(p,'utf8'))
+const src=Object.fromEntries(readdirSync('src/lib').sort().filter(f=>f.endsWith('.ts')).map(f=>[f,readFileSync(`src/lib/${f}`,'utf8')]))
+const hashes=Object.fromEntries(Object.entries(src).map(([f,s])=>[f,sha(s)]))
+assert.equal(sha(JSON.stringify(hashes)),'3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3','production must remain exact P13.1')
+const manifest=load('scripts/diag/p14/slices.json').samples,records=[]
+for(const unit of ['unit1','unit2','unit3','unit4']) {
+ const dir=`scripts/diag/p14-results/${unit}`;if(!existsSync(dir))continue
+ for(const f of readdirSync(dir).filter(f=>f.endsWith('.json'))) {
+  const r=load(`${dir}/${f}`);records.push(r)
+  assert.equal(r.unit,unit);assert.equal(r.productionSourceModified,false);assert.equal(r.fullCorpusEncoded,false)
+  assert.ok(r.durationMs<19000);assert.deepEqual(r.sourceFiles,hashes);assert.equal(r.sourceSha256,sha(JSON.stringify(hashes)))
+  for(const [f,h] of Object.entries(r.scripts))assert.equal(sha(readFileSync(`scripts/diag/p14/history/${h}-${f}.txt`)),h)
+  const copy={...src}
+  for(const p of r.patches){assert.equal(copy[p.file].split(p.from).length,2);copy[p.file]=copy[p.file].replace(p.from,p.to)}
+  if(r.experimentalFiles) {
+   const expected=Object.fromEntries(Object.entries(copy).map(([f,s])=>[f,sha(s)]))
+   assert.deepEqual(r.experimentalFiles,expected);assert.equal(r.experimentalSha256,sha(JSON.stringify(expected)))
+  }
+  if(r.status==='FAIL'){assert.ok(r.error||r.exitCode!==0);continue}
+  assert.equal(r.status,'PASS');assert.equal(r.exitCode,0)
+  const x=r.result;assert.deepEqual(JSON.parse(r.stdout.trim().split('\n').at(-1)),x)
+  assert.deepEqual(x.input,manifest.find(s=>s.name===r.slice));assert.ok(x.input.bytes<=262144)
+  assert.equal(x.fullFileMeasured,false);assert.equal(x.productionContainerEmitted,false)
+  if(x.payloadBytes!==undefined){assert.equal(x.kernel,'v20');assert.equal(x.roundtrip,true);assert.ok(x.payloadBytes>0);assert.match(x.payloadSha256,/^[0-9a-f]{64}$/)}
+  if(x.cmInputBytes!==undefined)assert.ok(x.cmInputBytes<=524288)
+  if(Array.isArray(x.cmCalls))assert.ok(x.cmCalls.every(c=>c.inputBytes<=524288))
+ }
+}
+const pass=records.filter(r=>r.status==='PASS'),encoded=pass.filter(r=>r.result.payloadBytes!==undefined)
+const base=load('scripts/diag/baseline.json'),previous=load('scripts/diag/baselines/p12-d9b84df.json')
+assert.equal(base.total.bestUcz,40233692);assert.equal(base.files.reduce((n,r)=>n+r.bestUcz,0),40233692)
+for(const b of base.files)assert.equal(b.bestUcz,previous.files.find(p=>p.file===b.file).bestUcz-(b.file==='ooffice'?64177:0))
+for(const sample of ['xml-mid','webster-mid','dickens-mid','reymont-mid','nci-mid']) {
+ const rows=encoded.filter(r=>r.unit==='unit1'&&r.slice===sample&&!['raw','text-class'].includes(r.variant))
+ if(rows.length)for(const r of rows)assert.equal(r.result.cmInputSha256,rows[0].result.cmInputSha256,'tokenization must be identical across CM experiments')
+}
+// Instrumentation must not alter coding bits.
+for(const r of encoded.filter(r=>r.unit==='unit4'&&r.variant.startsWith('profile'))) {
+ const b=encoded.find(b=>b.unit==='unit4'&&b.slice===r.slice&&b.result.profile===r.result.profile&&['control','text'].includes(b.variant))
+ assert.ok(b,'profile needs an uninstrumented control');assert.equal(b.result.payloadSha256,r.result.payloadSha256)
+}
+console.log(JSON.stringify({receipts:records.length,pass:pass.length,encodedRoundtrips:encoded.length,analysisOrPlanReceipts:pass.length-encoded.length,retainedFailures:records.length-pass.length,
+ units:Object.fromEntries(['unit1','unit2','unit3','unit4'].map(u=>[u,pass.filter(r=>r.unit===u).length])),productionExactlyP131:true,baselineBytes:40233692,fullFilesEncoded:0,reencodedByVerifier:0}))

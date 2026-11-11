@@ -1,0 +1,1 @@
+{"extends":"../../../tsconfig.json","compilerOptions":{"baseUrl":"../../..","paths":{"@lib/*":["src/lib/*"]}},"include":["residual-probe.ts"]}

@@ -1,0 +1,721 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "reymont-mid",
+  "variant": "v1",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "reymont-mid",
+    "v1"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "05fdd94a700d960bad4185866261745cb1c9f3819de8d6ca36d01b7db0ae3318"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 4530,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "reymont-mid",
+      "file": "reymont",
+      "offset": 3313152,
+      "bytes": 262144,
+      "sha256": "705c5a896506970732b2a2888cea73059a2c4ef7c66db99f6af588d0a5c3058e",
+      "corpusBytes": 6627202,
+      "corpusSha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "795abe66e4b940fb12731ecbaed88be172942f4a",
+        "bytes": 6627202,
+        "sha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "705c5a896506970732b2a2888cea73059a2c4ef7c66db99f6af588d0a5c3058e"
+    },
+    "variant": "v1",
+    "cmBytes": 49178,
+    "payloadBytes": 49182,
+    "bytes": 49203,
+    "outerHeaderBytes": 21,
+    "containerSha256": "7cecda242cb99ff78f70eae9da61a14b695825e4c6be0391a8485557c6fd746a",
+    "payloadSha256": "1f1b0da124673bbf733ccdcf6ab19fdeb25ed4f3584caa9e5eec6f812ba601fa",
+    "roundtrip": true,
+    "preprocessMs": 508.03456800000004,
+    "encodeDecodeMs": 4284.274246,
+    "short": {
+      "dictTokens": 120,
+      "one": 120,
+      "two": 0,
+      "headerRawBytes": 695,
+      "bodyRawBytes": 183689,
+      "cmInputBytes": 184384,
+      "bodyRatio": 0.7007179260253906,
+      "coverage": 0.4204826354980469,
+      "spaceSuffixHits": 654,
+      "punctuationSuffixHits": 545,
+      "oneHits": 31772,
+      "twoHits": 0,
+      "unusedTokens": 15,
+      "escapedOriginalBytes": 0,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 31772,
+      "twoHits": 0,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 151917,
+      "coveredOriginalBytes": 110227,
+      "coverage": 0.4204826354980469,
+      "spaceSuffixHits": 654,
+      "punctuationSuffixHits": 545,
+      "unusedTokens": 15,
+      "entries": [
+        {
+          "word": " /PDF /Text ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 0 595.276 8",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 595.276 841",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " [ /PDF /Tex",
+          "hits": 29,
+          "tier": 1
+        },
+        {
+          "word": " [0 0 595.27",
+          "hits": 29,
+          "tier": 1
+        },
+        {
+          "word": "/F17 10.909 ",
+          "hits": 43,
+          "tier": 1
+        },
+        {
+          "word": "/Resources 1",
+          "hits": 29,
+          "tier": 1
+        },
+        {
+          "word": "0 0 595.276 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "0 595.276 84",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "10.909 Tf 0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "17 10.909 Tf",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "5.276 841.89",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "595.276 841.",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "95.276 841.8",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "<\n/Font << /",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "F17 10.909 T",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " -13.549 Td",
+          "hits": 503,
+          "tier": 1
+        },
+        {
+          "word": " 10.909 Tf ",
+          "hits": 14,
+          "tier": 1
+        },
+        {
+          "word": " -13.55 Td",
+          "hits": 105,
+          "tier": 1
+        },
+        {
+          "word": " 0 obj <<",
+          "hits": 87,
+          "tier": 1
+        },
+        {
+          "word": ">> endobj",
+          "hits": 58,
+          "tier": 1
+        },
+        {
+          "word": "TJ 27.879",
+          "hits": 307,
+          "tier": 1
+        },
+        {
+          "word": " -27.879",
+          "hits": 301,
+          "tier": 1
+        },
+        {
+          "word": "27.879 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "TJ 0 ",
+          "hits": 597,
+          "tier": 1
+        },
+        {
+          "word": " 0 R",
+          "hits": 132,
+          "tier": 1
+        },
+        {
+          "word": "3)28",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "a)28",
+          "hits": 119,
+          "tier": 1
+        },
+        {
+          "word": "a\\24",
+          "hits": 78,
+          "tier": 1
+        },
+        {
+          "word": "a\\25",
+          "hits": 524,
+          "tier": 1
+        },
+        {
+          "word": "b)28",
+          "hits": 229,
+          "tier": 1
+        },
+        {
+          "word": "c)27",
+          "hits": 407,
+          "tier": 1
+        },
+        {
+          "word": "c)28",
+          "hits": 164,
+          "tier": 1
+        },
+        {
+          "word": "i\\24",
+          "hits": 412,
+          "tier": 1
+        },
+        {
+          "word": "i\\25",
+          "hits": 106,
+          "tier": 1
+        },
+        {
+          "word": "j\\24",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": "k)28",
+          "hits": 353,
+          "tier": 1
+        },
+        {
+          "word": "k)56",
+          "hits": 256,
+          "tier": 1
+        },
+        {
+          "word": "n)28",
+          "hits": 121,
+          "tier": 1
+        },
+        {
+          "word": "o)28",
+          "hits": 176,
+          "tier": 1
+        },
+        {
+          "word": "t)28",
+          "hits": 146,
+          "tier": 1
+        },
+        {
+          "word": "y\\25",
+          "hits": 115,
+          "tier": 1
+        },
+        {
+          "word": "z\\24",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "1(,",
+          "hits": 275,
+          "tier": 1
+        },
+        {
+          "word": "1(.",
+          "hits": 270,
+          "tier": 1
+        },
+        {
+          "word": "1(a",
+          "hits": 793,
+          "tier": 1
+        },
+        {
+          "word": "1(c",
+          "hits": 433,
+          "tier": 1
+        },
+        {
+          "word": "1(d",
+          "hits": 249,
+          "tier": 1
+        },
+        {
+          "word": "1(e",
+          "hits": 836,
+          "tier": 1
+        },
+        {
+          "word": "1(i",
+          "hits": 1299,
+          "tier": 1
+        },
+        {
+          "word": "1(j",
+          "hits": 220,
+          "tier": 1
+        },
+        {
+          "word": "1(k",
+          "hits": 297,
+          "tier": 1
+        },
+        {
+          "word": "1(l",
+          "hits": 133,
+          "tier": 1
+        },
+        {
+          "word": "1(m",
+          "hits": 191,
+          "tier": 1
+        },
+        {
+          "word": "1(n",
+          "hits": 329,
+          "tier": 1
+        },
+        {
+          "word": "1(o",
+          "hits": 413,
+          "tier": 1
+        },
+        {
+          "word": "1(p",
+          "hits": 224,
+          "tier": 1
+        },
+        {
+          "word": "1(r",
+          "hits": 283,
+          "tier": 1
+        },
+        {
+          "word": "1(s",
+          "hits": 301,
+          "tier": 1
+        },
+        {
+          "word": "1(t",
+          "hits": 289,
+          "tier": 1
+        },
+        {
+          "word": "1(u",
+          "hits": 157,
+          "tier": 1
+        },
+        {
+          "word": "1(w",
+          "hits": 230,
+          "tier": 1
+        },
+        {
+          "word": "1(y",
+          "hits": 478,
+          "tier": 1
+        },
+        {
+          "word": "1(z",
+          "hits": 689,
+          "tier": 1
+        },
+        {
+          "word": "241",
+          "hits": 670,
+          "tier": 1
+        },
+        {
+          "word": "242",
+          "hits": 291,
+          "tier": 1
+        },
+        {
+          "word": "246",
+          "hits": 732,
+          "tier": 1
+        },
+        {
+          "word": "252",
+          "hits": 1239,
+          "tier": 1
+        },
+        {
+          "word": "261",
+          "hits": 492,
+          "tier": 1
+        },
+        {
+          "word": "273",
+          "hits": 706,
+          "tier": 1
+        },
+        {
+          "word": "3(n",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": "3(p",
+          "hits": 72,
+          "tier": 1
+        },
+        {
+          "word": "3(s",
+          "hits": 55,
+          "tier": 1
+        },
+        {
+          "word": "3(w",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": "3(z",
+          "hits": 34,
+          "tier": 1
+        },
+        {
+          "word": "333",
+          "hits": 2143,
+          "tier": 1
+        },
+        {
+          "word": "334",
+          "hits": 1331,
+          "tier": 1
+        },
+        {
+          "word": "363",
+          "hits": 474,
+          "tier": 1
+        },
+        {
+          "word": "4(n",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "4(p",
+          "hits": 77,
+          "tier": 1
+        },
+        {
+          "word": "4(s",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "4(w",
+          "hits": 76,
+          "tier": 1
+        },
+        {
+          "word": "41c",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "5(j",
+          "hits": 214,
+          "tier": 1
+        },
+        {
+          "word": "52a",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": "52o",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "52y",
+          "hits": 2,
+          "tier": 1
+        },
+        {
+          "word": "6(a",
+          "hits": 75,
+          "tier": 1
+        },
+        {
+          "word": "6(j",
+          "hits": 283,
+          "tier": 1
+        },
+        {
+          "word": "7(a",
+          "hits": 214,
+          "tier": 1
+        },
+        {
+          "word": "7(h",
+          "hits": 85,
+          "tier": 1
+        },
+        {
+          "word": "7(o",
+          "hits": 627,
+          "tier": 1
+        },
+        {
+          "word": "7(w",
+          "hits": 200,
+          "tier": 1
+        },
+        {
+          "word": "8(a",
+          "hits": 229,
+          "tier": 1
+        },
+        {
+          "word": "8(c",
+          "hits": 227,
+          "tier": 1
+        },
+        {
+          "word": "8(d",
+          "hits": 315,
+          "tier": 1
+        },
+        {
+          "word": "8(h",
+          "hits": 61,
+          "tier": 1
+        },
+        {
+          "word": "8(o",
+          "hits": 486,
+          "tier": 1
+        },
+        {
+          "word": "8(w",
+          "hits": 340,
+          "tier": 1
+        },
+        {
+          "word": "8(y",
+          "hits": 104,
+          "tier": 1
+        },
+        {
+          "word": "b)1",
+          "hits": 213,
+          "tier": 1
+        },
+        {
+          "word": "cie",
+          "hits": 83,
+          "tier": 1
+        },
+        {
+          "word": "d)1",
+          "hits": 429,
+          "tier": 1
+        },
+        {
+          "word": "dzi",
+          "hits": 175,
+          "tier": 1
+        },
+        {
+          "word": "h)1",
+          "hits": 175,
+          "tier": 1
+        },
+        {
+          "word": "i)1",
+          "hits": 531,
+          "tier": 1
+        },
+        {
+          "word": "j)1",
+          "hits": 219,
+          "tier": 1
+        },
+        {
+          "word": "k)1",
+          "hits": 138,
+          "tier": 1
+        },
+        {
+          "word": "l)1",
+          "hits": 172,
+          "tier": 1
+        },
+        {
+          "word": "n)1",
+          "hits": 746,
+          "tier": 1
+        },
+        {
+          "word": "nie",
+          "hits": 170,
+          "tier": 1
+        },
+        {
+          "word": "o\\2",
+          "hits": 195,
+          "tier": 1
+        },
+        {
+          "word": "p)1",
+          "hits": 307,
+          "tier": 1
+        },
+        {
+          "word": "r)1",
+          "hits": 774,
+          "tier": 1
+        },
+        {
+          "word": "rze",
+          "hits": 167,
+          "tier": 1
+        },
+        {
+          "word": "u)1",
+          "hits": 341,
+          "tier": 1
+        },
+        {
+          "word": "w)2",
+          "hits": 514,
+          "tier": 1
+        },
+        {
+          "word": "wie",
+          "hits": 103,
+          "tier": 1
+        },
+        {
+          "word": "y)1",
+          "hits": 105,
+          "tier": 1
+        },
+        {
+          "word": "y)8",
+          "hits": 151,
+          "tier": 1
+        }
+      ]
+    },
+    "scope": "actual existing v1 WORD-PRE UCZ single TEXT3 group, dictionary and length prefix and model/header flags fully charged; forced dictionary, not chooser",
+    "maxRSSMiB": 207.06640625
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "kind": "P12-evidence-integrity-check",
+  "compressionExecutedByThisScript": false,
+  "checkedAtCommit": "ddc470671306256bf098b89b6a89f6269170a11f",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "productionSrcTreeUnchanged": true,
+  "baselineBytes": 41814147,
+  "byAgent": {
+    "agent1": {
+      "probes": 52,
+      "statisticsOnly": 0,
+      "codecRoundtrips": 52,
+      "maxWallMs": 7640
+    },
+    "agent2": {
+      "probes": 31,
+      "statisticsOnly": 3,
+      "codecRoundtrips": 28,
+      "maxWallMs": 10050
+    },
+    "agent3": {
+      "probes": 28,
+      "statisticsOnly": 4,
+      "codecRoundtrips": 24,
+      "maxWallMs": 7207
+    },
+    "agent4": {
+      "probes": 47,
+      "statisticsOnly": 0,
+      "codecRoundtrips": 47,
+      "maxWallMs": 11920
+    }
+  },
+  "primaryProbes": 158,
+  "primaryCodecRoundtrips": 151,
+  "statisticsOnly": 7,
+  "extraBoundedReplay": {
+    "path": "scripts/diag/p12-results/validation/replay-xml-mid-pool-repack-v1.json",
+    "wallMs": 5688,
+    "inputBytes": 262144,
+    "containerBytes": 4930,
+    "containerSha256": "82a1f85ba599fcf6e0c2efa8919a721dede4b475d329da6e1d8d547a871f59b4",
+    "matchesOriginalExactly": true
+  },
+  "globalMaxWallMs": 11920,
+  "inputSourceAndToolHashesChecked": 159,
+  "reportHashes": {
+    "P12_AGENT1.md": "984278a1a15419215a6a35cee6fdb035225e490346d4ff3b5b461c1a2099a01e",
+    "P12_AGENT2.md": "e233e2319231e954208c81fe85419cf3a361837740d214b9367822e5566914c3",
+    "P12_AGENT3.md": "ac1795633d4f0769bd5192b0aab25994d3d0ebf11531988380640fbc303ef758",
+    "P12_AGENT4.md": "e268b9d27a54f9b3768c36e0f369773f7ebaecb968b62f99458d5b0c18228242",
+    "P12_AUDIT_SUMMARY.md": "79d57fba9730991f68d2140cae2c1105f0f225de3c4a9d1c17acd658511614bf"
+  },
+  "status": "PASS",
+  "limits": "Receipt integrity/input/source/tool checking, NOT an independent rerun of all codecs or full corpus validation."
+}

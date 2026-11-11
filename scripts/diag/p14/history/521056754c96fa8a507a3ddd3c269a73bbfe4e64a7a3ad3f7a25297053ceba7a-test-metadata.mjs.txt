@@ -1,0 +1,32 @@
+// Synthetic wire metadata ONLY; no payload encode/decode and no corpus read.
+import { build } from 'esbuild'
+import { spawnSync } from 'node:child_process'
+import { mkdirSync } from 'node:fs'
+mkdirSync('.diag-state',{recursive:true})
+const path='.diag-state/p14-header-tests.cjs'
+await build({stdin:{resolveDir:process.cwd(),loader:'ts',contents:`
+import assert from 'node:assert/strict';
+import {planHeader,ID} from './src/lib/codec';
+import {inspectHeader} from './scripts/diag/p14/inspect-container.mjs';
+const segs=Array.from({length:12},(_,i)=>({start:i*64,end:(i+1)*64,cls:'binary' as const,spec:{id:24,s:1,r:1}}));
+const groups=[
+ {spec:{id:24,s:1,r:1},members:[0,4,8],payload:{length:55},modelFlags:0x3000,v15:true},
+ {spec:{id:25,s:2,r:1},members:[1,5,9],payload:{length:44},modelFlags:0x1800,v15:true},
+ {spec:{id:31,s:6,r:8192},members:[2,6,10],payload:{length:33},modelFlags:0x1800,v15:true},
+ {spec:{id:23,s:1,r:1},members:[3,7,11],payload:{length:22},modelFlags:0,v15:true,wordPre:true}
+];
+const h=Uint8Array.from(planHeader(768,segs,groups)),actual=inspectHeader(h,h.length+154);
+assert.equal(actual.headerBytes,h.length);assert.equal(actual.rawBytes,768);assert.equal(actual.payloadBytes,154);
+assert.deepEqual(actual.groups.map(g=>g.members),groups.map(g=>g.members));
+assert.equal(actual.groups[2].spec.r,8192,'r0x2000 is width, not a flag to steal');
+assert.equal(actual.groups[3].wordPre,true);assert.equal(actual.groups[3].kernel,'v15');
+assert.equal(actual.groups[0].kernel,'v20');assert.equal(actual.families['BCJ25-MSB'].payloadBytes,44);
+assert.equal(actual.groups.every(g=>g.rawBytes===192),true);
+assert.throws(()=>inspectHeader(h.subarray(0,h.length-1),h.length+154));
+assert.throws(()=>inspectHeader(h,h.length+155));
+const bad=h.slice();bad[3]=18;assert.throws(()=>inspectHeader(bad,h.length+154));
+console.log(JSON.stringify({test:'actual production planHeader vs read-only directory parser',checks:12,cmCalls:0,corpusReads:0,syntheticOnly:true}));
+`},bundle:true,platform:'node',format:'cjs',outfile:path,logLevel:'silent'})
+const r=spawnSync(process.execPath,[path],{stdio:'inherit',timeout:10000,killSignal:'SIGKILL'})
+if(r.error)throw r.error
+process.exitCode=r.status??1

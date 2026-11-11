@@ -1,0 +1,271 @@
+{
+  "kind": "P14.1-bounded-implementation-test",
+  "case": "adaptive",
+  "slice": "xml-mid",
+  "mode": "current",
+  "requestedBytes": 262144,
+  "status": "PASS",
+  "sourceRef": "working",
+  "commit": "f08217bb73b7012c5e8cbc5e92181083e0e82945",
+  "sourceSha256": "539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "cc8f9bbe23e3849473cc8c93ed077e027017b52a96364470a55764d062e9e530",
+    "coder.ts": "424d87a1d85d380f3019f7b18269135020049dcba428297c158227596c6d08aa",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "scripts": {
+    "scripts/diag/p141/adaptive.ts": "733f41b9c0195779746094ba369a131f063af49611c77df09b2bb2963b5b57da",
+    "scripts/diag/p141/input.ts": "d72c1fa12d2a7e2842bd39f1148ff17f59841f1ef4dc60d224ede95ab707f69c",
+    "scripts/diag/p141/cases.json": "89344d78a8f2facb37cb13106d4c0e89052a86fa99d991dfba9c47ce4424a29f",
+    "scripts/diag/p14/slices.json": "0ac072ebbd31a2c7c3cf7b40aef3d3653d24d73b47fe5712bbf09348f1f5c18a",
+    "tests/p141-implementation.test.mjs": "e1f8ca312bb01eb6943c88099a58b38e4b962378680aaaf2127eb064c66525da"
+  },
+  "bundleSha256": "32fd9d06a497998b79e44192031cc7a0c719f39d66baf0e98dab10644f45b431",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/tests/p141-implementation.test.mjs",
+    "adaptive",
+    "xml-mid",
+    "current",
+    "262144"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 11708,
+  "exitCode": 0,
+  "stdout": "{\"test\":\"actual compressAdaptive -> production UCZ -> decompress\",\"input\":{\"name\":\"xml-mid\",\"file\":\"xml\",\"offset\":2672640,\"bytes\":262144,\"sha256\":\"8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4\",\"parentWindowBytes\":262144,\"parentWindowSha256\":\"8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4\",\"selection\":\"P14 fixed window\"},\"mode\":\"current\",\"execution\":\"current\",\"serial\":true,\"requestedThreads\":1,\"scope\":\"unmodified adaptive chooser; no forced spec or plan\",\"containerBytes\":4542,\"containerSha256\":\"1c3784f0564b28dc2955a6b5a4450ed6935a1f951e6d8823635657cfef5776f1\",\"version\":21,\"headerBytes\":21,\"encodeMs\":11029,\"decodeMs\":544,\"roundtrip\":true,\"decodedSha256\":\"8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4\",\"contexts\":{\"baselineBytes\":6274,\"candidateBytes\":4542,\"accepted\":true,\"workerJobs\":0,\"workerFallbacks\":0,\"groups\":[{\"group\":0,\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"baselineSpec\":{\"id\":29,\"s\":60,\"r\":62},\"proposal\":\"existing-text-v3-trial\",\"members\":[0],\"rawBytes\":262144,\"baselinePayloadBytes\":6257,\"controlPayloadBytes\":4687,\"controlReused\":false,\"fullCandidateInputBytes\":262144,\"screen\":{\"rawBytes\":196608,\"controlBytes\":3961,\"trials\":[{\"context\":\"wp-token3\",\"bytes\":3860},{\"context\":\"wp-merge\",\"bytes\":3856}],\"selected\":[\"wp-merge\"]},\"admission\":{\"policy\":\"p12-contiguous-body\",\"dictionaryBytes\":386,\"rawPrefixBytes\":196608,\"tokenPrefixBytes\":102495,\"eligible\":[0],\"plainBytes\":[4727],\"bodyBytes\":[3845]},\"trials\":[{\"context\":\"wp-merge\",\"payloadBytes\":4521,\"containerBytes\":4542,\"controlContainerBytes\":4708,\"accepted\":true}],\"selected\":\"wp-merge\"}]},\"finalSpecs\":[\"23/1/1\"],\"stages\":[{\"msg\":\"扫描数据地形…\",\"pct\":5,\"ms\":1},{\"msg\":\"为每个区域试探最合适的编码规则…\",\"pct\":15,\"ms\":76},{\"msg\":\"区域 1/1 · 试探 SUB-TRANSPOSE(步长6, TEXT)\",\"pct\":15,\"ms\":95},{\"msg\":\"区域 1/1 · 试探 TRANSPOSE(步长6)\",\"pct\":15,\"ms\":527},{\"msg\":\"区域 1/1 · 试探 TRANSPOSE-G(步长6)\",\"pct\":15,\"ms\":809},{\"msg\":\"区域 1/1 · 试探 CM-TEXT\",\"pct\":15,\"ms\":2425},{\"msg\":\"区域 1/1 · 试探 CM-BIN\",\"pct\":15,\"ms\":2504},{\"msg\":\"区域 1/1 · 试探 SUB-ANCHOR('<', 0x3e)\",\"pct\":15,\"ms\":2618},{\"msg\":\"区域 1/1 · 试探 SUB-ANCHOR3('<', 0x3e)\",\"pct\":15,\"ms\":2937},{\"msg\":\"区域 1/1 · 试探 CM-TEXT2\",\"pct\":15,\"ms\":3336},{\"msg\":\"区域 1/1 · 试探 CM-TEXT3\",\"pct\":15,\"ms\":3422},{\"msg\":\"区域 1/1 · 试探 CM-BIN2\",\"pct\":15,\"ms\":3509},{\"msg\":\"区域 1/1 · 试探 CM-BIN3\",\"pct\":15,\"ms\":3587},{\"msg\":\"区域 1/1 → SUB-ANCHOR3('<', 0x3e)\",\"pct\":50,\"ms\":3677},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":50,\"ms\":3679},{\"msg\":\"编码地形 1/1 · 100%\",\"pct\":65,\"ms\":4492},{\"msg\":\"编码地形 1/1\",\"pct\":65,\"ms\":4493},{\"msg\":\"完整容器择优完成\",\"pct\":85,\"ms\":4494},{\"msg\":\"v21 上下文候选 1/1（保留原容器）\",\"pct\":85,\"ms\":4495},{\"msg\":\"v21 完整容器严格择优：6274 → 4542 B\",\"pct\":87,\"ms\":11028}],\"fullFileMeasured\":false,\"baselineBytes\":6274,\"savedBytes\":1732,\"baselineSource\":\"ed09309a54155b799b7ea492b45df1422aab03ae\"}\n",
+  "stderr": "527ms 15% 区域 1/1 · 试探 TRANSPOSE(步长6)\n2425ms 15% 区域 1/1 · 试探 CM-TEXT\n2937ms 15% 区域 1/1 · 试探 SUB-ANCHOR3('<', 0x3e)\n3509ms 15% 区域 1/1 · 试探 CM-BIN2\n4492ms 65% 编码地形 1/1 · 100%\n11028ms 87% v21 完整容器严格择优：6274 → 4542 B\n",
+  "result": {
+    "test": "actual compressAdaptive -> production UCZ -> decompress",
+    "input": {
+      "name": "xml-mid",
+      "file": "xml",
+      "offset": 2672640,
+      "bytes": 262144,
+      "sha256": "8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4",
+      "parentWindowBytes": 262144,
+      "parentWindowSha256": "8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4",
+      "selection": "P14 fixed window"
+    },
+    "mode": "current",
+    "execution": "current",
+    "serial": true,
+    "requestedThreads": 1,
+    "scope": "unmodified adaptive chooser; no forced spec or plan",
+    "containerBytes": 4542,
+    "containerSha256": "1c3784f0564b28dc2955a6b5a4450ed6935a1f951e6d8823635657cfef5776f1",
+    "version": 21,
+    "headerBytes": 21,
+    "encodeMs": 11029,
+    "decodeMs": 544,
+    "roundtrip": true,
+    "decodedSha256": "8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4",
+    "contexts": {
+      "baselineBytes": 6274,
+      "candidateBytes": 4542,
+      "accepted": true,
+      "workerJobs": 0,
+      "workerFallbacks": 0,
+      "groups": [
+        {
+          "group": 0,
+          "spec": {
+            "id": 23,
+            "s": 1,
+            "r": 1
+          },
+          "baselineSpec": {
+            "id": 29,
+            "s": 60,
+            "r": 62
+          },
+          "proposal": "existing-text-v3-trial",
+          "members": [
+            0
+          ],
+          "rawBytes": 262144,
+          "baselinePayloadBytes": 6257,
+          "controlPayloadBytes": 4687,
+          "controlReused": false,
+          "fullCandidateInputBytes": 262144,
+          "screen": {
+            "rawBytes": 196608,
+            "controlBytes": 3961,
+            "trials": [
+              {
+                "context": "wp-token3",
+                "bytes": 3860
+              },
+              {
+                "context": "wp-merge",
+                "bytes": 3856
+              }
+            ],
+            "selected": [
+              "wp-merge"
+            ]
+          },
+          "admission": {
+            "policy": "p12-contiguous-body",
+            "dictionaryBytes": 386,
+            "rawPrefixBytes": 196608,
+            "tokenPrefixBytes": 102495,
+            "eligible": [
+              0
+            ],
+            "plainBytes": [
+              4727
+            ],
+            "bodyBytes": [
+              3845
+            ]
+          },
+          "trials": [
+            {
+              "context": "wp-merge",
+              "payloadBytes": 4521,
+              "containerBytes": 4542,
+              "controlContainerBytes": 4708,
+              "accepted": true
+            }
+          ],
+          "selected": "wp-merge"
+        }
+      ]
+    },
+    "finalSpecs": [
+      "23/1/1"
+    ],
+    "stages": [
+      {
+        "msg": "扫描数据地形…",
+        "pct": 5,
+        "ms": 1
+      },
+      {
+        "msg": "为每个区域试探最合适的编码规则…",
+        "pct": 15,
+        "ms": 76
+      },
+      {
+        "msg": "区域 1/1 · 试探 SUB-TRANSPOSE(步长6, TEXT)",
+        "pct": 15,
+        "ms": 95
+      },
+      {
+        "msg": "区域 1/1 · 试探 TRANSPOSE(步长6)",
+        "pct": 15,
+        "ms": 527
+      },
+      {
+        "msg": "区域 1/1 · 试探 TRANSPOSE-G(步长6)",
+        "pct": 15,
+        "ms": 809
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-TEXT",
+        "pct": 15,
+        "ms": 2425
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-BIN",
+        "pct": 15,
+        "ms": 2504
+      },
+      {
+        "msg": "区域 1/1 · 试探 SUB-ANCHOR('<', 0x3e)",
+        "pct": 15,
+        "ms": 2618
+      },
+      {
+        "msg": "区域 1/1 · 试探 SUB-ANCHOR3('<', 0x3e)",
+        "pct": 15,
+        "ms": 2937
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-TEXT2",
+        "pct": 15,
+        "ms": 3336
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-TEXT3",
+        "pct": 15,
+        "ms": 3422
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-BIN2",
+        "pct": 15,
+        "ms": 3509
+      },
+      {
+        "msg": "区域 1/1 · 试探 CM-BIN3",
+        "pct": 15,
+        "ms": 3587
+      },
+      {
+        "msg": "区域 1/1 → SUB-ANCHOR3('<', 0x3e)",
+        "pct": 50,
+        "ms": 3677
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 50,
+        "ms": 3679
+      },
+      {
+        "msg": "编码地形 1/1 · 100%",
+        "pct": 65,
+        "ms": 4492
+      },
+      {
+        "msg": "编码地形 1/1",
+        "pct": 65,
+        "ms": 4493
+      },
+      {
+        "msg": "完整容器择优完成",
+        "pct": 85,
+        "ms": 4494
+      },
+      {
+        "msg": "v21 上下文候选 1/1（保留原容器）",
+        "pct": 85,
+        "ms": 4495
+      },
+      {
+        "msg": "v21 完整容器严格择优：6274 → 4542 B",
+        "pct": 87,
+        "ms": 11028
+      }
+    ],
+    "fullFileMeasured": false,
+    "baselineBytes": 6274,
+    "savedBytes": 1732,
+    "baselineSource": "ed09309a54155b799b7ea492b45df1422aab03ae"
+  },
+  "maxRawSliceBytes": 262144,
+  "fullCorpusEncoded": false,
+  "baselinePromoted": false
+}

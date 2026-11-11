@@ -1,0 +1,39 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {bitplaneEntropyGate,bitplaneScreen,encodeBitplanes,decodeBitplanes} from '../src/lib/bitplane'
+import {withCMBlockSize} from '../src/lib/coder'
+import {MAX_OUTPUT_BYTES} from '../src/lib/limits'
+import {ID,planHeader,decompress,refineBitplane,compressAdaptive,type Compressed} from '../src/lib/codec'
+import {V20_FLAG_CM,V20_FLAG_TRANSFORMS} from '../src/lib/coder'
+import {V21_FLAG_CONTEXTS} from '../src/lib/context-policy'
+import {payloadModelFlags,markPayloadModel} from '../src/lib/payload-model'
+const [kind='structured',size='65536']=process.argv.slice(2),n=Number(size);assert.ok(n<=262144&&n>=16384)
+const bytes=new Uint8Array(n)
+for(let pos=0;pos<n;pos+=32){const digest=createHash('sha256').update(`p16-deterministic-control-${pos/32}`).digest();bytes.set(digest.subarray(0,Math.min(32,n-pos)),pos)}
+if(kind==='structured'||kind==='auto'){
+ const state=[0x1a13,0x2b21,0x4c31],degrees=[13,14,15],taps=[1,5,1]
+ for(let i=0;i<n;i++)for(let b=0;b<3;b++){const bit=state[b]&1;bytes[i]=(bytes[i]&~(1<<b))|(bit<<b);state[b]=(state[b]>>>1)|(((state[b]^(state[b]>>>taps[b]))&1)<<(degrees[b]-1))}
+}
+assert.ok(bitplaneEntropyGate(bytes));const start=performance.now(),screen=bitplaneScreen(bytes),screenMs=performance.now()-start
+const payload=withCMBlockSize(n,()=>encodeBitplanes(bytes,screen.entropies))
+if(payload){
+ assert.deepEqual(withCMBlockSize(n,()=>decodeBitplanes(payload,n)),bytes);assert.throws(()=>decodeBitplanes(payload.subarray(0,payload.length-1),n));assert.throws(()=>decodeBitplanes(payload,MAX_OUTPUT_BYTES+1))
+ const spec={id:ID.BITPLANE,s:1,r:1};markPayloadModel(payload,payloadModelFlags(payload)|V21_FLAG_CONTEXTS|V20_FLAG_CM|V20_FLAG_TRANSFORMS)
+ const h=planHeader(n,[{start:0,end:n,cls:'noise',spec}],[{spec,members:[0],payload,v15:true}]),c=new Uint8Array(h.length+payload.length);c.set(h);c.set(payload,h.length)
+ assert.equal(c[3],21);assert.deepEqual(decompress(c),bytes)
+ const bad=c.slice();bad[h.length]=0;assert.throws(()=>decompress(bad));const oversized=c.slice();oversized.set([255,255,255,255],h.length+1);assert.throws(()=>decompress(oversized));const old=c.slice();old[3]=20;assert.throws(()=>decompress(old))
+ const truncated=c.slice(0,c.length-1);assert.throws(()=>decompress(truncated))
+ const base={container:new Uint8Array(n+100),blockCost:new Float32Array(1),blockSeg:new Int32Array(1)} as Compressed
+ const result=refineBitplane(bytes,base);assert.deepEqual(decompress(result.container),bytes);assert.ok(result.container.length<base.container.length)
+}
+async function main(){
+ let actual:object|undefined
+ if(kind==='auto'||kind==='auto-random'){
+  const baseline=await compressAdaptive(bytes,undefined,{serial:true,contextCandidates:false}),out=await compressAdaptive(bytes,undefined,{serial:true})
+  assert.deepEqual(decompress(out.container),bytes);assert.ok(out.container.length<=baseline.container.length)
+  if(kind==='auto')assert.equal(out.segs[0].spec.id,ID.BITPLANE);else assert.deepEqual(out.container,baseline.container)
+  actual={baseline:baseline.container.length,after:out.container.length,id:out.segs[0].spec.id,version:out.container[3],roundtrip:true}
+ }
+ console.log(JSON.stringify({kind,n,sha256:createHash('sha256').update(bytes).digest('hex'),screen,screenMs,payloadBytes:payload?.length??null,mask:payload?.[0]??0,roundtrip:!!payload,uncompressedSelection:screen.entropies.map((x,i)=>x<0.975?i:-1).filter(x=>x>=0),actual}))
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

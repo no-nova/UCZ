@@ -1,0 +1,98 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent2",
+  "name": "x-ray-late",
+  "variant": "med16",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent2",
+    "x-ray-late",
+    "med16"
+  ],
+  "commit": "e39773ac44d6bc362d4df0e82a9b176f7784b117",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "a79e798981cec51e361e9359e6c65a92c86897a652475e41c8207a4665084ff0",
+    "patches.mjs": "61720967456e076d425023588371dfad10eedddcdbb7a71d5cfa6f646d2bf861",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent2.ts": "c36d69a82acdb6cb86ccb5117407749fc7e8a8e7eadaad33f04c4239d2954894"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 3798,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "x-ray-late",
+      "file": "x-ray",
+      "offset": 6355456,
+      "bytes": 262144,
+      "sha256": "8267fc94a3d7c96d3a163fad44a6fa6803fcdc7aace4cd192e785ba9721132f1",
+      "corpusBytes": 8474240,
+      "corpusSha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c17436bf8b99b75506b352818c12992a7b82ca6b",
+        "bytes": 8474240,
+        "sha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad"
+      },
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression",
+      "parentSliceSha256": "8267fc94a3d7c96d3a163fad44a6fa6803fcdc7aace4cd192e785ba9721132f1"
+    },
+    "variant": "med16",
+    "payloadBytes": 110524,
+    "bytes": 110524,
+    "sideBytes": 0,
+    "payloadSha256": "6887dad6f8dfb213db133f752a73ee7eb7f913c95ab9cf1ea96cd910abf284fe",
+    "roundtrip": true,
+    "encodeDecodeMs": 3515.6856650000004,
+    "short": {
+      "lag": 3800,
+      "streamBytes": [
+        110524
+      ],
+      "residualEntropy": [
+        6.875464858741027,
+        1.0011512601189894
+      ]
+    },
+    "scope": "v15 residual CM with row A2 suppressed; two-stream framing charged; no new UCZ ID/header; true16bit MED is research-only",
+    "maxRSSMiB": 198.796875
+  }
+}

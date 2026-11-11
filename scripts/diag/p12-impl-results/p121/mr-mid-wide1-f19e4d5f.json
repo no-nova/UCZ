@@ -1,0 +1,98 @@
+{
+  "phase": "p121",
+  "slice": "mr-mid",
+  "case": "wide1",
+  "commit": "f19e4d5fba61dc152c42b3b81c3881e663460749",
+  "workingSource": false,
+  "sourceSha256": "4fa9683a8c459f8a2b49d320eb194f355e68f870d1dfd724e5a6a3258fc0c877",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "112608feeb0b0dd59ec79b24b84c387183ce0c1131130121f6f2febbc38bdff3",
+    "coder.ts": "a9896142b1b5ed7a478fafae13b6a9c0e2742ba3b986b67838ffa63c05661b9f",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "a5c60c51b9a44d9dd97497c7321eb041371cb6fea3107784513fb0abb2ca1093",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "b58046ed1889a509a4ccd5f9c0fbac0fd7fa4310b1df19ead1532a3af6ff491d",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "probeSha256": "d6754862283f2e5c4d34527f4c17524de7ae89a77e0cd909b2062f710792c13c",
+  "runnerSha256": "a3017ab1af7717e15e59e51a25ab6ada8a3d4fdd6dc324e28c556b929b2e1c87",
+  "bundleSha256": "3a1d0f269b25d4d71e53466ecb7d8bd3e7228770726b41ddfb0cd86d622f558d",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12-impl/run.mjs",
+    "p121",
+    "mr-mid",
+    "wide1",
+    "f19e4d5"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 3603,
+  "status": "PASS",
+  "stdout": "{\"input\":{\"name\":\"mr-mid\",\"file\":\"mr\",\"offset\":4984832,\"bytes\":262144,\"sha256\":\"2bfe9ca7f67a9c1988d1a473a5829799bf2e6930606c387a42d0adf4e0cd2fee\",\"corpusBytes\":9970564,\"corpusSha256\":\"68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6\",\"source\":{\"repo\":\"yewq/Silesia-compression-corpus\",\"blob\":\"ecdbeda89273cdacf36dcf637a7200de3f50cc0a\",\"bytes\":9970564,\"sha256\":\"68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6\"},\"path\":\".diag-data/p12-slices/mr-mid.bin\",\"selection\":\"fixed contiguous mid-file window\"},\"spec\":{\"id\":31,\"s\":1,\"r\":1024},\"scope\":\"forced single production group; real base/v15/WORD-PRE strict complete-cost selection, not whole-file adaptive routing\",\"bytes\":59406,\"headerBytes\":20,\"version\":15,\"v15\":true,\"wordPre\":false,\"flags\":0,\"containerSha256\":\"7b2ec9abc8f2b8940b8012d449e1ce9ac3e72875e49a3d182dd6408bebf26bc1\",\"roundtrip\":true,\"candidates\":[{\"bytes\":59406,\"v15\":true,\"wordPre\":false,\"flags\":0},{\"bytes\":66778,\"v15\":false,\"wordPre\":false,\"flags\":0}],\"encodeDecodeMs\":3258}\n",
+  "stderr": "",
+  "result": {
+    "input": {
+      "name": "mr-mid",
+      "file": "mr",
+      "offset": 4984832,
+      "bytes": 262144,
+      "sha256": "2bfe9ca7f67a9c1988d1a473a5829799bf2e6930606c387a42d0adf4e0cd2fee",
+      "corpusBytes": 9970564,
+      "corpusSha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "ecdbeda89273cdacf36dcf637a7200de3f50cc0a",
+        "bytes": 9970564,
+        "sha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6"
+      },
+      "path": ".diag-data/p12-slices/mr-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    "spec": {
+      "id": 31,
+      "s": 1,
+      "r": 1024
+    },
+    "scope": "forced single production group; real base/v15/WORD-PRE strict complete-cost selection, not whole-file adaptive routing",
+    "bytes": 59406,
+    "headerBytes": 20,
+    "version": 15,
+    "v15": true,
+    "wordPre": false,
+    "flags": 0,
+    "containerSha256": "7b2ec9abc8f2b8940b8012d449e1ce9ac3e72875e49a3d182dd6408bebf26bc1",
+    "roundtrip": true,
+    "candidates": [
+      {
+        "bytes": 59406,
+        "v15": true,
+        "wordPre": false,
+        "flags": 0
+      },
+      {
+        "bytes": 66778,
+        "v15": false,
+        "wordPre": false,
+        "flags": 0
+      }
+    ],
+    "encodeDecodeMs": 3258
+  }
+}

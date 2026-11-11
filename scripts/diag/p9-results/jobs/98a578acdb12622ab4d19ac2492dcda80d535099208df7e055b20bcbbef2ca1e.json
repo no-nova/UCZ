@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "key": "98a578acdb12622ab4d19ac2492dcda80d535099208df7e055b20bcbbef2ca1e",
+  "label": "macro-guard-mid-1m",
+  "file": "mozilla",
+  "n": 1048576,
+  "sourceSha256": "af6914e3a5728d1d18fc08e17a532f667252b6033e13b8ab1c055cc9435ce8cc",
+  "resultPath": "/home/user/test/universal-adaptive-compression-system/scripts/diag/p9-results/98a578acdb12622ab4d19ac2492dcda80d535099208df7e055b20bcbbef2ca1e.json",
+  "startedAt": "2026-11-08T07:26:39.629Z",
+  "attempt": 1,
+  "pid": 17338,
+  "status": "complete",
+  "updatedAt": "2026-11-08T07:29:20.034Z"
+}

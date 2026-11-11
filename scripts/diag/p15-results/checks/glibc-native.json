@@ -1,0 +1,1 @@
+{"status": "PASS", "count": 262144, "seed": 1, "interpretation": "low 8 bits of each native rand() return", "libc": ["glibc", "2.36"], "sha256": "50f52c36d7dbe822546644ed5c47e9a76840bbad926ac4b7c274b0a4502965e8", "matches_archived_endpoint_input": true}

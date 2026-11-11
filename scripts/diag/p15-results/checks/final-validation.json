@@ -1,0 +1,11 @@
+{
+  "scope": "bounded P15.0 final checks; not full codec or corpus validation",
+  "commands": [
+    {"command": "node --test tests/p10-baseline.test.mjs tests/p122-diagnostics.test.mjs tests/p13-diagnostics.test.mjs", "status": "PASS", "passed": 22, "failed": 0},
+    {"command": "npm run build", "status": "PASS", "includes": "prebuild worker-code consistency check"},
+    {"command": "node scripts/diag/p15/typecheck.mjs", "status": "PASS", "detail": "typescript.json; initial failure retained separately"},
+    {"command": "python3 scripts/diag/p15/check-glibc.py", "status": "PASS", "detail": "glibc-native.json"},
+    {"command": "node scripts/diag/p15/verify.mjs", "status": "PASS", "detail": "../summary.json; schema/archive/bounds verification only"}
+  ],
+  "outerTimeoutSeconds": 19
+}

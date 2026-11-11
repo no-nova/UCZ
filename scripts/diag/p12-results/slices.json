@@ -1,0 +1,681 @@
+{
+  "kind": "P12-fixed-slice-provenance",
+  "preparationOnly": true,
+  "maxProbeInputBytes": 262144,
+  "productionCommit": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "samples": [
+    {
+      "name": "xml-mid",
+      "file": "xml",
+      "offset": 2672640,
+      "bytes": 262144,
+      "sha256": "8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4",
+      "corpusBytes": 5345280,
+      "corpusSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0d5f183f3943f34472b692b5300d196fed0f0dd2",
+        "bytes": 5345280,
+        "sha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+      },
+      "path": ".diag-data/p12-slices/xml-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "dickens-mid",
+      "file": "dickens",
+      "offset": 5095936,
+      "bytes": 262144,
+      "sha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a",
+      "corpusBytes": 10192446,
+      "corpusSha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c02047fdd075ed66e470ba8064d0263a94bb361d",
+        "bytes": 10192446,
+        "sha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a"
+      },
+      "path": ".diag-data/p12-slices/dickens-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "dickens-late",
+      "file": "dickens",
+      "offset": 7644160,
+      "bytes": 262144,
+      "sha256": "b3d2ef91e8b93f4377ca5f8226764ee501a62ffd95749a5561e7e70f46625cd0",
+      "corpusBytes": 10192446,
+      "corpusSha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c02047fdd075ed66e470ba8064d0263a94bb361d",
+        "bytes": 10192446,
+        "sha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a"
+      },
+      "path": ".diag-data/p12-slices/dickens-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "ooffice-mid",
+      "file": "ooffice",
+      "offset": 3076096,
+      "bytes": 262144,
+      "sha256": "823304ab1e1b8883db98c74673d8b5237e578756e254ac40adad9e44707e5b88",
+      "corpusBytes": 6152192,
+      "corpusSha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "afa091f65b987c9c7a1e760add93189518b24ca1",
+        "bytes": 6152192,
+        "sha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb"
+      },
+      "path": ".diag-data/p12-slices/ooffice-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "mr-mid",
+      "file": "mr",
+      "offset": 4984832,
+      "bytes": 262144,
+      "sha256": "2bfe9ca7f67a9c1988d1a473a5829799bf2e6930606c387a42d0adf4e0cd2fee",
+      "corpusBytes": 9970564,
+      "corpusSha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "ecdbeda89273cdacf36dcf637a7200de3f50cc0a",
+        "bytes": 9970564,
+        "sha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6"
+      },
+      "path": ".diag-data/p12-slices/mr-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "mr-late",
+      "file": "mr",
+      "offset": 7477760,
+      "bytes": 262144,
+      "sha256": "14464292b5c0ca535b436071f5bdca984ee641a11a91ed8c3031e85f32ca5758",
+      "corpusBytes": 9970564,
+      "corpusSha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "ecdbeda89273cdacf36dcf637a7200de3f50cc0a",
+        "bytes": 9970564,
+        "sha256": "68637ed52e3e4860174ed2dc0840ac77d5f1a60abbcb13770d5754e3774d53e6"
+      },
+      "path": ".diag-data/p12-slices/mr-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "osdb-mid",
+      "file": "osdb",
+      "offset": 5042688,
+      "bytes": 262144,
+      "sha256": "16caaa3890e86d51f8dd427b742f3a350a11a4adb45e2be2a32f928aae6fce3b",
+      "corpusBytes": 10085684,
+      "corpusSha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0aaaae36ed18ee264f8320fc21a669209e008ce3",
+        "bytes": 10085684,
+        "sha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3"
+      },
+      "path": ".diag-data/p12-slices/osdb-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "osdb-late",
+      "file": "osdb",
+      "offset": 7563776,
+      "bytes": 262144,
+      "sha256": "5a214c52cf2058d7e1cb0309128d0a08d444c43520a3f7f80545c7f89bada3f9",
+      "corpusBytes": 10085684,
+      "corpusSha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0aaaae36ed18ee264f8320fc21a669209e008ce3",
+        "bytes": 10085684,
+        "sha256": "60f027179302ca3ad87c58ac90b6be72ec23588aaa7a3b7fe8ecc0f11def3fa3"
+      },
+      "path": ".diag-data/p12-slices/osdb-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "x-ray-mid",
+      "file": "x-ray",
+      "offset": 4236800,
+      "bytes": 262144,
+      "sha256": "387fee83a6a25cb7a702d1b775d2cb62c1fdf282890fbc3591df6b4aa96363ff",
+      "corpusBytes": 8474240,
+      "corpusSha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c17436bf8b99b75506b352818c12992a7b82ca6b",
+        "bytes": 8474240,
+        "sha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad"
+      },
+      "path": ".diag-data/p12-slices/x-ray-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "x-ray-late",
+      "file": "x-ray",
+      "offset": 6355456,
+      "bytes": 262144,
+      "sha256": "8267fc94a3d7c96d3a163fad44a6fa6803fcdc7aace4cd192e785ba9721132f1",
+      "corpusBytes": 8474240,
+      "corpusSha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c17436bf8b99b75506b352818c12992a7b82ca6b",
+        "bytes": 8474240,
+        "sha256": "7de9fce1405dc44ae5e6813ed21cd5751e761bd4265655a005d39b9685d1c9ad"
+      },
+      "path": ".diag-data/p12-slices/x-ray-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "sao-mid",
+      "file": "sao",
+      "offset": 3625972,
+      "bytes": 262136,
+      "sha256": "b6c09e1e4a6ac19120c0e0ec83135c2e01c55b29de4b4b03dbabaad36f0cb9af",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "path": ".diag-data/p12-slices/sao-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "sao-late",
+      "file": "sao",
+      "offset": 5438944,
+      "bytes": 262136,
+      "sha256": "2a14c5bc66d22c56401baef270885a79312f93e56ec9aa16779ce1478766f81c",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "path": ".diag-data/p12-slices/sao-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "reymont-mid",
+      "file": "reymont",
+      "offset": 3313152,
+      "bytes": 262144,
+      "sha256": "705c5a896506970732b2a2888cea73059a2c4ef7c66db99f6af588d0a5c3058e",
+      "corpusBytes": 6627202,
+      "corpusSha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "795abe66e4b940fb12731ecbaed88be172942f4a",
+        "bytes": 6627202,
+        "sha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578"
+      },
+      "path": ".diag-data/p12-slices/reymont-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "reymont-late",
+      "file": "reymont",
+      "offset": 4969984,
+      "bytes": 262144,
+      "sha256": "079cf3eb878d2fd557cb7168177c600597be706a39e3b60b441d540e4f1712b8",
+      "corpusBytes": 6627202,
+      "corpusSha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "795abe66e4b940fb12731ecbaed88be172942f4a",
+        "bytes": 6627202,
+        "sha256": "0eac0114a3dfe6e2ee1f345a0f79d653cb26c3bc9f0ed79238af4933422b7578"
+      },
+      "path": ".diag-data/p12-slices/reymont-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "nci-mid",
+      "file": "nci",
+      "offset": 16776704,
+      "bytes": 262144,
+      "sha256": "231b12fbe8244b61608e16795ca1c3092df3604f9e9db959108d1d330b109847",
+      "corpusBytes": 33553445,
+      "corpusSha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "66ca9639009623074dfcd4a7e56e46b37a841616",
+        "bytes": 33553445,
+        "sha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635"
+      },
+      "path": ".diag-data/p12-slices/nci-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "nci-late",
+      "file": "nci",
+      "offset": 25164800,
+      "bytes": 262144,
+      "sha256": "b04dcaf6453f4d18b6a0dd3875b18d4bb5c32a56682b0a7df051b030739e7e17",
+      "corpusBytes": 33553445,
+      "corpusSha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "66ca9639009623074dfcd4a7e56e46b37a841616",
+        "bytes": 33553445,
+        "sha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635"
+      },
+      "path": ".diag-data/p12-slices/nci-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "samba-mid",
+      "file": "samba",
+      "offset": 10803200,
+      "bytes": 262144,
+      "sha256": "312acb8d0f4004a69a827840c48c6141d6142b3b6e55f090b457476feea434d1",
+      "corpusBytes": 21606400,
+      "corpusSha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "34d2354f16add86d73d073109b583364b86648b0",
+        "bytes": 21606400,
+        "sha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2"
+      },
+      "path": ".diag-data/p12-slices/samba-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "webster-mid",
+      "file": "webster",
+      "offset": 20729344,
+      "bytes": 262144,
+      "sha256": "657d081ba8a1786ed144e983814eef7acf2dbdff7f546f22252eceac424303d4",
+      "corpusBytes": 41458703,
+      "corpusSha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "731f5c9e35d0aa24857a42bc034829fa6e832b5b",
+        "bytes": 41458703,
+        "sha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383"
+      },
+      "path": ".diag-data/p12-slices/webster-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "webster-late",
+      "file": "webster",
+      "offset": 31093760,
+      "bytes": 262144,
+      "sha256": "7699cea197f92a816363ee74473b1174126de6c96a3d599ba1c2c4bc2b7219e0",
+      "corpusBytes": 41458703,
+      "corpusSha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "731f5c9e35d0aa24857a42bc034829fa6e832b5b",
+        "bytes": 41458703,
+        "sha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383"
+      },
+      "path": ".diag-data/p12-slices/webster-late.bin",
+      "selection": "fixed 75%-offset contiguous window; holdout not selected by compression"
+    },
+    {
+      "name": "mozilla-mid",
+      "file": "mozilla",
+      "offset": 25610240,
+      "bytes": 262144,
+      "sha256": "23a6d50575b811eb7e9b9d141181b5a4caee4378648926b5c06a43dbc0541efc",
+      "corpusBytes": 51220480,
+      "corpusSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "9f855725921a25d2f51de6b6f00f3211977fcfc7",
+        "bytes": 51220480,
+        "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b"
+      },
+      "path": ".diag-data/p12-slices/mozilla-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    {
+      "name": "samba-c",
+      "file": "samba",
+      "offset": 18606080,
+      "bytes": 262144,
+      "sha256": "d935d92a16819cfa0c32ad5feb3e5eb8021b85b987bb694014337c89400dee71",
+      "corpusBytes": 21606400,
+      "corpusSha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "34d2354f16add86d73d073109b583364b86648b0",
+        "bytes": 21606400,
+        "sha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2"
+      },
+      "path": ".diag-data/p12-slices/samba-c.bin",
+      "selection": "starts in identified C source; 219702 B member plus following contiguous tar data; first128KiB entirely C"
+    },
+    {
+      "name": "xml-stats",
+      "file": "xml",
+      "offset": 1279488,
+      "bytes": 262144,
+      "sha256": "3aa5db86dcd36a1c84b2106f90d82a0e741a0b6027e6da7bbcde2b1dd365aba5",
+      "corpusBytes": 5345280,
+      "corpusSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0d5f183f3943f34472b692b5300d196fed0f0dd2",
+        "bytes": 5345280,
+        "sha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+      },
+      "path": ".diag-data/p12-slices/xml-stats.bin",
+      "selection": "identified stats1.xml member, no archive header"
+    },
+    {
+      "name": "mozilla-code",
+      "file": "mozilla",
+      "offset": 17318384,
+      "bytes": 262144,
+      "sha256": "5e0cc6ab4269a4c174662375a5c1722250d798eebe238ca9feafe1852d2b1475",
+      "corpusBytes": 51220480,
+      "corpusSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "9f855725921a25d2f51de6b6f00f3211977fcfc7",
+        "bytes": 51220480,
+        "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b"
+      },
+      "path": ".diag-data/p12-slices/mozilla-code.bin",
+      "selection": "identified Alpha ECOFF .text section of mozilla/components/libgkcontent.so"
+    },
+    {
+      "name": "mozilla-resources",
+      "file": "mozilla",
+      "offset": 21356368,
+      "bytes": 262144,
+      "sha256": "9b637e01c460bbff05e401907661d5b402023f452103248f91732389c45fe079",
+      "corpusBytes": 51220480,
+      "corpusSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "9f855725921a25d2f51de6b6f00f3211977fcfc7",
+        "bytes": 51220480,
+        "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b"
+      },
+      "path": ".diag-data/p12-slices/mozilla-resources.bin",
+      "selection": "identified Alpha ECOFF .rdata section of mozilla/components/libgkcontent.so"
+    },
+    {
+      "name": "mozilla-strings",
+      "file": "mozilla",
+      "offset": 16003952,
+      "bytes": 262144,
+      "sha256": "3761f5bc1954edc21174d166408fa54b281c2e1d94feeff442365053851bc3ac",
+      "corpusBytes": 51220480,
+      "corpusSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "9f855725921a25d2f51de6b6f00f3211977fcfc7",
+        "bytes": 51220480,
+        "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b"
+      },
+      "path": ".diag-data/p12-slices/mozilla-strings.bin",
+      "selection": "identified Alpha ECOFF .dynstr section of mozilla/components/libgkcontent.so"
+    },
+    {
+      "name": "mozilla-resources-late",
+      "file": "mozilla",
+      "offset": 21618512,
+      "bytes": 262144,
+      "sha256": "437042a07536d782fff7b207bfb063fe2c131015d5b1605575793a3fa3679a43",
+      "corpusBytes": 51220480,
+      "corpusSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "9f855725921a25d2f51de6b6f00f3211977fcfc7",
+        "bytes": 51220480,
+        "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b"
+      },
+      "path": ".diag-data/p12-slices/mozilla-resources-late.bin",
+      "selection": "fixed next contiguous non-overlapping 256KiB window in same Alpha .rdata; holdout after first window"
+    },
+    {
+      "name": "mozilla-code-late",
+      "file": "mozilla",
+      "offset": 18366960,
+      "bytes": 262144,
+      "sha256": "e40567c6a3625ca86135e984ffe603df1198c1f2b24a0d2b2b72472971c7273e",
+      "corpusBytes": 51220480,
+      "corpusSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "9f855725921a25d2f51de6b6f00f3211977fcfc7",
+        "bytes": 51220480,
+        "sha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b"
+      },
+      "path": ".diag-data/p12-slices/mozilla-code-late.bin",
+      "selection": "independent offset +1MiB inside same Alpha .text; input itself256KiB"
+    },
+    {
+      "name": "ooffice-code",
+      "file": "ooffice",
+      "offset": 4096,
+      "bytes": 262144,
+      "sha256": "634726a9a07d44bf12d81e951be43f0099e0300509a99667aa848cdb4019d033",
+      "corpusBytes": 6152192,
+      "corpusSha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "afa091f65b987c9c7a1e760add93189518b24ca1",
+        "bytes": 6152192,
+        "sha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb"
+      },
+      "path": ".diag-data/p12-slices/ooffice-code.bin",
+      "selection": "PE .text"
+    },
+    {
+      "name": "ooffice-code-late",
+      "file": "ooffice",
+      "offset": 1052672,
+      "bytes": 262144,
+      "sha256": "27c57297eb68d7420ee9c4e7f7104e670eecbdeff60aba06a27dc15bc2d3faa6",
+      "corpusBytes": 6152192,
+      "corpusSha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "afa091f65b987c9c7a1e760add93189518b24ca1",
+        "bytes": 6152192,
+        "sha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb"
+      },
+      "path": ".diag-data/p12-slices/ooffice-code-late.bin",
+      "selection": "PE .text"
+    },
+    {
+      "name": "ooffice-resources",
+      "file": "ooffice",
+      "offset": 5300224,
+      "bytes": 262144,
+      "sha256": "3cde6170f9600a74b1df2658ebdfa0a356e5d27c41c4f62958b0db334198dfce",
+      "corpusBytes": 6152192,
+      "corpusSha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "afa091f65b987c9c7a1e760add93189518b24ca1",
+        "bytes": 6152192,
+        "sha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb"
+      },
+      "path": ".diag-data/p12-slices/ooffice-resources.bin",
+      "selection": "PE .rdata"
+    }
+  ],
+  "structures": {
+    "sambaC": {
+      "member": "samba-2.2.3a/source/rpc_server/srv_spoolss_nt.c",
+      "offset": 18606080,
+      "bytes": 219702
+    },
+    "mozilla": {
+      "member": "mozilla/components/libgkcontent.so",
+      "memberOffset": 15110656,
+      "memberBytes": 7036928,
+      "magic": "0x0183",
+      "format": "Alpha ECOFF (not x86 PE/ELF)",
+      "sections": [
+        {
+          "name": ".dynamic",
+          "bytes": 672,
+          "offset": 1456
+        },
+        {
+          "name": ".liblist",
+          "bytes": 224,
+          "offset": 2128
+        },
+        {
+          "name": ".rel.dyn",
+          "bytes": 790208,
+          "offset": 2352
+        },
+        {
+          "name": ".conflic",
+          "bytes": 48,
+          "offset": 792560
+        },
+        {
+          "name": ".msym",
+          "bytes": 100688,
+          "offset": 792608
+        },
+        {
+          "name": ".dynstr",
+          "bytes": 564304,
+          "offset": 893296
+        },
+        {
+          "name": ".dynsym",
+          "bytes": 302048,
+          "offset": 1457600
+        },
+        {
+          "name": ".hash",
+          "bytes": 115888,
+          "offset": 1759648
+        },
+        {
+          "name": ".text",
+          "bytes": 4012816,
+          "offset": 2207728
+        },
+        {
+          "name": ".init",
+          "bytes": 96,
+          "offset": 6220544
+        },
+        {
+          "name": ".fini",
+          "bytes": 80,
+          "offset": 6220640
+        },
+        {
+          "name": ".got",
+          "bytes": 47968,
+          "offset": 6983856
+        },
+        {
+          "name": ".data",
+          "bytes": 19792,
+          "offset": 6225920
+        },
+        {
+          "name": ".xdata",
+          "bytes": 93536,
+          "offset": 6890064
+        },
+        {
+          "name": ".pdata",
+          "bytes": 188528,
+          "offset": 2019200
+        },
+        {
+          "name": ".rdata",
+          "bytes": 644352,
+          "offset": 6245712
+        },
+        {
+          "name": ".rconst",
+          "bytes": 143664,
+          "offset": 1875536
+        },
+        {
+          "name": ".sdata",
+          "bytes": 256,
+          "offset": 6983600
+        },
+        {
+          "name": ".sbss",
+          "bytes": 17504,
+          "offset": 0
+        },
+        {
+          "name": ".bss",
+          "bytes": 9504,
+          "offset": 0
+        },
+        {
+          "name": ".comment",
+          "bytes": 0,
+          "offset": 0
+        }
+      ]
+    },
+    "ooffice": {
+      "format": "PE x86",
+      "machine": "0x14c",
+      "sections": [
+        {
+          "name": ".text",
+          "bytes": 5283840,
+          "offset": 4096,
+          "virtualAddress": 4096
+        },
+        {
+          "name": "SWSTATIC",
+          "bytes": 12288,
+          "offset": 5287936,
+          "virtualAddress": 5287936
+        },
+        {
+          "name": ".rdata",
+          "bytes": 303104,
+          "offset": 5300224,
+          "virtualAddress": 5300224
+        },
+        {
+          "name": ".data",
+          "bytes": 307200,
+          "offset": 5603328,
+          "virtualAddress": 5603328
+        },
+        {
+          "name": ".rsrc",
+          "bytes": 4096,
+          "offset": 5910528,
+          "virtualAddress": 5922816
+        },
+        {
+          "name": ".reloc",
+          "bytes": 237568,
+          "offset": 5914624,
+          "virtualAddress": 5926912
+        }
+      ]
+    }
+  }
+}

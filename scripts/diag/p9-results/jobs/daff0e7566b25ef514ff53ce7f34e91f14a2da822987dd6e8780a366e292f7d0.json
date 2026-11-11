@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "key": "daff0e7566b25ef514ff53ce7f34e91f14a2da822987dd6e8780a366e292f7d0",
+  "label": "macro-mid-1m",
+  "file": "mozilla",
+  "n": 1048576,
+  "sourceSha256": "4b4648a6f89ae6064ffbf05f05799a559e8d0b73ba85d015e7c17c744d3b2eaf",
+  "resultPath": "/home/user/test/universal-adaptive-compression-system/scripts/diag/p9-results/daff0e7566b25ef514ff53ce7f34e91f14a2da822987dd6e8780a366e292f7d0.json",
+  "startedAt": "2026-11-08T06:36:33.835Z",
+  "attempt": 1,
+  "pid": 10798,
+  "status": "complete",
+  "updatedAt": "2026-11-08T06:39:38.731Z"
+}

@@ -1,0 +1,265 @@
+{
+  "unit": "unit2",
+  "slice": "sao-mid",
+  "variant": "tg-control",
+  "phase": "audit",
+  "commit": "cd96f00c61e30298e52146bd337e3f6d50c59c05",
+  "node": "v22.22.3",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "f39db04c365a43460cbacdee6765bce3030558c1f902671b11da9f5bba57cf46",
+    "coder.ts": "bb775399134ccdbae66625c212affe958d9e7c7d41ed25478530b398fb96e05d",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "0ef5ac0a4f4376aa1c4405faa52812b4f940c8c5b0897cf3b514f66613051e83",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "bad571c86c3ab0d73c132c909c3d4d44bb61a86842e74d22713c83c00b76c5b0",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "33393e64dafd270aec1ac4e2d99c819979a938447c3565100d32ee3667ea2a6f",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3",
+  "scripts": {
+    "check-harness.mjs": "7bd8037e55cd68d627c1cab968110b37680f2de4288765ff14a836346f690ecc",
+    "common.ts": "6b0d46d3555a52cef06e6a83ac7997a50fe8948dd8bfe8a2bf3069e674b1b301",
+    "patches.mjs": "7dec53e9aee7a6b1caaf46803a11af748e35a98ebcd693eed75cf162be5c7e20",
+    "run.mjs": "1a8f1f9a1598803564bd099df8988328e1fcd1aa4113cf49f5b4c1f3b86fbf23",
+    "slices.json": "0ac072ebbd31a2c7c3cf7b40aef3d3653d24d73b47fe5712bbf09348f1f5c18a",
+    "unit1.ts": "29bef593e806d3edb9efc710ce8fe2d3dd5d209a558c0c07a27b3b19bb3bed0e",
+    "unit2.ts": "e0622fd34919ec868435c746996641d75b4673705e183b779e4c522fa4dc40f9",
+    "unit3.ts": "2a42ae895e2b69cdce0e51fb0dc611cbee4750a61238ea1f500249ab7b7a90b4",
+    "unit4.ts": "2fa8abb04e5dd3942b48dc4af5b2693128b5d526d94d1f12563a20a553fb936b",
+    "verify.mjs": "14fc06dd65bf21b18d689d68f77eec7c1b22bd76a96d43f9b7440af8eba6d88f"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "from": "  const n = data.length\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens)",
+      "to": "  const n = data.length\n  if(n>524288)throw Error(\"P14 CM hard budget exceeded\")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens)",
+      "to": "  if(n>524288)throw Error(\"P14 CM decode hard budget exceeded\")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "import { ByteWriter } from './byte-writer'",
+      "to": "import { ByteWriter } from './byte-writer'\nexport const p14 = { side: undefined as Uint8Array|undefined, planeLen:0, learnHook: null as null|((m:any,y:number)=>void) }\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  learn(y: number, prOverride?: number): void {",
+      "to": "  learn(y: number, prOverride?: number): void {\n    if(p14.learnHook)p14.learnHook(this,y)"
+    },
+    {
+      "file": "codec.ts",
+      "from": "function planColumnGroups(parts:",
+      "to": "export function planColumnGroups(parts:"
+    },
+    {
+      "file": "codec.ts",
+      "from": "function gatherGroup(parts:",
+      "to": "export function gatherGroup(parts:"
+    },
+    {
+      "file": "codec.ts",
+      "from": "function groupDelta(input:",
+      "to": "export function groupDelta(input:"
+    }
+  ],
+  "maxRawBytes": 262144,
+  "maxCMBytes": 524288,
+  "innerBudgetMs": 17000,
+  "status": "PASS",
+  "fullCorpusEncoded": false,
+  "productionSourceModified": false,
+  "experimentalFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "2b60e5922eb726a49cd125d3b875d8e539a9e55afe6a1e64056a19abc31c0888",
+    "coder.ts": "ed9a1c513b8ed42cee1e69f7d388505c91db987e0934ad93418bb02076e3ff01",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "0ef5ac0a4f4376aa1c4405faa52812b4f940c8c5b0897cf3b514f66613051e83",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "bad571c86c3ab0d73c132c909c3d4d44bb61a86842e74d22713c83c00b76c5b0",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "33393e64dafd270aec1ac4e2d99c819979a938447c3565100d32ee3667ea2a6f",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "experimentalSha256": "25ba111cbc7617ba6f4cb21f9b57b157e49167b11991bc94fa304b5debabe558",
+  "bundleSha256": "36af59ac9fbe55f389a2e59adc12beba3a7715597a8453c26b5284664a088d9f",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "{\"unit\":2,\"input\":{\"name\":\"sao-mid\",\"file\":\"sao\",\"offset\":3625972,\"bytes\":262136,\"sha256\":\"b6c09e1e4a6ac19120c0e0ec83135c2e01c55b29de4b4b03dbabaad36f0cb9af\",\"corpusBytes\":7251944,\"corpusSha256\":\"c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc\",\"source\":{\"repo\":\"yewq/Silesia-compression-corpus\",\"blob\":\"e33e161c7873ba0de633c0ac0f30772b446c1e32\",\"bytes\":7251944,\"sha256\":\"c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc\"},\"path\":\".diag-data/p12-slices/sao-mid.bin\",\"selection\":\"fixed contiguous mid-file window\"},\"variant\":\"tg-control\",\"kernel\":\"v20\",\"layout\":\"actual TG3 gather/groupDelta/wordRowDelta/CM, fixed plan proposed on <=64KiB; no full 256KiB plan search\",\"planSha256\":\"831991182e3846f36b9bf49663bd971de82ca9b339f233028aa06dc2eb884c5d\",\"channels\":[{\"start\":0,\"span\":1,\"mode\":0,\"reverse\":false,\"actualMode\":0,\"rawBytes\":9362,\"payloadBytes\":9362},{\"start\":1,\"span\":4,\"mode\":0,\"reverse\":false,\"actualMode\":0,\"rawBytes\":37448,\"payloadBytes\":37448},{\"start\":5,\"span\":3,\"mode\":6,\"reverse\":true,\"actualMode\":6,\"rawBytes\":28086,\"payloadBytes\":2365},{\"start\":8,\"span\":6,\"mode\":0,\"reverse\":false,\"actualMode\":0,\"rawBytes\":56172,\"payloadBytes\":56172},{\"start\":14,\"span\":1,\"mode\":3,\"reverse\":false,\"actualMode\":3,\"rawBytes\":9362,\"payloadBytes\":7004},{\"start\":15,\"span\":1,\"mode\":1,\"reverse\":false,\"actualMode\":5,\"rawBytes\":9362,\"payloadBytes\":19},{\"start\":16,\"span\":12,\"mode\":5,\"reverse\":false,\"actualMode\":5,\"rawBytes\":112344,\"payloadBytes\":27589}],\"productionCompatible\":true,\"sideIsAlreadyDecodedPreviousGroup\":true,\"payloadBytes\":139989,\"payloadSha256\":\"e781351b5e9375c7112c944f17836813fd095ac142a6adc3acdb93632f4187a7\",\"roundtrip\":true,\"cmCalls\":[{\"inputBytes\":28086,\"profile\":\"res\",\"s\":3,\"r\":1,\"geomStride\":0,\"sideBytes\":0,\"payloadBytes\":2365},{\"inputBytes\":9362,\"profile\":\"o0\",\"s\":1,\"r\":1,\"geomStride\":0,\"sideBytes\":0,\"payloadBytes\":7004},{\"inputBytes\":9362,\"profile\":\"bin\",\"s\":1,\"r\":1,\"geomStride\":1,\"sideBytes\":0,\"payloadBytes\":19},{\"inputBytes\":112344,\"profile\":\"bin\",\"s\":12,\"r\":1,\"geomStride\":12,\"sideBytes\":0,\"payloadBytes\":27589}],\"encodeMs\":1382,\"decodeMs\":1207,\"totalWorkMs\":2681,\"scope\":\"fixed 256KiB-class window; actual experimental CM + framing; no full adaptive chooser or complete UCZ\",\"fullFileMeasured\":false,\"productionContainerEmitted\":false}\n",
+  "stderr": "",
+  "result": {
+    "unit": 2,
+    "input": {
+      "name": "sao-mid",
+      "file": "sao",
+      "offset": 3625972,
+      "bytes": 262136,
+      "sha256": "b6c09e1e4a6ac19120c0e0ec83135c2e01c55b29de4b4b03dbabaad36f0cb9af",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "path": ".diag-data/p12-slices/sao-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    "variant": "tg-control",
+    "kernel": "v20",
+    "layout": "actual TG3 gather/groupDelta/wordRowDelta/CM, fixed plan proposed on <=64KiB; no full 256KiB plan search",
+    "planSha256": "831991182e3846f36b9bf49663bd971de82ca9b339f233028aa06dc2eb884c5d",
+    "channels": [
+      {
+        "start": 0,
+        "span": 1,
+        "mode": 0,
+        "reverse": false,
+        "actualMode": 0,
+        "rawBytes": 9362,
+        "payloadBytes": 9362
+      },
+      {
+        "start": 1,
+        "span": 4,
+        "mode": 0,
+        "reverse": false,
+        "actualMode": 0,
+        "rawBytes": 37448,
+        "payloadBytes": 37448
+      },
+      {
+        "start": 5,
+        "span": 3,
+        "mode": 6,
+        "reverse": true,
+        "actualMode": 6,
+        "rawBytes": 28086,
+        "payloadBytes": 2365
+      },
+      {
+        "start": 8,
+        "span": 6,
+        "mode": 0,
+        "reverse": false,
+        "actualMode": 0,
+        "rawBytes": 56172,
+        "payloadBytes": 56172
+      },
+      {
+        "start": 14,
+        "span": 1,
+        "mode": 3,
+        "reverse": false,
+        "actualMode": 3,
+        "rawBytes": 9362,
+        "payloadBytes": 7004
+      },
+      {
+        "start": 15,
+        "span": 1,
+        "mode": 1,
+        "reverse": false,
+        "actualMode": 5,
+        "rawBytes": 9362,
+        "payloadBytes": 19
+      },
+      {
+        "start": 16,
+        "span": 12,
+        "mode": 5,
+        "reverse": false,
+        "actualMode": 5,
+        "rawBytes": 112344,
+        "payloadBytes": 27589
+      }
+    ],
+    "productionCompatible": true,
+    "sideIsAlreadyDecodedPreviousGroup": true,
+    "payloadBytes": 139989,
+    "payloadSha256": "e781351b5e9375c7112c944f17836813fd095ac142a6adc3acdb93632f4187a7",
+    "roundtrip": true,
+    "cmCalls": [
+      {
+        "inputBytes": 28086,
+        "profile": "res",
+        "s": 3,
+        "r": 1,
+        "geomStride": 0,
+        "sideBytes": 0,
+        "payloadBytes": 2365
+      },
+      {
+        "inputBytes": 9362,
+        "profile": "o0",
+        "s": 1,
+        "r": 1,
+        "geomStride": 0,
+        "sideBytes": 0,
+        "payloadBytes": 7004
+      },
+      {
+        "inputBytes": 9362,
+        "profile": "bin",
+        "s": 1,
+        "r": 1,
+        "geomStride": 1,
+        "sideBytes": 0,
+        "payloadBytes": 19
+      },
+      {
+        "inputBytes": 112344,
+        "profile": "bin",
+        "s": 12,
+        "r": 1,
+        "geomStride": 12,
+        "sideBytes": 0,
+        "payloadBytes": 27589
+      }
+    ],
+    "encodeMs": 1382,
+    "decodeMs": 1207,
+    "totalWorkMs": 2681,
+    "scope": "fixed 256KiB-class window; actual experimental CM + framing; no full adaptive chooser or complete UCZ",
+    "fullFileMeasured": false,
+    "productionContainerEmitted": false
+  },
+  "durationMs": 3109
+}

@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "scope": "receipt identity and archived source hashes; does not rerun tests or prove full-file behavior",
+  "count": 42,
+  "passed": 41,
+  "failed": 1,
+  "failures": [
+    {
+      "file": "p151-raw--webster-adaptive-256.json",
+      "status": "FAIL",
+      "timedOut": true,
+      "sourceSha256": "af25613ce4a728155ee8e0144f2bdb55bdbcc9284e06927eea4a52ab0ae59c0e"
+    }
+  ],
+  "sourceFingerprint": "5834590acb58b56f8259f30917929fc20f65d6b8c9d7582ff813dda554328e1b",
+  "archivedFiles": 41
+}

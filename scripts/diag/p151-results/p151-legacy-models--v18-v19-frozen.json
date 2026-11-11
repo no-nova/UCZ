@@ -1,0 +1,76 @@
+{
+  "test": "p151-legacy-models",
+  "phase": "v18-v19-frozen",
+  "args": [],
+  "commit": "bdcd6d76ce09ead294453761d722575422dee53e",
+  "node": "v22.22.3",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "3cf206be73da15298120457c9a1be202759e484e9f72d1cf4bb32c2d35e54913",
+    "coder.ts": "c251fc1349e784c2bcc9e2335c9e3502d2fc328e6adad602dcb8c5f82ae40591",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "64778138513a0115d3b6f0330f129e972963d9f71568c5d9c7f9d5e6de174789",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "16f640eafd5ff5cb33bbf8b627bf98df3a0e92242ab86aab588ee4eec1aafd76",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "68e04029f042195008d08bbddcb84cfdcab05cf0df45ffaed8224429af314a8f",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "a2324c9df4de32463870e1a34630974818ff301b08aa2dee6b5d235125283af6",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "rec2.ts": "a7d3312b43a667608b48cf43ad3d6d6d8a46d40b6576a1bb3021a8b9b8bd4c59",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "ac24df0febe799b7bc68008f7e09da96b148310eb8b8897207323d53c127c7af",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "af25613ce4a728155ee8e0144f2bdb55bdbcc9284e06927eea4a52ab0ae59c0e",
+  "testSha256": "797f351d21e8dd8f0099eff31f00d4648624f6ce8decb44a178525f806a792ed",
+  "status": "PASS",
+  "outerBudgetMs": 19000,
+  "innerBudgetMs": 17000,
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "error": null,
+  "stdout": "{\"rows\":[{\"version\":18,\"scope\":524288,\"flags\":10,\"sha256\":\"b1b8b9e50fdba7c924435043d1a69896bad871c9ea732df2888e921be2808ba0\",\"roundtrip\":true},{\"version\":18,\"scope\":8388607,\"flags\":20,\"sha256\":\"b1b8b9e50fdba7c924435043d1a69896bad871c9ea732df2888e921be2808ba0\",\"roundtrip\":true},{\"version\":19,\"scope\":8388608,\"flags\":784,\"sha256\":\"b1b8b9e50fdba7c924435043d1a69896bad871c9ea732df2888e921be2808ba0\",\"roundtrip\":true}],\"inputBytes\":128,\"source\":\"independent archived P10/P11 raw CM payloads; not UCZ container fixtures\"}\n",
+  "stderr": "",
+  "result": {
+    "rows": [
+      {
+        "version": 18,
+        "scope": 524288,
+        "flags": 10,
+        "sha256": "b1b8b9e50fdba7c924435043d1a69896bad871c9ea732df2888e921be2808ba0",
+        "roundtrip": true
+      },
+      {
+        "version": 18,
+        "scope": 8388607,
+        "flags": 20,
+        "sha256": "b1b8b9e50fdba7c924435043d1a69896bad871c9ea732df2888e921be2808ba0",
+        "roundtrip": true
+      },
+      {
+        "version": 19,
+        "scope": 8388608,
+        "flags": 784,
+        "sha256": "b1b8b9e50fdba7c924435043d1a69896bad871c9ea732df2888e921be2808ba0",
+        "roundtrip": true
+      }
+    ],
+    "inputBytes": 128,
+    "source": "independent archived P10/P11 raw CM payloads; not UCZ container fixtures"
+  },
+  "durationMs": 678
+}

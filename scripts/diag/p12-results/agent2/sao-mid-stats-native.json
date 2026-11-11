@@ -1,0 +1,512 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent2",
+  "name": "sao-mid",
+  "variant": "stats",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent2",
+    "sao-mid",
+    "stats"
+  ],
+  "commit": "e39773ac44d6bc362d4df0e82a9b176f7784b117",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "a79e798981cec51e361e9359e6c65a92c86897a652475e41c8207a4665084ff0",
+    "patches.mjs": "61720967456e076d425023588371dfad10eedddcdbb7a71d5cfa6f646d2bf861",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent2.ts": "480c7e336adf2bbe4cc51db46968a76df2d726adf6f1e465b07dc5690b7ca27b"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 665,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "sao-mid",
+      "file": "sao",
+      "offset": 3625972,
+      "bytes": 262136,
+      "sha256": "b6c09e1e4a6ac19120c0e0ec83135c2e01c55b29de4b4b03dbabaad36f0cb9af",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "b6c09e1e4a6ac19120c0e0ec83135c2e01c55b29de4b4b03dbabaad36f0cb9af"
+    },
+    "variant": "stats",
+    "short": {
+      "columns": [
+        {
+          "column": 0,
+          "n": 9362,
+          "rawH": 7.976811986122761,
+          "deltaH": 7.978260754057189,
+          "firstBytes": [
+            144,
+            126,
+            212,
+            240,
+            187,
+            51
+          ]
+        },
+        {
+          "column": 1,
+          "n": 9362,
+          "rawH": 7.981267139686084,
+          "deltaH": 7.979543755949528,
+          "firstBytes": [
+            155,
+            127,
+            70,
+            145,
+            154,
+            113
+          ]
+        },
+        {
+          "column": 2,
+          "n": 9362,
+          "rawH": 7.980676539128036,
+          "deltaH": 7.98357369958234,
+          "firstBytes": [
+            237,
+            20,
+            36,
+            120,
+            33,
+            247
+          ]
+        },
+        {
+          "column": 3,
+          "n": 9362,
+          "rawH": 7.97989062781705,
+          "deltaH": 7.979859304138699,
+          "firstBytes": [
+            65,
+            153,
+            137,
+            94,
+            199,
+            189
+          ]
+        },
+        {
+          "column": 4,
+          "n": 9362,
+          "rawH": 7.980080672800138,
+          "deltaH": 7.904673621845676,
+          "firstBytes": [
+            110,
+            181,
+            100,
+            65,
+            211,
+            64
+          ]
+        },
+        {
+          "column": 5,
+          "n": 9362,
+          "rawH": 7.9802262136615205,
+          "deltaH": 2.1228745193970893,
+          "firstBytes": [
+            63,
+            77,
+            83,
+            84,
+            84,
+            91
+          ]
+        },
+        {
+          "column": 6,
+          "n": 9362,
+          "rawH": 5.166168279650551,
+          "deltaH": 0.045495292044440284,
+          "firstBytes": [
+            221,
+            221,
+            221,
+            221,
+            221,
+            221
+          ]
+        },
+        {
+          "column": 7,
+          "n": 9362,
+          "rawH": 0.9791450058799201,
+          "deltaH": 0.0031264990340671255,
+          "firstBytes": [
+            63,
+            63,
+            63,
+            63,
+            63,
+            63
+          ]
+        },
+        {
+          "column": 8,
+          "n": 9362,
+          "rawH": 7.980306556644283,
+          "deltaH": 7.979263382186078,
+          "firstBytes": [
+            198,
+            218,
+            152,
+            147,
+            116,
+            149
+          ]
+        },
+        {
+          "column": 9,
+          "n": 9362,
+          "rawH": 7.978702159115236,
+          "deltaH": 7.978649823703051,
+          "firstBytes": [
+            103,
+            41,
+            129,
+            69,
+            220,
+            143
+          ]
+        },
+        {
+          "column": 10,
+          "n": 9362,
+          "rawH": 7.977179484805094,
+          "deltaH": 7.982749601182498,
+          "firstBytes": [
+            128,
+            118,
+            89,
+            3,
+            57,
+            184
+          ]
+        },
+        {
+          "column": 11,
+          "n": 9362,
+          "rawH": 7.978618857584636,
+          "deltaH": 7.980547554060486,
+          "firstBytes": [
+            77,
+            168,
+            116,
+            28,
+            74,
+            111
+          ]
+        },
+        {
+          "column": 12,
+          "n": 9362,
+          "rawH": 7.980185688951773,
+          "deltaH": 7.981304393260374,
+          "firstBytes": [
+            180,
+            90,
+            193,
+            23,
+            34,
+            26
+          ]
+        },
+        {
+          "column": 13,
+          "n": 9362,
+          "rawH": 7.98232258410306,
+          "deltaH": 7.978709204607284,
+          "firstBytes": [
+            12,
+            198,
+            61,
+            39,
+            208,
+            43
+          ]
+        },
+        {
+          "column": 14,
+          "n": 9362,
+          "rawH": 5.8926261830315205,
+          "deltaH": 6.895285476506074,
+          "firstBytes": [
+            189,
+            197,
+            172,
+            194,
+            90,
+            175
+          ]
+        },
+        {
+          "column": 15,
+          "n": 9362,
+          "rawH": 0.00156325774805366,
+          "deltaH": 0.004689723856281632,
+          "firstBytes": [
+            191,
+            191,
+            191,
+            191,
+            191,
+            191
+          ]
+        },
+        {
+          "column": 16,
+          "n": 9362,
+          "rawH": 2.3396169020765294,
+          "deltaH": 3.624473329237561,
+          "firstBytes": [
+            75,
+            75,
+            70,
+            75,
+            71,
+            70
+          ]
+        },
+        {
+          "column": 17,
+          "n": 9362,
+          "rawH": 2.327109161690403,
+          "deltaH": 3.7846720900542454,
+          "firstBytes": [
+            48,
+            53,
+            53,
+            50,
+            53,
+            56
+          ]
+        },
+        {
+          "column": 18,
+          "n": 9362,
+          "rawH": 4.306761834398298,
+          "deltaH": 5.278182639572608,
+          "firstBytes": [
+            142,
+            132,
+            52,
+            92,
+            42,
+            72
+          ]
+        },
+        {
+          "column": 19,
+          "n": 9362,
+          "rawH": 0.5210759738846311,
+          "deltaH": 0.9361538799666982,
+          "firstBytes": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "column": 20,
+          "n": 9362,
+          "rawH": 4.032219133966267,
+          "deltaH": 6.140205881018402,
+          "firstBytes": [
+            6,
+            63,
+            71,
+            0,
+            95,
+            205
+          ]
+        },
+        {
+          "column": 21,
+          "n": 9362,
+          "rawH": 4.0362924694891795,
+          "deltaH": 6.1789121789110055,
+          "firstBytes": [
+            16,
+            103,
+            152,
+            0,
+            43,
+            52
+          ]
+        },
+        {
+          "column": 22,
+          "n": 9362,
+          "rawH": 4.844231686258754,
+          "deltaH": 6.7239505598045515,
+          "firstBytes": [
+            114,
+            59,
+            51,
+            0,
+            28,
+            108
+          ]
+        },
+        {
+          "column": 23,
+          "n": 9362,
+          "rawH": 2.7349603682706025,
+          "deltaH": 3.513318543412846,
+          "firstBytes": [
+            180,
+            179,
+            53,
+            128,
+            179,
+            53
+          ]
+        },
+        {
+          "column": 24,
+          "n": 9362,
+          "rawH": 4.317259526754728,
+          "deltaH": 6.315853891795145,
+          "firstBytes": [
+            170,
+            180,
+            106,
+            255,
+            255,
+            6
+          ]
+        },
+        {
+          "column": 25,
+          "n": 9362,
+          "rawH": 4.321152533831186,
+          "deltaH": 6.309930866541744,
+          "firstBytes": [
+            148,
+            117,
+            12,
+            222,
+            222,
+            184
+          ]
+        },
+        {
+          "column": 26,
+          "n": 9362,
+          "rawH": 5.1564674645286805,
+          "deltaH": 7.092708644687105,
+          "firstBytes": [
+            38,
+            111,
+            101,
+            121,
+            249,
+            73
+          ]
+        },
+        {
+          "column": 27,
+          "n": 9362,
+          "rawH": 2.8415790313286733,
+          "deltaH": 3.5909022198695872,
+          "firstBytes": [
+            179,
+            180,
+            180,
+            179,
+            178,
+            53
+          ]
+        }
+      ],
+      "wide16Lag": 0,
+      "byteLagCandidates": [],
+      "residual": [
+        {
+          "column": 0,
+          "n": 131068,
+          "rawH": 7.823260750960277,
+          "deltaH": 7.980061582768599,
+          "firstBytes": [
+            144,
+            93,
+            129,
+            111,
+            233,
+            186
+          ]
+        },
+        {
+          "column": 1,
+          "n": 131068,
+          "rawH": 7.6907250849737325,
+          "deltaH": 7.884304636323474,
+          "firstBytes": [
+            155,
+            166,
+            253,
+            0,
+            39,
+            229
+          ]
+        }
+      ]
+    },
+    "roundtrip": true,
+    "encodeMs": 345.39002600000003,
+    "scope": "descriptive entropy/lag scan only, no full-file scan or compressed-size claim",
+    "maxRSSMiB": 63.734375
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "label": "collision-fixed",
+  "sourceCommit": "eb71c5c748aced5f8081af9c6e56f9f65e9fe2fd",
+  "workingSource": true,
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "bf6580e080ac4f70f9e47338dc801a7c60a466d73412cca087fcb2a7e6724c1d",
+    "codec.ts": "a8f297831ccb18d6e190cdc17b745fb37bf2870954092d91647e66231467837d",
+    "coder.ts": "bb775399134ccdbae66625c212affe958d9e7c7d41ed25478530b398fb96e05d",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "48b032f2e78de72b9e45becdf09fed9338a8821d683cbcfd2806c45ca476b2c2",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "313a7ccdd9a29aafa60da19196b2e25efe4369d3b28b4386b22a773cba9ab1dc",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "9a0990bb000531f70d37e740649fd06f922e6afdb4cafaf379803371f38eff23",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "b58046ed1889a509a4ccd5f9c0fbac0fd7fa4310b1df19ead1532a3af6ff491d",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "3012d499af496fe0d830d63b227669f03717ce8e9acba424a78af9d4f88d1592",
+  "probeSha256": "1fc02b0f28ff26b745369574258ba93aaaf98f466cfff576ae956a3010172414",
+  "runnerSha256": "057238aed1293b4ec4f866c5f4de70ef28ae9c10f0deeddfdfbc43ec26ef382e",
+  "bundleSha256": "e3e742e7859271288ef24a106914bd26ecc8f4a91fe5cd866d92bf3f62efdd82",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12-fix/run.mjs",
+    "collision-fixed"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 964,
+  "exitCode": 0,
+  "status": "PASS",
+  "stdout": "{\"scope\":\"synthetic explicit plan; serial; not a full-file/adaptive benchmark\",\"inputBytes\":4133,\"inputSha256\":\"4ad3071a2d54f526889b12f5978ba11d879db4cf181b18994357df7dc77357cd\",\"initialRules\":[{\"id\":10,\"s\":4,\"r\":1},{\"id\":22,\"s\":4,\"r\":1}],\"uncontested\":{\"bytes\":574,\"sha256\":\"86b81cd3f3ed1e982c2afef4348af6f402e38da48a37977b59e0042725f7d05f\",\"promoted\":{\"id\":22,\"s\":4,\"r\":1},\"roundtrip\":true},\"status\":\"PASS\",\"bytes\":791,\"containerSha256\":\"953066fa0396cf5d611068e1bf5123cc906692e09e821be6015ef2d18ced40b8\",\"finalRules\":[{\"id\":30,\"s\":4,\"r\":1},{\"id\":22,\"s\":4,\"r\":1}],\"roundtrip\":true}\n",
+  "stderr": "",
+  "result": {
+    "scope": "synthetic explicit plan; serial; not a full-file/adaptive benchmark",
+    "inputBytes": 4133,
+    "inputSha256": "4ad3071a2d54f526889b12f5978ba11d879db4cf181b18994357df7dc77357cd",
+    "initialRules": [
+      {
+        "id": 10,
+        "s": 4,
+        "r": 1
+      },
+      {
+        "id": 22,
+        "s": 4,
+        "r": 1
+      }
+    ],
+    "uncontested": {
+      "bytes": 574,
+      "sha256": "86b81cd3f3ed1e982c2afef4348af6f402e38da48a37977b59e0042725f7d05f",
+      "promoted": {
+        "id": 22,
+        "s": 4,
+        "r": 1
+      },
+      "roundtrip": true
+    },
+    "status": "PASS",
+    "bytes": 791,
+    "containerSha256": "953066fa0396cf5d611068e1bf5123cc906692e09e821be6015ef2d18ced40b8",
+    "finalRules": [
+      {
+        "id": 30,
+        "s": 4,
+        "r": 1
+      },
+      {
+        "id": 22,
+        "s": 4,
+        "r": 1
+      }
+    ],
+    "roundtrip": true
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "kind": "transcription-of-observed-agent-tool-results-not-an-independent-rerun",
+  "sourceCommitParent": "3ecd75ccb4fa8b681bb2cb2e5d9951eebebaef24",
+  "workingSource": true,
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "f39db04c365a43460cbacdee6765bce3030558c1f902671b11da9f5bba57cf46",
+    "coder.ts": "bb775399134ccdbae66625c212affe958d9e7c7d41ed25478530b398fb96e05d",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "0ef5ac0a4f4376aa1c4405faa52812b4f940c8c5b0897cf3b514f66613051e83",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "bad571c86c3ab0d73c132c909c3d4d44bb61a86842e74d22713c83c00b76c5b0",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "33393e64dafd270aec1ac4e2d99c819979a938447c3565100d32ee3667ea2a6f",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3",
+  "outerTimeout": "timeout --signal=KILL 19s",
+  "checks": [
+    {
+      "command": "npm run build:worker && npx tsc --noEmit && npx tsc --noEmit -p scripts/diag/p131/tsconfig.json",
+      "toolDurationMs": 8217,
+      "result": "PASS"
+    },
+    {
+      "command": "node tests/run-p131.mjs worker (initial execution)",
+      "toolDurationMs": 7242,
+      "result": "PASS"
+    },
+    {
+      "command": "P13.1 gate then test TypeScript (initial)",
+      "toolDurationMs": 8589,
+      "result": "FAIL: test-only TS18047 reply.cand possibly null; fixed with explicit assertion"
+    },
+    {
+      "command": "npx tsc --noEmit -p tests/tsconfig.p131.json && node tests/run-p131.mjs gate && p131 verifier --current",
+      "toolDurationMs": 4884,
+      "result": "PASS"
+    },
+    {
+      "command": "P13 policy + bcj-cache-worker + bcj-seams",
+      "toolDurationMs": 10229,
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check:worker && npm run build && baseline/diagnostics 22 node tests",
+      "toolDurationMs": 10005,
+      "result": "PASS"
+    },
+    {
+      "command": "P13 BIN screen + real worker",
+      "toolDurationMs": 13043,
+      "result": "PASS"
+    },
+    {
+      "command": "P12 historical decode + mixed/14 frozen fixtures + worker-plan",
+      "toolDurationMs": 6589,
+      "result": "PASS"
+    },
+    {
+      "command": "P131 source-scope/receipts verifier + P9 defaults 14 checks",
+      "toolDurationMs": 7112,
+      "result": "PASS"
+    },
+    {
+      "command": "P13 bcj-large-worker",
+      "toolDurationMs": 12647,
+      "result": "PASS"
+    },
+    {
+      "command": "P13 bcj three IDs + family",
+      "toolDurationMs": 8138,
+      "result": "PASS"
+    },
+    {
+      "command": "node tests/run-p131.mjs worker (after test null-guard assertion)",
+      "toolDurationMs": 7533,
+      "result": "PASS"
+    },
+    {
+      "command": "P13/P12 historical receipt verifiers + baseline unchanged check",
+      "toolDurationMs": 850,
+      "result": "PASS"
+    },
+    {
+      "command": "Final prepare/verifier/test-runner syntax + current receipts/scope + worker freshness + production/test TypeScript + diff check",
+      "toolDurationMs": 8370,
+      "result": "PASS"
+    },
+    {
+      "command": "Strengthened final verifier: three named groups match P12 prefix/body costs and P13 raw winners exactly; no WP-v15 probe",
+      "toolDurationMs": 230,
+      "result": "PASS"
+    }
+  ],
+  "fullCodecSuiteRun": false,
+  "fullCorpusEncodingRun": false,
+  "testFiles": {
+    "tests/p131.test.ts": "3686c3d7f2a2811efd2c2aff52a5c70fb192424b3d881c8402550cf3256c5b9b",
+    "tests/run-p131.mjs": "918030475766d68ca64a2d75c29381df5794aba2942f7eb587cd0c3dfe9a39c0",
+    "tests/tsconfig.p131.json": "0e6a2fd7bbf782c63b4c9030a90b1c7136789fc3ebdf9277d9a705cccba092c6"
+  }
+}

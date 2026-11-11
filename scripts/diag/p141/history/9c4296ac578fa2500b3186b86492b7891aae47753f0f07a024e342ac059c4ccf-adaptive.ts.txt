@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict'
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { compressAdaptive, decompress } from '@lib/codec'
+import { loadSlice, sha } from './input'
+const [,name,mode,requested]=process.argv.slice(2)
+const {data,input}=loadSlice(name,requested?Number(requested):undefined)
+const start=performance.now(),stages:{msg:string;pct:number;ms:number}[]=[]
+let last=0
+async function main() {
+ const result=await compressAdaptive(data,(msg,pct)=>{
+  const ms=Math.round(performance.now()-start);stages.push({msg,pct,ms})
+  if(ms-last>500){console.error(`${ms}ms ${Math.round(pct)}% ${msg}`);last=ms}
+ },{serial:true,contextCandidates:mode==='current'})
+ const encodeMs=Math.round(performance.now()-start),then=performance.now(),out=decompress(result.container)
+ assert.deepEqual(out,data);assert.equal(sha(out),input.sha256)
+ assert.equal(result.segs.reduce((n,s)=>n+s.compLen,0)+result.overhead,result.container.length)
+ const dir='.diag-state/p141-baselines',key=`${name}-${input.bytes}`
+ mkdirSync(dir,{recursive:true})
+ const record:any={test:'actual compressAdaptive -> production UCZ -> decompress',input,mode,scope:'unmodified adaptive chooser; no forced spec or plan',containerBytes:result.container.length,containerSha256:sha(result.container),version:result.container[3],headerBytes:result.overhead,
+  encodeMs,decodeMs:Math.round(performance.now()-then),roundtrip:true,decodedSha256:sha(out),contexts:result.contextComparison,
+  finalSpecs:[...new Set(result.segs.map(s=>`${s.spec.id}/${s.spec.s}/${s.spec.r}`))],stages:stages.slice(-200),fullFileMeasured:false}
+ if(mode==='old') {
+  const baseline={input,bytes:result.container.length,sha256:sha(result.container),sourceRef:process.env.P141_SOURCE_REF}
+  const file=`${dir}/${key}.json`,payload=`${dir}/${key}.ucz`
+  if(existsSync(file)) {assert.deepEqual(JSON.parse(readFileSync(file,'utf8')),baseline);assert.equal(sha(readFileSync(payload)),baseline.sha256)}
+  else {writeFileSync(file,JSON.stringify(baseline,null,2)+'\n',{flag:'wx'});writeFileSync(payload,result.container,{flag:'wx'})}
+ } else {
+  const baseline=JSON.parse(readFileSync(`${dir}/${key}.json`,'utf8'))
+  assert.deepEqual(baseline.input,input)
+  record.baselineBytes=baseline.bytes;record.savedBytes=baseline.bytes-result.container.length
+  record.baselineSource=baseline.sourceRef
+  if(mode==='off')assert.deepEqual(result.container,Uint8Array.from(readFileSync(`${dir}/${key}.ucz`)))
+  if(mode==='current') {
+   assert.ok(!result.contextComparison?.error,result.contextComparison?.error)
+   assert.ok(!result.contextComparison?.groups.some(g=>g.error),'candidate error must not masquerade as a tie')
+   assert.equal(result.contextComparison?.baselineBytes,baseline.bytes)
+  }
+  console.log(JSON.stringify(record))
+  assert.ok(result.container.length<=baseline.bytes,'per-file zero regression')
+  const matrix=JSON.parse(readFileSync('scripts/diag/p141/cases.json','utf8'))
+  const requirement=matrix.cases.find((c:any)=>c.slice===name&&c.bytes===input.bytes)
+  if(mode==='current'&&requirement?.requireDrop)assert.ok(result.container.length<baseline.bytes,'required adaptive endpoint size drop (not a forced-layout substitute)')
+  return
+ }
+ console.log(JSON.stringify(record))
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

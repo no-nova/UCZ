@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {bitplaneEntropyGate,bitplaneScreen,encodeBitplanes,decodeBitplanes,BITPLANE_SCREEN_THRESHOLD} from '../src/lib/bitplane'
+import {compressAdaptive,decompress} from '../src/lib/codec'
+// Deterministic proxy for AITDCC/L: planes 0..3 carry a 20-bit LFSR state (so the
+// order-16..20 conditional structure is real but only repeats a few times inside a
+// 256 KiB window, exactly the case the production screen must survive), planes 4..7
+// are xorshift noise. No claim that this reproduces L's numbers.
+function lfsr16(seed:number,n:number,noise:number){
+  let s=seed>>>0||1
+  const out=new Uint8Array(n),r=new Uint8Array(n)
+  let x=0x2545f4914f6cdd1d
+  for(let i=0;i<n;i++){x^=x<<13;x^=x>>>7;x^=x<<17;r[i]=x&255}
+  for(let i=0;i<n;i++){
+    let v=0
+    for(let b=0;b<8;b++){
+      let bit
+      if(b<4){bit=((s>>>15)^(s>>>13)^(s>>>12)^(s>>>10))&1;const st=((s<<1)|bit)&0xfffff;s=st;}
+      else bit=(r[i]>>>(b-4))&1
+      if(b<4&&r[i]/256<noise)bit^=1
+      v|=bit<<b
+    }
+    out[i]=v
+  }
+  return out
+}
+const neg=createHash('sha256')
+const [size='204800',pct='2']=process.argv.slice(2),n=Number(size),noise=Number(pct)/100
+const data=lfsr16(0x9e3779b9,n,noise)
+const rand=new Uint8Array(n)
+for(let off=0,c=0;off<n;off+=32,c++)rand.set(createHash('sha256').update(Buffer.from([c&255,c>>>8])).digest(),off)
+async function main(){
+ const screen=bitplaneScreen(data),rscreen=bitplaneScreen(rand)
+ const packed=encodeBitplanes(data,screen.entropies),rpacked=encodeBitplanes(rand,rscreen.entropies)
+ let ok=false,sizes:number[]=[]
+ if(packed){const dec=decodeBitplanes(packed,n);ok=Buffer.from(dec).equals(Buffer.from(data));sizes=[packed.length]}
+ const adaptive=await compressAdaptive(data,undefined,{serial:true})
+ const adaptiveOk=Buffer.from(decompress(adaptive.container)).equals(Buffer.from(data))
+ const randAdaptive=await compressAdaptive(rand,undefined,{serial:true})
+ console.log(JSON.stringify({n,noisePct:Number(pct),
+  screen:screen.entropies.map(x=>+x.toFixed(4)),selected:screen.entropies.map(h=>h<BITPLANE_SCREEN_THRESHOLD),orders:screen.orders,
+  packed:packed?.length??null,packedRoundtrip:ok,
+  randomScreen:rscreen.entropies.map(x=>+x.toFixed(4)),randomSelected:rscreen.entropies.some(h=>h<BITPLANE_SCREEN_THRESHOLD),randomPacked:rpacked?.length??null,
+  adaptive:{id:adaptive.segs[0]?.spec.id,ver:adaptive.container[3],bytes:adaptive.container.length,ok:adaptiveOk},
+  randomAdaptive:{id:randAdaptive.segs[0]?.spec.id,ver:randAdaptive.container[3],bytes:randAdaptive.container.length}}))
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

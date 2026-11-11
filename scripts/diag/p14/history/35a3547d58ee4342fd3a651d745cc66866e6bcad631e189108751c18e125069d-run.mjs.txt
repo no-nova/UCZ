@@ -1,0 +1,45 @@
+// ONE bounded probe per process. Always invoke under timeout --signal=KILL 19s.
+import { build } from 'esbuild'
+import { execFileSync,spawnSync } from 'node:child_process'
+import { readFileSync,writeFileSync,readdirSync,mkdirSync,existsSync } from 'node:fs'
+import { join,resolve } from 'node:path'
+import { createHash } from 'node:crypto'
+import { CASES,applyPatches } from './patches.mjs'
+const start=performance.now(),[unit,slice,variant,phase='audit']=process.argv.slice(2)
+const safe=x=>typeof x==='string'&&/^[a-z0-9][a-z0-9_.-]*$/i.test(x)
+if(!CASES[unit]?.includes(variant)||![slice,phase].every(safe))throw Error('run.mjs <unit1..unit4> <manifest-slice> <case> [unique-phase]')
+const sha=x=>createHash('sha256').update(x).digest('hex')
+const path=resolve(`scripts/diag/p14-results/${unit}/${slice}--${variant}--${phase}.json`)
+if(existsSync(path))throw Error(`Immutable receipt exists: ${path}`)
+mkdirSync(`scripts/diag/p14-results/${unit}`,{recursive:true})
+const sourceFiles=Object.fromEntries(readdirSync('src/lib').sort().filter(f=>f.endsWith('.ts')).map(f=>[f,sha(readFileSync(`src/lib/${f}`))]))
+const folder=resolve(`.diag-state/p14/${unit}-${slice}-${variant}-${phase}-${process.pid}`),lib=join(folder,'lib')
+mkdirSync(lib,{recursive:true});mkdirSync('scripts/diag/p14/history',{recursive:true})
+const scripts={}
+for(const name of readdirSync('scripts/diag/p14').filter(f=>/\.(ts|mjs|json)$/.test(f)).sort()) {
+ const bytes=readFileSync(`scripts/diag/p14/${name}`),h=sha(bytes);scripts[name]=h
+ const hist=`scripts/diag/p14/history/${h}-${name}.txt`;if(!existsSync(hist))writeFileSync(hist,bytes,{flag:'wx'})
+}
+const record={unit,slice,variant,phase,commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),node:process.version,
+ sourceFiles,sourceSha256:sha(JSON.stringify(sourceFiles)),scripts,patches:[],maxRawBytes:262144,maxCMBytes:524288,innerBudgetMs:17000,
+ status:'FAIL',fullCorpusEncoded:false,productionSourceModified:false}
+try {
+ for(const f of Object.keys(sourceFiles))writeFileSync(join(lib,f),readFileSync(`src/lib/${f}`))
+ const read=f=>readFileSync(join(lib,f),'utf8')
+ const patch=(file,from,to)=>{const s=read(file);if(s.split(from).length!==2)throw Error(`Expected unique ${file} patch: ${from.slice(0,120)}`);writeFileSync(join(lib,file),s.replace(from,to));record.patches.push({file,from,to})}
+ applyPatches(unit,variant,patch,read)
+ record.experimentalFiles=Object.fromEntries(Object.keys(sourceFiles).map(f=>[f,sha(readFileSync(join(lib,f)))]))
+ record.experimentalSha256=sha(JSON.stringify(record.experimentalFiles))
+ const bundle=join(folder,'probe.cjs')
+ await build({entryPoints:[`scripts/diag/p14/${unit}.ts`],bundle:true,platform:'node',format:'cjs',outfile:bundle,logLevel:'silent',plugins:[{name:'isolated-lib',setup(b){b.onResolve({filter:/^@lib\//},a=>({path:join(lib,a.path.slice(5)+'.ts')}))}}]})
+ record.bundleSha256=sha(readFileSync(bundle))
+ const r=spawnSync(process.execPath,[bundle,slice,variant],{encoding:'utf8',timeout:Math.max(1,17000-Math.ceil(performance.now()-start)),killSignal:'SIGKILL',maxBuffer:4*1024*1024})
+ Object.assign(record,{status:r.status===0&&!r.error?'PASS':'FAIL',exitCode:r.status,signal:r.signal,stdout:r.stdout,stderr:r.stderr,error:r.error?.message})
+ if(record.status==='PASS')record.result=JSON.parse(r.stdout.trim().split('\n').at(-1))
+} catch(e) {record.error=String(e?.stack??e)}
+record.durationMs=Math.round(performance.now()-start)
+for(const [f,h] of Object.entries(sourceFiles))if(sha(readFileSync(`src/lib/${f}`))!==h)throw Error(`PRODUCTION MUTATED: ${f}`)
+writeFileSync(path,JSON.stringify(record,null,2)+'\n',{flag:'wx'})
+const x=record.result
+console.log(JSON.stringify({receipt:path,status:record.status,durationMs:record.durationMs,unit,slice,variant,payloadBytes:x?.payloadBytes,roundtrip:x?.roundtrip,profile:x?.profile,spec:x?.spec,encodeMs:x?.encodeMs,decodeMs:x?.decodeMs,prepMs:x?.prepMs,analysisOnly:x?.analysisOnly,groups:x?.groups,error:record.error}))
+if(record.status!=='PASS'){if(record.stderr)console.error(record.stderr);process.exitCode=1}

@@ -1,0 +1,98 @@
+{
+  "phase": "p120",
+  "slice": "ooffice-code",
+  "case": "bcj",
+  "commit": "837250f8ca231062b5884de890e786d983603f60",
+  "workingSource": false,
+  "sourceSha256": "aa07af3f67a539de2a171a6fb6f2b94e52c13bd9128d75b903e5f213c546797d",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "probeSha256": "4c13e1521750ed9a8a299dbe4657735ed5e5442229c255bd20b808beba834bdd",
+  "runnerSha256": "a3017ab1af7717e15e59e51a25ab6ada8a3d4fdd6dc324e28c556b929b2e1c87",
+  "bundleSha256": "e82a027eb0ecdaf3ab94204a4b8df56a911a229822d6ddcbb2485537a0503cf1",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12-impl/run.mjs",
+    "p120",
+    "ooffice-code",
+    "bcj",
+    "837250f"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 8295,
+  "status": "PASS",
+  "stdout": "{\"input\":{\"name\":\"ooffice-code\",\"file\":\"ooffice\",\"offset\":4096,\"bytes\":262144,\"sha256\":\"634726a9a07d44bf12d81e951be43f0099e0300509a99667aa848cdb4019d033\",\"corpusBytes\":6152192,\"corpusSha256\":\"e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb\",\"source\":{\"repo\":\"yewq/Silesia-compression-corpus\",\"blob\":\"afa091f65b987c9c7a1e760add93189518b24ca1\",\"bytes\":6152192,\"sha256\":\"e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb\"},\"path\":\".diag-data/p12-slices/ooffice-code.bin\",\"selection\":\"PE .text\"},\"spec\":{\"id\":25,\"s\":1,\"r\":1},\"scope\":\"forced single production group; real base/v15/WORD-PRE strict complete-cost selection, not whole-file adaptive routing\",\"bytes\":101991,\"headerBytes\":20,\"version\":15,\"v15\":true,\"wordPre\":false,\"flags\":0,\"containerSha256\":\"10130e2a741e55ae812c6044621ce33590b9815ecfe3f293dfd54c31a009e63c\",\"roundtrip\":true,\"candidates\":[{\"bytes\":101991,\"v15\":true,\"wordPre\":false,\"flags\":0},{\"bytes\":103235,\"v15\":false,\"wordPre\":false,\"flags\":0}],\"encodeDecodeMs\":7935}\n",
+  "stderr": "",
+  "result": {
+    "input": {
+      "name": "ooffice-code",
+      "file": "ooffice",
+      "offset": 4096,
+      "bytes": 262144,
+      "sha256": "634726a9a07d44bf12d81e951be43f0099e0300509a99667aa848cdb4019d033",
+      "corpusBytes": 6152192,
+      "corpusSha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "afa091f65b987c9c7a1e760add93189518b24ca1",
+        "bytes": 6152192,
+        "sha256": "e7ee013880d34dd5208283d0d3d91b07f442e067454276095ded14f322a656eb"
+      },
+      "path": ".diag-data/p12-slices/ooffice-code.bin",
+      "selection": "PE .text"
+    },
+    "spec": {
+      "id": 25,
+      "s": 1,
+      "r": 1
+    },
+    "scope": "forced single production group; real base/v15/WORD-PRE strict complete-cost selection, not whole-file adaptive routing",
+    "bytes": 101991,
+    "headerBytes": 20,
+    "version": 15,
+    "v15": true,
+    "wordPre": false,
+    "flags": 0,
+    "containerSha256": "10130e2a741e55ae812c6044621ce33590b9815ecfe3f293dfd54c31a009e63c",
+    "roundtrip": true,
+    "candidates": [
+      {
+        "bytes": 101991,
+        "v15": true,
+        "wordPre": false,
+        "flags": 0
+      },
+      {
+        "bytes": 103235,
+        "v15": false,
+        "wordPre": false,
+        "flags": 0
+      }
+    ],
+    "encodeDecodeMs": 7935
+  }
+}

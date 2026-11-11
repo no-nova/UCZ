@@ -1,0 +1,21 @@
+{
+  "samples": [
+    {
+      "name": "sao-mid-256",
+      "file": "sao",
+      "offset": 3625972,
+      "bytes": 262144,
+      "sha256": "73b95e8503f082554472d60ead635a6e93d13df43525a8107b7684817fca226a",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "path": null,
+      "selection": "same precommitted sao-mid offset, extended by 8 bytes to exactly 256 KiB for implementation verification"
+    }
+  ]
+}

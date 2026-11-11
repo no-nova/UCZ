@@ -1,0 +1,4 @@
+iid-uniform     200000 ->    6601 v13 delta=0 accepted=[ctx:false macro:false orphan:false] rt=true
+iid-5sym        200000 ->    1282 v12 delta=0 accepted=[ctx:false macro:false orphan:false] rt=true
+constant        200000 ->      17 v7 delta=0 accepted=[ctx:false macro:false orphan:false] rt=true
+unique-4gram    200000 ->      27 v7 delta=0 accepted=[ctx:false macro:false orphan:false] rt=true

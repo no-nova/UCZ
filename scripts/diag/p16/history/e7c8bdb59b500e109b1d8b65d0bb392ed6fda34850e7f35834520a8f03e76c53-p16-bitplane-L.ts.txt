@@ -1,0 +1,49 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {bitplaneEntropyGate,bitplaneScreen,encodeBitplanes,decodeBitplanes,BITPLANE_SCREEN_THRESHOLD} from '../src/lib/bitplane'
+import {compressAdaptive,decompress} from '../src/lib/codec'
+
+// Bounded proxy for AITDCC/L: low planes driven by a 20-bit LFSR plus noise so
+// the true order-16 contingency still carries signal, high planes SHA-256.
+function synth(n:number,noise:number[]):Uint8Array {
+  const out=new Uint8Array(n),rnd=createHash('sha256'),key=Buffer.from('p16-L-proxy')
+  const stream=new Uint8Array(n+64);let off=0
+  const refill=()=>{const h=rnd.update(key).update(Buffer.from([off&255,(off>>>8)&255,(off>>>16)&255])).digest();stream.set(h,off);off+=32}
+  refill()
+  const states=noise.map((_,b)=>0x9e3779b9^(b*0x85ebca6b))
+  let rp=0
+  const byte=()=>{if(rp>=stream.length-1)refill();return stream[rp++]}
+  for(let i=0;i<n;i++){
+    let v=0
+    for(let b=0;b<8;b++){
+      const st=states[b],bit=((st>>>19)^(st>>>5)^(st>>>3)^(st>>>1))&1
+      let out=bit
+      if(b<4){const x=byte()/256;if(x<noise[b])out^=1}
+      else out=byte()&1
+      states[b]=((st<<1)|out)&0xfffff
+      v|=out<<b
+    }
+    out[i]=v
+  }
+  return out
+}
+const [size='204800']=process.argv.slice(2),n=Number(size)
+const data=synth(n,[0.06,0.18,0.36,0.56])
+const rand=new Uint8Array(n);{let p=0;for(let i=0;i<64;i++){const h=createHash('sha256').update(Buffer.from([i])).digest();rand.set(h,Math.min(p,n));p+=32}}
+async function main(){
+ const screen=bitplaneScreen(data),rscreen=bitplaneScreen(rand)
+ const compressed=encodeBitplanes(data,screen.entropies)
+ const csize=compressed?compressed.length:null
+ const adaptive=await compressAdaptive(data,undefined,{serial:true})
+ const ok=Buffer.from(decompress(adaptive.container)).equals(Buffer.from(data))
+ const randAdaptive=await compressAdaptive(rand,undefined,{serial:true})
+ const planeSizes=screen.entropies.map((h,b)=>{
+  const q=Math.floor(n/8),p=new Uint8Array(q)
+  for(let i=0;i<q*8;i++)p[i>>>3]|=((data[i]>>>b)&1)<<(i&7)
+  return {b,h:+h.toFixed(4),packed:q}
+ })
+ console.log(JSON.stringify({n,gate:bitplaneEntropyGate(data),screen:screen.entropies.map(x=>+x.toFixed(4)),selected:screen.entropies.map(h=>h<BITPLANE_SCREEN_THRESHOLD),
+  packedSize:csize,adaptive:{bytes:adaptive.container.length,ver:adaptive.container[3],ok,id:adaptive.segs[0]?.spec.id},
+  random:{screen:rscreen.entropies.map(x=>+x.toFixed(4)),gate:bitplaneEntropyGate(rand),packed:encodeBitplanes(rand,rscreen.entropies)?.length??null,bytes:randAdaptive.container.length,id:randAdaptive.segs[0]?.spec.id},planeSizes}))
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

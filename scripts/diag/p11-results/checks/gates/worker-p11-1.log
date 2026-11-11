@@ -1,0 +1,5 @@
+
+> react-vite-tailwind@0.0.0 check:worker
+> node scripts/build-worker-code.mjs --check
+
+parallel-worker-code.ts 是最新的

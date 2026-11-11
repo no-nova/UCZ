@@ -1,0 +1,50 @@
+{
+  "kind": "independent-historical-small-references",
+  "maxActualInputBytes": 49152,
+  "references": {
+    "p10": {
+      "commit": "d4bf4d836aec2616b53ee79fc1f628f00ab93bce",
+      "sourceFiles": {
+        "src/lib/analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+        "src/lib/anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+        "src/lib/byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+        "src/lib/codec-jobs.ts": "92d16ae81af9aad184ad28c36df5cdbc1a020fee4bc8cd3da882a358b11d4f8b",
+        "src/lib/codec.ts": "43f0cfd481f5a1cc53579a29ff39109343180376508818659be6f8bb24636e8a",
+        "src/lib/coder.ts": "4f68e337a650b7ca6de05bb1457c8f35cd4eb7885ed5a19af3005f070faecef7",
+        "src/lib/compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+        "src/lib/limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+        "src/lib/lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+        "src/lib/micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+        "src/lib/parallel-jobs.ts": "5f57c42e842592c68cb1b490359f8a05e3d660405f2c7e8f58cb9bbad45816cf",
+        "src/lib/parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+        "src/lib/parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+        "src/lib/parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+        "src/lib/parallel-worker-code.ts": "6cbd0f20a52abe0567d7d9148da8e5e09f5124b8f8084a31f7d389785d9d3221",
+        "src/lib/parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+        "src/lib/parallel.ts": "600680d914ab38b7c0aa57f4dfc588a764bb2b6cb7d3dd0ea9f922cf7bb69dec",
+        "src/lib/payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+        "src/lib/samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+        "src/lib/sub-peel.ts": "6461b2927d5281adda0c4eaca03e990263fe54c6500cde6c7d9300955ec6c6fe",
+        "src/lib/transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+        "src/lib/transpose2d.ts": "8706d002b9212d807177d4bd29bee05c0b85112e598296547a279948bbd2bba4",
+        "src/lib/unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+        "src/lib/viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+        "src/lib/wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+      },
+      "containers": [
+        {
+          "name": "guarded-wordpre",
+          "inputBytes": 49152,
+          "inputSha256": "ab94d53694ba57aac51c5e2cf5b47e4f87ca8e7f7c78c3dba8a49123af694b45",
+          "bytes": 111,
+          "version": 13,
+          "sha256": "5c0f26f5362b9d5a8c728799d1e414be4a24107d7ff4ef595cb0667eae7b914f",
+          "base64": "VUNaDYCAAwEBFwEBX4CAA57JLfEfoTG/Uk284Lfk2sGTXtxBtzEynmyr54w4f8+JjpYSiZp7rxdUbRll0Cinm7/HfbJGQZfDiBYQHtpUnND0tY879MInFp6+IiulDxB1uXwdS6Zr/F6RrHdfgURY",
+          "orphan": null,
+          "macro": null
+        }
+      ],
+      "models": []
+    }
+  }
+}

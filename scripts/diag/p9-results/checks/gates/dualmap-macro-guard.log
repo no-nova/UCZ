@@ -1,0 +1,48 @@
+
+=== dickens (40000 B, 2 分片) ===
+-- 双流覆盖规则 --
+  wide_grad s=1  alt=OK base==v13:no(mht8)  v13=22764 v15=22337 dual=22337
+  wide_grad s=2  alt=OK base==v13:YES  v13=32003 v15=31999 dual=31999
+  text_v3        alt=OK base==v13:no(mht8)  v13=12870 v15=12872 dual=12872
+  bin_v3         alt=OK base==v13:no(mht8)  v13=13218 v15=13149 dual=13149
+  bcj_v3         alt=OK base==v13:no(mht8)  v13=13218 v15=13149 dual=13149
+  delta_v3       alt=OK base==v13:YES  v13=28857 v15=28793 dual=28793
+  grad_v3        alt=OK base==v13:YES  v13=33621 v15=33505 dual=33505
+-- v2 家族是否可纳入双流 --
+  text_v2        多分片等价=OK  单分片等价=MISMATCH(encodeSpec 走 v2 拓扑)  v15=12872
+                 → 不纳入双流：单/多分片不同构，且两者都只需一遍编码，无提速收益
+  bin_v2         多分片等价=OK  单分片等价=MISMATCH(encodeSpec 走 v2 拓扑)  v15=13149
+                 → 不纳入双流：单/多分片不同构，且两者都只需一遍编码，无提速收益
+  bcj_v2         多分片等价=OK  单分片等价=OK  v15=13149
+  grad_v2        多分片等价=OK  单分片等价=OK  v15=33505
+-- 旧规则（不在 V15_PROFILES）--
+  text           不覆盖（v15 走单跑回退）
+  bcj            不覆盖（v15 走单跑回退）
+  delta          不覆盖（v15 走单跑回退）
+  grad           不覆盖（v15 走单跑回退）
+  d16            不覆盖（v15 走单跑回退）
+
+=== xml (40000 B, 2 分片) ===
+-- 双流覆盖规则 --
+  wide_grad s=1  alt=OK base==v13:no(mht8)  v13=6914 v15=5526 dual=5526
+  wide_grad s=2  alt=OK base==v13:YES  v13=27040 v15=27151 dual=27151
+  text_v3        alt=OK base==v13:no(mht8)  v13=2585 v15=2568 dual=2568
+  bin_v3         alt=OK base==v13:no(mht8)  v13=2744 v15=2641 dual=2641
+  bcj_v3         alt=OK base==v13:no(mht8)  v13=2744 v15=2641 dual=2641
+  delta_v3       alt=OK base==v13:YES  v13=6872 v15=6962 dual=6962
+  grad_v3        alt=OK base==v13:YES  v13=18825 v15=18903 dual=18903
+-- v2 家族是否可纳入双流 --
+  text_v2        多分片等价=OK  单分片等价=MISMATCH(encodeSpec 走 v2 拓扑)  v15=2568
+                 → 不纳入双流：单/多分片不同构，且两者都只需一遍编码，无提速收益
+  bin_v2         多分片等价=OK  单分片等价=MISMATCH(encodeSpec 走 v2 拓扑)  v15=2641
+                 → 不纳入双流：单/多分片不同构，且两者都只需一遍编码，无提速收益
+  bcj_v2         多分片等价=OK  单分片等价=OK  v15=2641
+  grad_v2        多分片等价=OK  单分片等价=OK  v15=18903
+-- 旧规则（不在 V15_PROFILES）--
+  text           不覆盖（v15 走单跑回退）
+  bcj            不覆盖（v15 走单跑回退）
+  delta          不覆盖（v15 走单跑回退）
+  grad           不覆盖（v15 走单跑回退）
+  d16            不覆盖（v15 走单跑回退）
+
+双流等价性全部通过

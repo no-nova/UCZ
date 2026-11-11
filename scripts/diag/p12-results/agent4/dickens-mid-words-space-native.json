@@ -1,0 +1,725 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "dickens-mid",
+  "variant": "words-space",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "dickens-mid",
+    "words-space"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "4f48edc164e0fed5f869ff3120174ee9a5e8b2b3182930741214efb4f312c298"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 5761,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "dickens-mid",
+      "file": "dickens",
+      "offset": 5095936,
+      "bytes": 262144,
+      "sha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a",
+      "corpusBytes": 10192446,
+      "corpusSha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c02047fdd075ed66e470ba8064d0263a94bb361d",
+        "bytes": 10192446,
+        "sha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a"
+    },
+    "variant": "words-space",
+    "cmBytes": 73167,
+    "payloadBytes": 73171,
+    "bytes": 73192,
+    "outerHeaderBytes": 21,
+    "containerSha256": "9083e13739278ab3ec344bf0301a2fb6722670eeb5f49c304d3bf1db860bbc6d",
+    "payloadSha256": "9c2399bfb1be9d37b0f5993dcbd43da4cafcf80ec72721da9530974436b968ac",
+    "roundtrip": true,
+    "preprocessMs": 150.910076,
+    "encodeDecodeMs": 5449.071,
+    "short": {
+      "dictTokens": 120,
+      "one": 120,
+      "two": 0,
+      "headerRawBytes": 716,
+      "bodyRawBytes": 190185,
+      "cmInputBytes": 190901,
+      "bodyRatio": 0.7254981994628906,
+      "coverage": 0.3658714294433594,
+      "spaceSuffixHits": 19176,
+      "punctuationSuffixHits": 0,
+      "oneHits": 23952,
+      "twoHits": 0,
+      "unusedTokens": 0,
+      "escapedOriginalBytes": 0,
+      "wordStats": {
+        "distinctCandidates": 10543,
+        "totalWords": 44629,
+        "totalWordBytes": 194044
+      }
+    },
+    "usage": {
+      "oneHits": 23952,
+      "twoHits": 0,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 166233,
+      "coveredOriginalBytes": 95911,
+      "coverage": 0.3658714294433594,
+      "spaceSuffixHits": 19176,
+      "punctuationSuffixHits": 0,
+      "unusedTokens": 0,
+      "entries": [
+        {
+          "word": "the ",
+          "hits": 1485,
+          "tier": 1
+        },
+        {
+          "word": "and ",
+          "hits": 1378,
+          "tier": 1
+        },
+        {
+          "word": "to ",
+          "hits": 1345,
+          "tier": 1
+        },
+        {
+          "word": "that ",
+          "hits": 585,
+          "tier": 1
+        },
+        {
+          "word": "of ",
+          "hits": 1020,
+          "tier": 1
+        },
+        {
+          "word": "was ",
+          "hits": 596,
+          "tier": 1
+        },
+        {
+          "word": "with ",
+          "hits": 372,
+          "tier": 1
+        },
+        {
+          "word": "in ",
+          "hits": 759,
+          "tier": 1
+        },
+        {
+          "word": "her ",
+          "hits": 587,
+          "tier": 1
+        },
+        {
+          "word": "said ",
+          "hits": 327,
+          "tier": 1
+        },
+        {
+          "word": "had ",
+          "hits": 381,
+          "tier": 1
+        },
+        {
+          "word": "my ",
+          "hits": 559,
+          "tier": 1
+        },
+        {
+          "word": "for ",
+          "hits": 333,
+          "tier": 1
+        },
+        {
+          "word": "have ",
+          "hits": 244,
+          "tier": 1
+        },
+        {
+          "word": "Peggotty",
+          "hits": 150,
+          "tier": 1
+        },
+        {
+          "word": "his ",
+          "hits": 325,
+          "tier": 1
+        },
+        {
+          "word": "little ",
+          "hits": 143,
+          "tier": 1
+        },
+        {
+          "word": "she ",
+          "hits": 283,
+          "tier": 1
+        },
+        {
+          "word": "which ",
+          "hits": 152,
+          "tier": 1
+        },
+        {
+          "word": "Copperfield",
+          "hits": 76,
+          "tier": 1
+        },
+        {
+          "word": "not ",
+          "hits": 255,
+          "tier": 1
+        },
+        {
+          "word": "you ",
+          "hits": 241,
+          "tier": 1
+        },
+        {
+          "word": "it ",
+          "hits": 398,
+          "tier": 1
+        },
+        {
+          "word": "as ",
+          "hits": 388,
+          "tier": 1
+        },
+        {
+          "word": "should ",
+          "hits": 109,
+          "tier": 1
+        },
+        {
+          "word": "he ",
+          "hits": 377,
+          "tier": 1
+        },
+        {
+          "word": "when ",
+          "hits": 154,
+          "tier": 1
+        },
+        {
+          "word": "at ",
+          "hits": 438,
+          "tier": 1
+        },
+        {
+          "word": "but ",
+          "hits": 202,
+          "tier": 1
+        },
+        {
+          "word": "Traddles",
+          "hits": 84,
+          "tier": 1
+        },
+        {
+          "word": "would ",
+          "hits": 117,
+          "tier": 1
+        },
+        {
+          "word": "this ",
+          "hits": 140,
+          "tier": 1
+        },
+        {
+          "word": "on ",
+          "hits": 537,
+          "tier": 1
+        },
+        {
+          "word": "were ",
+          "hits": 133,
+          "tier": 1
+        },
+        {
+          "word": "Micawber",
+          "hits": 82,
+          "tier": 1
+        },
+        {
+          "word": "from ",
+          "hits": 131,
+          "tier": 1
+        },
+        {
+          "word": "could ",
+          "hits": 100,
+          "tier": 1
+        },
+        {
+          "word": "about ",
+          "hits": 94,
+          "tier": 1
+        },
+        {
+          "word": "all ",
+          "hits": 208,
+          "tier": 1
+        },
+        {
+          "word": "be ",
+          "hits": 232,
+          "tier": 1
+        },
+        {
+          "word": "very ",
+          "hits": 120,
+          "tier": 1
+        },
+        {
+          "word": "him",
+          "hits": 229,
+          "tier": 1
+        },
+        {
+          "word": "Dora",
+          "hits": 167,
+          "tier": 1
+        },
+        {
+          "word": "what ",
+          "hits": 114,
+          "tier": 1
+        },
+        {
+          "word": "Miss ",
+          "hits": 116,
+          "tier": 1
+        },
+        {
+          "word": "there",
+          "hits": 132,
+          "tier": 1
+        },
+        {
+          "word": "me",
+          "hits": 1099,
+          "tier": 1
+        },
+        {
+          "word": "myself",
+          "hits": 82,
+          "tier": 1
+        },
+        {
+          "word": "been ",
+          "hits": 102,
+          "tier": 1
+        },
+        {
+          "word": "aunt",
+          "hits": 149,
+          "tier": 1
+        },
+        {
+          "word": "being ",
+          "hits": 77,
+          "tier": 1
+        },
+        {
+          "word": "Spenlow",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "thought",
+          "hits": 78,
+          "tier": 1
+        },
+        {
+          "word": "Mr",
+          "hits": 462,
+          "tier": 1
+        },
+        {
+          "word": "before",
+          "hits": 73,
+          "tier": 1
+        },
+        {
+          "word": "upon ",
+          "hits": 86,
+          "tier": 1
+        },
+        {
+          "word": "think",
+          "hits": 101,
+          "tier": 1
+        },
+        {
+          "word": "know",
+          "hits": 151,
+          "tier": 1
+        },
+        {
+          "word": "returned",
+          "hits": 47,
+          "tier": 1
+        },
+        {
+          "word": "if ",
+          "hits": 162,
+          "tier": 1
+        },
+        {
+          "word": "is ",
+          "hits": 183,
+          "tier": 1
+        },
+        {
+          "word": "into ",
+          "hits": 78,
+          "tier": 1
+        },
+        {
+          "word": "more",
+          "hits": 105,
+          "tier": 1
+        },
+        {
+          "word": "so ",
+          "hits": 157,
+          "tier": 1
+        },
+        {
+          "word": "out ",
+          "hits": 104,
+          "tier": 1
+        },
+        {
+          "word": "than ",
+          "hits": 74,
+          "tier": 1
+        },
+        {
+          "word": "never ",
+          "hits": 59,
+          "tier": 1
+        },
+        {
+          "word": "by ",
+          "hits": 151,
+          "tier": 1
+        },
+        {
+          "word": "down",
+          "hits": 95,
+          "tier": 1
+        },
+        {
+          "word": "looking ",
+          "hits": 40,
+          "tier": 1
+        },
+        {
+          "word": "went ",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "some ",
+          "hits": 72,
+          "tier": 1
+        },
+        {
+          "word": "such ",
+          "hits": 68,
+          "tier": 1
+        },
+        {
+          "word": "much",
+          "hits": 91,
+          "tier": 1
+        },
+        {
+          "word": "himself",
+          "hits": 45,
+          "tier": 1
+        },
+        {
+          "word": "good ",
+          "hits": 66,
+          "tier": 1
+        },
+        {
+          "word": "Agnes",
+          "hits": 65,
+          "tier": 1
+        },
+        {
+          "word": "quite ",
+          "hits": 51,
+          "tier": 1
+        },
+        {
+          "word": "made ",
+          "hits": 63,
+          "tier": 1
+        },
+        {
+          "word": "dear",
+          "hits": 92,
+          "tier": 1
+        },
+        {
+          "word": "nothing",
+          "hits": 42,
+          "tier": 1
+        },
+        {
+          "word": "don't ",
+          "hits": 51,
+          "tier": 1
+        },
+        {
+          "word": "without ",
+          "hits": 36,
+          "tier": 1
+        },
+        {
+          "word": "Mills",
+          "hits": 71,
+          "tier": 1
+        },
+        {
+          "word": "like ",
+          "hits": 66,
+          "tier": 1
+        },
+        {
+          "word": "looked ",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": "great ",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": "ever",
+          "hits": 172,
+          "tier": 1
+        },
+        {
+          "word": "herself",
+          "hits": 40,
+          "tier": 1
+        },
+        {
+          "word": "one ",
+          "hits": 152,
+          "tier": 1
+        },
+        {
+          "word": "we ",
+          "hits": 123,
+          "tier": 1
+        },
+        {
+          "word": "an ",
+          "hits": 253,
+          "tier": 1
+        },
+        {
+          "word": "night",
+          "hits": 74,
+          "tier": 1
+        },
+        {
+          "word": "or ",
+          "hits": 199,
+          "tier": 1
+        },
+        {
+          "word": "they ",
+          "hits": 58,
+          "tier": 1
+        },
+        {
+          "word": "them",
+          "hits": 81,
+          "tier": 1
+        },
+        {
+          "word": "again",
+          "hits": 77,
+          "tier": 1
+        },
+        {
+          "word": "your ",
+          "hits": 57,
+          "tier": 1
+        },
+        {
+          "word": "after ",
+          "hits": 45,
+          "tier": 1
+        },
+        {
+          "word": "'I ",
+          "hits": 109,
+          "tier": 1
+        },
+        {
+          "word": "any ",
+          "hits": 107,
+          "tier": 1
+        },
+        {
+          "word": "come ",
+          "hits": 63,
+          "tier": 1
+        },
+        {
+          "word": "going",
+          "hits": 55,
+          "tier": 1
+        },
+        {
+          "word": "will ",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": "might ",
+          "hits": 44,
+          "tier": 1
+        },
+        {
+          "word": "where ",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": "head",
+          "hits": 79,
+          "tier": 1
+        },
+        {
+          "word": "time",
+          "hits": 114,
+          "tier": 1
+        },
+        {
+          "word": "Steerforth",
+          "hits": 25,
+          "tier": 1
+        },
+        {
+          "word": "believe",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": "morning",
+          "hits": 37,
+          "tier": 1
+        },
+        {
+          "word": "how ",
+          "hits": 81,
+          "tier": 1
+        },
+        {
+          "word": "The ",
+          "hits": 76,
+          "tier": 1
+        },
+        {
+          "word": "hand",
+          "hits": 118,
+          "tier": 1
+        },
+        {
+          "word": "came ",
+          "hits": 65,
+          "tier": 1
+        },
+        {
+          "word": "old ",
+          "hits": 119,
+          "tier": 1
+        },
+        {
+          "word": "always ",
+          "hits": 33,
+          "tier": 1
+        },
+        {
+          "word": "over ",
+          "hits": 58,
+          "tier": 1
+        },
+        {
+          "word": "something",
+          "hits": 26,
+          "tier": 1
+        },
+        {
+          "word": "must ",
+          "hits": 48,
+          "tier": 1
+        }
+      ]
+    },
+    "scope": "actual existing v1 WORD-PRE UCZ single TEXT3 group, dictionary and length prefix and model/header flags fully charged; forced dictionary, not chooser",
+    "maxRSSMiB": 190.9375
+  }
+}

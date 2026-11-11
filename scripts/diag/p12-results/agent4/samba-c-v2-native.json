@@ -1,0 +1,2036 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "samba-c",
+  "variant": "v2",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "samba-c",
+    "v2"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "05fdd94a700d960bad4185866261745cb1c9f3819de8d6ca36d01b7db0ae3318"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 3895,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "samba-c",
+      "file": "samba",
+      "offset": 18606080,
+      "bytes": 262144,
+      "sha256": "d935d92a16819cfa0c32ad5feb3e5eb8021b85b987bb694014337c89400dee71",
+      "corpusBytes": 21606400,
+      "corpusSha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "34d2354f16add86d73d073109b583364b86648b0",
+        "bytes": 21606400,
+        "sha256": "93ba07bc44d8267789c1d911992f40b089ffa2140b4a160fac11ccae9a40e7b2"
+      },
+      "selection": "starts in identified C source; 219702 B member plus following contiguous tar data; first128KiB entirely C",
+      "parentSliceSha256": "d935d92a16819cfa0c32ad5feb3e5eb8021b85b987bb694014337c89400dee71"
+    },
+    "variant": "v2",
+    "cmBytes": 34488,
+    "payloadBytes": 34493,
+    "bytes": 34493,
+    "outerHeaderBytes": null,
+    "containerSha256": null,
+    "payloadSha256": "cdee1fca7a2011febea686a30636507f73101ed7afb84fb0e006398f785183d2",
+    "roundtrip": true,
+    "preprocessMs": 1889.987651,
+    "encodeDecodeMs": 3609.234256,
+    "short": {
+      "dictTokens": 383,
+      "one": 127,
+      "two": 256,
+      "headerRawBytes": 3362,
+      "bodyRawBytes": 186806,
+      "cmInputBytes": 190168,
+      "bodyRatio": 0.7126083374023438,
+      "coverage": 0.3648109436035156,
+      "spaceSuffixHits": 4540,
+      "punctuationSuffixHits": 44,
+      "oneHits": 9766,
+      "twoHits": 5264,
+      "unusedTokens": 200,
+      "escapedOriginalBytes": 1,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 9766,
+      "twoHits": 5264,
+      "escapedOriginalBytes": 1,
+      "literalOriginalBytes": 166511,
+      "coveredOriginalBytes": 95633,
+      "coverage": 0.3648109436035156,
+      "spaceSuffixHits": 4540,
+      "punctuationSuffixHits": 44,
+      "unusedTokens": 200,
+      "entries": [
+        {
+          "word": "printer",
+          "hits": 302,
+          "tier": 1
+        },
+        {
+          "word": "      ",
+          "hits": 55,
+          "tier": 1
+        },
+        {
+          "word": "       ",
+          "hits": 44,
+          "tier": 1
+        },
+        {
+          "word": "     ",
+          "hits": 81,
+          "tier": 1
+        },
+        {
+          "word": "        ",
+          "hits": 61,
+          "tier": 1
+        },
+        {
+          "word": "rinter",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "         ",
+          "hits": 13,
+          "tier": 1
+        },
+        {
+          "word": "    ",
+          "hits": 116,
+          "tier": 1
+        },
+        {
+          "word": "          ",
+          "hits": 5,
+          "tier": 1
+        },
+        {
+          "word": "           ",
+          "hits": 6,
+          "tier": 1
+        },
+        {
+          "word": "return ",
+          "hits": 192,
+          "tier": 1
+        },
+        {
+          "word": "return",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": "printe",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": "            ",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": "print",
+          "hits": 164,
+          "tier": 1
+        },
+        {
+          "word": "inter",
+          "hits": 8,
+          "tier": 1
+        },
+        {
+          "word": "rinte",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "   ",
+          "hits": 144,
+          "tier": 1
+        },
+        {
+          "word": "rint",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": "int",
+          "hits": 16,
+          "tier": 1
+        },
+        {
+          "word": "nter",
+          "hits": 27,
+          "tier": 1
+        },
+        {
+          "word": "inte",
+          "hits": 5,
+          "tier": 1
+        },
+        {
+          "word": "prin",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "rin",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": "info",
+          "hits": 342,
+          "tier": 1
+        },
+        {
+          "word": "uint32 ",
+          "hits": 210,
+          "tier": 1
+        },
+        {
+          "word": "data",
+          "hits": 578,
+          "tier": 1
+        },
+        {
+          "word": "uint32",
+          "hits": 21,
+          "tier": 1
+        },
+        {
+          "word": "ter",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": "nte",
+          "hits": 10,
+          "tier": 1
+        },
+        {
+          "word": "return WERR_",
+          "hits": 289,
+          "tier": 1
+        },
+        {
+          "word": "pri",
+          "hits": 33,
+          "tier": 1
+        },
+        {
+          "word": "eturn",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": "retur",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_printer",
+          "hits": 89,
+          "tier": 1
+        },
+        {
+          "word": "buffer",
+          "hits": 114,
+          "tier": 1
+        },
+        {
+          "word": "eturn ",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": "eturn WERR_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "return WERR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "_printe",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "eturn WERR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "return WER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "turn WERR_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "needed",
+          "hits": 151,
+          "tier": 1
+        },
+        {
+          "word": "driver",
+          "hits": 287,
+          "tier": 1
+        },
+        {
+          "word": "the ",
+          "hits": 16,
+          "tier": 1
+        },
+        {
+          "word": "handle",
+          "hits": 264,
+          "tier": 1
+        },
+        {
+          "word": "_print",
+          "hits": 31,
+          "tier": 1
+        },
+        {
+          "word": "etur",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "turn",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "turn ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "eturn WER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "return WE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "turn WERR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "urn WERR_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "printer_",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": "retu",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "rinter_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "PRINTER",
+          "hits": 57,
+          "tier": 1
+        },
+        {
+          "word": "if ",
+          "hits": 548,
+          "tier": 1
+        },
+        {
+          "word": "snum",
+          "hits": 382,
+          "tier": 1
+        },
+        {
+          "word": "Printer",
+          "hits": 223,
+          "tier": 1
+        },
+        {
+          "word": "returned",
+          "hits": 156,
+          "tier": 1
+        },
+        {
+          "word": "info_",
+          "hits": 167,
+          "tier": 1
+        },
+        {
+          "word": "static ",
+          "hits": 178,
+          "tier": 1
+        },
+        {
+          "word": "PRINTER_",
+          "hits": 57,
+          "tier": 1
+        },
+        {
+          "word": "name",
+          "hits": 338,
+          "tier": 1
+        },
+        {
+          "word": "_printer_",
+          "hits": 88,
+          "tier": 1
+        },
+        {
+          "word": "notify_data",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": "eturn WE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "return W",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "rn WERR_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "turn WER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "urn WERR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "struct",
+          "hits": 135,
+          "tier": 1
+        },
+        {
+          "word": "nfo",
+          "hits": 2,
+          "tier": 1
+        },
+        {
+          "word": "inf",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "DEBUG",
+          "hits": 212,
+          "tier": 1
+        },
+        {
+          "word": "init_unistr",
+          "hits": 100,
+          "tier": 1
+        },
+        {
+          "word": "PRINTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "spoolss_",
+          "hits": 57,
+          "tier": 1
+        },
+        {
+          "word": "_prin",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "inter_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "RINTER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "status",
+          "hits": 200,
+          "tier": 1
+        },
+        {
+          "word": "RINTER_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "pipes_struct",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "static",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "printer ",
+          "hits": 55,
+          "tier": 1
+        },
+        {
+          "word": "tur",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": " = ",
+          "hits": 761,
+          "tier": 1
+        },
+        {
+          "word": "the",
+          "hits": 25,
+          "tier": 1
+        },
+        {
+          "word": "notify",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": "devmode",
+          "hits": 144,
+          "tier": 1
+        },
+        {
+          "word": "urn ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "eturn W",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "n WERR_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "rn WERR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "turn WE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "urn WER",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "spoolss",
+          "hits": 6,
+          "tier": 1
+        },
+        {
+          "word": "PRINT",
+          "hits": 43,
+          "tier": 1
+        },
+        {
+          "word": "str",
+          "hits": 178,
+          "tier": 1
+        },
+        {
+          "word": "_info",
+          "hits": 103,
+          "tier": 1
+        },
+        {
+          "word": "ret",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": " WERR_",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": "info_2",
+          "hits": 139,
+          "tier": 1
+        },
+        {
+          "word": "dat",
+          "hits": 46,
+          "tier": 1
+        },
+        {
+          "word": "poolss_",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "nfo_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " the ",
+          "hits": 388,
+          "tier": 1
+        },
+        {
+          "word": "INTER",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": "SAFE_FREE",
+          "hits": 101,
+          "tier": 1
+        },
+        {
+          "word": "ata",
+          "hits": 23,
+          "tier": 1
+        },
+        {
+          "word": "offered",
+          "hits": 100,
+          "tier": 1
+        },
+        {
+          "word": "_NOTIFY_",
+          "hits": 100,
+          "tier": 1
+        },
+        {
+          "word": "etu",
+          "hits": 5,
+          "tier": 1
+        },
+        {
+          "word": "num",
+          "hits": 325,
+          "tier": 1
+        },
+        {
+          "word": "urn",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "int32 ",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "nter_",
+          "hits": 10,
+          "tier": 1
+        },
+        {
+          "word": " WERR",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "sizeof",
+          "hits": 152,
+          "tier": 1
+        },
+        {
+          "word": "RINTE",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "INTER_",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "river",
+          "hits": 10,
+          "tier": 1
+        },
+        {
+          "word": "notify_",
+          "hits": 146,
+          "tier": 1
+        },
+        {
+          "word": "servername",
+          "hits": 85,
+          "tier": 2
+        },
+        {
+          "word": "WERR_INSUFFICIENT_BUFFER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NT_PRINTER_INFO_LEVEL ",
+          "hits": 63,
+          "tier": 2
+        },
+        {
+          "word": "struct ",
+          "hits": 36,
+          "tier": 2
+        },
+        {
+          "word": "WERROR ",
+          "hits": 121,
+          "tier": 2
+        },
+        {
+          "word": "NT_PRINTER_INFO_LEVEL",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": " printer",
+          "hits": 139,
+          "tier": 2
+        },
+        {
+          "word": "_info_",
+          "hits": 98,
+          "tier": 2
+        },
+        {
+          "word": "n WERR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rn WER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "turn W",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "urn WE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NOTIFY_",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "_NOTIFY",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "poolss",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "spools",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "num_entries",
+          "hits": 70,
+          "tier": 2
+        },
+        {
+          "word": "drive",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_INFO",
+          "hits": 38,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_INFO_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "oolss_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " print",
+          "hits": 26,
+          "tier": 2
+        },
+        {
+          "word": "string",
+          "hits": 60,
+          "tier": 2
+        },
+        {
+          "word": "_struct ",
+          "hits": 50,
+          "tier": 2
+        },
+        {
+          "word": "ntprinter",
+          "hits": 76,
+          "tier": 2
+        },
+        {
+          "word": "architecture",
+          "hits": 53,
+          "tier": 2
+        },
+        {
+          "word": "struc",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "truct",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ZERO_STRUCT",
+          "hits": 62,
+          "tier": 2
+        },
+        {
+          "word": "buffe",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "uffer",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "WERR_",
+          "hits": 13,
+          "tier": 2
+        },
+        {
+          "word": ">notify_data",
+          "hits": 101,
+          "tier": 2
+        },
+        {
+          "word": "a->notify_da",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "notify_data.",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "int32",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "_INFO_",
+          "hits": 58,
+          "tier": 2
+        },
+        {
+          "word": "otify_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "printer,",
+          "hits": 44,
+          "tier": 2
+        },
+        {
+          "word": " printe",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "printername",
+          "hits": 49,
+          "tier": 2
+        },
+        {
+          "word": "uint3",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INTER_INFO_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_INF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_INFO",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "printer_in",
+          "hits": 6,
+          "tier": 2
+        },
+        {
+          "word": "WERROR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_pri",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "NULL",
+          "hits": 239,
+          "tier": 2
+        },
+        {
+          "word": "ffer",
+          "hits": 8,
+          "tier": 2
+        },
+        {
+          "word": "return False",
+          "hits": 96,
+          "tier": 2
+        },
+        {
+          "word": "needed ",
+          "hits": 94,
+          "tier": 2
+        },
+        {
+          "word": "NOTIFY",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "s_struct ",
+          "hits": 46,
+          "tier": 2
+        },
+        {
+          "word": "_printer_in",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER_INFO_",
+          "hits": 29,
+          "tier": 2
+        },
+        {
+          "word": "nt32 ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "otify",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "level",
+          "hits": 200,
+          "tier": 2
+        },
+        {
+          "word": "notif",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "OTIFY_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": ", uint32 ",
+          "hits": 93,
+          "tier": 2
+        },
+        {
+          "word": "WERR",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "buffer, ",
+          "hits": 152,
+          "tier": 2
+        },
+        {
+          "word": "_NOTIF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_spoolss_",
+          "hits": 130,
+          "tier": 2
+        },
+        {
+          "word": "size",
+          "hits": 237,
+          "tier": 2
+        },
+        {
+          "word": ">notify_dat",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "a->notify_d",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "otify_data.",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_struct",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "tprinter",
+          "hits": 74,
+          "tier": 2
+        },
+        {
+          "word": "pipes_struct ",
+          "hits": 82,
+          "tier": 2
+        },
+        {
+          "word": "Printe",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " uint32 ",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "er_info_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " the",
+          "hits": 35,
+          "tier": 2
+        },
+        {
+          "word": "INTER_NOTIFY",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_NOTI",
+          "hits": 86,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_NOTIF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NEW_BUFFER ",
+          "hits": 49,
+          "tier": 2
+        },
+        {
+          "word": "INTER_INFO",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_INFO_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_IN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_INF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER_INFO_LEVE",
+          "hits": 16,
+          "tier": 2
+        },
+        {
+          "word": "R_INFO_LEVEL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "spool",
+          "hits": 12,
+          "tier": 2
+        },
+        {
+          "word": "rinter ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "n WER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rn WE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "urn W",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_PRINTER_",
+          "hits": 28,
+          "tier": 2
+        },
+        {
+          "word": "_INFO",
+          "hits": 28,
+          "tier": 2
+        },
+        {
+          "word": "WERR_NOMEM",
+          "hits": 4,
+          "tier": 2
+        },
+        {
+          "word": "eturn False",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "mem_ctx",
+          "hits": 86,
+          "tier": 2
+        },
+        {
+          "word": "return Fals",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "version",
+          "hits": 103,
+          "tier": 2
+        },
+        {
+          "word": "truct ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_NOTIFY_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "eturn WERR_I",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "turn WERR_IN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "printer_i",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rinter_in",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRIN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RINT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rinter,",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "WERR_BADFID",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "_inf",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "fstring ",
+          "hits": 70,
+          "tier": 2
+        },
+        {
+          "word": "printer, ",
+          "hits": 91,
+          "tier": 2
+        },
+        {
+          "word": "oolss",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "pools",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_INFO_LEVEL ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "uint",
+          "hits": 87,
+          "tier": 2
+        },
+        {
+          "word": "INTE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_printer_i",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "notify_dat",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "otify_data",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "printer_info",
+          "hits": 7,
+          "tier": 2
+        },
+        {
+          "word": "POLICY_HND ",
+          "hits": 46,
+          "tier": 2
+        },
+        {
+          "word": "WERR_OK",
+          "hits": 20,
+          "tier": 2
+        },
+        {
+          "word": "string ",
+          "hits": 74,
+          "tier": 2
+        },
+        {
+          "word": "olss_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " prin",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ipes_struct ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": ">notify_da",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_a_printer",
+          "hits": 101,
+          "tier": 2
+        },
+        {
+          "word": "a->notify_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "er_info",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "tify_data.",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "andle",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "s_struct",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INTER_NOTIF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_NOTIFY",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_NOT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_NOTI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_PRINTER",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "init_unist",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "nit_unistr",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "handl",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": ", uint32",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "DEBUGADD",
+          "hits": 66,
+          "tier": 2
+        },
+        {
+          "word": "t_printer_",
+          "hits": 57,
+          "tier": 2
+        },
+        {
+          "word": "ER_INFO_LEV",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "R_INFO_LEVE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_INFO_LEVEL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "eturned",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "value",
+          "hits": 167,
+          "tier": 2
+        },
+        {
+          "word": " spoolss_",
+          "hits": 84,
+          "tier": 2
+        },
+        {
+          "word": "NEW_BUFFER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "POLICY_HND",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "server",
+          "hits": 68,
+          "tier": 2
+        },
+        {
+          "word": "returne",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_spoolss",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER_INFO",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "R_INFO_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "a_printer",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "r_info_",
+          "hits": 7,
+          "tier": 2
+        },
+        {
+          "word": "ter_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NT_PRINTER_",
+          "hits": 20,
+          "tier": 2
+        },
+        {
+          "word": "TALLOC_CTX ",
+          "hits": 43,
+          "tier": 2
+        },
+        {
+          "word": "TER_NOTIFY_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "turn WERR_I",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "urn WERR_IN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INTER_INF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_INFO",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_I",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_IN",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TER_INFO_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "devmod",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "eturn Fals",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "evmode",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "fy_data.data",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ify_data.dat",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "otify_data.d",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "return Fal",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "stat",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "tify_data.da",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "turn False",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "y_data.data.",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "False",
+          "hits": 31,
+          "tier": 2
+        },
+        {
+          "word": " WER",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "int ",
+          "hits": 180,
+          "tier": 2
+        },
+        {
+          "word": "buffer,",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "uffer, ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "driver_info_",
+          "hits": 76,
+          "tier": 2
+        },
+        {
+          "word": "iver",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rive",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INFO_",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "INFO_LEVEL ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "tify_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "tprinte",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "name, ",
+          "hits": 118,
+          "tier": 2
+        },
+        {
+          "word": "printer_inf",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rinter_info",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_data.data",
+          "hits": 16,
+          "tier": 2
+        },
+        {
+          "word": "find_printer_index_by_hnd",
+          "hits": 33,
+          "tier": 2
+        },
+        {
+          "word": " uint32",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "fstring",
+          "hits": 4,
+          "tier": 2
+        },
+        {
+          "word": "r->info_2",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "eeded",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "neede",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ipes_struct",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "pes_struct ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "pipes_struc",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "queue",
+          "hits": 150,
+          "tier": 2
+        },
+        {
+          "word": ",         ",
+          "hits": 12,
+          "tier": 2
+        },
+        {
+          "word": "driv",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "inter_in",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rinter, ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "rinter_i",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "notify_da",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "otify_dat",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "tify_data",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_data",
+          "hits": 58,
+          "tier": 2
+        },
+        {
+          "word": "nt_devmode",
+          "hits": 47,
+          "tier": 2
+        },
+        {
+          "word": "_struc",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": ",          ",
+          "hits": 80,
+          "tier": 2
+        },
+        {
+          "word": "INTER_INFO_L",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_INFO_LE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TER_INFO_LEV",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_PRINTE",
+          "hits": 10,
+          "tier": 2
+        },
+        {
+          "word": "_PRINTER_INF",
+          "hits": 6,
+          "tier": 2
+        },
+        {
+          "word": "rinter_info_",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "tatic ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INTER_NOTI",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NTER_NOTIF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_NO",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "RINTER_NOT",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "TER_NOTIFY",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "inter ",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": " offered",
+          "hits": 32,
+          "tier": 2
+        },
+        {
+          "word": " spoolss",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "stru",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": ">notify_d",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "SPOOL_NOTIFY_INFO_DATA",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "_a_printe",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_printer_inf",
+          "hits": 53,
+          "tier": 2
+        },
+        {
+          "word": "a->notify",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ify_data.",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ruct",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "truc",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "NOTIF",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "OTIFY",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ER_INFO_LE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "INFO_LEVEL",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "R_INFO_LEV",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "_INFO_LEVE",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "buffer ",
+          "hits": 70,
+          "tier": 2
+        },
+        {
+          "word": "PRINTER_N",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "SPOOL_NOTIFY_INFO_DATA ",
+          "hits": 34,
+          "tier": 2
+        },
+        {
+          "word": "driver_info",
+          "hits": 2,
+          "tier": 2
+        }
+      ]
+    },
+    "scope": "research-only v2 envelope: mode byte + u32 token-stream length + CM(dict||body); no compatible production UCZ outer header, no codec v2 dispatch",
+    "maxRSSMiB": 257.625
+  }
+}

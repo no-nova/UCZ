@@ -1,0 +1,128 @@
+{
+  "kind": "user-reported-local-full-file-validation",
+  "phase": "P14.1",
+  "implementationCommit": "18f497d5babc6ad6bf3522094ab8546c2d64c068",
+  "runSourceSha256": null,
+  "reportedCores": 16,
+  "reportedVerified": "12/12",
+  "reportedExactInputSizeAndSha256": true,
+  "reportedPerFileNoRegression": true,
+  "rawJsonUploaded": false,
+  "arenaReencodedFullFiles": false,
+  "reportedTotalBytes": 40075423,
+  "reportedPreviousTotalBytes": 40233692,
+  "reportedPct": 18.909,
+  "computedPct": 18.908979667599922,
+  "deltaBytes": -158269,
+  "computedReductionPct": 0.39337428938910207,
+  "reportedEncodeSeconds": null,
+  "perFileTimingsProvided": "Mozilla only",
+  "mozillaEncodeSeconds": {
+    "previous": 589.7,
+    "current": 723.3,
+    "delta": 133.6,
+    "source": "user-reported; raw logs/machine/Node metadata absent"
+  },
+  "strictTargetSavingsNeeded": {
+    "below40058000": 17424,
+    "below40000000": 75424
+  },
+  "rows": [
+    {
+      "file": "xml",
+      "reportedBytes": 335300,
+      "previousBestUcz": 339516,
+      "deltaBytes": -4216,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "dickens",
+      "reportedBytes": 2214517,
+      "previousBestUcz": 2214517,
+      "deltaBytes": 0,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "ooffice",
+      "reportedBytes": 1889366,
+      "previousBestUcz": 1890887,
+      "deltaBytes": -1521,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "mr",
+      "reportedBytes": 1772130,
+      "previousBestUcz": 1798884,
+      "deltaBytes": -26754,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "osdb",
+      "reportedBytes": 2255954,
+      "previousBestUcz": 2277558,
+      "deltaBytes": -21604,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "x-ray",
+      "reportedBytes": 3548450,
+      "previousBestUcz": 3548450,
+      "deltaBytes": 0,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "sao",
+      "reportedBytes": 3132317,
+      "previousBestUcz": 3132317,
+      "deltaBytes": 0,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "reymont",
+      "reportedBytes": 1064930,
+      "previousBestUcz": 1064930,
+      "deltaBytes": 0,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "nci",
+      "reportedBytes": 1216095,
+      "previousBestUcz": 1217746,
+      "deltaBytes": -1651,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "samba",
+      "reportedBytes": 3349194,
+      "previousBestUcz": 3349194,
+      "deltaBytes": 0,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "webster",
+      "reportedBytes": 6276863,
+      "previousBestUcz": 6276863,
+      "deltaBytes": 0,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    },
+    {
+      "file": "mozilla",
+      "reportedBytes": 13020307,
+      "previousBestUcz": 13122830,
+      "deltaBytes": -102523,
+      "reportedVerified": true,
+      "reportedSizeAndShaMatch": true
+    }
+  ]
+}

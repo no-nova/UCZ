@@ -1,0 +1,169 @@
+{
+  "kind": "cross-version-diagnostic",
+  "commit": "030e2ffc12074246e0f4b92b9664936dd8770ba2",
+  "source": {
+    "sha256": "70f701b4f727320634d41bb43945ea4dcfef2324f91185b3a9c60cc10ad8a0b4",
+    "files": {
+      "src/lib/analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "src/lib/anchor.ts": "462957291d3a6eaf190a198385e4118a945df0add17682045178368ffa9d6e24",
+      "src/lib/byte-writer.ts": "ffc299e45dfeaef1af765cd238b794d368376706fa046d3a17ac52242b5116de",
+      "src/lib/codec-jobs.ts": "93696520d2b4a1611a66047d7e303359a1e999549a665b129847cdc2eb27de54",
+      "src/lib/codec.ts": "e6639b53b3ce0c7fe42b0120aa35748c63a8d4c75ed750c2ed3c00f418ef1d5d",
+      "src/lib/coder.ts": "2d3c9206364084b7eb5f6070e864d2b712bbaf38b7eab8f8bc727683228498ca",
+      "src/lib/compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+      "src/lib/limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+      "src/lib/lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+      "src/lib/micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+      "src/lib/parallel-jobs.ts": "5f57c42e842592c68cb1b490359f8a05e3d660405f2c7e8f58cb9bbad45816cf",
+      "src/lib/parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+      "src/lib/parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+      "src/lib/parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+      "src/lib/parallel-worker-code.ts": "39980d145ec6bf6690cf7bd99908dca554a6d38aff5dfe6ee8013283d795b2e6",
+      "src/lib/parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+      "src/lib/parallel.ts": "592d97c5a01259450d7807d583b82f395ae1e05fcf221b8b123003ee97e16e24",
+      "src/lib/samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+      "src/lib/sub-peel.ts": "b9627e7f404d01eb716dd3aea4a2f29bcf20e11b897d18105b337471d8aa075d",
+      "src/lib/transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+      "src/lib/transpose2d.ts": "6a10fc67350e70cae670b22a7586928d5bf676be8ccd0395601c2546323065ad",
+      "src/lib/unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+      "src/lib/viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+      "src/lib/wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a",
+      "package.json": "3ce5c0e8943d71000c60a05023a4e3eb387e7c4f81f6daa030133959a9c24989",
+      "package-lock.json": "df13cb90fea7667a92d96dec1f7dae61a79b3b49aa38db8113f50b33a839341d",
+      "tsconfig.json": "2a760f56fa49b96935783a2c3b4ce63d67e4547fdace88c4f4361a0c4fc10848",
+      "scripts/diag/run.mjs": "a10cf5e0ea918fbd48b82bc57f7f7ce925e5a5fc530752258e48f0dbd07935f6",
+      "scripts/diag/run-p9.mjs": "4beecd0f6027065e447221effe5fb23160999325ef94c14d1b33b9cf9545f744",
+      "scripts/diag/probe-p9-ab.ts": "796bfd955c7f29395328781c905c42ca0a13f59cdba6a50aad66c1f2193233dd",
+      "scripts/diag/p9-checkpoint.mjs": "fa5d848b883c877aa22a2c580079432aa9e2ea13c5f37229a859d1ed1180a946",
+      "scripts/diag/baseline.json": "4db78f40e895dbcf06285801aa782342e29409be36627ce8924df7b893b269eb"
+    }
+  },
+  "probeSha256": "2fb4d780dfb40886fa8a27211e2409e56d8f36c332c78ac4d39a1a2b65eae7bd",
+  "reference": "cb99b15ed095bdec31985844e90333c68f6c348e",
+  "createdAt": "2026-11-08T05:56:24.001Z",
+  "defaults": {
+    "a2": {
+      "resOn": true,
+      "textOn": false
+    },
+    "model": {
+      "maxTableBits": 21,
+      "matchTableBits": 20
+    }
+  },
+  "input": {
+    "bytes": 6000,
+    "sha256": "028c6c0c4ae132d9487a4a2339f16b213fd61553f942938e2693c419e1683d6a",
+    "formula": "(i * 37 + (i >> 3)) & 255"
+  },
+  "cases": [
+    {
+      "profile": "text",
+      "id": 23,
+      "p7Bytes": 738,
+      "p7ContainerSha256": "62c809add66176f6db607e56a24940b8d0e6a8ba59bf720d95c767bddbaab7a7",
+      "p7ContainerBase64": "VUNaD/AuAQEXAYGAAtEF8C7PNgC9+4D2N3tiBEeoPlzFBb198ay/gVSbjgRSD2h6W0Gy2hsTN+SKwhNA22SwyCvMZVBm1G+6UJ0Lodyhr2NKwLWk5MMsb04BkDYAU0zexMcEVg6bRuH8DcNnKpIxGTSfS/+U3/tRLXdYTA+jZfMqo4MNtbLPH08M8zlIqg21x6Pfe6SJfIZCQB7HaNJLrjgUtIAeywaPA5pL9df3zs/bam3eC6XfJU/xV4TcjKwVS9IMZDWo8B9fKRl+Hi9ZinLs+4F9BL0kfxGZECynuJOg1pYvrxQUa3VNHdxvx/OKxmbhncyR5+XD1aEZf8M05MsbpIwAXBGi93EqdZGAg+c0XR4U0JKZHNwKog+wmV5Wi3t75uTRvicv5q2FsAL7XtFb5+FvGynC4Loe8+KtM5YnoYaiwaPWz/UKTgZFq+Nv05rV+BvWwOfnEZCXoJ4/282O+ijBPc+490pKAtZbZiiIoYzg8v5vGnmPapMFPQjGp+RQ6oGLbN+ti5ghEG/7U0wmiCInI+3CH5PIvtetyWFQ6MXt2NL5VyQq7dR6QSguWiej6mMJNUjM+HfHKviKCk6DO6Ytpycrj8zPV5lhfAXRDrGgtb4cDjLL7PpxF6KX8mFr4mk2qOahda7C5EsWiHR/KEPzTEtZpl0VZcENCdeg0p0PlwHY50miUSSQ1gZuHznYXUxQpO7wjIMCL4kyWeICoS58wX2X6splQHysgh+6Eo6O3GD3RxBn6QvEiIycA88I8jqb7csTEpJJUVvhA9QV9fYPXgS7f+5tQKCvDmR9VXNzb+YNTXwWApKFeMMVMDocAEDIJEoJNg9TO5kXmJwBKK6Mu6aChAKtyvgYaiwaDnmd+3z06AprMLS//CkdqApWk0ZY0vX3QI14HW3IrjiOQPQeNUuqV4xZWosMo46zi+Gwluf+GU49Htf9BdI9OJrDTYX7vljnYG0eNZwHuYic",
+      "referenceVerified": {
+        "verified": true,
+        "outputBytes": 6000,
+        "firstMismatch": -1
+      },
+      "variants": [
+        {
+          "textOn": true,
+          "encodedBytes": 738,
+          "sameAsP7": true,
+          "currentReadsP7": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          },
+          "p7ReadsCurrent": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          },
+          "sameSettingsRoundTrip": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          }
+        },
+        {
+          "textOn": false,
+          "encodedBytes": 808,
+          "sameAsP7": false,
+          "currentReadsP7": {
+            "verified": false,
+            "outputBytes": 6000,
+            "firstMismatch": 0
+          },
+          "p7ReadsCurrent": {
+            "verified": false,
+            "outputBytes": 6000,
+            "firstMismatch": 1
+          },
+          "sameSettingsRoundTrip": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          }
+        }
+      ]
+    },
+    {
+      "profile": "bin",
+      "id": 24,
+      "p7Bytes": 731,
+      "p7ContainerSha256": "f911e473ced166deff4c4eb8662977f4986c9119f27e4b7b64c277efa0ddd61d",
+      "p7ContainerBase64": "VUNaD/AuAQEYAYGAAsoF8C7QRKU45f8qhJYMvGGvSvSLFK6xj3Hr5lIWcJm+9g8fY0c8QvKR/TmlAJVraxbxRnd7t3zbkkJgK5zlfxUzsFeoHyAFHmvsU/0pH0vpR2rZT2z/6PdT9DAwzr78WYvddOFeBGqoeRF+fIa+RyJII2fBYhqoKGwnlrQZyKQ92eErtxb0ovu0/AVUbpQuPnwJNfPfGzxe7CqkP0mQm3E0MCL4R+7TNutYIAGS1zjnorL/n/9cZPgGbNj37ucGctQAdQZ4Bb/tb9vV45XyeDzmDMXVStLZzfP4q484YBw22qe1Y4lQuwAMH5BxcJsCxA303nm69hXyYCnNlqsjxvtnGjyRBinDiL9qTbuNKJxiwitUvQ+w4DzwcScu82Zz0nrgIGR7zyWKXXGZe6LMqdWNxaZrJL+i2lGg3CSRGLQn6ALrnD9LmK0YEZ8WNJ1stXT9rf3w5etmLWSLqTPyNct4RXCxRtg0u2g/b4MAatO5HmSPxmVX4343VxkVdJd32tUb+YHrnyWdlGjDDwSxREi77T0ZvM7d+bhEydPcFgaJPmDmpszejzk/DJOQWmHIBS9druAZwMwJxScjkV6CgYAnXCc7/h/S/hbOau49Zb3Haud5xzyzuqWEnd/E3C1zrpKfCDSL8PfhwEzpV63eD4R2aP2shcVtyO3y+57kXR5K9moSeyQJVxPtjv3jlXLh9R9mPJwy5GllwaEodY737t3bUBuCbyWoHE4vtW3N3Krp8Jt5I9a+C9rEF5sk8Eu2TwtE/4Ime1iAAbOEaJ6mcDZbS4ZUwCUwti03EUMo369js6t8vLwL6G0p5+Mp1iGctpRvCKZorvSdIScS929+oIbvYhvGpBF0wCOLWp9JqjsRwcbcJPsNtYt2i5tZ7VKIoRR1rbYY4e4Axiy5A8pXAWRbM1Po4hfZjhR62Za7KotKCCN+xyFS/rh5qrn/a74=",
+      "referenceVerified": {
+        "verified": true,
+        "outputBytes": 6000,
+        "firstMismatch": -1
+      },
+      "variants": [
+        {
+          "textOn": true,
+          "encodedBytes": 731,
+          "sameAsP7": true,
+          "currentReadsP7": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          },
+          "p7ReadsCurrent": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          },
+          "sameSettingsRoundTrip": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          }
+        },
+        {
+          "textOn": false,
+          "encodedBytes": 731,
+          "sameAsP7": true,
+          "currentReadsP7": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          },
+          "p7ReadsCurrent": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          },
+          "sameSettingsRoundTrip": {
+            "verified": true,
+            "outputBytes": 6000,
+            "firstMismatch": -1
+          }
+        }
+      ]
+    }
+  ]
+}

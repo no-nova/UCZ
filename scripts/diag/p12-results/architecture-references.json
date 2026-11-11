@@ -1,0 +1,50 @@
+[
+  {
+    "repo": "RTEMS/sourceware-mirror-binutils-gdb",
+    "path": "include/coff/alpha.h",
+    "blob": "013e4cf0549bb43729aec078d09897e1dcd11955",
+    "url": "https://github.com/RTEMS/sourceware-mirror-binutils-gdb/blob/master/include/coff/alpha.h",
+    "excerpts": [
+      {
+        "line": 36,
+        "text": "  ((x).f_magic != ALPHA_MAGIC && (x).f_magic != ALPHA_MAGIC_BSD)"
+      },
+      {
+        "line": 39,
+        "text": "  ((x).f_magic == ALPHA_MAGIC_COMPRESSED)"
+      },
+      {
+        "line": 48,
+        "text": "#define\tFILHSZ\t24"
+      },
+      {
+        "line": 92,
+        "text": "#define\tSCNHSZ\t64"
+      }
+    ]
+  },
+  {
+    "repo": "RTEMS/sourceware-mirror-binutils-gdb",
+    "path": "include/coff/ecoff.h",
+    "blob": "244b7e985f78aabd000de65de6b190e84e14a8e9",
+    "url": "https://github.com/RTEMS/sourceware-mirror-binutils-gdb/blob/master/include/coff/ecoff.h",
+    "excerpts": [
+      {
+        "line": 45,
+        "text": "#define ALPHA_MAGIC 0x183"
+      },
+      {
+        "line": 46,
+        "text": "#define ALPHA_MAGIC_BSD 0x185"
+      },
+      {
+        "line": 47,
+        "text": "/* A compressed version of an ALPHA_MAGIC file created by DEC's tools.  */"
+      },
+      {
+        "line": 48,
+        "text": "#define ALPHA_MAGIC_COMPRESSED 0x188"
+      }
+    ]
+  }
+]

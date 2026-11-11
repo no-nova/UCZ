@@ -1,0 +1,22 @@
+{
+  "kind": "read-only-final-verifier-execution",
+  "status": "PASS",
+  "command": "node scripts/diag/p131/verify.mjs --current",
+  "verifierSha256": "3e7234df3a331f3f66775c8f2d9cf07246d6191272cb138f9221661a81baf78b",
+  "parentCommit": "3ecd75ccb4fa8b681bb2cb2e5d9951eebebaef24",
+  "node": "v22.22.3",
+  "durationMs": 120,
+  "sourceSha256": "3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3",
+  "stdout": "{\"preparations\":3,\"oldAndAblationDecisions\":8,\"fixedDecisions\":3,\"currentFixedSourceBound\":true,\"protectedNonWordPreSourceChecked\":true,\"allDecisionCMInputsAtMost192KiB\":true,\"fullCorpusCMCalls\":0,\"baselineBytes\":40297869,\"fullFileFixVerified\":false}\n",
+  "result": {
+    "preparations": 3,
+    "oldAndAblationDecisions": 8,
+    "fixedDecisions": 3,
+    "currentFixedSourceBound": true,
+    "protectedNonWordPreSourceChecked": true,
+    "allDecisionCMInputsAtMost192KiB": true,
+    "fullCorpusCMCalls": 0,
+    "baselineBytes": 40297869,
+    "fullFileFixVerified": false
+  }
+}

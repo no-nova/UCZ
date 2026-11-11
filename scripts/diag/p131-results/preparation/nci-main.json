@@ -1,0 +1,78 @@
+{
+  "commit": "51ced1f2826ec84c088c46302a8271b9d5fc64ae",
+  "file": "nci",
+  "scope": "main",
+  "node": "v22.22.3",
+  "probeSha256": "04b3f01fe4e5cd5331bec3b5c3d272dc118f42882e5d0d791c40ffeb90b0821b",
+  "runnerSha256": "5c2131e6084575ed479b048d46a52281377cca39e40945f055b3da437c31702d",
+  "bundleSha256": "136f6f38686f7d7c178cf4bc5cc37229b25fc43a70dc009b07ce1b7528497e1e",
+  "status": "PASS",
+  "durationMs": 9642,
+  "stdout": "{\"file\":\"nci\",\"scope\":\"main\",\"inputBytes\":33553445,\"inputSha256\":\"fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635\",\"selection\":\"all analyze() text segments, proposed TEXT_V3 group; not a replay of final adaptive assignments\",\"analysisSegments\":[{\"start\":0,\"end\":33553445,\"cls\":\"text\"}],\"positions\":[0],\"lengths\":[33553445],\"rawBytes\":33553445,\"rawSha256\":\"fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635\",\"bodyBytes\":10920511,\"bodySha256\":\"ea0a29b770100bcd0d4ce83af28b7c121853233e56696a00ff8991f8e30187cb\",\"dictionaryBytes\":423,\"headerSha256\":\"3253b55bd79a6d3d2c03a456f3bcb80430dae5483478f22bfdb77878ebc3962a\",\"dict\":[\"  1  0  0  0  0\",\" 0  0  0  0  0  0  0  0\",\"0  0  0  0  0  0  0  0  \",\"    0.0000 H   0  0  0  \",\"  0.0000 C   0  0  0  0 \",\"  0.0000 H   0  0  0  0 \",\"    \",\"    0.0000 C   0  0  0  \",\"   0  0  0  0  0  0  0  \",\"  0  0  0  0\",\"0  \",\"0  0  0  0  0\",\"  0  0  0  0  0  0  0  0\",\"1  0  0  0  0\",\"   \",\"  0.0000 \",\"    0.0000 \",\"    0.0000 C   0  0  \",\"   0.0000\",\"  0  0  0  0  0\",\" 0  \",\"  0\",\"   0.0000 C   0  0  0  0\",\"  0  0\",\"   0  0  \",\"   0.0000 \",\"  0  0  0  0  \",\"  0  \"],\"collapse\":0.3254661630124716,\"analysisMs\":3597,\"prepareMs\":5752,\"totalMs\":9507,\"sourceFiles\":{\"analyze.ts\":\"7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9\",\"wordpre.ts\":\"4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b\"},\"cmCalls\":0}\n",
+  "stderr": "",
+  "result": {
+    "file": "nci",
+    "scope": "main",
+    "inputBytes": 33553445,
+    "inputSha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "selection": "all analyze() text segments, proposed TEXT_V3 group; not a replay of final adaptive assignments",
+    "analysisSegments": [
+      {
+        "start": 0,
+        "end": 33553445,
+        "cls": "text"
+      }
+    ],
+    "positions": [
+      0
+    ],
+    "lengths": [
+      33553445
+    ],
+    "rawBytes": 33553445,
+    "rawSha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+    "bodyBytes": 10920511,
+    "bodySha256": "ea0a29b770100bcd0d4ce83af28b7c121853233e56696a00ff8991f8e30187cb",
+    "dictionaryBytes": 423,
+    "headerSha256": "3253b55bd79a6d3d2c03a456f3bcb80430dae5483478f22bfdb77878ebc3962a",
+    "dict": [
+      "  1  0  0  0  0",
+      " 0  0  0  0  0  0  0  0",
+      "0  0  0  0  0  0  0  0  ",
+      "    0.0000 H   0  0  0  ",
+      "  0.0000 C   0  0  0  0 ",
+      "  0.0000 H   0  0  0  0 ",
+      "    ",
+      "    0.0000 C   0  0  0  ",
+      "   0  0  0  0  0  0  0  ",
+      "  0  0  0  0",
+      "0  ",
+      "0  0  0  0  0",
+      "  0  0  0  0  0  0  0  0",
+      "1  0  0  0  0",
+      "   ",
+      "  0.0000 ",
+      "    0.0000 ",
+      "    0.0000 C   0  0  ",
+      "   0.0000",
+      "  0  0  0  0  0",
+      " 0  ",
+      "  0",
+      "   0.0000 C   0  0  0  0",
+      "  0  0",
+      "   0  0  ",
+      "   0.0000 ",
+      "  0  0  0  0  ",
+      "  0  "
+    ],
+    "collapse": 0.3254661630124716,
+    "analysisMs": 3597,
+    "prepareMs": 5752,
+    "totalMs": 9507,
+    "sourceFiles": {
+      "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+    },
+    "cmCalls": 0
+  }
+}

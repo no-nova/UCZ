@@ -1,0 +1,444 @@
+{
+  "kind": "P14.1-bounded-implementation-test",
+  "case": "adaptive",
+  "slice": "mr-mid",
+  "mode": "current",
+  "requestedBytes": 65536,
+  "status": "PASS",
+  "sourceRef": "working",
+  "commit": "193cfb6106317054bfbbce624b6878aac2cbe5c8",
+  "sourceSha256": "3d9f4f9495b70be36887a785af2c4cab1d7a8e75add598641911eb556596672f",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "5e6af2071eaee9aab907f20a785f07926175237b95e588bc85dd53feea8728e2",
+    "coder.ts": "424d87a1d85d380f3019f7b18269135020049dcba428297c158227596c6d08aa",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "scripts": {
+    "scripts/diag/p141/adaptive.ts": "04c1c14c3cbd3cf175472fc32b08814db7336f51dd69e3d949403714c03f0dbe",
+    "scripts/diag/p141/input.ts": "9afda5284183c4b61d613c95565c8d2824523d3db4d2341065e78e9e18e65dea",
+    "scripts/diag/p141/cases.json": "9331da99464e16b316f33e680995efe1da1cf2228213617eaf40726fa88dddf6",
+    "scripts/diag/p14/slices.json": "0ac072ebbd31a2c7c3cf7b40aef3d3653d24d73b47fe5712bbf09348f1f5c18a",
+    "tests/p141-implementation.test.mjs": "418126216e7d001c9513a4ff11386161fb56583dc509accd0a7e50da839bfb5a"
+  },
+  "bundleSha256": "0a31e4f3503ed7190c6b514bfd08fa5ae45bda580d0b47d20e86b69264fd700d",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/tests/p141-implementation.test.mjs",
+    "adaptive",
+    "mr-mid",
+    "current",
+    "65536"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 5513,
+  "exitCode": 0,
+  "stdout": "{\"test\":\"actual compressAdaptive -> production UCZ -> decompress\",\"input\":{\"name\":\"mr-mid\",\"file\":\"mr\",\"offset\":4984832,\"bytes\":65536,\"sha256\":\"14df47eda991d3c34053d9e2bdf02beac0d713640f1f36cdedefd92409aea76f\",\"parentWindowBytes\":262144,\"parentWindowSha256\":\"2bfe9ca7f67a9c1988d1a473a5829799bf2e6930606c387a42d0adf4e0cd2fee\",\"selection\":\"bounded prefix of P14 fixed window\"},\"mode\":\"current\",\"execution\":\"current\",\"serial\":true,\"requestedThreads\":1,\"scope\":\"unmodified adaptive chooser; no forced spec or plan\",\"containerBytes\":12117,\"containerSha256\":\"0428d3ef5e60e68f3c7f973cd057e0d49cef0f9bd3135141a14d1fe7609cdfd6\",\"version\":21,\"headerBytes\":23,\"encodeMs\":5223,\"decodeMs\":173,\"roundtrip\":true,\"decodedSha256\":\"14df47eda991d3c34053d9e2bdf02beac0d713640f1f36cdedefd92409aea76f\",\"contexts\":{\"baselineBytes\":14056,\"candidateBytes\":12117,\"accepted\":true,\"workerJobs\":0,\"workerFallbacks\":0,\"groups\":[{\"group\":0,\"spec\":{\"id\":31,\"s\":6,\"r\":1024},\"baselineSpec\":{\"id\":26,\"s\":2,\"r\":1024},\"proposal\":\"existing-16bit-row-geometry\",\"members\":[0,1],\"rawBytes\":65536,\"baselinePayloadBytes\":14035,\"controlPayloadBytes\":12190,\"controlReused\":false,\"fullCandidateInputBytes\":65536,\"trials\":[{\"context\":\"wide-geom\",\"payloadBytes\":12094,\"containerBytes\":12117,\"controlContainerBytes\":12213,\"accepted\":true}],\"selected\":\"wide-geom\"},{\"group\":0,\"spec\":{\"id\":31,\"s\":7,\"r\":1024},\"baselineSpec\":{\"id\":26,\"s\":2,\"r\":1024},\"proposal\":\"existing-16bit-row-geometry\",\"members\":[0,1],\"rawBytes\":65536,\"baselinePayloadBytes\":14035,\"controlPayloadBytes\":13368,\"controlReused\":false,\"fullCandidateInputBytes\":65536,\"trials\":[{\"context\":\"wide-geom\",\"payloadBytes\":13294,\"containerBytes\":13317,\"controlContainerBytes\":13391,\"accepted\":false}]},{\"group\":0,\"spec\":{\"id\":31,\"s\":8,\"r\":1024},\"baselineSpec\":{\"id\":26,\"s\":2,\"r\":1024},\"proposal\":\"existing-16bit-row-geometry\",\"members\":[0,1],\"rawBytes\":65536,\"baselinePayloadBytes\":14035,\"controlPayloadBytes\":12932,\"controlReused\":false,\"fullCandidateInputBytes\":65536,\"trials\":[{\"context\":\"wide-geom\",\"payloadBytes\":12867,\"containerBytes\":12890,\"controlContainerBytes\":12955,\"accepted\":false}]}]},\"finalSpecs\":[\"31/6/1024\"],\"stages\":[{\"msg\":\"扫描数据地形…\",\"pct\":5,\"ms\":1},{\"msg\":\"为每个区域试探最合适的编码规则…\",\"pct\":15,\"ms\":39},{\"msg\":\"区域 1/2 · 试探 SUB-TRANSPOSE(步长2, BIN)\",\"pct\":15,\"ms\":87},{\"msg\":\"区域 1/2 · 试探 TRANSPOSE(步长2)\",\"pct\":15,\"ms\":563},{\"msg\":\"区域 1/2 · 试探 TRANSPOSE-G(步长2)\",\"pct\":15,\"ms\":667},{\"msg\":\"区域 1/2 · 试探 TRANSPOSE-G3(步长2)\",\"pct\":15,\"ms\":896},{\"msg\":\"区域 1/2 · 试探 TRANSPOSE-G3(步长4)\",\"pct\":15,\"ms\":1252},{\"msg\":\"区域 1/2 · 试探 GRAD-2D3(步长2, 行1024)\",\"pct\":15,\"ms\":2266},{\"msg\":\"区域 1/2 · 试探 DELTA(步长2)\",\"pct\":15,\"ms\":2377},{\"msg\":\"区域 1/2 · 试探 DELTA3(步长2)\",\"pct\":15,\"ms\":2444},{\"msg\":\"区域 1/2 · 试探 DELTA(步长1)\",\"pct\":15,\"ms\":2522},{\"msg\":\"区域 1/2 · 试探 LIN-16(1声道, 1阶)\",\"pct\":15,\"ms\":2590},{\"msg\":\"区域 1/2 · 试探 LIN-16(1声道, 2阶)\",\"pct\":15,\"ms\":2662},{\"msg\":\"区域 1/2 · 试探 CM-BIN\",\"pct\":15,\"ms\":2726},{\"msg\":\"区域 1/2 · 试探 CM-BIN2\",\"pct\":15,\"ms\":2839},{\"msg\":\"区域 1/2 · 试探 CM-BIN3\",\"pct\":15,\"ms\":2966},{\"msg\":\"区域 1/2 → GRAD-2D3(步长2, 行1024)\",\"pct\":32.5,\"ms\":3108},{\"msg\":\"区域 2/2 · 试探 TRANSPOSE(步长2)\",\"pct\":32.5,\"ms\":3111},{\"msg\":\"区域 2/2 · 试探 CM-BIN\",\"pct\":32.5,\"ms\":3141},{\"msg\":\"区域 2/2 · 试探 CM-TEXT\",\"pct\":32.5,\"ms\":3145},{\"msg\":\"区域 2/2 · 试探 CM-TEXT2\",\"pct\":32.5,\"ms\":3149},{\"msg\":\"区域 2/2 · 试探 CM-TEXT3\",\"pct\":32.5,\"ms\":3152},{\"msg\":\"区域 2/2 · 试探 CM-BIN2\",\"pct\":32.5,\"ms\":3154},{\"msg\":\"区域 2/2 · 试探 CM-BIN3\",\"pct\":32.5,\"ms\":3157},{\"msg\":\"区域 2/2 → TRANSPOSE(步长2)\",\"pct\":50,\"ms\":3161},{\"msg\":\"编码地形 1/2 · 0%\",\"pct\":50,\"ms\":3163},{\"msg\":\"编码地形 1/2 · 0%\",\"pct\":50,\"ms\":3181},{\"msg\":\"编码地形 1/2 · 100%\",\"pct\":57.5,\"ms\":3339},{\"msg\":\"编码地形 1/2\",\"pct\":57.5,\"ms\":3714},{\"msg\":\"编码地形 2/2 · 0%\",\"pct\":57.5,\"ms\":3715},{\"msg\":\"编码地形 2/2 · 0%\",\"pct\":57.5,\"ms\":3719},{\"msg\":\"编码地形 2/2 · 50%\",\"pct\":61.25,\"ms\":3720},{\"msg\":\"编码地形 2/2 · 50%\",\"pct\":61.25,\"ms\":3720},{\"msg\":\"编码地形 2/2 · 50%\",\"pct\":61.25,\"ms\":3723},{\"msg\":\"编码地形 2/2 · 100%\",\"pct\":65,\"ms\":3724},{\"msg\":\"编码地形 2/2 · 100%\",\"pct\":65,\"ms\":3724},{\"msg\":\"编码地形 2/2\",\"pct\":65,\"ms\":3724},{\"msg\":\"宏组直接试完整主导规则 GRAD-2D3(步长2, 行1024)（不经过小窗口门）\",\"pct\":75,\"ms\":3725},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":79.85714285714286,\"ms\":3725},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":79.85714285714286,\"ms\":3745},{\"msg\":\"编码地形 1/1 · 100%\",\"pct\":85,\"ms\":3897},{\"msg\":\"编码地形 1/1\",\"pct\":85,\"ms\":4258},{\"msg\":\"宏组完整容器：14123 → 14056 B（采用）\",\"pct\":85,\"ms\":4259},{\"msg\":\"完整容器择优完成\",\"pct\":85,\"ms\":4259},{\"msg\":\"v21 上下文候选 1/3（保留原容器）\",\"pct\":85,\"ms\":4260},{\"msg\":\"v21 上下文候选 2/3（保留原容器）\",\"pct\":85.66666666666667,\"ms\":4582},{\"msg\":\"v21 上下文候选 3/3（保留原容器）\",\"pct\":86.33333333333333,\"ms\":4908},{\"msg\":\"v21 完整容器严格择优：14056 → 12117 B\",\"pct\":87,\"ms\":5223}],\"fullFileMeasured\":false,\"baselineBytes\":14056,\"savedBytes\":1939,\"baselineSource\":\"ed09309a54155b799b7ea492b45df1422aab03ae\"}\n",
+  "stderr": "563ms 15% 区域 1/2 · 试探 TRANSPOSE(步长2)\n1252ms 15% 区域 1/2 · 试探 TRANSPOSE-G3(步长4)\n2266ms 15% 区域 1/2 · 试探 GRAD-2D3(步长2, 行1024)\n2839ms 15% 区域 1/2 · 试探 CM-BIN2\n3714ms 58% 编码地形 1/2\n4258ms 85% 编码地形 1/1\n4908ms 86% v21 上下文候选 3/3（保留原容器）\n",
+  "result": {
+    "test": "actual compressAdaptive -> production UCZ -> decompress",
+    "input": {
+      "name": "mr-mid",
+      "file": "mr",
+      "offset": 4984832,
+      "bytes": 65536,
+      "sha256": "14df47eda991d3c34053d9e2bdf02beac0d713640f1f36cdedefd92409aea76f",
+      "parentWindowBytes": 262144,
+      "parentWindowSha256": "2bfe9ca7f67a9c1988d1a473a5829799bf2e6930606c387a42d0adf4e0cd2fee",
+      "selection": "bounded prefix of P14 fixed window"
+    },
+    "mode": "current",
+    "execution": "current",
+    "serial": true,
+    "requestedThreads": 1,
+    "scope": "unmodified adaptive chooser; no forced spec or plan",
+    "containerBytes": 12117,
+    "containerSha256": "0428d3ef5e60e68f3c7f973cd057e0d49cef0f9bd3135141a14d1fe7609cdfd6",
+    "version": 21,
+    "headerBytes": 23,
+    "encodeMs": 5223,
+    "decodeMs": 173,
+    "roundtrip": true,
+    "decodedSha256": "14df47eda991d3c34053d9e2bdf02beac0d713640f1f36cdedefd92409aea76f",
+    "contexts": {
+      "baselineBytes": 14056,
+      "candidateBytes": 12117,
+      "accepted": true,
+      "workerJobs": 0,
+      "workerFallbacks": 0,
+      "groups": [
+        {
+          "group": 0,
+          "spec": {
+            "id": 31,
+            "s": 6,
+            "r": 1024
+          },
+          "baselineSpec": {
+            "id": 26,
+            "s": 2,
+            "r": 1024
+          },
+          "proposal": "existing-16bit-row-geometry",
+          "members": [
+            0,
+            1
+          ],
+          "rawBytes": 65536,
+          "baselinePayloadBytes": 14035,
+          "controlPayloadBytes": 12190,
+          "controlReused": false,
+          "fullCandidateInputBytes": 65536,
+          "trials": [
+            {
+              "context": "wide-geom",
+              "payloadBytes": 12094,
+              "containerBytes": 12117,
+              "controlContainerBytes": 12213,
+              "accepted": true
+            }
+          ],
+          "selected": "wide-geom"
+        },
+        {
+          "group": 0,
+          "spec": {
+            "id": 31,
+            "s": 7,
+            "r": 1024
+          },
+          "baselineSpec": {
+            "id": 26,
+            "s": 2,
+            "r": 1024
+          },
+          "proposal": "existing-16bit-row-geometry",
+          "members": [
+            0,
+            1
+          ],
+          "rawBytes": 65536,
+          "baselinePayloadBytes": 14035,
+          "controlPayloadBytes": 13368,
+          "controlReused": false,
+          "fullCandidateInputBytes": 65536,
+          "trials": [
+            {
+              "context": "wide-geom",
+              "payloadBytes": 13294,
+              "containerBytes": 13317,
+              "controlContainerBytes": 13391,
+              "accepted": false
+            }
+          ]
+        },
+        {
+          "group": 0,
+          "spec": {
+            "id": 31,
+            "s": 8,
+            "r": 1024
+          },
+          "baselineSpec": {
+            "id": 26,
+            "s": 2,
+            "r": 1024
+          },
+          "proposal": "existing-16bit-row-geometry",
+          "members": [
+            0,
+            1
+          ],
+          "rawBytes": 65536,
+          "baselinePayloadBytes": 14035,
+          "controlPayloadBytes": 12932,
+          "controlReused": false,
+          "fullCandidateInputBytes": 65536,
+          "trials": [
+            {
+              "context": "wide-geom",
+              "payloadBytes": 12867,
+              "containerBytes": 12890,
+              "controlContainerBytes": 12955,
+              "accepted": false
+            }
+          ]
+        }
+      ]
+    },
+    "finalSpecs": [
+      "31/6/1024"
+    ],
+    "stages": [
+      {
+        "msg": "扫描数据地形…",
+        "pct": 5,
+        "ms": 1
+      },
+      {
+        "msg": "为每个区域试探最合适的编码规则…",
+        "pct": 15,
+        "ms": 39
+      },
+      {
+        "msg": "区域 1/2 · 试探 SUB-TRANSPOSE(步长2, BIN)",
+        "pct": 15,
+        "ms": 87
+      },
+      {
+        "msg": "区域 1/2 · 试探 TRANSPOSE(步长2)",
+        "pct": 15,
+        "ms": 563
+      },
+      {
+        "msg": "区域 1/2 · 试探 TRANSPOSE-G(步长2)",
+        "pct": 15,
+        "ms": 667
+      },
+      {
+        "msg": "区域 1/2 · 试探 TRANSPOSE-G3(步长2)",
+        "pct": 15,
+        "ms": 896
+      },
+      {
+        "msg": "区域 1/2 · 试探 TRANSPOSE-G3(步长4)",
+        "pct": 15,
+        "ms": 1252
+      },
+      {
+        "msg": "区域 1/2 · 试探 GRAD-2D3(步长2, 行1024)",
+        "pct": 15,
+        "ms": 2266
+      },
+      {
+        "msg": "区域 1/2 · 试探 DELTA(步长2)",
+        "pct": 15,
+        "ms": 2377
+      },
+      {
+        "msg": "区域 1/2 · 试探 DELTA3(步长2)",
+        "pct": 15,
+        "ms": 2444
+      },
+      {
+        "msg": "区域 1/2 · 试探 DELTA(步长1)",
+        "pct": 15,
+        "ms": 2522
+      },
+      {
+        "msg": "区域 1/2 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 15,
+        "ms": 2590
+      },
+      {
+        "msg": "区域 1/2 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 15,
+        "ms": 2662
+      },
+      {
+        "msg": "区域 1/2 · 试探 CM-BIN",
+        "pct": 15,
+        "ms": 2726
+      },
+      {
+        "msg": "区域 1/2 · 试探 CM-BIN2",
+        "pct": 15,
+        "ms": 2839
+      },
+      {
+        "msg": "区域 1/2 · 试探 CM-BIN3",
+        "pct": 15,
+        "ms": 2966
+      },
+      {
+        "msg": "区域 1/2 → GRAD-2D3(步长2, 行1024)",
+        "pct": 32.5,
+        "ms": 3108
+      },
+      {
+        "msg": "区域 2/2 · 试探 TRANSPOSE(步长2)",
+        "pct": 32.5,
+        "ms": 3111
+      },
+      {
+        "msg": "区域 2/2 · 试探 CM-BIN",
+        "pct": 32.5,
+        "ms": 3141
+      },
+      {
+        "msg": "区域 2/2 · 试探 CM-TEXT",
+        "pct": 32.5,
+        "ms": 3145
+      },
+      {
+        "msg": "区域 2/2 · 试探 CM-TEXT2",
+        "pct": 32.5,
+        "ms": 3149
+      },
+      {
+        "msg": "区域 2/2 · 试探 CM-TEXT3",
+        "pct": 32.5,
+        "ms": 3152
+      },
+      {
+        "msg": "区域 2/2 · 试探 CM-BIN2",
+        "pct": 32.5,
+        "ms": 3154
+      },
+      {
+        "msg": "区域 2/2 · 试探 CM-BIN3",
+        "pct": 32.5,
+        "ms": 3157
+      },
+      {
+        "msg": "区域 2/2 → TRANSPOSE(步长2)",
+        "pct": 50,
+        "ms": 3161
+      },
+      {
+        "msg": "编码地形 1/2 · 0%",
+        "pct": 50,
+        "ms": 3163
+      },
+      {
+        "msg": "编码地形 1/2 · 0%",
+        "pct": 50,
+        "ms": 3181
+      },
+      {
+        "msg": "编码地形 1/2 · 100%",
+        "pct": 57.5,
+        "ms": 3339
+      },
+      {
+        "msg": "编码地形 1/2",
+        "pct": 57.5,
+        "ms": 3714
+      },
+      {
+        "msg": "编码地形 2/2 · 0%",
+        "pct": 57.5,
+        "ms": 3715
+      },
+      {
+        "msg": "编码地形 2/2 · 0%",
+        "pct": 57.5,
+        "ms": 3719
+      },
+      {
+        "msg": "编码地形 2/2 · 50%",
+        "pct": 61.25,
+        "ms": 3720
+      },
+      {
+        "msg": "编码地形 2/2 · 50%",
+        "pct": 61.25,
+        "ms": 3720
+      },
+      {
+        "msg": "编码地形 2/2 · 50%",
+        "pct": 61.25,
+        "ms": 3723
+      },
+      {
+        "msg": "编码地形 2/2 · 100%",
+        "pct": 65,
+        "ms": 3724
+      },
+      {
+        "msg": "编码地形 2/2 · 100%",
+        "pct": 65,
+        "ms": 3724
+      },
+      {
+        "msg": "编码地形 2/2",
+        "pct": 65,
+        "ms": 3724
+      },
+      {
+        "msg": "宏组直接试完整主导规则 GRAD-2D3(步长2, 行1024)（不经过小窗口门）",
+        "pct": 75,
+        "ms": 3725
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 79.85714285714286,
+        "ms": 3725
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 79.85714285714286,
+        "ms": 3745
+      },
+      {
+        "msg": "编码地形 1/1 · 100%",
+        "pct": 85,
+        "ms": 3897
+      },
+      {
+        "msg": "编码地形 1/1",
+        "pct": 85,
+        "ms": 4258
+      },
+      {
+        "msg": "宏组完整容器：14123 → 14056 B（采用）",
+        "pct": 85,
+        "ms": 4259
+      },
+      {
+        "msg": "完整容器择优完成",
+        "pct": 85,
+        "ms": 4259
+      },
+      {
+        "msg": "v21 上下文候选 1/3（保留原容器）",
+        "pct": 85,
+        "ms": 4260
+      },
+      {
+        "msg": "v21 上下文候选 2/3（保留原容器）",
+        "pct": 85.66666666666667,
+        "ms": 4582
+      },
+      {
+        "msg": "v21 上下文候选 3/3（保留原容器）",
+        "pct": 86.33333333333333,
+        "ms": 4908
+      },
+      {
+        "msg": "v21 完整容器严格择优：14056 → 12117 B",
+        "pct": 87,
+        "ms": 5223
+      }
+    ],
+    "fullFileMeasured": false,
+    "baselineBytes": 14056,
+    "savedBytes": 1939,
+    "baselineSource": "ed09309a54155b799b7ea492b45df1422aab03ae"
+  },
+  "maxRawSliceBytes": 262144,
+  "fullCorpusEncoded": false,
+  "baselinePromoted": false
+}

@@ -1,0 +1,98 @@
+{
+  "kind": "macro-container-safety",
+  "input": {
+    "bytes": [
+      0,
+      7,
+      6,
+      5
+    ],
+    "sha256": "4a3873a337c68b1cf11000608f4fb17daa611b76724b8100cb1b0681c9ec16e9"
+  },
+  "commit": "31f7a09e2677bdb3b2467c358f883b1c1b0683c9",
+  "source": {
+    "sha256": "af6914e3a5728d1d18fc08e17a532f667252b6033e13b8ab1c055cc9435ce8cc",
+    "files": {
+      "src/lib/analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "src/lib/anchor.ts": "462957291d3a6eaf190a198385e4118a945df0add17682045178368ffa9d6e24",
+      "src/lib/byte-writer.ts": "ffc299e45dfeaef1af765cd238b794d368376706fa046d3a17ac52242b5116de",
+      "src/lib/codec-jobs.ts": "93696520d2b4a1611a66047d7e303359a1e999549a665b129847cdc2eb27de54",
+      "src/lib/codec.ts": "322973e0cc5fa932eefffd1f37de8b3b36307e5d143b6694eaa0a81683368589",
+      "src/lib/coder.ts": "9b1a7498f721000af36d99ba678333e7af47376780b74034d0f3b547fc330fbe",
+      "src/lib/compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+      "src/lib/limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+      "src/lib/lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+      "src/lib/micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+      "src/lib/parallel-jobs.ts": "5f57c42e842592c68cb1b490359f8a05e3d660405f2c7e8f58cb9bbad45816cf",
+      "src/lib/parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+      "src/lib/parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+      "src/lib/parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+      "src/lib/parallel-worker-code.ts": "e1fa08a78109179074d20a8094a2a9d1ee3b8736dafb73784866ac862f847918",
+      "src/lib/parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+      "src/lib/parallel.ts": "592d97c5a01259450d7807d583b82f395ae1e05fcf221b8b123003ee97e16e24",
+      "src/lib/samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+      "src/lib/sub-peel.ts": "b9627e7f404d01eb716dd3aea4a2f29bcf20e11b897d18105b337471d8aa075d",
+      "src/lib/transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+      "src/lib/transpose2d.ts": "6a10fc67350e70cae670b22a7586928d5bf676be8ccd0395601c2546323065ad",
+      "src/lib/unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+      "src/lib/viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+      "src/lib/wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a",
+      "package.json": "62879b8d7d8c2186fe1826507da4e58ac5459d371ad7668ef109037b953afa42",
+      "package-lock.json": "df13cb90fea7667a92d96dec1f7dae61a79b3b49aa38db8113f50b33a839341d",
+      "tsconfig.json": "2a760f56fa49b96935783a2c3b4ce63d67e4547fdace88c4f4361a0c4fc10848",
+      "scripts/diag/run.mjs": "a10cf5e0ea918fbd48b82bc57f7f7ce925e5a5fc530752258e48f0dbd07935f6",
+      "scripts/diag/run-p9.mjs": "4beecd0f6027065e447221effe5fb23160999325ef94c14d1b33b9cf9545f744",
+      "scripts/diag/probe-p9-ab.ts": "b6d3dddaa5438afed8eff13fbbf27508f21c1c7c2588900e9b9ff5a0a5461cd3",
+      "scripts/diag/p9-checkpoint.mjs": "fa5d848b883c877aa22a2c580079432aa9e2ea13c5f37229a859d1ed1180a946",
+      "scripts/diag/baseline.json": "4db78f40e895dbcf06285801aa782342e29409be36627ce8924df7b893b269eb"
+    }
+  },
+  "cases": [
+    {
+      "textOn": true,
+      "baselineBytes": 16,
+      "baselineHeaderBytes": 12,
+      "baselineVersion": 7,
+      "candidateBytes": 17,
+      "candidateHeaderBytes": 14,
+      "candidateVersion": 15,
+      "accepted": false,
+      "proposal": {
+        "id": 24,
+        "s": 1,
+        "r": 1
+      },
+      "reusedProbePayload": false,
+      "baselinePayloadBytes": 4,
+      "candidatePayloadBytes": 3,
+      "selectedSha256": "6c69135e663cd0e66ef28031f786964ac39c0d88e8fcf87343c5762c827b0cd7",
+      "candidateSha256": "3ce9b0a3e5700e356472cffa57651403a2ec970559ddc682aaa20046fe46d52d",
+      "baselineVerified": true,
+      "candidateVerified": true,
+      "keptBaseline": true
+    },
+    {
+      "textOn": false,
+      "baselineBytes": 16,
+      "baselineHeaderBytes": 12,
+      "baselineVersion": 7,
+      "candidateBytes": 18,
+      "candidateHeaderBytes": 15,
+      "candidateVersion": 17,
+      "accepted": false,
+      "proposal": {
+        "id": 24,
+        "s": 1,
+        "r": 1
+      },
+      "reusedProbePayload": false,
+      "baselinePayloadBytes": 4,
+      "candidatePayloadBytes": 3,
+      "selectedSha256": "6c69135e663cd0e66ef28031f786964ac39c0d88e8fcf87343c5762c827b0cd7",
+      "candidateSha256": "21ab088ff7739bcb4a449fb70f9b76d6a0cce10f8f0d473060cc100b5ade8887",
+      "baselineVerified": true,
+      "candidateVerified": true,
+      "keptBaseline": true
+    }
+  ]
+}

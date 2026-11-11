@@ -1,0 +1,3504 @@
+{
+  "kind": "P15.0-bounded-audit",
+  "unit": "unit2",
+  "name": "x-ray-mid",
+  "variant": "adaptive",
+  "bytes": 65536,
+  "offset": 0,
+  "phase": "main",
+  "status": "PASS",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "cc8f9bbe23e3849473cc8c93ed077e027017b52a96364470a55764d062e9e530",
+    "coder.ts": "424d87a1d85d380f3019f7b18269135020049dcba428297c158227596c6d08aa",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65",
+  "scripts": {
+    "PLAN.md": "9a40a368e3d9606437c7aeff6a29b1dee2b7e91602cecc2c2d78efaed09fdb7c",
+    "common.ts": "3a1d5435b6fcf04b9b2a88adae318fd415113c472ce93980618587e4ae7a9366",
+    "dual-append.ts": "11485e6f76875ca0e27663675d1937acff7b7813b9a4b03bad207443f5e9f301",
+    "patches.mjs": "f038ccccc1f834b0bf28cfede438f36dcdd7f8dd2241f5d3c80fb87dfd7ec36e",
+    "rec2.ts": "1b8aa37147409355c23495bb20bbe9e20e6eef00c18db44310cc076a5073f60b",
+    "run.mjs": "d472bcea8c8b2f1166177739f0152c277d0bf8005f85ef37f27061e31d2511f4",
+    "unit1.ts": "2759c08fb68abb9bec5c684be53bd1977a3224bc061acdec92561a9d1528a0a4",
+    "unit2.ts": "3781f617c6d7db0c8c90018685e8e551631deedbe877a2f716ec73c5d16d41f3",
+    "unit3.ts": "1cd7231002fcaeab959e2c24203a27f47c7763f277cb6da613b5450967f85e2c",
+    "unit4.ts": "1c300ca9b27c30d7429d765c8e8cce40a0f78d4c089cd2509bf8c0a553459b31"
+  },
+  "commit": "dcf80573cb31172c9a876aaa0346cc7748c26f96",
+  "node": "v22.22.3",
+  "baselineSha256": "6cb5eed94431cb53d30af6ce0ecf19f69a03e166841f229aafd8691fb26671e6",
+  "maxRawBytes": 262144,
+  "maxCMBytes": 524288,
+  "innerBudgetMs": 17000,
+  "fullCorpusEncoded": false,
+  "productionSourceModified": false,
+  "patches": [
+    {
+      "file": "coder.ts",
+      "from": "import { ByteWriter } from './byte-writer'",
+      "to": "import { ByteWriter } from './byte-writer'\nexport const p15 = {binStride:false,textContext:'control',resContext:'control'}\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "class Model {",
+      "to": "class Model {\n  p15Peer?:Model\n  p15NumHash=0; p15NumLen=0; p15Field=0; p15ClassHist=0; p15PunctDistance=0\n\n  private p15TextHash(old:number,b1:number,b2:number,b3:number,b4:number):number {\n    switch(p15.textContext) {\n      case 'numfield':return this.p15NumLen>0||b1===58 ? hh(this.p15NumHash&4095,this.p15NumLen&15,this.p15Field&7,b1) : old\n      case 'numclass':return this.p15NumLen>0||b1===58 ? hh(this.p15ClassHist&511,b1,this.p15NumLen&15,this.p15Field&7) : old\n      case 'puncword':return hh(this.p15ClassHist&63,this.curWord||this.prevWord,Math.min(15,this.p15PunctDistance))\n      case 'sparse5':return hh(b1,b3,this.g(5))\n      case 'control':return old\n      default:throw Error('unknown P15 text experiment')\n    }\n  }\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "wordTokens = false, options?: CMOptions) {\n    this.context = options?.context",
+      "to": "wordTokens = false, options?: CMOptions, p15Peer?:Model) {\n    this.p15Peer=p15Peer\n    if(p15Peer)this.msm=p15Peer.msm\n    this.context = options?.context"
+    },
+    {
+      "file": "coder.ts",
+      "from": "    this.buf = new Uint8Array(n + 1)",
+      "to": "    this.buf = p15Peer?.buf ?? new Uint8Array(n + 1)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "      this.tables.push(new Uint32Array(1 << bits).fill(32768 << 16))",
+      "to": "      this.tables.push(p15Peer && i<8 ? p15Peer.tables[i] : new Uint32Array(1 << bits).fill(32768 << 16))"
+    },
+    {
+      "file": "coder.ts",
+      "from": "    this.mht = new Int32Array(this.useMatch ? 1 << mhBits : 1)",
+      "to": "    this.mht = p15Peer?.mht ?? new Int32Array(this.useMatch ? 1 << mhBits : 1)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "      this.mht8 = new Int32Array(1 << mh8Bits)",
+      "to": "      this.mht8 = p15Peer?.mht8 ?? new Int32Array(1 << mh8Bits)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "      for (let i = 0; i < nctx; i++) {\n        let h = Math.imul(hashes[i] ^ cm, 0x85ebca6b)\n        h ^= h >>> 15\n        idx[i] = h >>> shift\n      }\n      for (let i = 0; i < nctx; i++) {\n        inputs[i] = STRETCH_l[(tables[i][idx[i]] >>> 16) >>> 4]\n      }",
+      "to": "      const peer=this.p15Peer,first=peer?8:0\n      if(peer)for(let i=0;i<8;i++){idx[i]=peer.idx[i];inputs[i]=peer.inputs[i]}\n      for (let i = first; i < nctx; i++) {\n        let h = Math.imul(hashes[i] ^ cm, 0x85ebca6b)\n        h ^= h >>> 15\n        idx[i] = h >>> shift\n      }\n      for (let i = first; i < nctx; i++) {\n        inputs[i] = STRETCH_l[(tables[i][idx[i]] >>> 16) >>> 4]\n      }"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  learn(y: number, prOverride?: number): void {\n    const nctx = this.nctx, N = this.ninputs\n    const inputs = this.inputs, idx = this.idx, weights = this.weights\n    const tables = this.tables, limit = this.limit\n    const err = ((y << 12) - (prOverride ?? this.pr)) * 8\n    const wb = this.wbase\n    for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + 0x8000) >> 16\n    if (this.dualPass) {\n      // v13 的第二套权重：误差项用上游概率（不含辅混洗，保证 base 流不被污染）。\n      const aw = this.altWeights, wb2 = this.altWbase\n      const err2 = ((y << 12) - this.altPr) * 8\n      for (let i = 0; i < N; i++) aw[wb2 + i] += (inputs[i] * err2 + 0x8000) >> 16\n    }\n    const w2 = this.weights2\n    if (this.isV15 && w2) {\n      // 辅权重用**校准后**的误差（与主权重一致），学习率减半。\n      const err3 = ((y << 12) - (prOverride ?? this.pr)) * (this.isV20 ? 2 : mixer2Tuning.lr2)\n      const wb3 = this.wbase2\n      for (let i = 0; i < N; i++) w2[wb3 + i] += (inputs[i] * err3 + 0x8000) >> 16\n    }\n    const target = y ? 65535 : 0\n    for (let i = 0; i < nctx; i++) {\n      const t = tables[i]\n      const k = idx[i]\n      const e = t[k]\n      const p = e >>> 16\n      const n = e & 255\n      // 一次读、一次写：概率与计数打包在同一字里。\n      t[k] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < limit ? n + 1 : n)\n    }\n    if (this.useApm) {\n      // 插值表的标准 SGD：两端各按权重向目标移动，权重和恰好等于 1。\n      const target = y ? 65535 : 0\n      const base = this.apmBase, tw = this.apmT\n      const a = tw[base]\n      tw[base] = a + ((target - a) >> apmTuning.rate)\n      const b = tw[base + 1]\n      tw[base + 1] = b + ((target - b) >> apmTuning.rate)\n      if (this.apm2On) {\n        const t2 = this.apm2T, b2 = this.apm2Base\n        const x2 = t2[b2]\n        t2[b2] = x2 + ((target - x2) >> apm2Tuning.rate)\n        const y2 = t2[b2 + 1]\n        t2[b2 + 1] = y2 + ((target - y2) >> apm2Tuning.rate)\n      }\n    }\n    const mi = this.mIdx\n    if (mi >= 0) {\n      const ok = this.mExpect === y ? 65535 : 0\n      if (this.matchStats) { this.matchStats.predictedBits++; if (ok) this.matchStats.correctBits++ }\n      const q = this.msm[mi]\n      this.msm[mi] = q + ((ok - q) >> 5)\n    }\n    this.c0 = (this.c0 << 1) | y\n    this.bit++\n    if (this.bit === 8) {\n      const byte = this.c0 & 255\n      this.buf[this.pos] = byte\n      this.pos++\n      this.c0 = 1\n      this.bit = 0\n      this.byteUpdate(byte)\n    }\n  }\n",
+      "to": "  learn(y: number, prOverride?: number): void {\n    const nctx = this.nctx, N = this.ninputs\n    const inputs = this.inputs, idx = this.idx, weights = this.weights\n    const tables = this.tables, limit = this.limit\n    const err = ((y << 12) - (prOverride ?? this.pr)) * 8\n    const wb = this.wbase\n    for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + 0x8000) >> 16\n    if (this.dualPass) {\n      // v13 的第二套权重：误差项用上游概率（不含辅混洗，保证 base 流不被污染）。\n      const aw = this.altWeights, wb2 = this.altWbase\n      const err2 = ((y << 12) - this.altPr) * 8\n      for (let i = 0; i < N; i++) aw[wb2 + i] += (inputs[i] * err2 + 0x8000) >> 16\n    }\n    const w2 = this.weights2\n    if (this.isV15 && w2) {\n      // 辅权重用**校准后**的误差（与主权重一致），学习率减半。\n      const err3 = ((y << 12) - (prOverride ?? this.pr)) * (this.isV20 ? 2 : mixer2Tuning.lr2)\n      const wb3 = this.wbase2\n      for (let i = 0; i < N; i++) w2[wb3 + i] += (inputs[i] * err3 + 0x8000) >> 16\n    }\n    const target = y ? 65535 : 0\n    for (let i = this.p15Peer ? 8 : 0; i < nctx; i++) {\n      const t = tables[i]\n      const k = idx[i]\n      const e = t[k]\n      const p = e >>> 16\n      const n = e & 255\n      // 一次读、一次写：概率与计数打包在同一字里。\n      t[k] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < limit ? n + 1 : n)\n    }\n    if (this.useApm) {\n      // 插值表的标准 SGD：两端各按权重向目标移动，权重和恰好等于 1。\n      const target = y ? 65535 : 0\n      const base = this.apmBase, tw = this.apmT\n      const a = tw[base]\n      tw[base] = a + ((target - a) >> apmTuning.rate)\n      const b = tw[base + 1]\n      tw[base + 1] = b + ((target - b) >> apmTuning.rate)\n      if (this.apm2On) {\n        const t2 = this.apm2T, b2 = this.apm2Base\n        const x2 = t2[b2]\n        t2[b2] = x2 + ((target - x2) >> apm2Tuning.rate)\n        const y2 = t2[b2 + 1]\n        t2[b2 + 1] = y2 + ((target - y2) >> apm2Tuning.rate)\n      }\n    }\n    const mi = this.mIdx\n    if (mi >= 0 && !this.p15Peer) {\n      const ok = this.mExpect === y ? 65535 : 0\n      if (this.matchStats) { this.matchStats.predictedBits++; if (ok) this.matchStats.correctBits++ }\n      const q = this.msm[mi]\n      this.msm[mi] = q + ((ok - q) >> 5)\n    }\n    this.c0 = (this.c0 << 1) | y\n    this.bit++\n    if (this.bit === 8) {\n      const byte = this.c0 & 255\n      this.buf[this.pos] = byte\n      this.pos++\n      this.c0 = 1\n      this.bit = 0\n      this.byteUpdate(byte)\n    }\n  }\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "    if (this.useMatch) {\n      const buf = this.buf",
+      "to": "    if (this.p15Peer) {\n      const p=this.p15Peer\n      this.mlen=p.mlen;this.mptr=p.mptr;this.mbyte=p.mbyte;this.lastDist=p.lastDist;this.gapLeft=p.gapLeft\n    } else if (this.useMatch) {\n      const buf = this.buf"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  private byteUpdate(byte: number) {",
+      "to": "  private byteUpdate(byte: number) {\n    if(p15.textContext!=='control'&&(this.profile==='text'||this.profile==='bin')) {\n      const digit=byte>=48&&byte<=57\n      if(digit){this.p15NumHash=(Math.imul(this.p15NumHash,257)+byte-47)>>>0;this.p15NumLen++}\n      else {this.p15NumHash=0;this.p15NumLen=0}\n      if(byte===10)this.p15Field=0;else if(byte===58)this.p15Field++\n      this.p15ClassHist=((this.p15ClassHist<<3)|charClass8(byte))&4095\n      const lower=byte|32,alnum=digit||(lower>=97&&lower<=122)\n      this.p15PunctDistance=alnum?Math.min(63,this.p15PunctDistance+1):0\n    }"
+    },
+    {
+      "file": "coder.ts",
+      "from": "H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : hh(b1,b3,b4);return",
+      "to": "H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : hh(b1,b3,b4);if(this.isV20&&!this.wordTokens&&p15.textContext!=='control')H[8]=this.p15TextHash(H[8],b1,b2,b3,b4);return"
+    },
+    {
+      "file": "coder.ts",
+      "from": "        if(this.isV20)this.computeGeometry(b1,b2)\n        return",
+      "to": "        if(this.isV20)this.computeGeometry(b1,b2)\n        if(this.isV20&&p15.binStride)H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)\n        if(this.isV20&&p15.textContext!=='control')H[8]=this.p15TextHash(H[8],b1,b2,b3,b4)\n        return"
+    },
+    {
+      "file": "coder.ts",
+      "from": "if(this.isV20)this.computeGeometry(b1,b2); return",
+      "to": "if(this.isV20)this.computeGeometry(b1,b2); if(this.isV20&&p15.resContext==='gradclass')H[8]=hh(phase,QV[gs],QV[gr],QV[(gs-gr)&255]); return"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  const n = data.length\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens, options)",
+      "to": "  const n = data.length\n  if(n>524288)throw Error(\"P15 CM input cap\")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens, options)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens, options)",
+      "to": "  if(n>524288)throw Error(\"P15 CM decode cap\")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens, options)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "export type CMVariant = boolean | 'v13' | 'v15' | 'v20'",
+      "to": "// Appended to the isolated coder.ts, never imported by production.\n// Requires patchLibrary's per-model peer hooks. Only the H8 table differs.\nexport function encodeCMContextDual(data:Uint8Array, context:'bin-stride4'|'wp-token3') {\n  if(context!=='bin-stride4'&&context!=='wp-token3')throw Error('only H8-compatible contexts may share')\n  if(p15.binStride||p15.textContext!=='control'||p15.resContext!=='control')throw Error('dual sharing requires unchanged H0..7 topology')\n  const n=data.length;if(n>524288)throw Error('P15 dual CM budget')\n  const profile=context==='bin-stride4'?'bin':'text',wordTokens=context==='wp-token3'\n  const base=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens)\n  const alt=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens,{context},base)\n  for(let k=0;k<8;k++)if(base.tables[k]!==alt.tables[k])throw Error('tables not actually shared')\n  if(base.mht!==alt.mht||base.mht8!==alt.mht8||base.msm!==alt.msm||base.buf!==alt.buf)throw Error('match/input not shared')\n  if(base.apm2On!==alt.apm2On||base.weights===alt.weights||(base.weights2&&base.weights2===alt.weights2)||base.apmT===alt.apmT||(base.apm2T&&base.apm2T===alt.apm2T))throw Error('stream-specific learning must be independent')\n  const bOut=new ByteWriter(),aOut=new ByteWriter()\n  let b1=0,b2=0xffffffff,a1=0,a2=0xffffffff\n  for(let i=0;i<n;i++)for(let bit=7;bit>=0;bit--){\n    const y=(data[i]>>>bit)&1\n    // Both predictions MUST see the same pre-update shared tables/MSM.\n    const bp=base.step(y,true),ap=alt.step(y,true)\n    let x=mid(b1,b2,bp);if(y)b2=x;else b1=x+1\n    x=mid(a1,a2,ap);if(y)a2=x;else a1=x+1\n    // Base writes shared tables/MSM/match state ONCE. Alt learns its H8,\n    // weights, secondary weights, a1/a2 only; at byte boundaries it copies\n    // the newly updated match pointers without inserting again into mht.\n    base.learn(y);alt.learn(y)\n    while(((b1^b2)&0xff000000)===0){bOut.push(b2>>>24);b1=(b1<<8)>>>0;b2=((b2<<8)|255)>>>0}\n    while(((a1^a2)&0xff000000)===0){aOut.push(a2>>>24);a1=(a1<<8)>>>0;a2=((a2<<8)|255)>>>0}\n  }\n  const flush=(x1:number,x2:number,out:ByteWriter)=>{\n    for(let k=0;k<=4;k++){\n      const unit=2**(32-8*k),v=Math.ceil(x1/unit)*unit\n      if(v<=x2&&v<4294967296){for(let j=0;j<k;j++)out.push(Math.floor(v/2**(24-8*j))&255);break}\n    }return out.finish()\n  }\n  const sharedTableBytes=base.tables.slice(0,8).reduce((n,t)=>n+t.byteLength,0)\n  const sharedMatchBytes=base.mht.byteLength+(base.mht8?.byteLength??0)+base.msm.byteLength\n  return {base:markPayloadModel(flush(b1,b2,bOut),n?base.requiredFlags:0),alt:markPayloadModel(flush(a1,a2,aOut),n?alt.requiredFlags:0),\n    sharing:{sharedTableCount:8,sharedTableBytes,sharedMatchBytes,sharedInputBytes:base.buf.byteLength,\n      // Exact live typed-array accounting, NOT measured peak RSS.\n      avoidedDuplicateBytes:sharedTableBytes+sharedMatchBytes+base.buf.byteLength,\n      independentMixerAndApm:true,geometry:base.geometry}}\n}\n\nexport type CMVariant = boolean | 'v13' | 'v15' | 'v20'"
+    },
+    {
+      "file": "codec.ts",
+      "from": "function gatherGroup(",
+      "to": "export function gatherGroup("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function groupDelta(",
+      "to": "export function groupDelta("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function planColumnGroups(",
+      "to": "export function planColumnGroups("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function encodeGroupData(",
+      "to": "export function encodeGroupData("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function encodeGroupedTranspose(",
+      "to": "export function encodeGroupedTranspose("
+    }
+  ],
+  "experimentalFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "e0ba3da49c80b53664121d37ae23425672a01a6f1e17b4512173c8dd055c83f4",
+    "coder.ts": "9d4b067fef0bce07e7b61e0f122a7d3c5317bc2fc707bb2a2de7de729e4250e4",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "bundleSha256": "067a412d927918b30d90972905be122af861998e59b5c9ed66eefd77a4b6a0c3",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "stdout": "{\"unit\":2,\"input\":{\"name\":\"x-ray-mid\",\"kind\":\"fixed-corpus-window\",\"file\":\"x-ray\",\"offset\":4236800,\"withinParentOffset\":0,\"bytes\":65536,\"sha256\":\"fb64ffe822248d7ca6b9375cbe4f99c43f2c700d6e77b19a980d229cc629469f\",\"parentWindowBytes\":262144,\"parentWindowSha256\":\"387fee83a6a25cb7a702d1b775d2cb62c1fdf282890fbc3591df6b4aa96363ff\"},\"variant\":\"adaptive\",\"analysis\":{\"inputStats\":{\"entropy\":6.46530881266475,\"evenEntropy\":7.985788988690571,\"oddEntropy\":3.1628740216016378,\"lag1Equal\":0.0036011291676203558,\"lag2Equal\":0.45614490188299206,\"meanAbsLE16Delta\":29.89593188268685,\"meanAbsBE16Delta\":11478.812097537157},\"wide16Lag\":0,\"lag1\":[3800],\"lag2\":[3800],\"segments\":[{\"start\":0,\"end\":14336,\"cls\":\"smooth\",\"bestS\":2,\"b0\":0,\"b1\":28},{\"start\":14336,\"end\":15360,\"cls\":\"binary\",\"bestS\":2,\"b0\":28,\"b1\":30},{\"start\":15360,\"end\":24576,\"cls\":\"smooth\",\"bestS\":2,\"b0\":30,\"b1\":48},{\"start\":24576,\"end\":26112,\"cls\":\"binary\",\"bestS\":2,\"b0\":48,\"b1\":51},{\"start\":26112,\"end\":33280,\"cls\":\"smooth\",\"bestS\":2,\"b0\":51,\"b1\":65},{\"start\":33280,\"end\":34304,\"cls\":\"binary\",\"bestS\":2,\"b0\":65,\"b1\":67},{\"start\":34304,\"end\":40960,\"cls\":\"smooth\",\"bestS\":2,\"b0\":67,\"b1\":80},{\"start\":40960,\"end\":41984,\"cls\":\"binary\",\"bestS\":2,\"b0\":80,\"b1\":82},{\"start\":41984,\"end\":51200,\"cls\":\"smooth\",\"bestS\":2,\"b0\":82,\"b1\":100},{\"start\":51200,\"end\":52736,\"cls\":\"binary\",\"bestS\":2,\"b0\":100,\"b1\":103},{\"start\":52736,\"end\":59392,\"cls\":\"smooth\",\"bestS\":2,\"b0\":103,\"b1\":116},{\"start\":59392,\"end\":60928,\"cls\":\"binary\",\"bestS\":2,\"b0\":116,\"b1\":119},{\"start\":60928,\"end\":65536,\"cls\":\"smooth\",\"bestS\":2,\"b0\":119,\"b1\":128}]},\"containerBytes\":30760,\"containerSha256\":\"f00355550360a813e06cf2fa5b9ceb10c1f73dde648f59e212327faeb319d8c2\",\"version\":7,\"headerBytes\":39,\"encodeMs\":4003.008,\"decodeMs\":163.462,\"roundtrip\":true,\"decodedSha256\":\"fb64ffe822248d7ca6b9375cbe4f99c43f2c700d6e77b19a980d229cc629469f\",\"segs\":[{\"start\":0,\"end\":14336,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":14336,\"compLen\":6942,\"trials\":[{\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"ratio\":0.48451450892857145,\"sampleLen\":14336,\"payloadSize\":6946,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":27,\"s\":2,\"r\":1},\"label\":\"DELTA3(步长2)\",\"ratio\":0.4893275669642857,\"sampleLen\":14336,\"payloadSize\":7015,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":15,\"s\":2,\"r\":2},\"label\":\"SUB-TRANSPOSE(步长2, BIN)\",\"ratio\":0.49135044642857145,\"sampleLen\":14336,\"payloadSize\":7044,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.49142020089285715,\"sampleLen\":14336,\"payloadSize\":7045,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":2,\"r\":1},\"label\":\"DELTA(步长2)\",\"ratio\":0.5085797991071429,\"sampleLen\":14336,\"payloadSize\":7291,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":2},\"label\":\"LIN-16(1声道, 2阶)\",\"ratio\":0.5089285714285714,\"sampleLen\":14336,\"payloadSize\":7296,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":26,\"s\":2,\"r\":3296},\"label\":\"GRAD-2D3(步长2, 行3296)\",\"ratio\":0.51171875,\"sampleLen\":14336,\"payloadSize\":7336,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5368303571428571,\"sampleLen\":14336,\"payloadSize\":7696,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.537109375,\"sampleLen\":14336,\"payloadSize\":7700,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":16,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR('\\\\n', 0x08)\",\"ratio\":0.5529436383928571,\"sampleLen\":14336,\"payloadSize\":7927,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.6078404017857143,\"sampleLen\":14336,\"payloadSize\":8714,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":29,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR3('\\\\n', 0x08)\",\"ratio\":0.6138392857142857,\"sampleLen\":14336,\"payloadSize\":8800,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":1,\"r\":1},\"label\":\"DELTA(步长1)\",\"ratio\":0.6462751116071429,\"sampleLen\":14336,\"payloadSize\":9265,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":14336,\"payloadSize\":14336,\"sampleStart\":0}],\"trialBytes\":6946,\"modelFlags\":0},{\"start\":14336,\"end\":15360,\"cls\":\"binary\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":1024,\"compLen\":487,\"trials\":[{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.52734375,\"sampleLen\":1024,\"payloadSize\":540,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.595703125,\"sampleLen\":1024,\"payloadSize\":610,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5966796875,\"sampleLen\":1024,\"payloadSize\":611,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":18,\"s\":1,\"r\":1},\"label\":\"CM-TEXT2\",\"ratio\":0.7216796875,\"sampleLen\":1024,\"payloadSize\":739,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.7236328125,\"sampleLen\":1024,\"payloadSize\":741,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":4,\"s\":1,\"r\":1},\"label\":\"CM-TEXT\",\"ratio\":0.724609375,\"sampleLen\":1024,\"payloadSize\":742,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"label\":\"CM-TEXT3\",\"ratio\":0.724609375,\"sampleLen\":1024,\"payloadSize\":742,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":3,\"s\":1,\"r\":1},\"label\":\"O0\",\"ratio\":0.732421875,\"sampleLen\":1024,\"payloadSize\":750,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":1024,\"payloadSize\":1024,\"sampleStart\":0}],\"trialBytes\":540,\"modelFlags\":0},{\"start\":15360,\"end\":24576,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":9216,\"compLen\":4267,\"trials\":[{\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"ratio\":0.4883897569444444,\"sampleLen\":9216,\"payloadSize\":4501,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":27,\"s\":2,\"r\":1},\"label\":\"DELTA3(步长2)\",\"ratio\":0.4898003472222222,\"sampleLen\":9216,\"payloadSize\":4514,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":15,\"s\":2,\"r\":2},\"label\":\"SUB-TRANSPOSE(步长2, BIN)\",\"ratio\":0.4907769097222222,\"sampleLen\":9216,\"payloadSize\":4523,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.4914279513888889,\"sampleLen\":9216,\"payloadSize\":4529,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":2},\"label\":\"LIN-16(1声道, 2阶)\",\"ratio\":0.5109592013888888,\"sampleLen\":9216,\"payloadSize\":4709,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":26,\"s\":2,\"r\":2288},\"label\":\"GRAD-2D3(步长2, 行2288)\",\"ratio\":0.5120442708333334,\"sampleLen\":9216,\"payloadSize\":4719,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":2,\"r\":1},\"label\":\"DELTA(步长2)\",\"ratio\":0.5122612847222222,\"sampleLen\":9216,\"payloadSize\":4721,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5415581597222222,\"sampleLen\":9216,\"payloadSize\":4991,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5419921875,\"sampleLen\":9216,\"payloadSize\":4995,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":16,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR('\\\\n', 0x08)\",\"ratio\":0.5540364583333334,\"sampleLen\":9216,\"payloadSize\":5106,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.6278211805555556,\"sampleLen\":9216,\"payloadSize\":5786,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":29,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR3('\\\\n', 0x08)\",\"ratio\":0.6348741319444444,\"sampleLen\":9216,\"payloadSize\":5851,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":1,\"r\":1},\"label\":\"DELTA(步长1)\",\"ratio\":0.6533203125,\"sampleLen\":9216,\"payloadSize\":6021,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":9216,\"payloadSize\":9216,\"sampleStart\":0}],\"trialBytes\":4501,\"modelFlags\":0},{\"start\":24576,\"end\":26112,\"cls\":\"binary\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":1536,\"compLen\":745,\"trials\":[{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.5338541666666666,\"sampleLen\":1536,\"payloadSize\":820,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.6067708333333334,\"sampleLen\":1536,\"payloadSize\":932,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.607421875,\"sampleLen\":1536,\"payloadSize\":933,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":18,\"s\":1,\"r\":1},\"label\":\"CM-TEXT2\",\"ratio\":0.7356770833333334,\"sampleLen\":1536,\"payloadSize\":1130,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"label\":\"CM-TEXT3\",\"ratio\":0.736328125,\"sampleLen\":1536,\"payloadSize\":1131,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.7395833333333334,\"sampleLen\":1536,\"payloadSize\":1136,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":4,\"s\":1,\"r\":1},\"label\":\"CM-TEXT\",\"ratio\":0.7408854166666666,\"sampleLen\":1536,\"payloadSize\":1138,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":3,\"s\":1,\"r\":1},\"label\":\"O0\",\"ratio\":0.7688802083333334,\"sampleLen\":1536,\"payloadSize\":1181,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":1536,\"payloadSize\":1536,\"sampleStart\":0}],\"trialBytes\":820,\"modelFlags\":0},{\"start\":26112,\"end\":33280,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":7168,\"compLen\":3328,\"trials\":[{\"spec\":{\"id\":27,\"s\":2,\"r\":1},\"label\":\"DELTA3(步长2)\",\"ratio\":0.4951171875,\"sampleLen\":7168,\"payloadSize\":3549,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.4965122767857143,\"sampleLen\":7168,\"payloadSize\":3559,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"ratio\":0.49693080357142855,\"sampleLen\":7168,\"payloadSize\":3562,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":26,\"s\":2,\"r\":654},\"label\":\"GRAD-2D3(步长2, 行654)\",\"ratio\":0.5186941964285714,\"sampleLen\":7168,\"payloadSize\":3718,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":2,\"r\":1},\"label\":\"DELTA(步长2)\",\"ratio\":0.51953125,\"sampleLen\":7168,\"payloadSize\":3724,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":2},\"label\":\"LIN-16(1声道, 2阶)\",\"ratio\":0.5207868303571429,\"sampleLen\":7168,\"payloadSize\":3733,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5539899553571429,\"sampleLen\":7168,\"payloadSize\":3971,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5542689732142857,\"sampleLen\":7168,\"payloadSize\":3973,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":16,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR('\\\\n', 0x08)\",\"ratio\":0.5687779017857143,\"sampleLen\":7168,\"payloadSize\":4077,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.6510881696428571,\"sampleLen\":7168,\"payloadSize\":4667,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":29,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR3('\\\\n', 0x08)\",\"ratio\":0.6551339285714286,\"sampleLen\":7168,\"payloadSize\":4696,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":1,\"r\":1},\"label\":\"DELTA(步长1)\",\"ratio\":0.6692243303571429,\"sampleLen\":7168,\"payloadSize\":4797,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":7168,\"payloadSize\":7168,\"sampleStart\":0}],\"trialBytes\":3549,\"modelFlags\":0},{\"start\":33280,\"end\":34304,\"cls\":\"binary\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":1024,\"compLen\":484,\"trials\":[{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.525390625,\"sampleLen\":1024,\"payloadSize\":538,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5888671875,\"sampleLen\":1024,\"payloadSize\":603,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.58984375,\"sampleLen\":1024,\"payloadSize\":604,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":18,\"s\":1,\"r\":1},\"label\":\"CM-TEXT2\",\"ratio\":0.697265625,\"sampleLen\":1024,\"payloadSize\":714,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.69921875,\"sampleLen\":1024,\"payloadSize\":716,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"label\":\"CM-TEXT3\",\"ratio\":0.7001953125,\"sampleLen\":1024,\"payloadSize\":717,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":4,\"s\":1,\"r\":1},\"label\":\"CM-TEXT\",\"ratio\":0.705078125,\"sampleLen\":1024,\"payloadSize\":722,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":3,\"s\":1,\"r\":1},\"label\":\"O0\",\"ratio\":0.7314453125,\"sampleLen\":1024,\"payloadSize\":749,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":1024,\"payloadSize\":1024,\"sampleStart\":0}],\"trialBytes\":538,\"modelFlags\":0},{\"start\":34304,\"end\":40960,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":6656,\"compLen\":3087,\"trials\":[{\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"ratio\":0.4990985576923077,\"sampleLen\":6656,\"payloadSize\":3322,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.49984975961538464,\"sampleLen\":6656,\"payloadSize\":3327,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":27,\"s\":2,\"r\":1},\"label\":\"DELTA3(步长2)\",\"ratio\":0.5001502403846154,\"sampleLen\":6656,\"payloadSize\":3329,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":2},\"label\":\"LIN-16(1声道, 2阶)\",\"ratio\":0.5238882211538461,\"sampleLen\":6656,\"payloadSize\":3487,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":2,\"r\":1},\"label\":\"DELTA(步长2)\",\"ratio\":0.5247896634615384,\"sampleLen\":6656,\"payloadSize\":3493,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5614483173076923,\"sampleLen\":6656,\"payloadSize\":3737,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5615985576923077,\"sampleLen\":6656,\"payloadSize\":3738,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":16,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR('\\\\n', 0x08)\",\"ratio\":0.5832331730769231,\"sampleLen\":6656,\"payloadSize\":3882,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.6663161057692307,\"sampleLen\":6656,\"payloadSize\":4435,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":1,\"r\":1},\"label\":\"DELTA(步长1)\",\"ratio\":0.6729266826923077,\"sampleLen\":6656,\"payloadSize\":4479,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":29,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR3('\\\\n', 0x08)\",\"ratio\":0.6732271634615384,\"sampleLen\":6656,\"payloadSize\":4481,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":6656,\"payloadSize\":6656,\"sampleStart\":0}],\"trialBytes\":3322,\"modelFlags\":0},{\"start\":40960,\"end\":41984,\"cls\":\"binary\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":1024,\"compLen\":488,\"trials\":[{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.5380859375,\"sampleLen\":1024,\"payloadSize\":551,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5966796875,\"sampleLen\":1024,\"payloadSize\":611,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5986328125,\"sampleLen\":1024,\"payloadSize\":613,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":18,\"s\":1,\"r\":1},\"label\":\"CM-TEXT2\",\"ratio\":0.69921875,\"sampleLen\":1024,\"payloadSize\":716,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"label\":\"CM-TEXT3\",\"ratio\":0.701171875,\"sampleLen\":1024,\"payloadSize\":718,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.701171875,\"sampleLen\":1024,\"payloadSize\":718,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":4,\"s\":1,\"r\":1},\"label\":\"CM-TEXT\",\"ratio\":0.705078125,\"sampleLen\":1024,\"payloadSize\":722,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":3,\"s\":1,\"r\":1},\"label\":\"O0\",\"ratio\":0.7265625,\"sampleLen\":1024,\"payloadSize\":744,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":1024,\"payloadSize\":1024,\"sampleStart\":0}],\"trialBytes\":551,\"modelFlags\":0},{\"start\":41984,\"end\":51200,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":9216,\"compLen\":4240,\"trials\":[{\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"ratio\":0.4893663194444444,\"sampleLen\":9216,\"payloadSize\":4510,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":27,\"s\":2,\"r\":1},\"label\":\"DELTA3(步长2)\",\"ratio\":0.4909939236111111,\"sampleLen\":9216,\"payloadSize\":4525,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":15,\"s\":2,\"r\":2},\"label\":\"SUB-TRANSPOSE(步长2, BIN)\",\"ratio\":0.4912109375,\"sampleLen\":9216,\"payloadSize\":4527,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.4919704861111111,\"sampleLen\":9216,\"payloadSize\":4534,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":26,\"s\":2,\"r\":1900},\"label\":\"GRAD-2D3(步长2, 行1900)\",\"ratio\":0.5098741319444444,\"sampleLen\":9216,\"payloadSize\":4699,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":2},\"label\":\"LIN-16(1声道, 2阶)\",\"ratio\":0.5129123263888888,\"sampleLen\":9216,\"payloadSize\":4727,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":2,\"r\":1},\"label\":\"DELTA(步长2)\",\"ratio\":0.5138888888888888,\"sampleLen\":9216,\"payloadSize\":4736,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5451388888888888,\"sampleLen\":9216,\"payloadSize\":5024,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5451388888888888,\"sampleLen\":9216,\"payloadSize\":5024,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":16,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR('\\\\n', 0x08)\",\"ratio\":0.5597873263888888,\"sampleLen\":9216,\"payloadSize\":5159,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.6287977430555556,\"sampleLen\":9216,\"payloadSize\":5795,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":29,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR3('\\\\n', 0x08)\",\"ratio\":0.638671875,\"sampleLen\":9216,\"payloadSize\":5886,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":1,\"r\":1},\"label\":\"DELTA(步长1)\",\"ratio\":0.6538628472222222,\"sampleLen\":9216,\"payloadSize\":6026,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":9216,\"payloadSize\":9216,\"sampleStart\":0}],\"trialBytes\":4510,\"modelFlags\":0},{\"start\":51200,\"end\":52736,\"cls\":\"binary\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":1536,\"compLen\":738,\"trials\":[{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.5345052083333334,\"sampleLen\":1536,\"payloadSize\":821,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.611328125,\"sampleLen\":1536,\"payloadSize\":939,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.611328125,\"sampleLen\":1536,\"payloadSize\":939,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":18,\"s\":1,\"r\":1},\"label\":\"CM-TEXT2\",\"ratio\":0.7356770833333334,\"sampleLen\":1536,\"payloadSize\":1130,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"label\":\"CM-TEXT3\",\"ratio\":0.7369791666666666,\"sampleLen\":1536,\"payloadSize\":1132,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":4,\"s\":1,\"r\":1},\"label\":\"CM-TEXT\",\"ratio\":0.73828125,\"sampleLen\":1536,\"payloadSize\":1134,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.7389322916666666,\"sampleLen\":1536,\"payloadSize\":1135,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":3,\"s\":1,\"r\":1},\"label\":\"O0\",\"ratio\":0.76953125,\"sampleLen\":1536,\"payloadSize\":1182,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":1536,\"payloadSize\":1536,\"sampleStart\":0}],\"trialBytes\":821,\"modelFlags\":0},{\"start\":52736,\"end\":59392,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":6656,\"compLen\":3062,\"trials\":[{\"spec\":{\"id\":27,\"s\":2,\"r\":1},\"label\":\"DELTA3(步长2)\",\"ratio\":0.49353966346153844,\"sampleLen\":6656,\"payloadSize\":3285,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.4950420673076923,\"sampleLen\":6656,\"payloadSize\":3295,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"ratio\":0.4950420673076923,\"sampleLen\":6656,\"payloadSize\":3295,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":2,\"r\":1},\"label\":\"DELTA(步长2)\",\"ratio\":0.5166766826923077,\"sampleLen\":6656,\"payloadSize\":3439,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":8,\"s\":1,\"r\":2},\"label\":\"LIN-16(1声道, 2阶)\",\"ratio\":0.5183293269230769,\"sampleLen\":6656,\"payloadSize\":3450,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.5497295673076923,\"sampleLen\":6656,\"payloadSize\":3659,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5500300480769231,\"sampleLen\":6656,\"payloadSize\":3661,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":16,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR('\\\\n', 0x08)\",\"ratio\":0.5608473557692307,\"sampleLen\":6656,\"payloadSize\":3733,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.65234375,\"sampleLen\":6656,\"payloadSize\":4342,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":29,\"s\":10,\"r\":136},\"label\":\"SUB-ANCHOR3('\\\\n', 0x08)\",\"ratio\":0.6535456730769231,\"sampleLen\":6656,\"payloadSize\":4350,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":6,\"s\":1,\"r\":1},\"label\":\"DELTA(步长1)\",\"ratio\":0.6687199519230769,\"sampleLen\":6656,\"payloadSize\":4451,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":6656,\"payloadSize\":6656,\"sampleStart\":0}],\"trialBytes\":3285,\"modelFlags\":0},{\"start\":59392,\"end\":65536,\"cls\":\"smooth\",\"spec\":{\"id\":8,\"s\":1,\"r\":1},\"label\":\"LIN-16(1声道, 1阶)\",\"rawLen\":6144,\"compLen\":2853,\"trials\":[{\"spec\":{\"id\":9,\"s\":2,\"r\":1},\"label\":\"TRANSPOSE(步长2)\",\"ratio\":0.5319010416666666,\"sampleLen\":1536,\"payloadSize\":817,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":5,\"s\":1,\"r\":1},\"label\":\"CM-BIN\",\"ratio\":0.595703125,\"sampleLen\":1536,\"payloadSize\":915,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":19,\"s\":1,\"r\":1},\"label\":\"CM-BIN2\",\"ratio\":0.5963541666666666,\"sampleLen\":1536,\"payloadSize\":916,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":18,\"s\":1,\"r\":1},\"label\":\"CM-TEXT2\",\"ratio\":0.70703125,\"sampleLen\":1536,\"payloadSize\":1086,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"label\":\"CM-TEXT3\",\"ratio\":0.7083333333333334,\"sampleLen\":1536,\"payloadSize\":1088,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":24,\"s\":1,\"r\":1},\"label\":\"CM-BIN3\",\"ratio\":0.708984375,\"sampleLen\":1536,\"payloadSize\":1089,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":4,\"s\":1,\"r\":1},\"label\":\"CM-TEXT\",\"ratio\":0.7135416666666666,\"sampleLen\":1536,\"payloadSize\":1096,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":3,\"s\":1,\"r\":1},\"label\":\"O0\",\"ratio\":0.7513020833333334,\"sampleLen\":1536,\"payloadSize\":1154,\"sampleStart\":0,\"sampleStarts\":[0],\"modelFlags\":0},{\"spec\":{\"id\":0,\"s\":1,\"r\":1},\"label\":\"STORE\",\"ratio\":1,\"sampleLen\":1536,\"payloadSize\":1536,\"sampleStart\":0}],\"trialBytes\":817,\"modelFlags\":0}],\"contexts\":{\"baselineBytes\":30760,\"candidateBytes\":30760,\"accepted\":false,\"workerJobs\":0,\"workerFallbacks\":0,\"groups\":[]},\"stages\":[{\"msg\":\"扫描数据地形…\",\"pct\":5,\"ms\":1.274},{\"msg\":\"为每个区域试探最合适的编码规则…\",\"pct\":15,\"ms\":24.995},{\"msg\":\"区域 1/13 · 试探 SUB-TRANSPOSE(步长2, BIN)\",\"pct\":15,\"ms\":57.454},{\"msg\":\"区域 1/13 · 试探 TRANSPOSE(步长2)\",\"pct\":15,\"ms\":264.61},{\"msg\":\"区域 1/13 · 试探 GRAD-2D3(步长2, 行3296)\",\"pct\":15,\"ms\":317.565},{\"msg\":\"区域 1/13 · 试探 DELTA(步长2)\",\"pct\":15,\"ms\":368.183},{\"msg\":\"区域 1/13 · 试探 DELTA3(步长2)\",\"pct\":15,\"ms\":400.818},{\"msg\":\"区域 1/13 · 试探 DELTA(步长1)\",\"pct\":15,\"ms\":443.685},{\"msg\":\"区域 1/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":15,\"ms\":476.31},{\"msg\":\"区域 1/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":15,\"ms\":502.611},{\"msg\":\"区域 1/13 · 试探 CM-BIN\",\"pct\":15,\"ms\":530.22},{\"msg\":\"区域 1/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":15,\"ms\":577.428},{\"msg\":\"区域 1/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":15,\"ms\":778.845},{\"msg\":\"区域 1/13 · 试探 CM-BIN2\",\"pct\":15,\"ms\":958.512},{\"msg\":\"区域 1/13 · 试探 CM-BIN3\",\"pct\":15,\"ms\":1021.482},{\"msg\":\"区域 1/13 → LIN-16(1声道, 1阶)\",\"pct\":17.692307692307693,\"ms\":1122.922},{\"msg\":\"区域 2/13 · 试探 TRANSPOSE(步长2)\",\"pct\":17.692307692307693,\"ms\":1125.171},{\"msg\":\"区域 2/13 · 试探 CM-BIN\",\"pct\":17.692307692307693,\"ms\":1132.545},{\"msg\":\"区域 2/13 · 试探 O0\",\"pct\":17.692307692307693,\"ms\":1134.653},{\"msg\":\"区域 2/13 · 试探 CM-TEXT\",\"pct\":17.692307692307693,\"ms\":1135.574},{\"msg\":\"区域 2/13 · 试探 CM-TEXT2\",\"pct\":17.692307692307693,\"ms\":1138.447},{\"msg\":\"区域 2/13 · 试探 CM-TEXT3\",\"pct\":17.692307692307693,\"ms\":1141.221},{\"msg\":\"区域 2/13 · 试探 CM-BIN2\",\"pct\":17.692307692307693,\"ms\":1144.41},{\"msg\":\"区域 2/13 · 试探 CM-BIN3\",\"pct\":17.692307692307693,\"ms\":1148.075},{\"msg\":\"区域 2/13 → TRANSPOSE(步长2)\",\"pct\":20.384615384615387,\"ms\":1151.317},{\"msg\":\"区域 3/13 · 试探 SUB-TRANSPOSE(步长2, BIN)\",\"pct\":20.384615384615387,\"ms\":1171.136},{\"msg\":\"区域 3/13 · 试探 TRANSPOSE(步长2)\",\"pct\":20.384615384615387,\"ms\":1268.073},{\"msg\":\"区域 3/13 · 试探 GRAD-2D3(步长2, 行2288)\",\"pct\":20.384615384615387,\"ms\":1307.912},{\"msg\":\"区域 3/13 · 试探 DELTA(步长2)\",\"pct\":20.384615384615387,\"ms\":1339.34},{\"msg\":\"区域 3/13 · 试探 DELTA3(步长2)\",\"pct\":20.384615384615387,\"ms\":1360.206},{\"msg\":\"区域 3/13 · 试探 DELTA(步长1)\",\"pct\":20.384615384615387,\"ms\":1385.719},{\"msg\":\"区域 3/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":20.384615384615387,\"ms\":1409.215},{\"msg\":\"区域 3/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":20.384615384615387,\"ms\":1429.675},{\"msg\":\"区域 3/13 · 试探 CM-BIN\",\"pct\":20.384615384615387,\"ms\":1446.205},{\"msg\":\"区域 3/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":20.384615384615387,\"ms\":1478.151},{\"msg\":\"区域 3/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":20.384615384615387,\"ms\":1574.518},{\"msg\":\"区域 3/13 · 试探 CM-BIN2\",\"pct\":20.384615384615387,\"ms\":1675.518},{\"msg\":\"区域 3/13 · 试探 CM-BIN3\",\"pct\":20.384615384615387,\"ms\":1709.653},{\"msg\":\"区域 3/13 → LIN-16(1声道, 1阶)\",\"pct\":23.076923076923077,\"ms\":1748.877},{\"msg\":\"区域 4/13 · 试探 TRANSPOSE(步长2)\",\"pct\":23.076923076923077,\"ms\":1749.179},{\"msg\":\"区域 4/13 · 试探 CM-BIN\",\"pct\":23.076923076923077,\"ms\":1757.103},{\"msg\":\"区域 4/13 · 试探 O0\",\"pct\":23.076923076923077,\"ms\":1760.54},{\"msg\":\"区域 4/13 · 试探 CM-TEXT\",\"pct\":23.076923076923077,\"ms\":1762.712},{\"msg\":\"区域 4/13 · 试探 CM-TEXT2\",\"pct\":23.076923076923077,\"ms\":1768.428},{\"msg\":\"区域 4/13 · 试探 CM-TEXT3\",\"pct\":23.076923076923077,\"ms\":1774.651},{\"msg\":\"区域 4/13 · 试探 CM-BIN2\",\"pct\":23.076923076923077,\"ms\":1782.148},{\"msg\":\"区域 4/13 · 试探 CM-BIN3\",\"pct\":23.076923076923077,\"ms\":1788.323},{\"msg\":\"区域 4/13 → TRANSPOSE(步长2)\",\"pct\":25.76923076923077,\"ms\":1796.655},{\"msg\":\"区域 5/13 · 试探 TRANSPOSE(步长2)\",\"pct\":25.76923076923077,\"ms\":1803.579},{\"msg\":\"区域 5/13 · 试探 GRAD-2D3(步长2, 行654)\",\"pct\":25.76923076923077,\"ms\":1835.419},{\"msg\":\"区域 5/13 · 试探 DELTA(步长2)\",\"pct\":25.76923076923077,\"ms\":1861.975},{\"msg\":\"区域 5/13 · 试探 DELTA3(步长2)\",\"pct\":25.76923076923077,\"ms\":1877.071},{\"msg\":\"区域 5/13 · 试探 DELTA(步长1)\",\"pct\":25.76923076923077,\"ms\":1892.898},{\"msg\":\"区域 5/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":25.76923076923077,\"ms\":1905.773},{\"msg\":\"区域 5/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":25.76923076923077,\"ms\":1917.439},{\"msg\":\"区域 5/13 · 试探 CM-BIN\",\"pct\":25.76923076923077,\"ms\":1930.971},{\"msg\":\"区域 5/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":25.76923076923077,\"ms\":1959.828},{\"msg\":\"区域 5/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":25.76923076923077,\"ms\":2034.704},{\"msg\":\"区域 5/13 · 试探 CM-BIN2\",\"pct\":25.76923076923077,\"ms\":2103.696},{\"msg\":\"区域 5/13 · 试探 CM-BIN3\",\"pct\":25.76923076923077,\"ms\":2128.018},{\"msg\":\"区域 5/13 → DELTA3(步长2)\",\"pct\":28.46153846153846,\"ms\":2152.588},{\"msg\":\"区域 6/13 · 试探 TRANSPOSE(步长2)\",\"pct\":28.46153846153846,\"ms\":2152.803},{\"msg\":\"区域 6/13 · 试探 CM-BIN\",\"pct\":28.46153846153846,\"ms\":2157.945},{\"msg\":\"区域 6/13 · 试探 O0\",\"pct\":28.46153846153846,\"ms\":2159.729},{\"msg\":\"区域 6/13 · 试探 CM-TEXT\",\"pct\":28.46153846153846,\"ms\":2160.415},{\"msg\":\"区域 6/13 · 试探 CM-TEXT2\",\"pct\":28.46153846153846,\"ms\":2162.002},{\"msg\":\"区域 6/13 · 试探 CM-TEXT3\",\"pct\":28.46153846153846,\"ms\":2163.562},{\"msg\":\"区域 6/13 · 试探 CM-BIN2\",\"pct\":28.46153846153846,\"ms\":2165.516},{\"msg\":\"区域 6/13 · 试探 CM-BIN3\",\"pct\":28.46153846153846,\"ms\":2167.277},{\"msg\":\"区域 6/13 → TRANSPOSE(步长2)\",\"pct\":31.153846153846153,\"ms\":2169.369},{\"msg\":\"区域 7/13 · 试探 TRANSPOSE(步长2)\",\"pct\":31.153846153846153,\"ms\":2177.999},{\"msg\":\"区域 7/13 · 试探 DELTA(步长2)\",\"pct\":31.153846153846153,\"ms\":2202.242},{\"msg\":\"区域 7/13 · 试探 DELTA3(步长2)\",\"pct\":31.153846153846153,\"ms\":2212.858},{\"msg\":\"区域 7/13 · 试探 DELTA(步长1)\",\"pct\":31.153846153846153,\"ms\":2227.168},{\"msg\":\"区域 7/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":31.153846153846153,\"ms\":2238.779},{\"msg\":\"区域 7/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":31.153846153846153,\"ms\":2251.263},{\"msg\":\"区域 7/13 · 试探 CM-BIN\",\"pct\":31.153846153846153,\"ms\":2262.983},{\"msg\":\"区域 7/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":31.153846153846153,\"ms\":2282.383},{\"msg\":\"区域 7/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":31.153846153846153,\"ms\":2340.382},{\"msg\":\"区域 7/13 · 试探 CM-BIN2\",\"pct\":31.153846153846153,\"ms\":2415.447},{\"msg\":\"区域 7/13 · 试探 CM-BIN3\",\"pct\":31.153846153846153,\"ms\":2434.051},{\"msg\":\"区域 7/13 → LIN-16(1声道, 1阶)\",\"pct\":33.84615384615385,\"ms\":2457.292},{\"msg\":\"区域 8/13 · 试探 TRANSPOSE(步长2)\",\"pct\":33.84615384615385,\"ms\":2457.513},{\"msg\":\"区域 8/13 · 试探 CM-BIN\",\"pct\":33.84615384615385,\"ms\":2462.471},{\"msg\":\"区域 8/13 · 试探 O0\",\"pct\":33.84615384615385,\"ms\":2464.073},{\"msg\":\"区域 8/13 · 试探 CM-TEXT\",\"pct\":33.84615384615385,\"ms\":2464.92},{\"msg\":\"区域 8/13 · 试探 CM-TEXT2\",\"pct\":33.84615384615385,\"ms\":2466.359},{\"msg\":\"区域 8/13 · 试探 CM-TEXT3\",\"pct\":33.84615384615385,\"ms\":2467.997},{\"msg\":\"区域 8/13 · 试探 CM-BIN2\",\"pct\":33.84615384615385,\"ms\":2469.843},{\"msg\":\"区域 8/13 · 试探 CM-BIN3\",\"pct\":33.84615384615385,\"ms\":2471.369},{\"msg\":\"区域 8/13 → TRANSPOSE(步长2)\",\"pct\":36.53846153846154,\"ms\":2474.293},{\"msg\":\"区域 9/13 · 试探 SUB-TRANSPOSE(步长2, BIN)\",\"pct\":36.53846153846154,\"ms\":2495.294},{\"msg\":\"区域 9/13 · 试探 TRANSPOSE(步长2)\",\"pct\":36.53846153846154,\"ms\":2582.485},{\"msg\":\"区域 9/13 · 试探 GRAD-2D3(步长2, 行1900)\",\"pct\":36.53846153846154,\"ms\":2613.368},{\"msg\":\"区域 9/13 · 试探 DELTA(步长2)\",\"pct\":36.53846153846154,\"ms\":2639.258},{\"msg\":\"区域 9/13 · 试探 DELTA3(步长2)\",\"pct\":36.53846153846154,\"ms\":2654.964},{\"msg\":\"区域 9/13 · 试探 DELTA(步长1)\",\"pct\":36.53846153846154,\"ms\":2676.169},{\"msg\":\"区域 9/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":36.53846153846154,\"ms\":2697.314},{\"msg\":\"区域 9/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":36.53846153846154,\"ms\":2713.439},{\"msg\":\"区域 9/13 · 试探 CM-BIN\",\"pct\":36.53846153846154,\"ms\":2730.338},{\"msg\":\"区域 9/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":36.53846153846154,\"ms\":2760.164},{\"msg\":\"区域 9/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":36.53846153846154,\"ms\":2868.499},{\"msg\":\"区域 9/13 · 试探 CM-BIN2\",\"pct\":36.53846153846154,\"ms\":2959.522},{\"msg\":\"区域 9/13 · 试探 CM-BIN3\",\"pct\":36.53846153846154,\"ms\":2988.27},{\"msg\":\"区域 9/13 → LIN-16(1声道, 1阶)\",\"pct\":39.230769230769226,\"ms\":3021.579},{\"msg\":\"区域 10/13 · 试探 TRANSPOSE(步长2)\",\"pct\":39.230769230769226,\"ms\":3022.185},{\"msg\":\"区域 10/13 · 试探 CM-BIN\",\"pct\":39.230769230769226,\"ms\":3029.777},{\"msg\":\"区域 10/13 · 试探 O0\",\"pct\":39.230769230769226,\"ms\":3032.528},{\"msg\":\"区域 10/13 · 试探 CM-TEXT\",\"pct\":39.230769230769226,\"ms\":3033.475},{\"msg\":\"区域 10/13 · 试探 CM-TEXT2\",\"pct\":39.230769230769226,\"ms\":3035.863},{\"msg\":\"区域 10/13 · 试探 CM-TEXT3\",\"pct\":39.230769230769226,\"ms\":3038.538},{\"msg\":\"区域 10/13 · 试探 CM-BIN2\",\"pct\":39.230769230769226,\"ms\":3041.776},{\"msg\":\"区域 10/13 · 试探 CM-BIN3\",\"pct\":39.230769230769226,\"ms\":3045.642},{\"msg\":\"区域 10/13 → TRANSPOSE(步长2)\",\"pct\":41.92307692307692,\"ms\":3048.821},{\"msg\":\"区域 11/13 · 试探 TRANSPOSE(步长2)\",\"pct\":41.92307692307692,\"ms\":3056.974},{\"msg\":\"区域 11/13 · 试探 DELTA(步长2)\",\"pct\":41.92307692307692,\"ms\":3080.13},{\"msg\":\"区域 11/13 · 试探 DELTA3(步长2)\",\"pct\":41.92307692307692,\"ms\":3089.708},{\"msg\":\"区域 11/13 · 试探 DELTA(步长1)\",\"pct\":41.92307692307692,\"ms\":3102.734},{\"msg\":\"区域 11/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":41.92307692307692,\"ms\":3113.864},{\"msg\":\"区域 11/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":41.92307692307692,\"ms\":3124.472},{\"msg\":\"区域 11/13 · 试探 CM-BIN\",\"pct\":41.92307692307692,\"ms\":3134.794},{\"msg\":\"区域 11/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":41.92307692307692,\"ms\":3153.27},{\"msg\":\"区域 11/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":41.92307692307692,\"ms\":3212.684},{\"msg\":\"区域 11/13 · 试探 CM-BIN2\",\"pct\":41.92307692307692,\"ms\":3277.369},{\"msg\":\"区域 11/13 · 试探 CM-BIN3\",\"pct\":41.92307692307692,\"ms\":3294.882},{\"msg\":\"区域 11/13 → DELTA3(步长2)\",\"pct\":44.61538461538461,\"ms\":3317.017},{\"msg\":\"区域 12/13 · 试探 TRANSPOSE(步长2)\",\"pct\":44.61538461538461,\"ms\":3317.286},{\"msg\":\"区域 12/13 · 试探 CM-BIN\",\"pct\":44.61538461538461,\"ms\":3324.782},{\"msg\":\"区域 12/13 · 试探 O0\",\"pct\":44.61538461538461,\"ms\":3327.37},{\"msg\":\"区域 12/13 · 试探 CM-TEXT\",\"pct\":44.61538461538461,\"ms\":3328.356},{\"msg\":\"区域 12/13 · 试探 CM-TEXT2\",\"pct\":44.61538461538461,\"ms\":3330.906},{\"msg\":\"区域 12/13 · 试探 CM-TEXT3\",\"pct\":44.61538461538461,\"ms\":3333.56},{\"msg\":\"区域 12/13 · 试探 CM-BIN2\",\"pct\":44.61538461538461,\"ms\":3336.572},{\"msg\":\"区域 12/13 · 试探 CM-BIN3\",\"pct\":44.61538461538461,\"ms\":3339.156},{\"msg\":\"区域 12/13 → TRANSPOSE(步长2)\",\"pct\":47.30769230769231,\"ms\":3342.279},{\"msg\":\"区域 13/13 · 试探 TRANSPOSE(步长2)\",\"pct\":47.30769230769231,\"ms\":3346.558},{\"msg\":\"区域 13/13 · 试探 DELTA(步长2)\",\"pct\":47.30769230769231,\"ms\":3367.964},{\"msg\":\"区域 13/13 · 试探 DELTA3(步长2)\",\"pct\":47.30769230769231,\"ms\":3375.044},{\"msg\":\"区域 13/13 · 试探 DELTA(步长1)\",\"pct\":47.30769230769231,\"ms\":3384.604},{\"msg\":\"区域 13/13 · 试探 LIN-16(1声道, 1阶)\",\"pct\":47.30769230769231,\"ms\":3392.582},{\"msg\":\"区域 13/13 · 试探 LIN-16(1声道, 2阶)\",\"pct\":47.30769230769231,\"ms\":3399.719},{\"msg\":\"区域 13/13 · 试探 CM-BIN\",\"pct\":47.30769230769231,\"ms\":3407.178},{\"msg\":\"区域 13/13 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":47.30769230769231,\"ms\":3419.358},{\"msg\":\"区域 13/13 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":47.30769230769231,\"ms\":3448.342},{\"msg\":\"区域 13/13 · 试探 CM-BIN2\",\"pct\":47.30769230769231,\"ms\":3482.475},{\"msg\":\"区域 13/13 · 试探 CM-BIN3\",\"pct\":47.30769230769231,\"ms\":3496.122},{\"msg\":\"区域 13/13 → TRANSPOSE(步长2)\",\"pct\":50,\"ms\":3511.92},{\"msg\":\"编码地形 1/3 · 0%\",\"pct\":50,\"ms\":3514.176},{\"msg\":\"编码地形 1/3 · 0%\",\"pct\":50,\"ms\":3523.599},{\"msg\":\"编码地形 1/3 · 50%\",\"pct\":52.5,\"ms\":3534.836},{\"msg\":\"编码地形 1/3 · 50%\",\"pct\":52.5,\"ms\":3535.159},{\"msg\":\"编码地形 1/3 · 50%\",\"pct\":52.5,\"ms\":3543.565},{\"msg\":\"编码地形 1/3 · 100%\",\"pct\":55,\"ms\":3550.449},{\"msg\":\"编码地形 1/3 · 100%\",\"pct\":55,\"ms\":3550.484},{\"msg\":\"编码地形 1/3\",\"pct\":55,\"ms\":3551.242},{\"msg\":\"编码地形 2/3 · 0%\",\"pct\":55,\"ms\":3551.401},{\"msg\":\"编码地形 2/3 · 0%\",\"pct\":55,\"ms\":3561.213},{\"msg\":\"编码地形 2/3 · 100%\",\"pct\":60,\"ms\":3637.901},{\"msg\":\"编码地形 2/3\",\"pct\":60,\"ms\":3638.098},{\"msg\":\"编码地形 3/3 · 0%\",\"pct\":60,\"ms\":3638.51},{\"msg\":\"编码地形 3/3 · 0%\",\"pct\":60,\"ms\":3641.253},{\"msg\":\"编码地形 3/3 · 100%\",\"pct\":65,\"ms\":3679.131},{\"msg\":\"编码地形 3/3\",\"pct\":65,\"ms\":3830.397},{\"msg\":\"宏组直接试完整主导规则 LIN-16(1声道, 1阶)（不经过小窗口门）\",\"pct\":75,\"ms\":3831.641},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":79.85714285714286,\"ms\":3832.245},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":79.85714285714286,\"ms\":3854.208},{\"msg\":\"编码地形 1/1 · 100%\",\"pct\":85,\"ms\":4001.499},{\"msg\":\"编码地形 1/1\",\"pct\":85,\"ms\":4001.844},{\"msg\":\"宏组完整容器：31460 → 30760 B（采用）\",\"pct\":85,\"ms\":4001.994},{\"msg\":\"完整容器择优完成\",\"pct\":85,\"ms\":4002.095}],\"scope\":\"unmodified stock compressAdaptive -> UCZ -> stock decompress; genuine bounded endpoint only\",\"fullFileMeasured\":false,\"productionSourceModified\":false}\n",
+  "stderr": "区域 1/13 · 试探 GRAD-2D3(步长2, 行3296)\n区域 1/13 · 试探 LIN-16(1声道, 2阶)\n区域 1/13 · 试探 CM-BIN3\n区域 2/13 · 试探 CM-TEXT\n区域 2/13 → TRANSPOSE(步长2)\n区域 3/13 · 试探 DELTA3(步长2)\n区域 3/13 · 试探 SUB-ANCHOR('\\n', 0x08)\n区域 4/13 · 试探 TRANSPOSE(步长2)\n区域 4/13 · 试探 CM-TEXT3\n区域 5/13 · 试探 GRAD-2D3(步长2, 行654)\n区域 5/13 · 试探 LIN-16(1声道, 2阶)\n区域 5/13 · 试探 CM-BIN3\n区域 6/13 · 试探 CM-TEXT\n区域 6/13 → TRANSPOSE(步长2)\n区域 7/13 · 试探 LIN-16(1声道, 1阶)\n区域 7/13 · 试探 CM-BIN2\n区域 8/13 · 试探 O0\n区域 8/13 · 试探 CM-BIN3\n区域 9/13 · 试探 DELTA(步长2)\n区域 9/13 · 试探 CM-BIN\n区域 9/13 → LIN-16(1声道, 1阶)\n区域 10/13 · 试探 CM-TEXT2\n区域 11/13 · 试探 TRANSPOSE(步长2)\n区域 11/13 · 试探 LIN-16(1声道, 2阶)\n区域 11/13 · 试探 CM-BIN3\n区域 12/13 · 试探 CM-TEXT\n区域 12/13 → TRANSPOSE(步长2)\n区域 13/13 · 试探 LIN-16(1声道, 1阶)\n区域 13/13 · 试探 CM-BIN2\n编码地形 1/3 · 50%\n编码地形 1/3\n编码地形 3/3 · 0%\n编码地形 1/1 · 0%\n完整容器择优完成\n",
+  "result": {
+    "unit": 2,
+    "input": {
+      "name": "x-ray-mid",
+      "kind": "fixed-corpus-window",
+      "file": "x-ray",
+      "offset": 4236800,
+      "withinParentOffset": 0,
+      "bytes": 65536,
+      "sha256": "fb64ffe822248d7ca6b9375cbe4f99c43f2c700d6e77b19a980d229cc629469f",
+      "parentWindowBytes": 262144,
+      "parentWindowSha256": "387fee83a6a25cb7a702d1b775d2cb62c1fdf282890fbc3591df6b4aa96363ff"
+    },
+    "variant": "adaptive",
+    "analysis": {
+      "inputStats": {
+        "entropy": 6.46530881266475,
+        "evenEntropy": 7.985788988690571,
+        "oddEntropy": 3.1628740216016378,
+        "lag1Equal": 0.0036011291676203558,
+        "lag2Equal": 0.45614490188299206,
+        "meanAbsLE16Delta": 29.89593188268685,
+        "meanAbsBE16Delta": 11478.812097537157
+      },
+      "wide16Lag": 0,
+      "lag1": [
+        3800
+      ],
+      "lag2": [
+        3800
+      ],
+      "segments": [
+        {
+          "start": 0,
+          "end": 14336,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 0,
+          "b1": 28
+        },
+        {
+          "start": 14336,
+          "end": 15360,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 28,
+          "b1": 30
+        },
+        {
+          "start": 15360,
+          "end": 24576,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 30,
+          "b1": 48
+        },
+        {
+          "start": 24576,
+          "end": 26112,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 48,
+          "b1": 51
+        },
+        {
+          "start": 26112,
+          "end": 33280,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 51,
+          "b1": 65
+        },
+        {
+          "start": 33280,
+          "end": 34304,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 65,
+          "b1": 67
+        },
+        {
+          "start": 34304,
+          "end": 40960,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 67,
+          "b1": 80
+        },
+        {
+          "start": 40960,
+          "end": 41984,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 80,
+          "b1": 82
+        },
+        {
+          "start": 41984,
+          "end": 51200,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 82,
+          "b1": 100
+        },
+        {
+          "start": 51200,
+          "end": 52736,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 100,
+          "b1": 103
+        },
+        {
+          "start": 52736,
+          "end": 59392,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 103,
+          "b1": 116
+        },
+        {
+          "start": 59392,
+          "end": 60928,
+          "cls": "binary",
+          "bestS": 2,
+          "b0": 116,
+          "b1": 119
+        },
+        {
+          "start": 60928,
+          "end": 65536,
+          "cls": "smooth",
+          "bestS": 2,
+          "b0": 119,
+          "b1": 128
+        }
+      ]
+    },
+    "containerBytes": 30760,
+    "containerSha256": "f00355550360a813e06cf2fa5b9ceb10c1f73dde648f59e212327faeb319d8c2",
+    "version": 7,
+    "headerBytes": 39,
+    "encodeMs": 4003.008,
+    "decodeMs": 163.462,
+    "roundtrip": true,
+    "decodedSha256": "fb64ffe822248d7ca6b9375cbe4f99c43f2c700d6e77b19a980d229cc629469f",
+    "segs": [
+      {
+        "start": 0,
+        "end": 14336,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 14336,
+        "compLen": 6942,
+        "trials": [
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 1
+            },
+            "label": "LIN-16(1声道, 1阶)",
+            "ratio": 0.48451450892857145,
+            "sampleLen": 14336,
+            "payloadSize": 6946,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 27,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA3(步长2)",
+            "ratio": 0.4893275669642857,
+            "sampleLen": 14336,
+            "payloadSize": 7015,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 15,
+              "s": 2,
+              "r": 2
+            },
+            "label": "SUB-TRANSPOSE(步长2, BIN)",
+            "ratio": 0.49135044642857145,
+            "sampleLen": 14336,
+            "payloadSize": 7044,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.49142020089285715,
+            "sampleLen": 14336,
+            "payloadSize": 7045,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA(步长2)",
+            "ratio": 0.5085797991071429,
+            "sampleLen": 14336,
+            "payloadSize": 7291,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 2
+            },
+            "label": "LIN-16(1声道, 2阶)",
+            "ratio": 0.5089285714285714,
+            "sampleLen": 14336,
+            "payloadSize": 7296,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 26,
+              "s": 2,
+              "r": 3296
+            },
+            "label": "GRAD-2D3(步长2, 行3296)",
+            "ratio": 0.51171875,
+            "sampleLen": 14336,
+            "payloadSize": 7336,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5368303571428571,
+            "sampleLen": 14336,
+            "payloadSize": 7696,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.537109375,
+            "sampleLen": 14336,
+            "payloadSize": 7700,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 16,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR('\\n', 0x08)",
+            "ratio": 0.5529436383928571,
+            "sampleLen": 14336,
+            "payloadSize": 7927,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.6078404017857143,
+            "sampleLen": 14336,
+            "payloadSize": 8714,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 29,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR3('\\n', 0x08)",
+            "ratio": 0.6138392857142857,
+            "sampleLen": 14336,
+            "payloadSize": 8800,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 1,
+              "r": 1
+            },
+            "label": "DELTA(步长1)",
+            "ratio": 0.6462751116071429,
+            "sampleLen": 14336,
+            "payloadSize": 9265,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 14336,
+            "payloadSize": 14336,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 6946,
+        "modelFlags": 0
+      },
+      {
+        "start": 14336,
+        "end": 15360,
+        "cls": "binary",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 1024,
+        "compLen": 487,
+        "trials": [
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.52734375,
+            "sampleLen": 1024,
+            "payloadSize": 540,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.595703125,
+            "sampleLen": 1024,
+            "payloadSize": 610,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5966796875,
+            "sampleLen": 1024,
+            "payloadSize": 611,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT2",
+            "ratio": 0.7216796875,
+            "sampleLen": 1024,
+            "payloadSize": 739,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.7236328125,
+            "sampleLen": 1024,
+            "payloadSize": 741,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT",
+            "ratio": 0.724609375,
+            "sampleLen": 1024,
+            "payloadSize": 742,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT3",
+            "ratio": 0.724609375,
+            "sampleLen": 1024,
+            "payloadSize": 742,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            "label": "O0",
+            "ratio": 0.732421875,
+            "sampleLen": 1024,
+            "payloadSize": 750,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 1024,
+            "payloadSize": 1024,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 540,
+        "modelFlags": 0
+      },
+      {
+        "start": 15360,
+        "end": 24576,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 9216,
+        "compLen": 4267,
+        "trials": [
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 1
+            },
+            "label": "LIN-16(1声道, 1阶)",
+            "ratio": 0.4883897569444444,
+            "sampleLen": 9216,
+            "payloadSize": 4501,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 27,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA3(步长2)",
+            "ratio": 0.4898003472222222,
+            "sampleLen": 9216,
+            "payloadSize": 4514,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 15,
+              "s": 2,
+              "r": 2
+            },
+            "label": "SUB-TRANSPOSE(步长2, BIN)",
+            "ratio": 0.4907769097222222,
+            "sampleLen": 9216,
+            "payloadSize": 4523,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.4914279513888889,
+            "sampleLen": 9216,
+            "payloadSize": 4529,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 2
+            },
+            "label": "LIN-16(1声道, 2阶)",
+            "ratio": 0.5109592013888888,
+            "sampleLen": 9216,
+            "payloadSize": 4709,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 26,
+              "s": 2,
+              "r": 2288
+            },
+            "label": "GRAD-2D3(步长2, 行2288)",
+            "ratio": 0.5120442708333334,
+            "sampleLen": 9216,
+            "payloadSize": 4719,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA(步长2)",
+            "ratio": 0.5122612847222222,
+            "sampleLen": 9216,
+            "payloadSize": 4721,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5415581597222222,
+            "sampleLen": 9216,
+            "payloadSize": 4991,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5419921875,
+            "sampleLen": 9216,
+            "payloadSize": 4995,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 16,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR('\\n', 0x08)",
+            "ratio": 0.5540364583333334,
+            "sampleLen": 9216,
+            "payloadSize": 5106,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.6278211805555556,
+            "sampleLen": 9216,
+            "payloadSize": 5786,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 29,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR3('\\n', 0x08)",
+            "ratio": 0.6348741319444444,
+            "sampleLen": 9216,
+            "payloadSize": 5851,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 1,
+              "r": 1
+            },
+            "label": "DELTA(步长1)",
+            "ratio": 0.6533203125,
+            "sampleLen": 9216,
+            "payloadSize": 6021,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 9216,
+            "payloadSize": 9216,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 4501,
+        "modelFlags": 0
+      },
+      {
+        "start": 24576,
+        "end": 26112,
+        "cls": "binary",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 1536,
+        "compLen": 745,
+        "trials": [
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.5338541666666666,
+            "sampleLen": 1536,
+            "payloadSize": 820,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.6067708333333334,
+            "sampleLen": 1536,
+            "payloadSize": 932,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.607421875,
+            "sampleLen": 1536,
+            "payloadSize": 933,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT2",
+            "ratio": 0.7356770833333334,
+            "sampleLen": 1536,
+            "payloadSize": 1130,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT3",
+            "ratio": 0.736328125,
+            "sampleLen": 1536,
+            "payloadSize": 1131,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.7395833333333334,
+            "sampleLen": 1536,
+            "payloadSize": 1136,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT",
+            "ratio": 0.7408854166666666,
+            "sampleLen": 1536,
+            "payloadSize": 1138,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            "label": "O0",
+            "ratio": 0.7688802083333334,
+            "sampleLen": 1536,
+            "payloadSize": 1181,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 1536,
+            "payloadSize": 1536,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 820,
+        "modelFlags": 0
+      },
+      {
+        "start": 26112,
+        "end": 33280,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 7168,
+        "compLen": 3328,
+        "trials": [
+          {
+            "spec": {
+              "id": 27,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA3(步长2)",
+            "ratio": 0.4951171875,
+            "sampleLen": 7168,
+            "payloadSize": 3549,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.4965122767857143,
+            "sampleLen": 7168,
+            "payloadSize": 3559,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 1
+            },
+            "label": "LIN-16(1声道, 1阶)",
+            "ratio": 0.49693080357142855,
+            "sampleLen": 7168,
+            "payloadSize": 3562,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 26,
+              "s": 2,
+              "r": 654
+            },
+            "label": "GRAD-2D3(步长2, 行654)",
+            "ratio": 0.5186941964285714,
+            "sampleLen": 7168,
+            "payloadSize": 3718,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA(步长2)",
+            "ratio": 0.51953125,
+            "sampleLen": 7168,
+            "payloadSize": 3724,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 2
+            },
+            "label": "LIN-16(1声道, 2阶)",
+            "ratio": 0.5207868303571429,
+            "sampleLen": 7168,
+            "payloadSize": 3733,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5539899553571429,
+            "sampleLen": 7168,
+            "payloadSize": 3971,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5542689732142857,
+            "sampleLen": 7168,
+            "payloadSize": 3973,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 16,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR('\\n', 0x08)",
+            "ratio": 0.5687779017857143,
+            "sampleLen": 7168,
+            "payloadSize": 4077,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.6510881696428571,
+            "sampleLen": 7168,
+            "payloadSize": 4667,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 29,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR3('\\n', 0x08)",
+            "ratio": 0.6551339285714286,
+            "sampleLen": 7168,
+            "payloadSize": 4696,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 1,
+              "r": 1
+            },
+            "label": "DELTA(步长1)",
+            "ratio": 0.6692243303571429,
+            "sampleLen": 7168,
+            "payloadSize": 4797,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 7168,
+            "payloadSize": 7168,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 3549,
+        "modelFlags": 0
+      },
+      {
+        "start": 33280,
+        "end": 34304,
+        "cls": "binary",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 1024,
+        "compLen": 484,
+        "trials": [
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.525390625,
+            "sampleLen": 1024,
+            "payloadSize": 538,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5888671875,
+            "sampleLen": 1024,
+            "payloadSize": 603,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.58984375,
+            "sampleLen": 1024,
+            "payloadSize": 604,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT2",
+            "ratio": 0.697265625,
+            "sampleLen": 1024,
+            "payloadSize": 714,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.69921875,
+            "sampleLen": 1024,
+            "payloadSize": 716,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT3",
+            "ratio": 0.7001953125,
+            "sampleLen": 1024,
+            "payloadSize": 717,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT",
+            "ratio": 0.705078125,
+            "sampleLen": 1024,
+            "payloadSize": 722,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            "label": "O0",
+            "ratio": 0.7314453125,
+            "sampleLen": 1024,
+            "payloadSize": 749,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 1024,
+            "payloadSize": 1024,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 538,
+        "modelFlags": 0
+      },
+      {
+        "start": 34304,
+        "end": 40960,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 6656,
+        "compLen": 3087,
+        "trials": [
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 1
+            },
+            "label": "LIN-16(1声道, 1阶)",
+            "ratio": 0.4990985576923077,
+            "sampleLen": 6656,
+            "payloadSize": 3322,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.49984975961538464,
+            "sampleLen": 6656,
+            "payloadSize": 3327,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 27,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA3(步长2)",
+            "ratio": 0.5001502403846154,
+            "sampleLen": 6656,
+            "payloadSize": 3329,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 2
+            },
+            "label": "LIN-16(1声道, 2阶)",
+            "ratio": 0.5238882211538461,
+            "sampleLen": 6656,
+            "payloadSize": 3487,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA(步长2)",
+            "ratio": 0.5247896634615384,
+            "sampleLen": 6656,
+            "payloadSize": 3493,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5614483173076923,
+            "sampleLen": 6656,
+            "payloadSize": 3737,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5615985576923077,
+            "sampleLen": 6656,
+            "payloadSize": 3738,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 16,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR('\\n', 0x08)",
+            "ratio": 0.5832331730769231,
+            "sampleLen": 6656,
+            "payloadSize": 3882,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.6663161057692307,
+            "sampleLen": 6656,
+            "payloadSize": 4435,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 1,
+              "r": 1
+            },
+            "label": "DELTA(步长1)",
+            "ratio": 0.6729266826923077,
+            "sampleLen": 6656,
+            "payloadSize": 4479,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 29,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR3('\\n', 0x08)",
+            "ratio": 0.6732271634615384,
+            "sampleLen": 6656,
+            "payloadSize": 4481,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 6656,
+            "payloadSize": 6656,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 3322,
+        "modelFlags": 0
+      },
+      {
+        "start": 40960,
+        "end": 41984,
+        "cls": "binary",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 1024,
+        "compLen": 488,
+        "trials": [
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.5380859375,
+            "sampleLen": 1024,
+            "payloadSize": 551,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5966796875,
+            "sampleLen": 1024,
+            "payloadSize": 611,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5986328125,
+            "sampleLen": 1024,
+            "payloadSize": 613,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT2",
+            "ratio": 0.69921875,
+            "sampleLen": 1024,
+            "payloadSize": 716,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT3",
+            "ratio": 0.701171875,
+            "sampleLen": 1024,
+            "payloadSize": 718,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.701171875,
+            "sampleLen": 1024,
+            "payloadSize": 718,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT",
+            "ratio": 0.705078125,
+            "sampleLen": 1024,
+            "payloadSize": 722,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            "label": "O0",
+            "ratio": 0.7265625,
+            "sampleLen": 1024,
+            "payloadSize": 744,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 1024,
+            "payloadSize": 1024,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 551,
+        "modelFlags": 0
+      },
+      {
+        "start": 41984,
+        "end": 51200,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 9216,
+        "compLen": 4240,
+        "trials": [
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 1
+            },
+            "label": "LIN-16(1声道, 1阶)",
+            "ratio": 0.4893663194444444,
+            "sampleLen": 9216,
+            "payloadSize": 4510,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 27,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA3(步长2)",
+            "ratio": 0.4909939236111111,
+            "sampleLen": 9216,
+            "payloadSize": 4525,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 15,
+              "s": 2,
+              "r": 2
+            },
+            "label": "SUB-TRANSPOSE(步长2, BIN)",
+            "ratio": 0.4912109375,
+            "sampleLen": 9216,
+            "payloadSize": 4527,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.4919704861111111,
+            "sampleLen": 9216,
+            "payloadSize": 4534,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 26,
+              "s": 2,
+              "r": 1900
+            },
+            "label": "GRAD-2D3(步长2, 行1900)",
+            "ratio": 0.5098741319444444,
+            "sampleLen": 9216,
+            "payloadSize": 4699,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 2
+            },
+            "label": "LIN-16(1声道, 2阶)",
+            "ratio": 0.5129123263888888,
+            "sampleLen": 9216,
+            "payloadSize": 4727,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA(步长2)",
+            "ratio": 0.5138888888888888,
+            "sampleLen": 9216,
+            "payloadSize": 4736,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5451388888888888,
+            "sampleLen": 9216,
+            "payloadSize": 5024,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5451388888888888,
+            "sampleLen": 9216,
+            "payloadSize": 5024,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 16,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR('\\n', 0x08)",
+            "ratio": 0.5597873263888888,
+            "sampleLen": 9216,
+            "payloadSize": 5159,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.6287977430555556,
+            "sampleLen": 9216,
+            "payloadSize": 5795,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 29,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR3('\\n', 0x08)",
+            "ratio": 0.638671875,
+            "sampleLen": 9216,
+            "payloadSize": 5886,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 1,
+              "r": 1
+            },
+            "label": "DELTA(步长1)",
+            "ratio": 0.6538628472222222,
+            "sampleLen": 9216,
+            "payloadSize": 6026,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 9216,
+            "payloadSize": 9216,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 4510,
+        "modelFlags": 0
+      },
+      {
+        "start": 51200,
+        "end": 52736,
+        "cls": "binary",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 1536,
+        "compLen": 738,
+        "trials": [
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.5345052083333334,
+            "sampleLen": 1536,
+            "payloadSize": 821,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.611328125,
+            "sampleLen": 1536,
+            "payloadSize": 939,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.611328125,
+            "sampleLen": 1536,
+            "payloadSize": 939,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT2",
+            "ratio": 0.7356770833333334,
+            "sampleLen": 1536,
+            "payloadSize": 1130,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT3",
+            "ratio": 0.7369791666666666,
+            "sampleLen": 1536,
+            "payloadSize": 1132,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT",
+            "ratio": 0.73828125,
+            "sampleLen": 1536,
+            "payloadSize": 1134,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.7389322916666666,
+            "sampleLen": 1536,
+            "payloadSize": 1135,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            "label": "O0",
+            "ratio": 0.76953125,
+            "sampleLen": 1536,
+            "payloadSize": 1182,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 1536,
+            "payloadSize": 1536,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 821,
+        "modelFlags": 0
+      },
+      {
+        "start": 52736,
+        "end": 59392,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 6656,
+        "compLen": 3062,
+        "trials": [
+          {
+            "spec": {
+              "id": 27,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA3(步长2)",
+            "ratio": 0.49353966346153844,
+            "sampleLen": 6656,
+            "payloadSize": 3285,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.4950420673076923,
+            "sampleLen": 6656,
+            "payloadSize": 3295,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 1
+            },
+            "label": "LIN-16(1声道, 1阶)",
+            "ratio": 0.4950420673076923,
+            "sampleLen": 6656,
+            "payloadSize": 3295,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 2,
+              "r": 1
+            },
+            "label": "DELTA(步长2)",
+            "ratio": 0.5166766826923077,
+            "sampleLen": 6656,
+            "payloadSize": 3439,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 8,
+              "s": 1,
+              "r": 2
+            },
+            "label": "LIN-16(1声道, 2阶)",
+            "ratio": 0.5183293269230769,
+            "sampleLen": 6656,
+            "payloadSize": 3450,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.5497295673076923,
+            "sampleLen": 6656,
+            "payloadSize": 3659,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5500300480769231,
+            "sampleLen": 6656,
+            "payloadSize": 3661,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 16,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR('\\n', 0x08)",
+            "ratio": 0.5608473557692307,
+            "sampleLen": 6656,
+            "payloadSize": 3733,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.65234375,
+            "sampleLen": 6656,
+            "payloadSize": 4342,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 29,
+              "s": 10,
+              "r": 136
+            },
+            "label": "SUB-ANCHOR3('\\n', 0x08)",
+            "ratio": 0.6535456730769231,
+            "sampleLen": 6656,
+            "payloadSize": 4350,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 6,
+              "s": 1,
+              "r": 1
+            },
+            "label": "DELTA(步长1)",
+            "ratio": 0.6687199519230769,
+            "sampleLen": 6656,
+            "payloadSize": 4451,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 6656,
+            "payloadSize": 6656,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 3285,
+        "modelFlags": 0
+      },
+      {
+        "start": 59392,
+        "end": 65536,
+        "cls": "smooth",
+        "spec": {
+          "id": 8,
+          "s": 1,
+          "r": 1
+        },
+        "label": "LIN-16(1声道, 1阶)",
+        "rawLen": 6144,
+        "compLen": 2853,
+        "trials": [
+          {
+            "spec": {
+              "id": 9,
+              "s": 2,
+              "r": 1
+            },
+            "label": "TRANSPOSE(步长2)",
+            "ratio": 0.5319010416666666,
+            "sampleLen": 1536,
+            "payloadSize": 817,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 5,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN",
+            "ratio": 0.595703125,
+            "sampleLen": 1536,
+            "payloadSize": 915,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 19,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN2",
+            "ratio": 0.5963541666666666,
+            "sampleLen": 1536,
+            "payloadSize": 916,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 18,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT2",
+            "ratio": 0.70703125,
+            "sampleLen": 1536,
+            "payloadSize": 1086,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT3",
+            "ratio": 0.7083333333333334,
+            "sampleLen": 1536,
+            "payloadSize": 1088,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 24,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-BIN3",
+            "ratio": 0.708984375,
+            "sampleLen": 1536,
+            "payloadSize": 1089,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 4,
+              "s": 1,
+              "r": 1
+            },
+            "label": "CM-TEXT",
+            "ratio": 0.7135416666666666,
+            "sampleLen": 1536,
+            "payloadSize": 1096,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 3,
+              "s": 1,
+              "r": 1
+            },
+            "label": "O0",
+            "ratio": 0.7513020833333334,
+            "sampleLen": 1536,
+            "payloadSize": 1154,
+            "sampleStart": 0,
+            "sampleStarts": [
+              0
+            ],
+            "modelFlags": 0
+          },
+          {
+            "spec": {
+              "id": 0,
+              "s": 1,
+              "r": 1
+            },
+            "label": "STORE",
+            "ratio": 1,
+            "sampleLen": 1536,
+            "payloadSize": 1536,
+            "sampleStart": 0
+          }
+        ],
+        "trialBytes": 817,
+        "modelFlags": 0
+      }
+    ],
+    "contexts": {
+      "baselineBytes": 30760,
+      "candidateBytes": 30760,
+      "accepted": false,
+      "workerJobs": 0,
+      "workerFallbacks": 0,
+      "groups": []
+    },
+    "stages": [
+      {
+        "msg": "扫描数据地形…",
+        "pct": 5,
+        "ms": 1.274
+      },
+      {
+        "msg": "为每个区域试探最合适的编码规则…",
+        "pct": 15,
+        "ms": 24.995
+      },
+      {
+        "msg": "区域 1/13 · 试探 SUB-TRANSPOSE(步长2, BIN)",
+        "pct": 15,
+        "ms": 57.454
+      },
+      {
+        "msg": "区域 1/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 15,
+        "ms": 264.61
+      },
+      {
+        "msg": "区域 1/13 · 试探 GRAD-2D3(步长2, 行3296)",
+        "pct": 15,
+        "ms": 317.565
+      },
+      {
+        "msg": "区域 1/13 · 试探 DELTA(步长2)",
+        "pct": 15,
+        "ms": 368.183
+      },
+      {
+        "msg": "区域 1/13 · 试探 DELTA3(步长2)",
+        "pct": 15,
+        "ms": 400.818
+      },
+      {
+        "msg": "区域 1/13 · 试探 DELTA(步长1)",
+        "pct": 15,
+        "ms": 443.685
+      },
+      {
+        "msg": "区域 1/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 15,
+        "ms": 476.31
+      },
+      {
+        "msg": "区域 1/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 15,
+        "ms": 502.611
+      },
+      {
+        "msg": "区域 1/13 · 试探 CM-BIN",
+        "pct": 15,
+        "ms": 530.22
+      },
+      {
+        "msg": "区域 1/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 15,
+        "ms": 577.428
+      },
+      {
+        "msg": "区域 1/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 15,
+        "ms": 778.845
+      },
+      {
+        "msg": "区域 1/13 · 试探 CM-BIN2",
+        "pct": 15,
+        "ms": 958.512
+      },
+      {
+        "msg": "区域 1/13 · 试探 CM-BIN3",
+        "pct": 15,
+        "ms": 1021.482
+      },
+      {
+        "msg": "区域 1/13 → LIN-16(1声道, 1阶)",
+        "pct": 17.692307692307693,
+        "ms": 1122.922
+      },
+      {
+        "msg": "区域 2/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 17.692307692307693,
+        "ms": 1125.171
+      },
+      {
+        "msg": "区域 2/13 · 试探 CM-BIN",
+        "pct": 17.692307692307693,
+        "ms": 1132.545
+      },
+      {
+        "msg": "区域 2/13 · 试探 O0",
+        "pct": 17.692307692307693,
+        "ms": 1134.653
+      },
+      {
+        "msg": "区域 2/13 · 试探 CM-TEXT",
+        "pct": 17.692307692307693,
+        "ms": 1135.574
+      },
+      {
+        "msg": "区域 2/13 · 试探 CM-TEXT2",
+        "pct": 17.692307692307693,
+        "ms": 1138.447
+      },
+      {
+        "msg": "区域 2/13 · 试探 CM-TEXT3",
+        "pct": 17.692307692307693,
+        "ms": 1141.221
+      },
+      {
+        "msg": "区域 2/13 · 试探 CM-BIN2",
+        "pct": 17.692307692307693,
+        "ms": 1144.41
+      },
+      {
+        "msg": "区域 2/13 · 试探 CM-BIN3",
+        "pct": 17.692307692307693,
+        "ms": 1148.075
+      },
+      {
+        "msg": "区域 2/13 → TRANSPOSE(步长2)",
+        "pct": 20.384615384615387,
+        "ms": 1151.317
+      },
+      {
+        "msg": "区域 3/13 · 试探 SUB-TRANSPOSE(步长2, BIN)",
+        "pct": 20.384615384615387,
+        "ms": 1171.136
+      },
+      {
+        "msg": "区域 3/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 20.384615384615387,
+        "ms": 1268.073
+      },
+      {
+        "msg": "区域 3/13 · 试探 GRAD-2D3(步长2, 行2288)",
+        "pct": 20.384615384615387,
+        "ms": 1307.912
+      },
+      {
+        "msg": "区域 3/13 · 试探 DELTA(步长2)",
+        "pct": 20.384615384615387,
+        "ms": 1339.34
+      },
+      {
+        "msg": "区域 3/13 · 试探 DELTA3(步长2)",
+        "pct": 20.384615384615387,
+        "ms": 1360.206
+      },
+      {
+        "msg": "区域 3/13 · 试探 DELTA(步长1)",
+        "pct": 20.384615384615387,
+        "ms": 1385.719
+      },
+      {
+        "msg": "区域 3/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 20.384615384615387,
+        "ms": 1409.215
+      },
+      {
+        "msg": "区域 3/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 20.384615384615387,
+        "ms": 1429.675
+      },
+      {
+        "msg": "区域 3/13 · 试探 CM-BIN",
+        "pct": 20.384615384615387,
+        "ms": 1446.205
+      },
+      {
+        "msg": "区域 3/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 20.384615384615387,
+        "ms": 1478.151
+      },
+      {
+        "msg": "区域 3/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 20.384615384615387,
+        "ms": 1574.518
+      },
+      {
+        "msg": "区域 3/13 · 试探 CM-BIN2",
+        "pct": 20.384615384615387,
+        "ms": 1675.518
+      },
+      {
+        "msg": "区域 3/13 · 试探 CM-BIN3",
+        "pct": 20.384615384615387,
+        "ms": 1709.653
+      },
+      {
+        "msg": "区域 3/13 → LIN-16(1声道, 1阶)",
+        "pct": 23.076923076923077,
+        "ms": 1748.877
+      },
+      {
+        "msg": "区域 4/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 23.076923076923077,
+        "ms": 1749.179
+      },
+      {
+        "msg": "区域 4/13 · 试探 CM-BIN",
+        "pct": 23.076923076923077,
+        "ms": 1757.103
+      },
+      {
+        "msg": "区域 4/13 · 试探 O0",
+        "pct": 23.076923076923077,
+        "ms": 1760.54
+      },
+      {
+        "msg": "区域 4/13 · 试探 CM-TEXT",
+        "pct": 23.076923076923077,
+        "ms": 1762.712
+      },
+      {
+        "msg": "区域 4/13 · 试探 CM-TEXT2",
+        "pct": 23.076923076923077,
+        "ms": 1768.428
+      },
+      {
+        "msg": "区域 4/13 · 试探 CM-TEXT3",
+        "pct": 23.076923076923077,
+        "ms": 1774.651
+      },
+      {
+        "msg": "区域 4/13 · 试探 CM-BIN2",
+        "pct": 23.076923076923077,
+        "ms": 1782.148
+      },
+      {
+        "msg": "区域 4/13 · 试探 CM-BIN3",
+        "pct": 23.076923076923077,
+        "ms": 1788.323
+      },
+      {
+        "msg": "区域 4/13 → TRANSPOSE(步长2)",
+        "pct": 25.76923076923077,
+        "ms": 1796.655
+      },
+      {
+        "msg": "区域 5/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 25.76923076923077,
+        "ms": 1803.579
+      },
+      {
+        "msg": "区域 5/13 · 试探 GRAD-2D3(步长2, 行654)",
+        "pct": 25.76923076923077,
+        "ms": 1835.419
+      },
+      {
+        "msg": "区域 5/13 · 试探 DELTA(步长2)",
+        "pct": 25.76923076923077,
+        "ms": 1861.975
+      },
+      {
+        "msg": "区域 5/13 · 试探 DELTA3(步长2)",
+        "pct": 25.76923076923077,
+        "ms": 1877.071
+      },
+      {
+        "msg": "区域 5/13 · 试探 DELTA(步长1)",
+        "pct": 25.76923076923077,
+        "ms": 1892.898
+      },
+      {
+        "msg": "区域 5/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 25.76923076923077,
+        "ms": 1905.773
+      },
+      {
+        "msg": "区域 5/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 25.76923076923077,
+        "ms": 1917.439
+      },
+      {
+        "msg": "区域 5/13 · 试探 CM-BIN",
+        "pct": 25.76923076923077,
+        "ms": 1930.971
+      },
+      {
+        "msg": "区域 5/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 25.76923076923077,
+        "ms": 1959.828
+      },
+      {
+        "msg": "区域 5/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 25.76923076923077,
+        "ms": 2034.704
+      },
+      {
+        "msg": "区域 5/13 · 试探 CM-BIN2",
+        "pct": 25.76923076923077,
+        "ms": 2103.696
+      },
+      {
+        "msg": "区域 5/13 · 试探 CM-BIN3",
+        "pct": 25.76923076923077,
+        "ms": 2128.018
+      },
+      {
+        "msg": "区域 5/13 → DELTA3(步长2)",
+        "pct": 28.46153846153846,
+        "ms": 2152.588
+      },
+      {
+        "msg": "区域 6/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 28.46153846153846,
+        "ms": 2152.803
+      },
+      {
+        "msg": "区域 6/13 · 试探 CM-BIN",
+        "pct": 28.46153846153846,
+        "ms": 2157.945
+      },
+      {
+        "msg": "区域 6/13 · 试探 O0",
+        "pct": 28.46153846153846,
+        "ms": 2159.729
+      },
+      {
+        "msg": "区域 6/13 · 试探 CM-TEXT",
+        "pct": 28.46153846153846,
+        "ms": 2160.415
+      },
+      {
+        "msg": "区域 6/13 · 试探 CM-TEXT2",
+        "pct": 28.46153846153846,
+        "ms": 2162.002
+      },
+      {
+        "msg": "区域 6/13 · 试探 CM-TEXT3",
+        "pct": 28.46153846153846,
+        "ms": 2163.562
+      },
+      {
+        "msg": "区域 6/13 · 试探 CM-BIN2",
+        "pct": 28.46153846153846,
+        "ms": 2165.516
+      },
+      {
+        "msg": "区域 6/13 · 试探 CM-BIN3",
+        "pct": 28.46153846153846,
+        "ms": 2167.277
+      },
+      {
+        "msg": "区域 6/13 → TRANSPOSE(步长2)",
+        "pct": 31.153846153846153,
+        "ms": 2169.369
+      },
+      {
+        "msg": "区域 7/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 31.153846153846153,
+        "ms": 2177.999
+      },
+      {
+        "msg": "区域 7/13 · 试探 DELTA(步长2)",
+        "pct": 31.153846153846153,
+        "ms": 2202.242
+      },
+      {
+        "msg": "区域 7/13 · 试探 DELTA3(步长2)",
+        "pct": 31.153846153846153,
+        "ms": 2212.858
+      },
+      {
+        "msg": "区域 7/13 · 试探 DELTA(步长1)",
+        "pct": 31.153846153846153,
+        "ms": 2227.168
+      },
+      {
+        "msg": "区域 7/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 31.153846153846153,
+        "ms": 2238.779
+      },
+      {
+        "msg": "区域 7/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 31.153846153846153,
+        "ms": 2251.263
+      },
+      {
+        "msg": "区域 7/13 · 试探 CM-BIN",
+        "pct": 31.153846153846153,
+        "ms": 2262.983
+      },
+      {
+        "msg": "区域 7/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 31.153846153846153,
+        "ms": 2282.383
+      },
+      {
+        "msg": "区域 7/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 31.153846153846153,
+        "ms": 2340.382
+      },
+      {
+        "msg": "区域 7/13 · 试探 CM-BIN2",
+        "pct": 31.153846153846153,
+        "ms": 2415.447
+      },
+      {
+        "msg": "区域 7/13 · 试探 CM-BIN3",
+        "pct": 31.153846153846153,
+        "ms": 2434.051
+      },
+      {
+        "msg": "区域 7/13 → LIN-16(1声道, 1阶)",
+        "pct": 33.84615384615385,
+        "ms": 2457.292
+      },
+      {
+        "msg": "区域 8/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 33.84615384615385,
+        "ms": 2457.513
+      },
+      {
+        "msg": "区域 8/13 · 试探 CM-BIN",
+        "pct": 33.84615384615385,
+        "ms": 2462.471
+      },
+      {
+        "msg": "区域 8/13 · 试探 O0",
+        "pct": 33.84615384615385,
+        "ms": 2464.073
+      },
+      {
+        "msg": "区域 8/13 · 试探 CM-TEXT",
+        "pct": 33.84615384615385,
+        "ms": 2464.92
+      },
+      {
+        "msg": "区域 8/13 · 试探 CM-TEXT2",
+        "pct": 33.84615384615385,
+        "ms": 2466.359
+      },
+      {
+        "msg": "区域 8/13 · 试探 CM-TEXT3",
+        "pct": 33.84615384615385,
+        "ms": 2467.997
+      },
+      {
+        "msg": "区域 8/13 · 试探 CM-BIN2",
+        "pct": 33.84615384615385,
+        "ms": 2469.843
+      },
+      {
+        "msg": "区域 8/13 · 试探 CM-BIN3",
+        "pct": 33.84615384615385,
+        "ms": 2471.369
+      },
+      {
+        "msg": "区域 8/13 → TRANSPOSE(步长2)",
+        "pct": 36.53846153846154,
+        "ms": 2474.293
+      },
+      {
+        "msg": "区域 9/13 · 试探 SUB-TRANSPOSE(步长2, BIN)",
+        "pct": 36.53846153846154,
+        "ms": 2495.294
+      },
+      {
+        "msg": "区域 9/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 36.53846153846154,
+        "ms": 2582.485
+      },
+      {
+        "msg": "区域 9/13 · 试探 GRAD-2D3(步长2, 行1900)",
+        "pct": 36.53846153846154,
+        "ms": 2613.368
+      },
+      {
+        "msg": "区域 9/13 · 试探 DELTA(步长2)",
+        "pct": 36.53846153846154,
+        "ms": 2639.258
+      },
+      {
+        "msg": "区域 9/13 · 试探 DELTA3(步长2)",
+        "pct": 36.53846153846154,
+        "ms": 2654.964
+      },
+      {
+        "msg": "区域 9/13 · 试探 DELTA(步长1)",
+        "pct": 36.53846153846154,
+        "ms": 2676.169
+      },
+      {
+        "msg": "区域 9/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 36.53846153846154,
+        "ms": 2697.314
+      },
+      {
+        "msg": "区域 9/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 36.53846153846154,
+        "ms": 2713.439
+      },
+      {
+        "msg": "区域 9/13 · 试探 CM-BIN",
+        "pct": 36.53846153846154,
+        "ms": 2730.338
+      },
+      {
+        "msg": "区域 9/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 36.53846153846154,
+        "ms": 2760.164
+      },
+      {
+        "msg": "区域 9/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 36.53846153846154,
+        "ms": 2868.499
+      },
+      {
+        "msg": "区域 9/13 · 试探 CM-BIN2",
+        "pct": 36.53846153846154,
+        "ms": 2959.522
+      },
+      {
+        "msg": "区域 9/13 · 试探 CM-BIN3",
+        "pct": 36.53846153846154,
+        "ms": 2988.27
+      },
+      {
+        "msg": "区域 9/13 → LIN-16(1声道, 1阶)",
+        "pct": 39.230769230769226,
+        "ms": 3021.579
+      },
+      {
+        "msg": "区域 10/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 39.230769230769226,
+        "ms": 3022.185
+      },
+      {
+        "msg": "区域 10/13 · 试探 CM-BIN",
+        "pct": 39.230769230769226,
+        "ms": 3029.777
+      },
+      {
+        "msg": "区域 10/13 · 试探 O0",
+        "pct": 39.230769230769226,
+        "ms": 3032.528
+      },
+      {
+        "msg": "区域 10/13 · 试探 CM-TEXT",
+        "pct": 39.230769230769226,
+        "ms": 3033.475
+      },
+      {
+        "msg": "区域 10/13 · 试探 CM-TEXT2",
+        "pct": 39.230769230769226,
+        "ms": 3035.863
+      },
+      {
+        "msg": "区域 10/13 · 试探 CM-TEXT3",
+        "pct": 39.230769230769226,
+        "ms": 3038.538
+      },
+      {
+        "msg": "区域 10/13 · 试探 CM-BIN2",
+        "pct": 39.230769230769226,
+        "ms": 3041.776
+      },
+      {
+        "msg": "区域 10/13 · 试探 CM-BIN3",
+        "pct": 39.230769230769226,
+        "ms": 3045.642
+      },
+      {
+        "msg": "区域 10/13 → TRANSPOSE(步长2)",
+        "pct": 41.92307692307692,
+        "ms": 3048.821
+      },
+      {
+        "msg": "区域 11/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 41.92307692307692,
+        "ms": 3056.974
+      },
+      {
+        "msg": "区域 11/13 · 试探 DELTA(步长2)",
+        "pct": 41.92307692307692,
+        "ms": 3080.13
+      },
+      {
+        "msg": "区域 11/13 · 试探 DELTA3(步长2)",
+        "pct": 41.92307692307692,
+        "ms": 3089.708
+      },
+      {
+        "msg": "区域 11/13 · 试探 DELTA(步长1)",
+        "pct": 41.92307692307692,
+        "ms": 3102.734
+      },
+      {
+        "msg": "区域 11/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 41.92307692307692,
+        "ms": 3113.864
+      },
+      {
+        "msg": "区域 11/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 41.92307692307692,
+        "ms": 3124.472
+      },
+      {
+        "msg": "区域 11/13 · 试探 CM-BIN",
+        "pct": 41.92307692307692,
+        "ms": 3134.794
+      },
+      {
+        "msg": "区域 11/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 41.92307692307692,
+        "ms": 3153.27
+      },
+      {
+        "msg": "区域 11/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 41.92307692307692,
+        "ms": 3212.684
+      },
+      {
+        "msg": "区域 11/13 · 试探 CM-BIN2",
+        "pct": 41.92307692307692,
+        "ms": 3277.369
+      },
+      {
+        "msg": "区域 11/13 · 试探 CM-BIN3",
+        "pct": 41.92307692307692,
+        "ms": 3294.882
+      },
+      {
+        "msg": "区域 11/13 → DELTA3(步长2)",
+        "pct": 44.61538461538461,
+        "ms": 3317.017
+      },
+      {
+        "msg": "区域 12/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 44.61538461538461,
+        "ms": 3317.286
+      },
+      {
+        "msg": "区域 12/13 · 试探 CM-BIN",
+        "pct": 44.61538461538461,
+        "ms": 3324.782
+      },
+      {
+        "msg": "区域 12/13 · 试探 O0",
+        "pct": 44.61538461538461,
+        "ms": 3327.37
+      },
+      {
+        "msg": "区域 12/13 · 试探 CM-TEXT",
+        "pct": 44.61538461538461,
+        "ms": 3328.356
+      },
+      {
+        "msg": "区域 12/13 · 试探 CM-TEXT2",
+        "pct": 44.61538461538461,
+        "ms": 3330.906
+      },
+      {
+        "msg": "区域 12/13 · 试探 CM-TEXT3",
+        "pct": 44.61538461538461,
+        "ms": 3333.56
+      },
+      {
+        "msg": "区域 12/13 · 试探 CM-BIN2",
+        "pct": 44.61538461538461,
+        "ms": 3336.572
+      },
+      {
+        "msg": "区域 12/13 · 试探 CM-BIN3",
+        "pct": 44.61538461538461,
+        "ms": 3339.156
+      },
+      {
+        "msg": "区域 12/13 → TRANSPOSE(步长2)",
+        "pct": 47.30769230769231,
+        "ms": 3342.279
+      },
+      {
+        "msg": "区域 13/13 · 试探 TRANSPOSE(步长2)",
+        "pct": 47.30769230769231,
+        "ms": 3346.558
+      },
+      {
+        "msg": "区域 13/13 · 试探 DELTA(步长2)",
+        "pct": 47.30769230769231,
+        "ms": 3367.964
+      },
+      {
+        "msg": "区域 13/13 · 试探 DELTA3(步长2)",
+        "pct": 47.30769230769231,
+        "ms": 3375.044
+      },
+      {
+        "msg": "区域 13/13 · 试探 DELTA(步长1)",
+        "pct": 47.30769230769231,
+        "ms": 3384.604
+      },
+      {
+        "msg": "区域 13/13 · 试探 LIN-16(1声道, 1阶)",
+        "pct": 47.30769230769231,
+        "ms": 3392.582
+      },
+      {
+        "msg": "区域 13/13 · 试探 LIN-16(1声道, 2阶)",
+        "pct": 47.30769230769231,
+        "ms": 3399.719
+      },
+      {
+        "msg": "区域 13/13 · 试探 CM-BIN",
+        "pct": 47.30769230769231,
+        "ms": 3407.178
+      },
+      {
+        "msg": "区域 13/13 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 47.30769230769231,
+        "ms": 3419.358
+      },
+      {
+        "msg": "区域 13/13 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 47.30769230769231,
+        "ms": 3448.342
+      },
+      {
+        "msg": "区域 13/13 · 试探 CM-BIN2",
+        "pct": 47.30769230769231,
+        "ms": 3482.475
+      },
+      {
+        "msg": "区域 13/13 · 试探 CM-BIN3",
+        "pct": 47.30769230769231,
+        "ms": 3496.122
+      },
+      {
+        "msg": "区域 13/13 → TRANSPOSE(步长2)",
+        "pct": 50,
+        "ms": 3511.92
+      },
+      {
+        "msg": "编码地形 1/3 · 0%",
+        "pct": 50,
+        "ms": 3514.176
+      },
+      {
+        "msg": "编码地形 1/3 · 0%",
+        "pct": 50,
+        "ms": 3523.599
+      },
+      {
+        "msg": "编码地形 1/3 · 50%",
+        "pct": 52.5,
+        "ms": 3534.836
+      },
+      {
+        "msg": "编码地形 1/3 · 50%",
+        "pct": 52.5,
+        "ms": 3535.159
+      },
+      {
+        "msg": "编码地形 1/3 · 50%",
+        "pct": 52.5,
+        "ms": 3543.565
+      },
+      {
+        "msg": "编码地形 1/3 · 100%",
+        "pct": 55,
+        "ms": 3550.449
+      },
+      {
+        "msg": "编码地形 1/3 · 100%",
+        "pct": 55,
+        "ms": 3550.484
+      },
+      {
+        "msg": "编码地形 1/3",
+        "pct": 55,
+        "ms": 3551.242
+      },
+      {
+        "msg": "编码地形 2/3 · 0%",
+        "pct": 55,
+        "ms": 3551.401
+      },
+      {
+        "msg": "编码地形 2/3 · 0%",
+        "pct": 55,
+        "ms": 3561.213
+      },
+      {
+        "msg": "编码地形 2/3 · 100%",
+        "pct": 60,
+        "ms": 3637.901
+      },
+      {
+        "msg": "编码地形 2/3",
+        "pct": 60,
+        "ms": 3638.098
+      },
+      {
+        "msg": "编码地形 3/3 · 0%",
+        "pct": 60,
+        "ms": 3638.51
+      },
+      {
+        "msg": "编码地形 3/3 · 0%",
+        "pct": 60,
+        "ms": 3641.253
+      },
+      {
+        "msg": "编码地形 3/3 · 100%",
+        "pct": 65,
+        "ms": 3679.131
+      },
+      {
+        "msg": "编码地形 3/3",
+        "pct": 65,
+        "ms": 3830.397
+      },
+      {
+        "msg": "宏组直接试完整主导规则 LIN-16(1声道, 1阶)（不经过小窗口门）",
+        "pct": 75,
+        "ms": 3831.641
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 79.85714285714286,
+        "ms": 3832.245
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 79.85714285714286,
+        "ms": 3854.208
+      },
+      {
+        "msg": "编码地形 1/1 · 100%",
+        "pct": 85,
+        "ms": 4001.499
+      },
+      {
+        "msg": "编码地形 1/1",
+        "pct": 85,
+        "ms": 4001.844
+      },
+      {
+        "msg": "宏组完整容器：31460 → 30760 B（采用）",
+        "pct": 85,
+        "ms": 4001.994
+      },
+      {
+        "msg": "完整容器择优完成",
+        "pct": 85,
+        "ms": 4002.095
+      }
+    ],
+    "scope": "unmodified stock compressAdaptive -> UCZ -> stock decompress; genuine bounded endpoint only",
+    "fullFileMeasured": false,
+    "productionSourceModified": false
+  },
+  "durationMs": 4498
+}

@@ -1,0 +1,86 @@
+P17.2 Task 2 — hot-loop optimisation: what was tried, what it measured, what shipped
+=====================================================================================
+
+Method
+------
+Two independent measurements were used, because they disagree about what "fast" means:
+
+  V8 (Node 22.22.3)   — the engine the Web UI and the CLI actually run on.
+  QuickJS             — an interpreter with no JIT, standing in for the "decompressor
+                        runs in a non-JIT engine" case named in the brief. Reached
+                        through `quickjs-emscripten`; the codec was bundled with
+                        esbuild to a plain IIFE (verified: no `require`, no `Buffer`)
+                        and the slice was injected as a literal.
+
+Protocol: same 32 KiB `nci-mid` prefix for the QuickJS runs (a 256 KiB slice does not
+finish inside the 19 s per-command ceiling there — QuickJS is ~64x slower than V8 on
+this kernel, which is itself the headline measurement). 5-repeat median for V8, 3
+fresh processes per variant for QuickJS.
+
+Baseline and result, in µs per coded bit (`nci-mid`, 32768 B = 262144 bits)
+--------------------------------------------------------------------------
+  engine    variant                      enc            dec
+  V8        baseline 1ef1761        3715-3777 ms    3637-3677 ms   (~14.2 µs/bit)
+  V8        with optimisations      3728-3921 ms    3553-3680 ms   (indistinguishable)
+  QuickJS   baseline 1ef1761        5498-5716 ms    5360-5844 ms   (~21.5 µs/bit)
+  QuickJS   with optimisations      5413-5655 ms    5350-5657 ms   (indistinguishable)
+
+Conclusion: none of the micro-optimisations produced a speedup outside run-to-run
+noise, in either engine. Every variant was verified bit-identical before being
+measured, so the noise is measurement, not model divergence.
+
+What was tried, and why each was kept or reverted
+-------------------------------------------------
+1. KEPT — `hh()` trailing-zero folding. `hh` is FNV-1a over up to six words with
+   missing arguments treated as 0. Since `h ^ 0 === h`, each trailing zero word is a
+   multiplication by P = 0x01000193, so up to five `Math.imul` calls collapse into
+   one `Math.imul(h, P^k)` with P^k precomputed mod 2^32. Most call sites pass one to
+   three words and this runs several times per byte. Byte-identical, measurably
+   cheaper in instruction count, and it makes the hash's structure explicit.
+   It did not move wall clock on its own — kept for clarity, not sold as speed.
+
+2. REVERTED — module-level hot-field cache for `step()`/`learn()`.
+   **This one was a real bug, not just a non-improvement.** `encodeCMContextDual`
+   constructs two `Model` instances and interleaves `base.step()` / `alt.step()`.
+   A module-level cache is overwritten by the second constructor, so the base stream
+   silently read the alt stream's weights. Measured on `encodeCMContextDual`:
+
+     baseline 1ef1761 : bin-stride4 base=633 B  alt=657 B
+     cached version   : bin-stride4 base=1240 B alt=1240 B   <- both wrong
+
+   Caught by hashing the dual-stream outputs rather than trusting the round-trip
+   (a wrong-but-self-consistent model still round-trips against itself). Reverted;
+   outputs restored byte-for-byte.
+
+3. REVERTED — binding `buf`/`pos` into a local closure inside `computeContexts()`
+   to replace ~22 `this.g(k)` calls per byte. The closure was not inlined and the
+   variant measured slower (3763 ms vs 3584 ms enc). Equivalence-preserving but not
+   worth the indirection; the method call stays.
+
+4. REVERTED — merging the three `inputs` dot-product passes in `step()` into one.
+   Changed the bytes: the `dual` accumulator is read after the `isV15` block, and
+   hoisting it changed the order `altPr` is latched. Caught by the dual-stream hash
+   comparison, reverted immediately.
+
+5. REVERTED — constant-term hoisting of the `inputs[N-1] == 256` bias term in the
+   three dot products (`dot = w[N-1]*256` then loop `i < N-1`). Bit-identical and a
+   genuine instruction saving, but below the noise floor in both engines.
+
+Measurement notes that matter for the next attempt
+--------------------------------------------------
+- An all-zeros 16 KiB input still costs 2669 ms in QuickJS versus 2847 ms for real
+  data (94 %). Fixed per-bit cost dominates; the work is not data-dependent, so
+  optimisations must target the per-bit loop body itself.
+- Micro-benchmarks in QuickJS: typed-array dot ~0.33 ns/element, plain-array dot
+  slightly faster, `Math.imul` ~35 % slower than `*`, `table[i][idx]` double indexing
+  ~0.2 µs/access. None of these is the bottleneck, which is why the micro-edits
+  above did nothing.
+- Plain `*` cannot replace `Math.imul` in the hash: double rounding loses the low
+  bits and the model diverges. The multiply *count* is the only safe lever.
+
+Non-goal, stated plainly
+------------------------
+No speedup is claimed for this task. The deliverable that did land is correctness:
+the `AITDCC/I` round-trip defect (Task 1) is fixed, a latent dual-stream corruption
+introduced during this task was caught and removed, and the codec's measured speed
+is unchanged in both V8 and an interpreter.

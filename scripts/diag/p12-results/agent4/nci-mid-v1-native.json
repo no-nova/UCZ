@@ -1,0 +1,721 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "nci-mid",
+  "variant": "v1",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "nci-mid",
+    "v1"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "05fdd94a700d960bad4185866261745cb1c9f3819de8d6ca36d01b7db0ae3318"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 4922,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "nci-mid",
+      "file": "nci",
+      "offset": 16776704,
+      "bytes": 262144,
+      "sha256": "231b12fbe8244b61608e16795ca1c3092df3604f9e9db959108d1d330b109847",
+      "corpusBytes": 33553445,
+      "corpusSha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "66ca9639009623074dfcd4a7e56e46b37a841616",
+        "bytes": 33553445,
+        "sha256": "fc63a31770947b8c2062d3b19ca94c00485a232bb91b502021948fee983e1635"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "231b12fbe8244b61608e16795ca1c3092df3604f9e9db959108d1d330b109847"
+    },
+    "variant": "v1",
+    "cmBytes": 13830,
+    "payloadBytes": 13834,
+    "bytes": 13854,
+    "outerHeaderBytes": 20,
+    "containerSha256": "ffedc3599126cff70fccc550087e1303c37718ded0da0e91705f3d0aa504dd11",
+    "payloadSha256": "c28b1dea4dd8160a00ebb34911321f5163764f51d5d01ce743bc2e50a7ac7972",
+    "roundtrip": true,
+    "preprocessMs": 2611.5815900000002,
+    "encodeDecodeMs": 4608.580776999999,
+    "short": {
+      "dictTokens": 120,
+      "one": 120,
+      "two": 0,
+      "headerRawBytes": 1337,
+      "bodyRawBytes": 104975,
+      "cmInputBytes": 106312,
+      "bodyRatio": 0.4004478454589844,
+      "coverage": 0.6998825073242188,
+      "spaceSuffixHits": 19149,
+      "punctuationSuffixHits": 966,
+      "oneHits": 26301,
+      "twoHits": 0,
+      "unusedTokens": 37,
+      "escapedOriginalBytes": 0,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 26301,
+      "twoHits": 0,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 78674,
+      "coveredOriginalBytes": 183470,
+      "coverage": 0.6998825073242188,
+      "spaceSuffixHits": 19149,
+      "punctuationSuffixHits": 966,
+      "unusedTokens": 37,
+      "entries": [
+        {
+          "word": "  0  0  0  0",
+          "hits": 337,
+          "tier": 1
+        },
+        {
+          "word": "  0  0  0  1",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "  0  1 V2000",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "  1  0  0  0",
+          "hits": 348,
+          "tier": 1
+        },
+        {
+          "word": "  2  0  0  0",
+          "hits": 218,
+          "tier": 1
+        },
+        {
+          "word": " 0  0  0  0 ",
+          "hits": 3504,
+          "tier": 1
+        },
+        {
+          "word": " 0  0  1 V20",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 0.000001092",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 1  0  0  0 ",
+          "hits": 45,
+          "tier": 1
+        },
+        {
+          "word": " 12  1  0  0",
+          "hits": 55,
+          "tier": 1
+        },
+        {
+          "word": " 13  1  0  0",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": " 14  1  0  0",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": " 15  1  0  0",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": " 17  1  0  0",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": " 18  1  0  0",
+          "hits": 47,
+          "tier": 1
+        },
+        {
+          "word": " 19  1  0  0",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": " 2  0  0  0 ",
+          "hits": 18,
+          "tier": 1
+        },
+        {
+          "word": " 20  1  0  0",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": " 22  1  0  0",
+          "hits": 53,
+          "tier": 1
+        },
+        {
+          "word": " 23  1  0  0",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": " 24  1  0  0",
+          "hits": 66,
+          "tier": 1
+        },
+        {
+          "word": " 25  1  0  0",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": " 26  1  0  0",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": " 27  1  0  0",
+          "hits": 47,
+          "tier": 1
+        },
+        {
+          "word": " 28  1  0  0",
+          "hits": 51,
+          "tier": 1
+        },
+        {
+          "word": " 29  1  0  0",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": " 30  1  0  0",
+          "hits": 53,
+          "tier": 1
+        },
+        {
+          "word": " 31  1  0  0",
+          "hits": 53,
+          "tier": 1
+        },
+        {
+          "word": " 32  1  0  0",
+          "hits": 53,
+          "tier": 1
+        },
+        {
+          "word": " 33  1  0  0",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": " 34  1  0  0",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": " 35  1  0  0",
+          "hits": 49,
+          "tier": 1
+        },
+        {
+          "word": " 5  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 7  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 9  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "0  0  0  0  ",
+          "hits": 1617,
+          "tier": 1
+        },
+        {
+          "word": "0  0  1 V200",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "0  1  0  0  ",
+          "hits": 72,
+          "tier": 1
+        },
+        {
+          "word": "0  2  0  0  ",
+          "hits": 44,
+          "tier": 1
+        },
+        {
+          "word": "0011282D 0  ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "1  0  0  0  ",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": "1  1  0  0  ",
+          "hits": 104,
+          "tier": 1
+        },
+        {
+          "word": "10  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "11  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "12  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "13  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "14  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "15  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "17  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "18  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "19  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "2  0  0  0  ",
+          "hits": 26,
+          "tier": 1
+        },
+        {
+          "word": "2  1  0  0  ",
+          "hits": 81,
+          "tier": 1
+        },
+        {
+          "word": "2  2  0  0  ",
+          "hits": 77,
+          "tier": 1
+        },
+        {
+          "word": "20  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "22  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "23  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "24  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "25  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "26  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "28  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "29  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "3  1  0  0  ",
+          "hits": 44,
+          "tier": 1
+        },
+        {
+          "word": "3  2  0  0  ",
+          "hits": 29,
+          "tier": 1
+        },
+        {
+          "word": "30  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "31  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "32  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "33  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "34  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "35  1  0  0 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "4  1  0  0  ",
+          "hits": 40,
+          "tier": 1
+        },
+        {
+          "word": "4  2  0  0  ",
+          "hits": 31,
+          "tier": 1
+        },
+        {
+          "word": "5  1  0  0  ",
+          "hits": 34,
+          "tier": 1
+        },
+        {
+          "word": "6  1  0  0  ",
+          "hits": 112,
+          "tier": 1
+        },
+        {
+          "word": "6  2  0  0  ",
+          "hits": 36,
+          "tier": 1
+        },
+        {
+          "word": "7  1  0  0  ",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "8  1  0  0  ",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": "8  2  0  0  ",
+          "hits": 30,
+          "tier": 1
+        },
+        {
+          "word": "9  1  0  0  ",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": "Otclserve111",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "ROtclserve11",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": "clserve11150",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "tclserve1115",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 0.0000 C  ",
+          "hits": 784,
+          "tier": 1
+        },
+        {
+          "word": " 0.0000 H  ",
+          "hits": 712,
+          "tier": 1
+        },
+        {
+          "word": " 0.0000 N  ",
+          "hits": 105,
+          "tier": 1
+        },
+        {
+          "word": " 0.0000 O  ",
+          "hits": 182,
+          "tier": 1
+        },
+        {
+          "word": "  0  0  1 ",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": "  3.7321  ",
+          "hits": 166,
+          "tier": 1
+        },
+        {
+          "word": "  4.5981  ",
+          "hits": 170,
+          "tier": 1
+        },
+        {
+          "word": "> <SMILES>",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": "  0.0000 ",
+          "hits": 776,
+          "tier": 1
+        },
+        {
+          "word": "  0.00000",
+          "hits": 0,
+          "tier": 1
+        },
+        {
+          "word": " 2.8660  ",
+          "hits": 9,
+          "tier": 1
+        },
+        {
+          "word": " 5.4641  ",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": " 6.3301  ",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": " 2.0000 ",
+          "hits": 27,
+          "tier": 1
+        },
+        {
+          "word": "  3  ",
+          "hits": 89,
+          "tier": 1
+        },
+        {
+          "word": "  1.",
+          "hits": 125,
+          "tier": 1
+        },
+        {
+          "word": "  2.",
+          "hits": 359,
+          "tier": 1
+        },
+        {
+          "word": "  4 ",
+          "hits": 81,
+          "tier": 1
+        },
+        {
+          "word": " -0.",
+          "hits": 161,
+          "tier": 1
+        },
+        {
+          "word": " -1.",
+          "hits": 160,
+          "tier": 1
+        },
+        {
+          "word": " -2.",
+          "hits": 97,
+          "tier": 1
+        },
+        {
+          "word": "0\n  ",
+          "hits": 3727,
+          "tier": 1
+        },
+        {
+          "word": "0\n 1",
+          "hits": 969,
+          "tier": 1
+        },
+        {
+          "word": "0\n 2",
+          "hits": 525,
+          "tier": 1
+        },
+        {
+          "word": "00  ",
+          "hits": 954,
+          "tier": 1
+        },
+        {
+          "word": "279 ",
+          "hits": 245,
+          "tier": 1
+        },
+        {
+          "word": "79  ",
+          "hits": 134,
+          "tier": 1
+        },
+        {
+          "word": "   ",
+          "hits": 4791,
+          "tier": 1
+        },
+        {
+          "word": "  5",
+          "hits": 400,
+          "tier": 1
+        },
+        {
+          "word": "  6",
+          "hits": 322,
+          "tier": 1
+        },
+        {
+          "word": "  7",
+          "hits": 282,
+          "tier": 1
+        },
+        {
+          "word": "  8",
+          "hits": 299,
+          "tier": 1
+        },
+        {
+          "word": "  9",
+          "hits": 197,
+          "tier": 1
+        },
+        {
+          "word": " 10",
+          "hits": 230,
+          "tier": 1
+        },
+        {
+          "word": " 11",
+          "hits": 165,
+          "tier": 1
+        },
+        {
+          "word": ".50",
+          "hits": 218,
+          "tier": 1
+        },
+        {
+          "word": "500",
+          "hits": 447,
+          "tier": 1
+        }
+      ]
+    },
+    "scope": "actual existing v1 WORD-PRE UCZ single TEXT3 group, dictionary and length prefix and model/header flags fully charged; forced dictionary, not chooser",
+    "maxRSSMiB": 224.63671875
+  }
+}

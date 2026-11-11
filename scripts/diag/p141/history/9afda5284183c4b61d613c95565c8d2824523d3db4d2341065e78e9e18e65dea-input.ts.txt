@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict'
+import { readFileSync, openSync, readSync, closeSync, statSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+export const sha = (data: Uint8Array | string) => createHash('sha256').update(data).digest('hex')
+export function loadSlice(name: string, bytes?: number) {
+  const manifest=JSON.parse(readFileSync('scripts/diag/p14/slices.json','utf8'))
+  const source=manifest.samples.find((row:any)=>row.name===name)
+  assert.ok(source,`unknown fixed slice: ${name}`)
+  const length=bytes??source.bytes
+  assert.ok(Number.isSafeInteger(length)&&length>0&&length<=source.bytes&&length<=262144)
+  const path=`.diag-data/corpus/${source.file}`
+  assert.equal(statSync(path).size,source.corpusBytes)
+  const data=new Uint8Array(length),fd=openSync(path,'r')
+  try { assert.equal(readSync(fd,data,0,length,source.offset),length) } finally {closeSync(fd)}
+  if(length===source.bytes)assert.equal(sha(data),source.sha256)
+  return {data,input:{name,file:source.file,offset:source.offset,bytes:length,sha256:sha(data),parentWindowBytes:source.bytes,parentWindowSha256:source.sha256,selection:length===source.bytes?'P14 fixed window':'bounded prefix of P14 fixed window'}}
+}

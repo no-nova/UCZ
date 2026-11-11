@@ -1,0 +1,43 @@
+P17.1 end-to-end verification — matchDist fused into per-group refineContextCandidates
+=====================================================================================
+Harness: `.diag-state/final.ts` (compressAdaptive + decompress, serial=true, A/B by toggling
+`cmV22Tuning.matchDist`). Inputs are <=256 KiB Silesia slices via `scripts/diag/p141/input.ts`.
+
+  slice          v22-off    v22-on      delta    ver       rt     md group
+  -----------------------------------------------------------------------------
+  dickens-mid      69566     69519        -47   v20/v22   ok     id23 (no ctx)
+  mozilla-mid      80390     80206       -184   v21/v22   ok     id24 bin-stride4
+  mr-mid           48795     48795          0   v21/v21   ok     —  (res2d excluded)
+  nci-mid          13743     13662        -81   v21/v22   ok     id24 bin-stride4
+  ooffice-mid     100189    100189          0   v20/v20   ok     —
+  osdb-mid         72445     72355        -90   v21/v22   ok     id5  bin-stride4
+  reymont-mid      48941     48941          0   v15/v15   ok     —
+  samba-c          32233     32130       -103   v20/v22   ok     id23 (no ctx)
+  sao-mid         131922    131922          0   v20/v20   ok     —
+  webster-mid      56376     56350        -26   v21/v22   ok     id23 text-sparse5
+  xml-mid           4542      4501        -41   v21/v22   ok     id23 wp-merge
+  x-ray-mid       115234    115234          0   v20/v20   ok     —
+  -----------------------------------------------------------------------------
+  total           774376    773804       -572   wins 7/12, regressions 0/12
+
+  xml-mid: 6274 B at v13 before P17.1  ->  4501 B at v22 (-28.3 %), wp-merge + matchDist
+  mr-mid: exactly 0 B, stays v21 wide-geom (native res2d correctly excluded at source)
+
+Null controls — `.diag-state/ctrl2.ts`, identical protocol to exp1/exp2 (single shared
+xorshift generator, 262144 B each). Requirement: exactly 0 B.
+
+  iid-uniform      262162 -> 262162   0 B   v7/v7    rt=true   md groups 0
+  iid-5sym          76438 ->  76438   0 B   v7/v7    rt=true   md groups 0
+  constant             17 ->     17   0 B   v7/v7    rt=true   md groups 0
+  unique-4gram      65638 ->  65638   0 B   v10/v10  rt=true   md groups 0
+
+Note: an earlier control run showed spurious -98/-96 B on iid-uniform/iid-5sym. Cause was a
+defective generator in the harness (`rng(seed + i)` re-seeded per byte, producing a periodic
+deterministic sequence rather than noise) — not a codec effect. With the P17.0 generator the
+controls are exactly 0 B, confirming matchDist cannot pay for itself on data with no match
+structure.
+
+Timing: every slice <=256 KiB. Full A/B wall clock for the 12 slices was ~801 s for 24 encodes,
+i.e. ~33 s per single compressAdaptive call including the v20 baseline. sao-mid is dominated by
+the pre-existing 28-column TRANSPOSE-G3 search (present identically at v20 off/on: 209.7 s vs
+145.6 s, both v20, so matchDist is not implicated and no new encode was added).

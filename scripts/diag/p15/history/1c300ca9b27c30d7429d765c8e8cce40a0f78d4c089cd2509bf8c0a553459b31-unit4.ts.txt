@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict'
+import { compressAdaptive, decompress } from '@stock/codec'
+import { load, eq, sha, ms, entropy, done, synthetic } from './common'
+import { detectRec2, forwardRec2, inverseRec2, verifyRec2Frame, decodeRec2 } from './rec2'
+const [name,variant,b='262144',o='0']=process.argv.slice(2),{data,input}=load(name,Number(b),Number(o))
+async function main(){
+ if(variant==='boundary'){
+  const cases=[]
+  for(const op of [0,1,2,3,4])for(const [a,b] of [[1,2],[3,31],[1,63],[62,63]])for(const n of [b,b+1,b+17,4097]){
+   const raw=synthetic('random',n),p={op,a,b},res=forwardRec2(raw,p);eq(inverseRec2(res,raw.subarray(0,b),p),raw)
+   const {frame,details}=verifyRec2Frame(raw,p)
+   for(const at of [4,5,6,7,8,12]){const bad=frame.slice();bad[at]=at===4?1:at===5?5:at===6?0:at===7?64:255;assert.throws(()=>decodeRec2(bad))}
+   assert.throws(()=>decodeRec2(frame.subarray(0,frame.length-1)));cases.push({op,a,b,n,frameBytes:frame.length,roundtrip:details.roundtrip})
+  }
+  done({unit:4,input,variant,cases,caseCount:cases.length,roundtrip:true,malformedFramesRejected:true,scope:'experimental frame/inverse boundary tests, random data; not detection or corpus compression'});return
+ }
+ const detector=detectRec2(data)
+ if(variant==='detect'){
+  done({unit:4,input,variant,entropy:entropy(data),detector,analysisOnly:true,scope:'bounded candidate search and independent holdout; no encoding or claimed universal zero false positives'});return
+ }
+ if(variant!=='endpoint')throw Error('unit4: detect / endpoint / boundary')
+ // Retain the actual production UCZ, not a synthetic STORE-size assumption.
+ const t=performance.now(),baseline=await compressAdaptive(data,undefined,{serial:true}),baselineEncodeMs=ms(performance.now()-t),dt=performance.now(),restored=decompress(baseline.container);eq(restored,data)
+ const control={containerBytes:baseline.container.length,containerSha256:sha(baseline.container),version:baseline.container[3],specs:[...new Set(baseline.segs.map(s=>`${s.spec.id}/${s.spec.s}/${s.spec.r}`))],encodeMs:baselineEncodeMs,decodeMs:ms(performance.now()-dt),roundtrip:true}
+ let candidate:any=null
+ if(detector.accepted&&'params'in detector&&detector.params){const {details}=verifyRec2Frame(data,detector.params);candidate=details}
+ const adopted=!!candidate&&candidate.frameBytes<control.containerBytes
+ done({unit:4,input,variant,entropy:entropy(data),detector,control,candidate,adoptedInExperimentalComparator:adopted,selectedBytes:adopted?candidate.frameBytes:control.containerBytes,ratio:adopted?candidate.frameBytes/data.length:control.containerBytes/data.length,savedBytes:adopted?control.containerBytes-candidate.frameBytes:0,strictActualByteGuard:true,roundtrip:true,scope:'actual stock UCZ retained vs completely framed experimental REC2+O0 CM and reversible reconstruction; REC2 is NOT a production UCZ format or adaptive feature'})
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

@@ -1,0 +1,73 @@
+{
+  "kind": "P17.5-bounded-verification",
+  "status": "PASS",
+  "sourceSha256": "3dbf1730141945816deb2e9448b5f500b976aa663140ea1f0496bff5aa996295",
+  "maxInputBytes": 262144,
+  "corpusScaleRun": false,
+  "cases": {
+    "harmonicStride2Alias": {
+      "inputBytes": 65536,
+      "detector": true,
+      "forcedSpec": {
+        "id": 9,
+        "s": 4,
+        "r": 1
+      },
+      "finalSpec": {
+        "id": 30,
+        "s": 2,
+        "r": 1
+      },
+      "containerBytes": 39469,
+      "s4BaselineBytes": 42296,
+      "reductionBytes": 2827,
+      "roundtrip": true
+    },
+    "trueStride4": {
+      "inputBytes": 65536,
+      "detector": false,
+      "finalSpec": {
+        "id": 9,
+        "s": 4,
+        "r": 1
+      },
+      "roundtrip": true
+    },
+    "oofficeCmBin3": {
+      "source": "/home/user/Downloads/silesia/ooffice",
+      "offset": 5500000,
+      "bytes": 131072,
+      "screenMatchDist": true,
+      "contexts": [
+        {
+          "context": null,
+          "matchDist": true,
+          "payloadBytes": 29770
+        },
+        {
+          "context": "bin-stride4",
+          "matchDist": false,
+          "payloadBytes": 27246
+        },
+        {
+          "context": "bin-stride4",
+          "matchDist": true,
+          "payloadBytes": 27180
+        }
+      ],
+      "bcj3ProposalCount": 0,
+      "bcj3Skipped": "bcj3-context-disabled"
+    },
+    "transposeNonDegradation": {
+      "inputBytes": 8192,
+      "retainedPayloadBytes": 1,
+      "returnedPayloadBytes": 1,
+      "returnedSpec": {
+        "id": 10,
+        "s": 4,
+        "r": 1
+      },
+      "pass": true
+    }
+  }
+}

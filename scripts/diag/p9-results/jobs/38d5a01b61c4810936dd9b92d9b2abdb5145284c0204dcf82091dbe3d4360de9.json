@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "key": "38d5a01b61c4810936dd9b92d9b2abdb5145284c0204dcf82091dbe3d4360de9",
+  "label": "single-plain-baseline",
+  "file": "osdb",
+  "n": 1048576,
+  "sourceSha256": "4b4648a6f89ae6064ffbf05f05799a559e8d0b73ba85d015e7c17c744d3b2eaf",
+  "resultPath": "/home/user/test/universal-adaptive-compression-system/scripts/diag/p9-results/38d5a01b61c4810936dd9b92d9b2abdb5145284c0204dcf82091dbe3d4360de9.json",
+  "startedAt": "2026-11-08T06:26:21.641Z",
+  "attempt": 1,
+  "pid": 6848,
+  "status": "complete",
+  "updatedAt": "2026-11-08T06:26:38.637Z"
+}

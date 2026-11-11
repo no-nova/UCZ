@@ -1,0 +1,2121 @@
+{
+  "kind": "derived-audit-summary-not-a-corpus-measurement",
+  "generatorSha256": "6d5e6ae8a84d5f7b7bb34d77a1146b18679ab4d0317b5bdda1b5a3bb7d840255",
+  "baselineBytes": 40233692,
+  "corpusInputBytes": 211938580,
+  "targets": {
+    "cubrimUserApproximateBytes": 40058000,
+    "approximateGapBytes": 175692,
+    "strict40MMinimumSavingsBytes": 233693,
+    "zpaqUserApproximateDecimalBytes": 38830000,
+    "approximateZpaqGapBytes": 1403692,
+    "externallyBenchmarkedHere": false
+  },
+  "counts": {
+    "receipts": 112,
+    "pass": 108,
+    "encodedRoundtrips": 98,
+    "distinctEncodedCases": 94,
+    "analysisOrPlan": 10,
+    "retainedFailures": 4
+  },
+  "maxReceiptMs": 11130,
+  "sourceSha256": "3f6971ff4feff664f7fc16f50c6d89a7ac92622ee57d1b4c586ce52c722b62a3",
+  "evidence": [
+    {
+      "path": "scripts/diag/p14-results/unit1/dickens-mid--control--audit.json",
+      "sha256": "bcce5240032693a6e7eba49f5b824ead73f2e166b18d4ad9171f882afa6c9106",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/dickens-mid--raw--audit.json",
+      "sha256": "cce2f196f4bf69250a7a11d06b904978fdcd3266f6ab57d6c60e6c58e6581e1c",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/dickens-mid--text-class--audit.json",
+      "sha256": "a6f45b67f60c78ce0339154b945d90e2d184e5be2e836e91488c995706f51973",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/dickens-mid--wp-lexical--audit.json",
+      "sha256": "02a7405914861302233ab2b2b7141775caef59401f538f12abd6de76d83c7437",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/dickens-mid--wp-merge--audit.json",
+      "sha256": "bed09c4baf463177833b98e937f1f2c7fa78a39971a93e3976fc28f122db6336",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/dickens-mid--wp-token3--audit.json",
+      "sha256": "79218c0d3e5e7fae03d055f12d661bc568896104b4991d9a0f691df69e511a3a",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-late--control--audit.json",
+      "sha256": "0fab6da261b19c2bc4c15acc080934a3b70732d8126ed102ee7dd297f0e2c312",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-late--wp-merge--audit.json",
+      "sha256": "e9bf9ed61095a2946ab4ac712e13a9d6e03a607e1b701a9b286fb6a3defcec62",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-mid--control--audit.json",
+      "sha256": "1fdeee5408bebb840a59c4957602f5f798f3efd6e2c66784588b49b1ba4d4477",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-mid--raw--audit.json",
+      "sha256": "d18d65f1fdaf82c0965637aa0530c24b243a93ed6e5aea0f17aa7e1bc4f679d4",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-mid--wp-lexical--audit.json",
+      "sha256": "bf321e4fd91619e5f0f771d1cc749a53cd67e57a0aa9f2128324c39ce7756be8",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-mid--wp-merge--audit.json",
+      "sha256": "7f3d8c4dc11a4a25b458e7eebee71fac46e8a49caad5cbbfcd88714b742d79af",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/nci-mid--wp-token3--audit.json",
+      "sha256": "1d0dc6b1b54b873b4d446784c3ce79c0c41b470dc12d37438507efb5a164e957",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/reymont-mid--control--audit.json",
+      "sha256": "ebb314cdf254ceaa067d8bb0cf00c51d30eb28d1e038da4393d1912a47996b3d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/reymont-mid--raw--audit.json",
+      "sha256": "512032286b71494af1929d6deed3e972c1d9fad86fd368b9df6a5b7963e114dd",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/reymont-mid--wp-lexical--audit.json",
+      "sha256": "03b513322b6caed5359cbb69a112282983dd2e95cc7bb66b903c330ab02637e8",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/reymont-mid--wp-merge--audit.json",
+      "sha256": "95e8cc6d7032aa6b9aab81c5b6e7ad6f7a268c27eb29e1993ef9504f9d1d1298",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/reymont-mid--wp-token3--audit.json",
+      "sha256": "27de1c1c0003e6f635c2c58ac98ce38550e5901c2a2118d336ea654ff3936de2",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/webster-mid--control--audit.json",
+      "sha256": "8b0c9aa854aac6f62455917623e42be210a87b1ba2611d4713af96ff0138bf89",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/webster-mid--raw--audit.json",
+      "sha256": "0bccf909f42fbbfd27ec38d8a17d4b3440473cae883a7c236d1b82a4b59e7c6b",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/webster-mid--text-class--audit.json",
+      "sha256": "07532b4f44a5ab7faf12c57c29379383896adfdd2e846c6ffc358cde129dea1f",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/webster-mid--wp-lexical--audit.json",
+      "sha256": "26759ed14c6aaec04a2a87db60c3868697c8aa17aec7ff8ebca843049644c981",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/webster-mid--wp-merge--audit.json",
+      "sha256": "34a74901c48380dd49050a857d3d49b974fe5e471e8d7b1a407420afe3b0e6f8",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/webster-mid--wp-token3--audit.json",
+      "sha256": "000187e5f69f1d38a0db458b64a0fcce6614b633154cf337a168e04355d71304",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-mid--control--audit.json",
+      "sha256": "1b16f0cbedcb5c821850671fbc400bfe3457888079394ff1bb39053c17353580",
+      "status": "FAIL"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-mid--control--measured.json",
+      "sha256": "ee7dc93a4c4ce8feecb1b4b29a65c67b3630750c217c8d2b116d80d8f5dba7e0",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-mid--raw--audit.json",
+      "sha256": "f474ca263e3ea217b176e6fce8fd79f9b14a625eb0e63ecb1f0294a4943057c7",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-mid--wp-lexical--audit.json",
+      "sha256": "6e4c5c710504881052a8b2ff6a86b1150de4127607322920287a0cccddb7a372",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-mid--wp-merge--audit.json",
+      "sha256": "e47129e131e8fc374db8b18b9618f96dc17abb1ffd30441149543d405083ab55",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-mid--wp-token3--audit.json",
+      "sha256": "5d51984284c373ef468b6eaadf8a4c8446eadc4ee27ec0c3f2a483bd733287f9",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-stats--control--audit.json",
+      "sha256": "ec1f6d567600426a9e8b7407fb14dcd7267022a740dd8d9730570e66a17acd16",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-stats--wp-merge--audit.json",
+      "sha256": "ad4df0494c365c49e620cdac5b41727abea928c0f996014b08ac38c021e816d7",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit1/xml-stats--wp-token3--audit.json",
+      "sha256": "046bf41e2df9000c9c1e7a14e8666c737b29dcee6312d979d55035624162bf91",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-late--control--audit.json",
+      "sha256": "5d02e210118b91a0dce0359e9087742a67f3074c0eb7bb4eb87c9a4dfa57be3c",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-late--geom--audit.json",
+      "sha256": "b5defb49df0d6db46d24e88e9ac371821ec926eb6850fbe6de440e7ee956491d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--control--audit.json",
+      "sha256": "8e79550de81b916eb8297fb699a61f190cad291bcb245ac9128ee7fa8c369874",
+      "status": "FAIL"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--control--measured.json",
+      "sha256": "ce95d3f532e36c0cf2ed04fed736569a6380116ac6e7c9645fa569210b41ed7e",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--geom--audit.json",
+      "sha256": "eae2492197316eb51b02d525836f1d8b96facc18b43c2411daed2cca895a6512",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--high2d--audit.json",
+      "sha256": "5e30660ab87ae2815cfaed18ba5e3d0950189f10dd61aa1fb4e1286823deae17",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--msb--audit.json",
+      "sha256": "4620e14ac72a2a429bdd8fc264097ef05d3fd929e46dedd8c8ff41202e92ce12",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--msb-add--audit.json",
+      "sha256": "4c300cf7d9da90100b6d57be20872a3d8a144e76761fffdc2e4b97c670cbdef7",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--plane-info--audit.json",
+      "sha256": "5682d0897e114d05f7a468feed771b3dde8c72d0f6631fa1cbb5f1b011b4627b",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--wide3--audit.json",
+      "sha256": "9a9da547f8be4572fdb8d7fd4ea3a4e4d9e5a45751433fa0002d1794dd4a1105",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/mr-mid--wide3-geom--audit.json",
+      "sha256": "3228358fd733a2c1947ec57f2675c7cc009bc61c07852625975020f7a857cb9b",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-late--tg-control--audit.json",
+      "sha256": "f6576ea986a95d55e5fbb98779702764d62ded0369c02f39d7cbdbbe7012e445",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-late--tg-control--stock-decoder.json",
+      "sha256": "bf277445958d622cc02afe6f8a8bbbfefef4e43f242a25951fde07f40599a4b2",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-late--tg-plan--audit.json",
+      "sha256": "fb5063565d71ecfca6cd8d48817a04de61e5138e2980d7cdf7e411f742ee89cf",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-late--tg-side--audit.json",
+      "sha256": "e12077b5887790a8429324436bb2646129032887332f96279f2e8e58e4632bc4",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-mid--tg-control--audit.json",
+      "sha256": "b42a106d936750407caa3066dd763f0369ef3e25e00bbd199ce206b7922022de",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-mid--tg-control--stock-decoder.json",
+      "sha256": "d4df3ec39e5ce8ce31b7d9aa4795ccc59b38199ad0941e6b4361445571efb5c9",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-mid--tg-flat--audit.json",
+      "sha256": "8ef1f19b38dc4bca80da2e32d2fba7409c9217887e8ebeaa8782a46aebc40a9e",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-mid--tg-flat-side--audit.json",
+      "sha256": "c82b8525dac513ded16e2d47880e2406f0e546173d9ac59cac2397ac5508ece8",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-mid--tg-plan--audit.json",
+      "sha256": "67d9c9e7de4013d37d3945797a3c9d28da9c0f157c026e2cb90e89f7806218a8",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/sao-mid--tg-side--audit.json",
+      "sha256": "100a3b3d5f8c2021fe50cffa8393c19282811f39e2402da91170978c5ae23ea6",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-late--control--audit.json",
+      "sha256": "87e063432919dcf34d803dba236b33d27af94711533a8521719764ef4b49fc89",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-late--geom--audit.json",
+      "sha256": "d7913c4f59797d6ba03c226d7026b107418ad6674fbc4b2f59e0b900baacd0cb",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--control--audit.json",
+      "sha256": "34070dc5fba3be5a202a59cc5cd0072e84ef2e01eb88308b378d5a9bdc2db9b5",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--geom--audit.json",
+      "sha256": "d1dc366e391ef3d4e5c69036567450684f66cb98aae8d2e5e79bf31f928ae24d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--high2d--audit.json",
+      "sha256": "cd096214927710bdfcd638c67ea5bd53261ff6007db5cc35b0cb6f4cd2a7cd19",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--msb--audit.json",
+      "sha256": "8e4ad68ae70c39f486ce12a10915823e9fb9314503de31fd8c14de8b1025d389",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--msb-add--audit.json",
+      "sha256": "847a56be9588edf9f5c562d3efded33ea393a8dddb9e94589aae5058b0f6a480",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--plane-info--audit.json",
+      "sha256": "7a9b461613c3eeeec86a8878c3396116c04a1687bb5264e17f1ce807138ebe96",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--wide3--audit.json",
+      "sha256": "fcfc1ea7b9fa98f71ae86839b9f267f7e4039f217f0952617c0650867fc3582c",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit2/x-ray-mid--wide3-geom--audit.json",
+      "sha256": "6a671d8b1121ab5612e1d907db795ca614298ddf9dbeeeb8a2647f78eadb1c1e",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--control--audit.json",
+      "sha256": "82b0716c5edbf82bc662a833d4d9ee35a1e7aafd997909000da8c56ae073b3f2",
+      "status": "FAIL"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--control--measured.json",
+      "sha256": "043b8337bb262cbfcdb84a57121e19f5e9da8c68453220d502db6538dee95571",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--control--serial-timing.json",
+      "sha256": "60e4e2c21f719bd626d51e715c22a64dfca6e4b164f569fd10938c36126cf811",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--inspect--audit.json",
+      "sha256": "dfd7ee7d51e7d2ecafc0e21b8e813b65c0de21c464380874f3ed901d386b0cee",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--opcode--audit.json",
+      "sha256": "54c79205b008a4abfe557cb65cd17391a351e71de11dc744e167753b5c1a2c5d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--stride4--audit.json",
+      "sha256": "d689ea3c873fe1829304f6dcc5e006005a32bb85b1e8c3711f87ab5c0dd19e2d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--stride4--serial-timing.json",
+      "sha256": "efccc0fcd2125f848fa880e349e995e49d2b802e989e588a10cd941290eef46e",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code--word-prefix--audit.json",
+      "sha256": "e2420198da2a8beb67b17772fea1f63872f385285436b0f2c72e45f92c4968f9",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code-late--control--audit.json",
+      "sha256": "77dd4969ec5a6625d068920fd410dfe4f445c249dd8ba32aa60e21f9d2218de7",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code-late--opcode--audit.json",
+      "sha256": "6f9365344e185541a6a485ec5f6c436a8c84585d63fef67ef04f8da82d1922be",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-code-late--stride4--audit.json",
+      "sha256": "3870ccc5f6bf8239f6ae0262ff172088c01b6f6c1ace2bc4e4a5740bf8100cfe",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources--control--audit.json",
+      "sha256": "62683d232cbeaae3ef1965072410c3c5bb12882032bb991218742cc4e5f59c3e",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources--inspect--audit.json",
+      "sha256": "d09fe971731209f5d05568a8e9199fcd2f0e7caacb03af3877cb55b3b04116e4",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources--opcode--audit.json",
+      "sha256": "737685b754483a6e98e6ac14968b268c2f44f8b7ffba10ce893c453bc0cab6ec",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources--stride4--audit.json",
+      "sha256": "e1ed1ac8853f34ea0681474876e52cc1ab15c10d20a4184c8370965e8a24cbeb",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources--word-prefix--audit.json",
+      "sha256": "7a6db4c7ce19b2b58c946ea3c475dcd931f806f9c1c29bd2a219e577720da684",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources-late--control--audit.json",
+      "sha256": "8390a08daef4c06d4af51d4d0054071cf93b36e802eb90753c072bb852a35937",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources-late--opcode--audit.json",
+      "sha256": "186a6cae94f8158c72aa0df81eadd295cc940493ffc25fb7c818a70faff823fb",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/mozilla-resources-late--stride4--audit.json",
+      "sha256": "37bd8ce23ef7f0b3fba60ee81db4d95d687043c5e088223250d9a24d5f9a5ae9",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/ooffice-code--bcj2--audit.json",
+      "sha256": "5db4ae081844b68b851996ae89679fdcce5d80e133ae494f2645f39a920cd6a3",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/ooffice-code--bcj2-opcode--audit.json",
+      "sha256": "ecba5b20735c0bcfdcbffd44e86f8e6b3e17fe2b9778a301bcf90c530dd29227",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/ooffice-code--bcj2-stride4--audit.json",
+      "sha256": "6e4ad305ab36bfd6566e45852b4982f59e9555f94e3e735d61ba438ebce6f3b9",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/ooffice-code--inspect--audit.json",
+      "sha256": "8a8380d6ccc9dec75ff2e1957cdcc4853c328d2abfba78362cfa5f71467a18f1",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/samba-mid--control--audit.json",
+      "sha256": "72ede8ab1f3bc87af061871e356ef9bb51b51988900288a4ea5889d3940fa0cc",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/samba-mid--inspect--audit.json",
+      "sha256": "21169a404bbda5bde0ebdd3754a64bc062c38924443f4ba800cc79a005aac3fe",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/samba-mid--opcode--audit.json",
+      "sha256": "755dde7b0ebd8a9e9f842d2b6d2515d97741b8a4194640a8dc702dd0d92726b8",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit3/samba-mid--stride4--audit.json",
+      "sha256": "19a48b20e48b1e86f87a0ed27f6dd023604b80467eb21925e2cf3726a93a271f",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-late--control--audit.json",
+      "sha256": "8db635bb6ea225cb2a42bbfdc9435e46fbe57ad5b05d569402387a5fcb1cd322",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-late--no-mht8--audit.json",
+      "sha256": "890ba0383a7dbec676081675fd0f075d20663fcbc946072bfa0f14377fa93012",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-late--stride4--audit.json",
+      "sha256": "a277e84e0f4ff8324f16bfb7b89952a1e1b01f9bc35489490f63035ce22f5975",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-late--structure--audit.json",
+      "sha256": "0620c437fed321343b6874c668c9024d15dfe4d36bb8d05fc3e4434afecb7a3d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--control--audit.json",
+      "sha256": "3cbc1ce42db3f80699fbe1f2c1ff0178ba1228e2e218d6dac40cd640fd209abd",
+      "status": "FAIL"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "sha256": "474a3f3efb408f29c3317acfe621983c0b54845e1eb6748c28af7ae2a428154a",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--count160--audit.json",
+      "sha256": "bf0146b54e5ce35b7f147cbc1cc230d33dce88c1d4f8f7c682aba1029b8c7ebf",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--lr-main4--audit.json",
+      "sha256": "9afda7f42ed2d624a9b3961cec1e22ffa61746ae204f8c9a2baa389b57ae37b0",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--lr-secondary1--audit.json",
+      "sha256": "bb14d1d5a65d0e80b82dff1975ca77675a80a346435e362daad3c43147a4482d",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--near8--audit.json",
+      "sha256": "1d0b2f616088028c42272db18d10fe8485ef7f82d67e7747b4e56bb89c355e20",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--no-mht8--audit.json",
+      "sha256": "c71eb53f92ae287d79ec83c82105eeef43131152f8c428e692b257a97fe83f95",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--order4--audit.json",
+      "sha256": "9702ab864c415d6daecc0d4995e68b2271cd7c8eb106510672563aacb412fcf6",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--profile--audit.json",
+      "sha256": "29cc38ee60e1a1d6c1e3cd58a5ad9f9d4286ad804bce3f428ee455feb620cf28",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--profile-text--audit.json",
+      "sha256": "26db005c8ed6aeb269c7c5e8b8afaf87af36702b7faaf9f816c75aa537ae1d55",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--stride4--audit.json",
+      "sha256": "df27303e96ea3a025bca0f8df4e80be59b2348090d3243259541ae6b74242a42",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--structure--audit.json",
+      "sha256": "ab586a3bc3bc71ef1bdc8f6597fd7babe352683390596394fa9e559672b69866",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/osdb-mid--text--audit.json",
+      "sha256": "975564446e9fcd5374bfb8889fae3fbad40d8831961e0481874708effa5d6add",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/samba-mid--text--audit.json",
+      "sha256": "ee5319dd3cddcb9e67261f35cabe7b63f27c93ca45c5d2d44f3db69edc6f4a8b",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/webster-mid--control--audit.json",
+      "sha256": "ebd8e8b7421c681cd45befa5666eb8038abfd8aeb164763424d8513ef98c9822",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/webster-mid--lr-main4--audit.json",
+      "sha256": "dd45d82dd11a6be92b64def2605142a20b2d8c3a3564c3b5540ea98682b407ea",
+      "status": "PASS"
+    },
+    {
+      "path": "scripts/diag/p14-results/unit4/webster-mid--no-mht8--audit.json",
+      "sha256": "3f76d2afe110bcfb890ff2a191303cd827469b74c62c39ec77e1daa57b7100af",
+      "status": "PASS"
+    }
+  ],
+  "comparisons": [
+    {
+      "unit": "unit1",
+      "slice": "dickens-mid",
+      "file": "dickens",
+      "variant": "text-class",
+      "control": "raw",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 69544,
+      "experimentPayloadBytes": 69448,
+      "savedBytes": 96,
+      "relativeReductionPct": 0.13804210284136662,
+      "bestKnownTestedOldPayloadBytes": 69544,
+      "experimentIncludingKnownWrapperBytes": 69448,
+      "improvementOverBestKnownTestedOldPayloadBytes": 96,
+      "mechanicalWholeFileSavingsDecimalKB": 3.732585205078125,
+      "savingsBytesPerRawMiB": 384,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/dickens-mid--raw--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/dickens-mid--text-class--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "dickens-mid",
+      "file": "dickens",
+      "variant": "wp-lexical",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 77420,
+      "experimentPayloadBytes": 73661,
+      "savedBytes": 3759,
+      "relativeReductionPct": 4.855334538878843,
+      "bestKnownTestedOldPayloadBytes": 69544,
+      "experimentIncludingKnownWrapperBytes": 73665,
+      "improvementOverBestKnownTestedOldPayloadBytes": -4121,
+      "mechanicalWholeFileSavingsDecimalKB": 146.15403943634033,
+      "savingsBytesPerRawMiB": 15036,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/dickens-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/dickens-mid--wp-lexical--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "dickens-mid",
+      "file": "dickens",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 77420,
+      "experimentPayloadBytes": 78114,
+      "savedBytes": -694,
+      "relativeReductionPct": -0.8964091965900284,
+      "bestKnownTestedOldPayloadBytes": 69544,
+      "experimentIncludingKnownWrapperBytes": 78118,
+      "improvementOverBestKnownTestedOldPayloadBytes": -8574,
+      "mechanicalWholeFileSavingsDecimalKB": -26.983480545043946,
+      "savingsBytesPerRawMiB": -2776,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/dickens-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/dickens-mid--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "dickens-mid",
+      "file": "dickens",
+      "variant": "wp-token3",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 77420,
+      "experimentPayloadBytes": 77513,
+      "savedBytes": -93,
+      "relativeReductionPct": -0.12012399896667528,
+      "bestKnownTestedOldPayloadBytes": 69544,
+      "experimentIncludingKnownWrapperBytes": 77517,
+      "improvementOverBestKnownTestedOldPayloadBytes": -7973,
+      "mechanicalWholeFileSavingsDecimalKB": -3.6159419174194336,
+      "savingsBytesPerRawMiB": -372,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/dickens-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/dickens-mid--wp-token3--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "nci-late",
+      "file": "nci",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 11836,
+      "experimentPayloadBytes": 11803,
+      "savedBytes": 33,
+      "relativeReductionPct": 0.2788104089219331,
+      "bestKnownTestedOldPayloadBytes": 11840,
+      "experimentIncludingKnownWrapperBytes": 11807,
+      "improvementOverBestKnownTestedOldPayloadBytes": 33,
+      "mechanicalWholeFileSavingsDecimalKB": 4.2238757514953615,
+      "savingsBytesPerRawMiB": 132,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/nci-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/nci-late--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "nci-mid",
+      "file": "nci",
+      "variant": "wp-lexical",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 12491,
+      "experimentPayloadBytes": 12511,
+      "savedBytes": -20,
+      "relativeReductionPct": -0.1601152830037627,
+      "bestKnownTestedOldPayloadBytes": 12495,
+      "experimentIncludingKnownWrapperBytes": 12515,
+      "improvementOverBestKnownTestedOldPayloadBytes": -20,
+      "mechanicalWholeFileSavingsDecimalKB": -2.5599246978759767,
+      "savingsBytesPerRawMiB": -80,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/nci-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/nci-mid--wp-lexical--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "nci-mid",
+      "file": "nci",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 12491,
+      "experimentPayloadBytes": 12442,
+      "savedBytes": 49,
+      "relativeReductionPct": 0.39228244335921864,
+      "bestKnownTestedOldPayloadBytes": 12495,
+      "experimentIncludingKnownWrapperBytes": 12446,
+      "improvementOverBestKnownTestedOldPayloadBytes": 49,
+      "mechanicalWholeFileSavingsDecimalKB": 6.271815509796142,
+      "savingsBytesPerRawMiB": 196,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/nci-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/nci-mid--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "nci-mid",
+      "file": "nci",
+      "variant": "wp-token3",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 12491,
+      "experimentPayloadBytes": 12572,
+      "savedBytes": -81,
+      "relativeReductionPct": -0.648466896165239,
+      "bestKnownTestedOldPayloadBytes": 12495,
+      "experimentIncludingKnownWrapperBytes": 12576,
+      "improvementOverBestKnownTestedOldPayloadBytes": -81,
+      "mechanicalWholeFileSavingsDecimalKB": -10.367695026397705,
+      "savingsBytesPerRawMiB": -324,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/nci-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/nci-mid--wp-token3--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "reymont-mid",
+      "file": "reymont",
+      "variant": "wp-lexical",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 47539,
+      "experimentPayloadBytes": 47530,
+      "savedBytes": 9,
+      "relativeReductionPct": 0.01893182439681104,
+      "bestKnownTestedOldPayloadBytes": 47358,
+      "experimentIncludingKnownWrapperBytes": 47534,
+      "improvementOverBestKnownTestedOldPayloadBytes": -176,
+      "mechanicalWholeFileSavingsDecimalKB": 0.22752692413330078,
+      "savingsBytesPerRawMiB": 36,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/reymont-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/reymont-mid--wp-lexical--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "reymont-mid",
+      "file": "reymont",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 47539,
+      "experimentPayloadBytes": 47516,
+      "savedBytes": 23,
+      "relativeReductionPct": 0.04838132901407266,
+      "bestKnownTestedOldPayloadBytes": 47358,
+      "experimentIncludingKnownWrapperBytes": 47520,
+      "improvementOverBestKnownTestedOldPayloadBytes": -162,
+      "mechanicalWholeFileSavingsDecimalKB": 0.5814576950073242,
+      "savingsBytesPerRawMiB": 92,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/reymont-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/reymont-mid--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "reymont-mid",
+      "file": "reymont",
+      "variant": "wp-token3",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 47539,
+      "experimentPayloadBytes": 47559,
+      "savedBytes": -20,
+      "relativeReductionPct": -0.04207072088180231,
+      "bestKnownTestedOldPayloadBytes": 47358,
+      "experimentIncludingKnownWrapperBytes": 47563,
+      "improvementOverBestKnownTestedOldPayloadBytes": -205,
+      "mechanicalWholeFileSavingsDecimalKB": -0.5056153869628907,
+      "savingsBytesPerRawMiB": -80,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/reymont-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/reymont-mid--wp-token3--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "webster-mid",
+      "file": "webster",
+      "variant": "text-class",
+      "control": "raw",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 56444,
+      "experimentPayloadBytes": 56425,
+      "savedBytes": 19,
+      "relativeReductionPct": 0.03366168237545177,
+      "bestKnownTestedOldPayloadBytes": 56444,
+      "experimentIncludingKnownWrapperBytes": 56425,
+      "improvementOverBestKnownTestedOldPayloadBytes": 19,
+      "mechanicalWholeFileSavingsDecimalKB": 3.0048956184387206,
+      "savingsBytesPerRawMiB": 76,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/webster-mid--raw--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/webster-mid--text-class--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "webster-mid",
+      "file": "webster",
+      "variant": "wp-lexical",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 57182,
+      "experimentPayloadBytes": 56558,
+      "savedBytes": 624,
+      "relativeReductionPct": 1.0912524920429505,
+      "bestKnownTestedOldPayloadBytes": 56444,
+      "experimentIncludingKnownWrapperBytes": 56562,
+      "improvementOverBestKnownTestedOldPayloadBytes": -118,
+      "mechanicalWholeFileSavingsDecimalKB": 98.6870982055664,
+      "savingsBytesPerRawMiB": 2496,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/webster-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/webster-mid--wp-lexical--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "webster-mid",
+      "file": "webster",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 57182,
+      "experimentPayloadBytes": 57420,
+      "savedBytes": -238,
+      "relativeReductionPct": -0.4162148927984331,
+      "bestKnownTestedOldPayloadBytes": 56444,
+      "experimentIncludingKnownWrapperBytes": 57424,
+      "improvementOverBestKnownTestedOldPayloadBytes": -980,
+      "mechanicalWholeFileSavingsDecimalKB": -37.640271430969236,
+      "savingsBytesPerRawMiB": -952,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/webster-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/webster-mid--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "webster-mid",
+      "file": "webster",
+      "variant": "wp-token3",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 57182,
+      "experimentPayloadBytes": 57230,
+      "savedBytes": -48,
+      "relativeReductionPct": -0.08394249938791928,
+      "bestKnownTestedOldPayloadBytes": 56444,
+      "experimentIncludingKnownWrapperBytes": 57234,
+      "improvementOverBestKnownTestedOldPayloadBytes": -790,
+      "mechanicalWholeFileSavingsDecimalKB": -7.591315246582031,
+      "savingsBytesPerRawMiB": -192,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/webster-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/webster-mid--wp-token3--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "xml-mid",
+      "file": "xml",
+      "variant": "wp-lexical",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 4683,
+      "experimentPayloadBytes": 4688,
+      "savedBytes": -5,
+      "relativeReductionPct": -0.10676916506512919,
+      "bestKnownTestedOldPayloadBytes": 4687,
+      "experimentIncludingKnownWrapperBytes": 4692,
+      "improvementOverBestKnownTestedOldPayloadBytes": -5,
+      "mechanicalWholeFileSavingsDecimalKB": -0.101953125,
+      "savingsBytesPerRawMiB": -20,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/xml-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/xml-mid--wp-lexical--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "xml-mid",
+      "file": "xml",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 4683,
+      "experimentPayloadBytes": 4517,
+      "savedBytes": 166,
+      "relativeReductionPct": 3.544736280162289,
+      "bestKnownTestedOldPayloadBytes": 4687,
+      "experimentIncludingKnownWrapperBytes": 4521,
+      "improvementOverBestKnownTestedOldPayloadBytes": 166,
+      "mechanicalWholeFileSavingsDecimalKB": 3.38484375,
+      "savingsBytesPerRawMiB": 664,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/xml-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/xml-mid--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "xml-mid",
+      "file": "xml",
+      "variant": "wp-token3",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 4683,
+      "experimentPayloadBytes": 4538,
+      "savedBytes": 145,
+      "relativeReductionPct": 3.0963057868887462,
+      "bestKnownTestedOldPayloadBytes": 4687,
+      "experimentIncludingKnownWrapperBytes": 4542,
+      "improvementOverBestKnownTestedOldPayloadBytes": 145,
+      "mechanicalWholeFileSavingsDecimalKB": 2.956640625,
+      "savingsBytesPerRawMiB": 580,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/xml-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/xml-mid--wp-token3--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "xml-stats",
+      "file": "xml",
+      "variant": "wp-merge",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 11269,
+      "experimentPayloadBytes": 11223,
+      "savedBytes": 46,
+      "relativeReductionPct": 0.40819948531369243,
+      "bestKnownTestedOldPayloadBytes": 11273,
+      "experimentIncludingKnownWrapperBytes": 11227,
+      "improvementOverBestKnownTestedOldPayloadBytes": 46,
+      "mechanicalWholeFileSavingsDecimalKB": 0.93796875,
+      "savingsBytesPerRawMiB": 184,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/xml-stats--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/xml-stats--wp-merge--audit.json"
+    },
+    {
+      "unit": "unit1",
+      "slice": "xml-stats",
+      "file": "xml",
+      "variant": "wp-token3",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 11269,
+      "experimentPayloadBytes": 11148,
+      "savedBytes": 121,
+      "relativeReductionPct": 1.073742124412104,
+      "bestKnownTestedOldPayloadBytes": 11273,
+      "experimentIncludingKnownWrapperBytes": 11152,
+      "improvementOverBestKnownTestedOldPayloadBytes": 121,
+      "mechanicalWholeFileSavingsDecimalKB": 2.467265625,
+      "savingsBytesPerRawMiB": 484,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit1/xml-stats--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit1/xml-stats--wp-token3--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "mr-late",
+      "file": "mr",
+      "variant": "geom",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 55307,
+      "experimentPayloadBytes": 54936,
+      "savedBytes": 371,
+      "relativeReductionPct": 0.6708011644095684,
+      "bestKnownTestedOldPayloadBytes": 55307,
+      "experimentIncludingKnownWrapperBytes": 54936,
+      "improvementOverBestKnownTestedOldPayloadBytes": 371,
+      "mechanicalWholeFileSavingsDecimalKB": 14.110867477416992,
+      "savingsBytesPerRawMiB": 1484,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/mr-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/mr-late--geom--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "mr-mid",
+      "file": "mr",
+      "variant": "geom",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 49237,
+      "experimentPayloadBytes": 48773,
+      "savedBytes": 464,
+      "relativeReductionPct": 0.9423807299388671,
+      "bestKnownTestedOldPayloadBytes": 49237,
+      "experimentIncludingKnownWrapperBytes": 48773,
+      "improvementOverBestKnownTestedOldPayloadBytes": 464,
+      "mechanicalWholeFileSavingsDecimalKB": 17.648093017578127,
+      "savingsBytesPerRawMiB": 1856,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/mr-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/mr-mid--geom--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "mr-mid",
+      "file": "mr",
+      "variant": "high2d",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 49237,
+      "experimentPayloadBytes": 49232,
+      "savedBytes": 5,
+      "relativeReductionPct": 0.010154964762272276,
+      "bestKnownTestedOldPayloadBytes": 49237,
+      "experimentIncludingKnownWrapperBytes": 49232,
+      "improvementOverBestKnownTestedOldPayloadBytes": 5,
+      "mechanicalWholeFileSavingsDecimalKB": 0.1901734161376953,
+      "savingsBytesPerRawMiB": 20,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/mr-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/mr-mid--high2d--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "mr-mid",
+      "file": "mr",
+      "variant": "msb",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 49237,
+      "experimentPayloadBytes": 49457,
+      "savedBytes": -220,
+      "relativeReductionPct": -0.4468184495399801,
+      "bestKnownTestedOldPayloadBytes": 49237,
+      "experimentIncludingKnownWrapperBytes": 49457,
+      "improvementOverBestKnownTestedOldPayloadBytes": -220,
+      "mechanicalWholeFileSavingsDecimalKB": -8.367630310058594,
+      "savingsBytesPerRawMiB": -880,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/mr-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/mr-mid--msb--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "mr-mid",
+      "file": "mr",
+      "variant": "msb-add",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 49237,
+      "experimentPayloadBytes": 49256,
+      "savedBytes": -19,
+      "relativeReductionPct": -0.038588866096634644,
+      "bestKnownTestedOldPayloadBytes": 49237,
+      "experimentIncludingKnownWrapperBytes": 49256,
+      "improvementOverBestKnownTestedOldPayloadBytes": -19,
+      "mechanicalWholeFileSavingsDecimalKB": -0.7226589813232421,
+      "savingsBytesPerRawMiB": -76,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/mr-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/mr-mid--msb-add--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "mr-mid",
+      "file": "mr",
+      "variant": "wide3-geom",
+      "control": "wide3",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 52177,
+      "experimentPayloadBytes": 51389,
+      "savedBytes": 788,
+      "relativeReductionPct": 1.510243977231347,
+      "bestKnownTestedOldPayloadBytes": 49237,
+      "experimentIncludingKnownWrapperBytes": 51389,
+      "improvementOverBestKnownTestedOldPayloadBytes": -2152,
+      "mechanicalWholeFileSavingsDecimalKB": 29.97133038330078,
+      "savingsBytesPerRawMiB": 3152,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/mr-mid--wide3--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/mr-mid--wide3-geom--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "sao-late",
+      "file": "sao",
+      "variant": "tg-side",
+      "control": "tg-control",
+      "rawWindowBytes": 262136,
+      "controlPayloadBytes": 137894,
+      "experimentPayloadBytes": 137896,
+      "savedBytes": -2,
+      "relativeReductionPct": -0.0014503894295618373,
+      "bestKnownTestedOldPayloadBytes": 137894,
+      "experimentIncludingKnownWrapperBytes": 137896,
+      "improvementOverBestKnownTestedOldPayloadBytes": -2,
+      "mechanicalWholeFileSavingsDecimalKB": -0.05532963042085024,
+      "savingsBytesPerRawMiB": -8.000244148075808,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/sao-late--tg-control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/sao-late--tg-side--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "sao-mid",
+      "file": "sao",
+      "variant": "tg-flat-side",
+      "control": "tg-flat",
+      "rawWindowBytes": 262136,
+      "controlPayloadBytes": 168401,
+      "experimentPayloadBytes": 154094,
+      "savedBytes": 14307,
+      "relativeReductionPct": 8.495792780327909,
+      "bestKnownTestedOldPayloadBytes": 139989,
+      "experimentIncludingKnownWrapperBytes": 154094,
+      "improvementOverBestKnownTestedOldPayloadBytes": -14105,
+      "mechanicalWholeFileSavingsDecimalKB": 395.8005112155522,
+      "savingsBytesPerRawMiB": 57229.746513260296,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/sao-mid--tg-flat--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/sao-mid--tg-flat-side--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "sao-mid",
+      "file": "sao",
+      "variant": "tg-side",
+      "control": "tg-control",
+      "rawWindowBytes": 262136,
+      "controlPayloadBytes": 139989,
+      "experimentPayloadBytes": 139987,
+      "savedBytes": 2,
+      "relativeReductionPct": 0.0014286836822893227,
+      "bestKnownTestedOldPayloadBytes": 139989,
+      "experimentIncludingKnownWrapperBytes": 139987,
+      "improvementOverBestKnownTestedOldPayloadBytes": 2,
+      "mechanicalWholeFileSavingsDecimalKB": 0.05532963042085024,
+      "savingsBytesPerRawMiB": 8.000244148075808,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/sao-mid--tg-control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/sao-mid--tg-side--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "x-ray-late",
+      "file": "x-ray",
+      "variant": "geom",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 108651,
+      "experimentPayloadBytes": 108647,
+      "savedBytes": 4,
+      "relativeReductionPct": 0.0036815123652796573,
+      "bestKnownTestedOldPayloadBytes": 108651,
+      "experimentIncludingKnownWrapperBytes": 108647,
+      "improvementOverBestKnownTestedOldPayloadBytes": 4,
+      "mechanicalWholeFileSavingsDecimalKB": 0.129306640625,
+      "savingsBytesPerRawMiB": 16,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/x-ray-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/x-ray-late--geom--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "x-ray-mid",
+      "file": "x-ray",
+      "variant": "geom",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 115212,
+      "experimentPayloadBytes": 115205,
+      "savedBytes": 7,
+      "relativeReductionPct": 0.006075755997639135,
+      "bestKnownTestedOldPayloadBytes": 115212,
+      "experimentIncludingKnownWrapperBytes": 115205,
+      "improvementOverBestKnownTestedOldPayloadBytes": 7,
+      "mechanicalWholeFileSavingsDecimalKB": 0.22628662109375,
+      "savingsBytesPerRawMiB": 28,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--geom--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "x-ray-mid",
+      "file": "x-ray",
+      "variant": "high2d",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 115212,
+      "experimentPayloadBytes": 115187,
+      "savedBytes": 25,
+      "relativeReductionPct": 0.02169912856299691,
+      "bestKnownTestedOldPayloadBytes": 115212,
+      "experimentIncludingKnownWrapperBytes": 115187,
+      "improvementOverBestKnownTestedOldPayloadBytes": 25,
+      "mechanicalWholeFileSavingsDecimalKB": 0.80816650390625,
+      "savingsBytesPerRawMiB": 100,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--high2d--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "x-ray-mid",
+      "file": "x-ray",
+      "variant": "msb",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 115212,
+      "experimentPayloadBytes": 115209,
+      "savedBytes": 3,
+      "relativeReductionPct": 0.002603895427559629,
+      "bestKnownTestedOldPayloadBytes": 115212,
+      "experimentIncludingKnownWrapperBytes": 115209,
+      "improvementOverBestKnownTestedOldPayloadBytes": 3,
+      "mechanicalWholeFileSavingsDecimalKB": 0.09697998046875,
+      "savingsBytesPerRawMiB": 12,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--msb--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "x-ray-mid",
+      "file": "x-ray",
+      "variant": "msb-add",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 115212,
+      "experimentPayloadBytes": 115218,
+      "savedBytes": -6,
+      "relativeReductionPct": -0.005207790855119258,
+      "bestKnownTestedOldPayloadBytes": 115212,
+      "experimentIncludingKnownWrapperBytes": 115218,
+      "improvementOverBestKnownTestedOldPayloadBytes": -6,
+      "mechanicalWholeFileSavingsDecimalKB": -0.1939599609375,
+      "savingsBytesPerRawMiB": -24,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--msb-add--audit.json"
+    },
+    {
+      "unit": "unit2",
+      "slice": "x-ray-mid",
+      "file": "x-ray",
+      "variant": "wide3-geom",
+      "control": "wide3",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 117359,
+      "experimentPayloadBytes": 117356,
+      "savedBytes": 3,
+      "relativeReductionPct": 0.0025562590001618965,
+      "bestKnownTestedOldPayloadBytes": 115212,
+      "experimentIncludingKnownWrapperBytes": 117356,
+      "improvementOverBestKnownTestedOldPayloadBytes": -2144,
+      "mechanicalWholeFileSavingsDecimalKB": 0.09697998046875,
+      "savingsBytesPerRawMiB": 12,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--wide3--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit2/x-ray-mid--wide3-geom--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-code",
+      "file": "mozilla",
+      "variant": "opcode",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72058,
+      "experimentPayloadBytes": 70558,
+      "savedBytes": 1500,
+      "relativeReductionPct": 2.0816564434205778,
+      "bestKnownTestedOldPayloadBytes": 72058,
+      "experimentIncludingKnownWrapperBytes": 70558,
+      "improvementOverBestKnownTestedOldPayloadBytes": 1500,
+      "mechanicalWholeFileSavingsDecimalKB": 293.0859375,
+      "savingsBytesPerRawMiB": 6000,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-code--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-code--opcode--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-code",
+      "file": "mozilla",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72058,
+      "experimentPayloadBytes": 70578,
+      "savedBytes": 1480,
+      "relativeReductionPct": 2.0539010241749702,
+      "bestKnownTestedOldPayloadBytes": 72058,
+      "experimentIncludingKnownWrapperBytes": 70578,
+      "improvementOverBestKnownTestedOldPayloadBytes": 1480,
+      "mechanicalWholeFileSavingsDecimalKB": 289.178125,
+      "savingsBytesPerRawMiB": 5920,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-code--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-code--stride4--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-code",
+      "file": "mozilla",
+      "variant": "word-prefix",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72058,
+      "experimentPayloadBytes": 72680,
+      "savedBytes": -622,
+      "relativeReductionPct": -0.8631935385383995,
+      "bestKnownTestedOldPayloadBytes": 72058,
+      "experimentIncludingKnownWrapperBytes": 72680,
+      "improvementOverBestKnownTestedOldPayloadBytes": -622,
+      "mechanicalWholeFileSavingsDecimalKB": -121.53296875,
+      "savingsBytesPerRawMiB": -2488,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-code--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-code--word-prefix--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-code-late",
+      "file": "mozilla",
+      "variant": "opcode",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 69861,
+      "experimentPayloadBytes": 67917,
+      "savedBytes": 1944,
+      "relativeReductionPct": 2.782668441619788,
+      "bestKnownTestedOldPayloadBytes": 69861,
+      "experimentIncludingKnownWrapperBytes": 67917,
+      "improvementOverBestKnownTestedOldPayloadBytes": 1944,
+      "mechanicalWholeFileSavingsDecimalKB": 379.839375,
+      "savingsBytesPerRawMiB": 7776,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-code-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-code-late--opcode--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-code-late",
+      "file": "mozilla",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 69861,
+      "experimentPayloadBytes": 67913,
+      "savedBytes": 1948,
+      "relativeReductionPct": 2.788394096849458,
+      "bestKnownTestedOldPayloadBytes": 69861,
+      "experimentIncludingKnownWrapperBytes": 67913,
+      "improvementOverBestKnownTestedOldPayloadBytes": 1948,
+      "mechanicalWholeFileSavingsDecimalKB": 380.6209375,
+      "savingsBytesPerRawMiB": 7792,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-code-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-code-late--stride4--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-resources",
+      "file": "mozilla",
+      "variant": "opcode",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 24466,
+      "experimentPayloadBytes": 20862,
+      "savedBytes": 3604,
+      "relativeReductionPct": 14.730646611624296,
+      "bestKnownTestedOldPayloadBytes": 24466,
+      "experimentIncludingKnownWrapperBytes": 20862,
+      "improvementOverBestKnownTestedOldPayloadBytes": 3604,
+      "mechanicalWholeFileSavingsDecimalKB": 704.1878125,
+      "savingsBytesPerRawMiB": 14416,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-resources--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-resources--opcode--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-resources",
+      "file": "mozilla",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 24466,
+      "experimentPayloadBytes": 20727,
+      "savedBytes": 3739,
+      "relativeReductionPct": 15.282432763835526,
+      "bestKnownTestedOldPayloadBytes": 24466,
+      "experimentIncludingKnownWrapperBytes": 20727,
+      "improvementOverBestKnownTestedOldPayloadBytes": 3739,
+      "mechanicalWholeFileSavingsDecimalKB": 730.565546875,
+      "savingsBytesPerRawMiB": 14956,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-resources--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-resources--stride4--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-resources",
+      "file": "mozilla",
+      "variant": "word-prefix",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 24466,
+      "experimentPayloadBytes": 24721,
+      "savedBytes": -255,
+      "relativeReductionPct": -1.042262731954549,
+      "bestKnownTestedOldPayloadBytes": 24466,
+      "experimentIncludingKnownWrapperBytes": 24721,
+      "improvementOverBestKnownTestedOldPayloadBytes": -255,
+      "mechanicalWholeFileSavingsDecimalKB": -49.824609375,
+      "savingsBytesPerRawMiB": -1020,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-resources--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-resources--word-prefix--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-resources-late",
+      "file": "mozilla",
+      "variant": "opcode",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 29761,
+      "experimentPayloadBytes": 25962,
+      "savedBytes": 3799,
+      "relativeReductionPct": 12.765028056852929,
+      "bestKnownTestedOldPayloadBytes": 29761,
+      "experimentIncludingKnownWrapperBytes": 25962,
+      "improvementOverBestKnownTestedOldPayloadBytes": 3799,
+      "mechanicalWholeFileSavingsDecimalKB": 742.288984375,
+      "savingsBytesPerRawMiB": 15196,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-resources-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-resources-late--opcode--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "mozilla-resources-late",
+      "file": "mozilla",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 29761,
+      "experimentPayloadBytes": 25697,
+      "savedBytes": 4064,
+      "relativeReductionPct": 13.655455125835825,
+      "bestKnownTestedOldPayloadBytes": 29761,
+      "experimentIncludingKnownWrapperBytes": 25697,
+      "improvementOverBestKnownTestedOldPayloadBytes": 4064,
+      "mechanicalWholeFileSavingsDecimalKB": 794.0675,
+      "savingsBytesPerRawMiB": 16256,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/mozilla-resources-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/mozilla-resources-late--stride4--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "ooffice-code",
+      "file": "ooffice",
+      "variant": "bcj2-opcode",
+      "control": "bcj2",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 98457,
+      "experimentPayloadBytes": 99120,
+      "savedBytes": -663,
+      "relativeReductionPct": -0.6733904140893994,
+      "bestKnownTestedOldPayloadBytes": 98457,
+      "experimentIncludingKnownWrapperBytes": 99120,
+      "improvementOverBestKnownTestedOldPayloadBytes": -663,
+      "mechanicalWholeFileSavingsDecimalKB": -15.55978125,
+      "savingsBytesPerRawMiB": -2652,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/ooffice-code--bcj2--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/ooffice-code--bcj2-opcode--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "ooffice-code",
+      "file": "ooffice",
+      "variant": "bcj2-stride4",
+      "control": "bcj2",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 98457,
+      "experimentPayloadBytes": 99137,
+      "savedBytes": -680,
+      "relativeReductionPct": -0.6906568349634866,
+      "bestKnownTestedOldPayloadBytes": 98457,
+      "experimentIncludingKnownWrapperBytes": 99137,
+      "improvementOverBestKnownTestedOldPayloadBytes": -680,
+      "mechanicalWholeFileSavingsDecimalKB": -15.95875,
+      "savingsBytesPerRawMiB": -2720,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/ooffice-code--bcj2--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/ooffice-code--bcj2-stride4--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "samba-mid",
+      "file": "samba",
+      "variant": "opcode",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 12553,
+      "experimentPayloadBytes": 12550,
+      "savedBytes": 3,
+      "relativeReductionPct": 0.023898669640723333,
+      "bestKnownTestedOldPayloadBytes": 12553,
+      "experimentIncludingKnownWrapperBytes": 12550,
+      "improvementOverBestKnownTestedOldPayloadBytes": 3,
+      "mechanicalWholeFileSavingsDecimalKB": 0.247265625,
+      "savingsBytesPerRawMiB": 12,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/samba-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/samba-mid--opcode--audit.json"
+    },
+    {
+      "unit": "unit3",
+      "slice": "samba-mid",
+      "file": "samba",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 12553,
+      "experimentPayloadBytes": 12528,
+      "savedBytes": 25,
+      "relativeReductionPct": 0.1991555803393611,
+      "bestKnownTestedOldPayloadBytes": 12553,
+      "experimentIncludingKnownWrapperBytes": 12528,
+      "improvementOverBestKnownTestedOldPayloadBytes": 25,
+      "mechanicalWholeFileSavingsDecimalKB": 2.060546875,
+      "savingsBytesPerRawMiB": 100,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit3/samba-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit3/samba-mid--stride4--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-late",
+      "file": "osdb",
+      "variant": "no-mht8",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72917,
+      "experimentPayloadBytes": 72864,
+      "savedBytes": 53,
+      "relativeReductionPct": 0.07268538200968225,
+      "bestKnownTestedOldPayloadBytes": 72917,
+      "experimentIncludingKnownWrapperBytes": 72864,
+      "improvementOverBestKnownTestedOldPayloadBytes": 53,
+      "mechanicalWholeFileSavingsDecimalKB": 2.039113052368164,
+      "savingsBytesPerRawMiB": 212,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-late--no-mht8--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-late",
+      "file": "osdb",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72917,
+      "experimentPayloadBytes": 72681,
+      "savedBytes": 236,
+      "relativeReductionPct": 0.3236556632883964,
+      "bestKnownTestedOldPayloadBytes": 72917,
+      "experimentIncludingKnownWrapperBytes": 72681,
+      "improvementOverBestKnownTestedOldPayloadBytes": 236,
+      "mechanicalWholeFileSavingsDecimalKB": 9.079824157714844,
+      "savingsBytesPerRawMiB": 944,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-late--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-late--stride4--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "count160",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 72747,
+      "savedBytes": -40,
+      "relativeReductionPct": -0.055015335524777526,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 72747,
+      "improvementOverBestKnownTestedOldPayloadBytes": -40,
+      "mechanicalWholeFileSavingsDecimalKB": -1.5389532470703124,
+      "savingsBytesPerRawMiB": -160,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--count160--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "lr-main4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 72858,
+      "savedBytes": -151,
+      "relativeReductionPct": -0.2076828916060352,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 72858,
+      "improvementOverBestKnownTestedOldPayloadBytes": -151,
+      "mechanicalWholeFileSavingsDecimalKB": -5.80954850769043,
+      "savingsBytesPerRawMiB": -604,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--lr-main4--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "lr-secondary1",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 73148,
+      "savedBytes": -441,
+      "relativeReductionPct": -0.6065440741606724,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 73148,
+      "improvementOverBestKnownTestedOldPayloadBytes": -441,
+      "mechanicalWholeFileSavingsDecimalKB": -16.966959548950197,
+      "savingsBytesPerRawMiB": -1764,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--lr-secondary1--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "near8",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 72707,
+      "savedBytes": 0,
+      "relativeReductionPct": 0,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 72707,
+      "improvementOverBestKnownTestedOldPayloadBytes": 0,
+      "mechanicalWholeFileSavingsDecimalKB": 0,
+      "savingsBytesPerRawMiB": 0,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--near8--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "no-mht8",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 72639,
+      "savedBytes": 68,
+      "relativeReductionPct": 0.0935260703921218,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 72639,
+      "improvementOverBestKnownTestedOldPayloadBytes": 68,
+      "mechanicalWholeFileSavingsDecimalKB": 2.616220520019531,
+      "savingsBytesPerRawMiB": 272,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--no-mht8--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "order4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 73161,
+      "savedBytes": -454,
+      "relativeReductionPct": -0.6244240582062249,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 73161,
+      "improvementOverBestKnownTestedOldPayloadBytes": -454,
+      "mechanicalWholeFileSavingsDecimalKB": -17.467119354248048,
+      "savingsBytesPerRawMiB": -1816,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--order4--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "osdb-mid",
+      "file": "osdb",
+      "variant": "stride4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 72707,
+      "experimentPayloadBytes": 72423,
+      "savedBytes": 284,
+      "relativeReductionPct": 0.39060888222592044,
+      "bestKnownTestedOldPayloadBytes": 72707,
+      "experimentIncludingKnownWrapperBytes": 72423,
+      "improvementOverBestKnownTestedOldPayloadBytes": 284,
+      "mechanicalWholeFileSavingsDecimalKB": 10.926568054199219,
+      "savingsBytesPerRawMiB": 1136,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/osdb-mid--control--measured.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/osdb-mid--stride4--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "webster-mid",
+      "file": "webster",
+      "variant": "lr-main4",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 56444,
+      "experimentPayloadBytes": 56433,
+      "savedBytes": 11,
+      "relativeReductionPct": 0.019488342427893133,
+      "bestKnownTestedOldPayloadBytes": 56444,
+      "experimentIncludingKnownWrapperBytes": 56433,
+      "improvementOverBestKnownTestedOldPayloadBytes": 11,
+      "mechanicalWholeFileSavingsDecimalKB": 1.7396764106750489,
+      "savingsBytesPerRawMiB": 44,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/webster-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/webster-mid--lr-main4--audit.json"
+    },
+    {
+      "unit": "unit4",
+      "slice": "webster-mid",
+      "file": "webster",
+      "variant": "no-mht8",
+      "control": "control",
+      "rawWindowBytes": 262144,
+      "controlPayloadBytes": 56444,
+      "experimentPayloadBytes": 56557,
+      "savedBytes": -113,
+      "relativeReductionPct": -0.2001984267592658,
+      "bestKnownTestedOldPayloadBytes": 56444,
+      "experimentIncludingKnownWrapperBytes": 56557,
+      "improvementOverBestKnownTestedOldPayloadBytes": -113,
+      "mechanicalWholeFileSavingsDecimalKB": -17.871221309661866,
+      "savingsBytesPerRawMiB": -452,
+      "extrapolationIsMeasured": false,
+      "applicableFullFileGroupCoverage": null,
+      "extrapolationAssumption": "Every raw byte behaves like this fixed cold window with this forced layout and CM table size; eligibility, full model warmup, framing and routing are NOT proved. Do not sum alternate windows/variants.",
+      "controlReceipt": "scripts/diag/p14-results/unit4/webster-mid--control--audit.json",
+      "experimentReceipt": "scripts/diag/p14-results/unit4/webster-mid--no-mht8--audit.json"
+    }
+  ],
+  "ranges": [
+    {
+      "unit": "unit3",
+      "file": "mozilla",
+      "variant": "stride4",
+      "cohort": "mozilla-code",
+      "windows": [
+        {
+          "slice": "mozilla-code",
+          "savedBytes": 1480
+        },
+        {
+          "slice": "mozilla-code-late",
+          "savedBytes": 1948
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 289.178125,
+      "mechanicalWholeFileSavingsKBMax": 380.6209375,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit3",
+      "file": "mozilla",
+      "variant": "stride4",
+      "cohort": "mozilla-resources",
+      "windows": [
+        {
+          "slice": "mozilla-resources",
+          "savedBytes": 3739
+        },
+        {
+          "slice": "mozilla-resources-late",
+          "savedBytes": 4064
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 730.565546875,
+      "mechanicalWholeFileSavingsKBMax": 794.0675,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit3",
+      "file": "mozilla",
+      "variant": "opcode",
+      "cohort": "mozilla-code",
+      "windows": [
+        {
+          "slice": "mozilla-code",
+          "savedBytes": 1500
+        },
+        {
+          "slice": "mozilla-code-late",
+          "savedBytes": 1944
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 293.0859375,
+      "mechanicalWholeFileSavingsKBMax": 379.839375,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit3",
+      "file": "mozilla",
+      "variant": "opcode",
+      "cohort": "mozilla-resources",
+      "windows": [
+        {
+          "slice": "mozilla-resources",
+          "savedBytes": 3604
+        },
+        {
+          "slice": "mozilla-resources-late",
+          "savedBytes": 3799
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 704.1878125,
+      "mechanicalWholeFileSavingsKBMax": 742.288984375,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit4",
+      "file": "osdb",
+      "variant": "stride4",
+      "cohort": "osdb-",
+      "windows": [
+        {
+          "slice": "osdb-late",
+          "savedBytes": 236
+        },
+        {
+          "slice": "osdb-mid",
+          "savedBytes": 284
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 9.079824157714844,
+      "mechanicalWholeFileSavingsKBMax": 10.926568054199219,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit2",
+      "file": "mr",
+      "variant": "geom",
+      "cohort": "mr-",
+      "windows": [
+        {
+          "slice": "mr-late",
+          "savedBytes": 371
+        },
+        {
+          "slice": "mr-mid",
+          "savedBytes": 464
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 14.110867477416992,
+      "mechanicalWholeFileSavingsKBMax": 17.648093017578127,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit2",
+      "file": "x-ray",
+      "variant": "geom",
+      "cohort": "x-ray-",
+      "windows": [
+        {
+          "slice": "x-ray-late",
+          "savedBytes": 4
+        },
+        {
+          "slice": "x-ray-mid",
+          "savedBytes": 7
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 0.129306640625,
+      "mechanicalWholeFileSavingsKBMax": 0.22628662109375,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit1",
+      "file": "xml",
+      "variant": "wp-token3",
+      "cohort": "xml-",
+      "windows": [
+        {
+          "slice": "xml-mid",
+          "savedBytes": 145
+        },
+        {
+          "slice": "xml-stats",
+          "savedBytes": 121
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 2.467265625,
+      "mechanicalWholeFileSavingsKBMax": 2.956640625,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit1",
+      "file": "xml",
+      "variant": "wp-merge",
+      "cohort": "xml-",
+      "windows": [
+        {
+          "slice": "xml-mid",
+          "savedBytes": 166
+        },
+        {
+          "slice": "xml-stats",
+          "savedBytes": 46
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 0.93796875,
+      "mechanicalWholeFileSavingsKBMax": 3.38484375,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    },
+    {
+      "unit": "unit1",
+      "file": "nci",
+      "variant": "wp-merge",
+      "cohort": "nci-",
+      "windows": [
+        {
+          "slice": "nci-late",
+          "savedBytes": 33
+        },
+        {
+          "slice": "nci-mid",
+          "savedBytes": 49
+        }
+      ],
+      "mechanicalWholeFileSavingsKBMin": 4.2238757514953615,
+      "mechanicalWholeFileSavingsKBMax": 6.271815509796142,
+      "fullFileEstimateVerified": false,
+      "cohortCoverageBytes": null
+    }
+  ],
+  "benchmarkLimitations": [
+    "fixed windows, not population samples",
+    "forced layouts and slice-local dictionaries",
+    "CM21 cold tables vs full CM22/23/24 and long-distance matches",
+    "parallel process timings are not comparable throughput",
+    "no actual user final-group directory supplied",
+    "new model payloads require a distinct wire semantic marker"
+  ],
+  "fullFileGainClaimed": false,
+  "productionCompressionLogicChanged": false,
+  "baselineUpdatedByAudit": false
+}

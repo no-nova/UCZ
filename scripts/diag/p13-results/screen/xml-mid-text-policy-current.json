@@ -1,0 +1,178 @@
+{
+  "phase": "screen",
+  "slice": "xml-mid",
+  "case": "text-policy",
+  "commit": "b244373423399ac766f9a0143acc53f5aa96e52d",
+  "workingSource": true,
+  "sourceSha256": "93adda103f9927a566e35c8deed6e4bcec1468dc13c659dd3f3337fe120ba140",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "8181a7c617b01908cc52b92c31a650806472303f2570050b744e739ca30c0f74",
+    "codec.ts": "7774e432419fb3b084392ef71ba6cc5eda52c46d49ec566958f2e36813e615ce",
+    "coder.ts": "bb775399134ccdbae66625c212affe958d9e7c7d41ed25478530b398fb96e05d",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "group-policy.ts": "ca00fa36ca991dcaaaef4c4fbc8bbe7a4fb4edb91d0c6371a60edbb5e511e8c3",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "48b032f2e78de72b9e45becdf09fed9338a8821d683cbcfd2806c45ca476b2c2",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "e34b9015548e0663967094c9601ebb9284daebad0b54d2b4afb583d3d7cf804a",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "e7cc7337264903e034bb2b9da542780f5c51815934c0dc1f0945d2cf67de989c",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "b58046ed1889a509a4ccd5f9c0fbac0fd7fa4310b1df19ead1532a3af6ff491d",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "probeSha256": "969da780e7a3e137993bafec7bab3e921b44fa82489167fc2457b04a60a8984d",
+  "runnerSha256": "c8edb2f2f846a16b4af67adf529a9009d9951f9fba1329ab8345af08d7979bf4",
+  "bundleSha256": "4f8dfe92a1bbbc71270aac1ed4af42673c67014c53612af6bb94cdd2ffdfc834",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p13/run.mjs",
+    "screen",
+    "xml-mid",
+    "text-policy"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 11707,
+  "status": "PASS",
+  "stdout": "{\"input\":{\"name\":\"xml-mid\",\"file\":\"xml\",\"offset\":2672640,\"bytes\":262144,\"sha256\":\"8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4\",\"corpusBytes\":5345280,\"corpusSha256\":\"0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c\",\"source\":{\"repo\":\"yewq/Silesia-compression-corpus\",\"blob\":\"0d5f183f3943f34472b692b5300d196fed0f0dd2\",\"bytes\":5345280,\"sha256\":\"0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c\"},\"path\":\".diag-data/p12-slices/xml-mid.bin\",\"selection\":\"fixed contiguous mid-file window\"},\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"positions\":[0],\"scope\":\"fixed-window forced group, reset origin 0; complete UCZ roundtrip, not full-file adaptive routing\",\"bytes\":4708,\"headerBytes\":21,\"version\":20,\"flags\":4096,\"selected\":\"wordpre-v20\",\"containerSha256\":\"e8f6e5f57d916b08205cb285ce934a498f2f4c4a2f0098145c1c19c51151eb77\",\"roundtrip\":true,\"containerRoundtrip\":true,\"candidates\":[{\"label\":\"wordpre-v20\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":4708,\"flags\":4096},{\"label\":\"v20\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":5871,\"flags\":4096},{\"label\":\"base\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":7080,\"flags\":0}],\"screening\":[{\"kind\":\"raw\",\"sampleBytes\":196608,\"trials\":[{\"kernel\":\"v15\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":4963},{\"kernel\":\"v20\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":4815}],\"selected\":[1],\"fullBytes\":262144},{\"kind\":\"wordpre\",\"sampleBytes\":196608,\"trials\":[{\"kernel\":\"v15\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":4105},{\"kernel\":\"v20\",\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"bytes\":4003}],\"selected\":[1],\"fullBytes\":262144}],\"encodeMs\":9728,\"decodeMs\":1770}\n",
+  "stderr": "",
+  "result": {
+    "input": {
+      "name": "xml-mid",
+      "file": "xml",
+      "offset": 2672640,
+      "bytes": 262144,
+      "sha256": "8dd4374089102a6cd6c61beb469ace5d884deeef2e9399f50d9ca722ea3008b4",
+      "corpusBytes": 5345280,
+      "corpusSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "0d5f183f3943f34472b692b5300d196fed0f0dd2",
+        "bytes": 5345280,
+        "sha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c"
+      },
+      "path": ".diag-data/p12-slices/xml-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    "spec": {
+      "id": 23,
+      "s": 1,
+      "r": 1
+    },
+    "positions": [
+      0
+    ],
+    "scope": "fixed-window forced group, reset origin 0; complete UCZ roundtrip, not full-file adaptive routing",
+    "bytes": 4708,
+    "headerBytes": 21,
+    "version": 20,
+    "flags": 4096,
+    "selected": "wordpre-v20",
+    "containerSha256": "e8f6e5f57d916b08205cb285ce934a498f2f4c4a2f0098145c1c19c51151eb77",
+    "roundtrip": true,
+    "containerRoundtrip": true,
+    "candidates": [
+      {
+        "label": "wordpre-v20",
+        "spec": {
+          "id": 23,
+          "s": 1,
+          "r": 1
+        },
+        "bytes": 4708,
+        "flags": 4096
+      },
+      {
+        "label": "v20",
+        "spec": {
+          "id": 23,
+          "s": 1,
+          "r": 1
+        },
+        "bytes": 5871,
+        "flags": 4096
+      },
+      {
+        "label": "base",
+        "spec": {
+          "id": 23,
+          "s": 1,
+          "r": 1
+        },
+        "bytes": 7080,
+        "flags": 0
+      }
+    ],
+    "screening": [
+      {
+        "kind": "raw",
+        "sampleBytes": 196608,
+        "trials": [
+          {
+            "kernel": "v15",
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "bytes": 4963
+          },
+          {
+            "kernel": "v20",
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "bytes": 4815
+          }
+        ],
+        "selected": [
+          1
+        ],
+        "fullBytes": 262144
+      },
+      {
+        "kind": "wordpre",
+        "sampleBytes": 196608,
+        "trials": [
+          {
+            "kernel": "v15",
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "bytes": 4105
+          },
+          {
+            "kernel": "v20",
+            "spec": {
+              "id": 23,
+              "s": 1,
+              "r": 1
+            },
+            "bytes": 4003
+          }
+        ],
+        "selected": [
+          1
+        ],
+        "fullBytes": 262144
+      }
+    ],
+    "encodeMs": 9728,
+    "decodeMs": 1770
+  }
+}

@@ -1,0 +1,329 @@
+{
+  "commit": "51ced1f2826ec84c088c46302a8271b9d5fc64ae",
+  "file": "xml",
+  "scope": "main",
+  "node": "v22.22.3",
+  "probeSha256": "04b3f01fe4e5cd5331bec3b5c3d272dc118f42882e5d0d791c40ffeb90b0821b",
+  "runnerSha256": "5c2131e6084575ed479b048d46a52281377cca39e40945f055b3da437c31702d",
+  "bundleSha256": "136f6f38686f7d7c178cf4bc5cc37229b25fc43a70dc009b07ce1b7528497e1e",
+  "status": "PASS",
+  "durationMs": 5725,
+  "stdout": "{\"file\":\"xml\",\"scope\":\"main\",\"inputBytes\":5345280,\"inputSha256\":\"0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c\",\"selection\":\"all analyze() text segments, proposed TEXT_V3 group; not a replay of final adaptive assignments\",\"analysisSegments\":[{\"start\":0,\"end\":162816,\"cls\":\"text\"},{\"start\":162816,\"end\":163840,\"cls\":\"repeat\"},{\"start\":163840,\"end\":416256,\"cls\":\"text\"},{\"start\":416256,\"end\":417280,\"cls\":\"repeat\"},{\"start\":417280,\"end\":596480,\"cls\":\"text\"},{\"start\":596480,\"end\":597504,\"cls\":\"repeat\"},{\"start\":597504,\"end\":986624,\"cls\":\"text\"},{\"start\":986624,\"end\":987648,\"cls\":\"repeat\"},{\"start\":987648,\"end\":1267200,\"cls\":\"text\"},{\"start\":1267200,\"end\":1268224,\"cls\":\"repeat\"},{\"start\":1268224,\"end\":1278464,\"cls\":\"text\"},{\"start\":1278464,\"end\":1279488,\"cls\":\"repeat\"},{\"start\":1279488,\"end\":1948672,\"cls\":\"text\"},{\"start\":1948672,\"end\":1949696,\"cls\":\"repeat\"},{\"start\":1949696,\"end\":2565632,\"cls\":\"text\"},{\"start\":2565632,\"end\":2566656,\"cls\":\"repeat\"},{\"start\":2566656,\"end\":3300864,\"cls\":\"text\"},{\"start\":3300864,\"end\":3301888,\"cls\":\"repeat\"},{\"start\":3301888,\"end\":3811840,\"cls\":\"text\"},{\"start\":3811840,\"end\":3812864,\"cls\":\"repeat\"},{\"start\":3812864,\"end\":4064256,\"cls\":\"text\"},{\"start\":4064256,\"end\":4065280,\"cls\":\"repeat\"},{\"start\":4065280,\"end\":4353024,\"cls\":\"text\"},{\"start\":4353024,\"end\":4354048,\"cls\":\"repeat\"},{\"start\":4354048,\"end\":4360192,\"cls\":\"text\"},{\"start\":4360192,\"end\":4361216,\"cls\":\"repeat\"},{\"start\":4361216,\"end\":4581888,\"cls\":\"text\"},{\"start\":4581888,\"end\":4582912,\"cls\":\"repeat\"},{\"start\":4582912,\"end\":4779008,\"cls\":\"text\"},{\"start\":4779008,\"end\":4780032,\"cls\":\"repeat\"},{\"start\":4780032,\"end\":4981760,\"cls\":\"text\"},{\"start\":4981760,\"end\":4982784,\"cls\":\"repeat\"},{\"start\":4982784,\"end\":5087744,\"cls\":\"text\"},{\"start\":5087744,\"end\":5088768,\"cls\":\"repeat\"},{\"start\":5088768,\"end\":5336064,\"cls\":\"text\"},{\"start\":5336064,\"end\":5337088,\"cls\":\"repeat\"},{\"start\":5337088,\"end\":5339332,\"cls\":\"text\"},{\"start\":5339332,\"end\":5345280,\"cls\":\"fill\"}],\"positions\":[0,163840,417280,597504,987648,1268224,1279488,1949696,2566656,3301888,3812864,4065280,4354048,4361216,4582912,4780032,4982784,5088768,5337088],\"lengths\":[162816,252416,179200,389120,279552,10240,669184,615936,734208,509952,251392,287744,6144,220672,196096,201728,104960,247296,2244],\"rawBytes\":5320900,\"rawSha256\":\"e21e718950fc5ea01f81e0c86854a37e7ceda16eff70c3136d71403472cb7f37\",\"bodyBytes\":3990596,\"bodySha256\":\"1112a3595125d4a357107c591ced2d9b503c26c02dddfbe4791e79838ca68a74\",\"dictionaryBytes\":554,\"headerSha256\":\"6dbbaeb08e0b4a38100e17b49f7a2fb87dbe85bbea5bddba1a16ba8734d232b2\",\"dict\":[\"><Cvar><string val\",\"    <\",\"><list></list></\",\"></\",\"</GAMES><GAMES_STARTED>\",\"</LINE>\",\"</SURNAME><GIVEN_NAME>\",\"><string val\",\"SACRIFICE_\",\"_BATTER>\",\"<LINE>\",\"STRUCK_OUT\",\"></C\",\"/><none></none><\",\"><list></list><int val\",\"S><\",\"ES>\",\"GAMES_STARTED>\",\"><C\",\"><int val\",\"></list><\",\"GIVEN_NAME>\",\"><list><\",\"><list></list><\",\"GAMES\",\"></list></\",\"      \",\"NAME>\",\"          \",\"string val\",\"><none></none></\",\"list><\",\"string\",\"ing \",\"</C\",\"LIN\",\" val\",\"        \",\"r><string val\",\"none></none></\",\"t></\",\"Cvar><string val\",\"t><\",\"ist\",\"ring \",\"></li\",\"list\",\"list>\",\"     \",\"   \",\"string \",\"st>\",\"         \",\"       \",\"list></list><\",\"none></none><\",\"   <\",\"tring \"],\"collapse\":0.7499851528876694,\"analysisMs\":1034,\"prepareMs\":4570,\"totalMs\":5636,\"sourceFiles\":{\"analyze.ts\":\"7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9\",\"wordpre.ts\":\"4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b\"},\"cmCalls\":0}\n",
+  "stderr": "",
+  "result": {
+    "file": "xml",
+    "scope": "main",
+    "inputBytes": 5345280,
+    "inputSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+    "selection": "all analyze() text segments, proposed TEXT_V3 group; not a replay of final adaptive assignments",
+    "analysisSegments": [
+      {
+        "start": 0,
+        "end": 162816,
+        "cls": "text"
+      },
+      {
+        "start": 162816,
+        "end": 163840,
+        "cls": "repeat"
+      },
+      {
+        "start": 163840,
+        "end": 416256,
+        "cls": "text"
+      },
+      {
+        "start": 416256,
+        "end": 417280,
+        "cls": "repeat"
+      },
+      {
+        "start": 417280,
+        "end": 596480,
+        "cls": "text"
+      },
+      {
+        "start": 596480,
+        "end": 597504,
+        "cls": "repeat"
+      },
+      {
+        "start": 597504,
+        "end": 986624,
+        "cls": "text"
+      },
+      {
+        "start": 986624,
+        "end": 987648,
+        "cls": "repeat"
+      },
+      {
+        "start": 987648,
+        "end": 1267200,
+        "cls": "text"
+      },
+      {
+        "start": 1267200,
+        "end": 1268224,
+        "cls": "repeat"
+      },
+      {
+        "start": 1268224,
+        "end": 1278464,
+        "cls": "text"
+      },
+      {
+        "start": 1278464,
+        "end": 1279488,
+        "cls": "repeat"
+      },
+      {
+        "start": 1279488,
+        "end": 1948672,
+        "cls": "text"
+      },
+      {
+        "start": 1948672,
+        "end": 1949696,
+        "cls": "repeat"
+      },
+      {
+        "start": 1949696,
+        "end": 2565632,
+        "cls": "text"
+      },
+      {
+        "start": 2565632,
+        "end": 2566656,
+        "cls": "repeat"
+      },
+      {
+        "start": 2566656,
+        "end": 3300864,
+        "cls": "text"
+      },
+      {
+        "start": 3300864,
+        "end": 3301888,
+        "cls": "repeat"
+      },
+      {
+        "start": 3301888,
+        "end": 3811840,
+        "cls": "text"
+      },
+      {
+        "start": 3811840,
+        "end": 3812864,
+        "cls": "repeat"
+      },
+      {
+        "start": 3812864,
+        "end": 4064256,
+        "cls": "text"
+      },
+      {
+        "start": 4064256,
+        "end": 4065280,
+        "cls": "repeat"
+      },
+      {
+        "start": 4065280,
+        "end": 4353024,
+        "cls": "text"
+      },
+      {
+        "start": 4353024,
+        "end": 4354048,
+        "cls": "repeat"
+      },
+      {
+        "start": 4354048,
+        "end": 4360192,
+        "cls": "text"
+      },
+      {
+        "start": 4360192,
+        "end": 4361216,
+        "cls": "repeat"
+      },
+      {
+        "start": 4361216,
+        "end": 4581888,
+        "cls": "text"
+      },
+      {
+        "start": 4581888,
+        "end": 4582912,
+        "cls": "repeat"
+      },
+      {
+        "start": 4582912,
+        "end": 4779008,
+        "cls": "text"
+      },
+      {
+        "start": 4779008,
+        "end": 4780032,
+        "cls": "repeat"
+      },
+      {
+        "start": 4780032,
+        "end": 4981760,
+        "cls": "text"
+      },
+      {
+        "start": 4981760,
+        "end": 4982784,
+        "cls": "repeat"
+      },
+      {
+        "start": 4982784,
+        "end": 5087744,
+        "cls": "text"
+      },
+      {
+        "start": 5087744,
+        "end": 5088768,
+        "cls": "repeat"
+      },
+      {
+        "start": 5088768,
+        "end": 5336064,
+        "cls": "text"
+      },
+      {
+        "start": 5336064,
+        "end": 5337088,
+        "cls": "repeat"
+      },
+      {
+        "start": 5337088,
+        "end": 5339332,
+        "cls": "text"
+      },
+      {
+        "start": 5339332,
+        "end": 5345280,
+        "cls": "fill"
+      }
+    ],
+    "positions": [
+      0,
+      163840,
+      417280,
+      597504,
+      987648,
+      1268224,
+      1279488,
+      1949696,
+      2566656,
+      3301888,
+      3812864,
+      4065280,
+      4354048,
+      4361216,
+      4582912,
+      4780032,
+      4982784,
+      5088768,
+      5337088
+    ],
+    "lengths": [
+      162816,
+      252416,
+      179200,
+      389120,
+      279552,
+      10240,
+      669184,
+      615936,
+      734208,
+      509952,
+      251392,
+      287744,
+      6144,
+      220672,
+      196096,
+      201728,
+      104960,
+      247296,
+      2244
+    ],
+    "rawBytes": 5320900,
+    "rawSha256": "e21e718950fc5ea01f81e0c86854a37e7ceda16eff70c3136d71403472cb7f37",
+    "bodyBytes": 3990596,
+    "bodySha256": "1112a3595125d4a357107c591ced2d9b503c26c02dddfbe4791e79838ca68a74",
+    "dictionaryBytes": 554,
+    "headerSha256": "6dbbaeb08e0b4a38100e17b49f7a2fb87dbe85bbea5bddba1a16ba8734d232b2",
+    "dict": [
+      "><Cvar><string val",
+      "    <",
+      "><list></list></",
+      "></",
+      "</GAMES><GAMES_STARTED>",
+      "</LINE>",
+      "</SURNAME><GIVEN_NAME>",
+      "><string val",
+      "SACRIFICE_",
+      "_BATTER>",
+      "<LINE>",
+      "STRUCK_OUT",
+      "></C",
+      "/><none></none><",
+      "><list></list><int val",
+      "S><",
+      "ES>",
+      "GAMES_STARTED>",
+      "><C",
+      "><int val",
+      "></list><",
+      "GIVEN_NAME>",
+      "><list><",
+      "><list></list><",
+      "GAMES",
+      "></list></",
+      "      ",
+      "NAME>",
+      "          ",
+      "string val",
+      "><none></none></",
+      "list><",
+      "string",
+      "ing ",
+      "</C",
+      "LIN",
+      " val",
+      "        ",
+      "r><string val",
+      "none></none></",
+      "t></",
+      "Cvar><string val",
+      "t><",
+      "ist",
+      "ring ",
+      "></li",
+      "list",
+      "list>",
+      "     ",
+      "   ",
+      "string ",
+      "st>",
+      "         ",
+      "       ",
+      "list></list><",
+      "none></none><",
+      "   <",
+      "tring "
+    ],
+    "collapse": 0.7499851528876694,
+    "analysisMs": 1034,
+    "prepareMs": 4570,
+    "totalMs": 5636,
+    "sourceFiles": {
+      "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+    },
+    "cmCalls": 0
+  }
+}

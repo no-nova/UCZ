@@ -1,0 +1,38 @@
+{
+  "samples": [
+    {
+      "name": "sao-mid-128",
+      "file": "sao",
+      "offset": 3625972,
+      "bytes": 131072,
+      "sha256": "0b4527a94b0a39de9f57b1f88b85d47d25c407ae7334989dd776f712d898325d",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "path": null,
+      "selection": "fixed first 128 KiB of sao-mid-256, reduced before measuring because the 256 KiB TG28 control hit the 17.5 s deadline; same window for all compared recipes"
+    },
+    {
+      "name": "sao-mid-64",
+      "file": "sao",
+      "offset": 3625972,
+      "bytes": 65536,
+      "sha256": "e33504866bc4cf7c5452309c994b57e490ff241f63c0abd5358342b4e481bc7a",
+      "corpusBytes": 7251944,
+      "corpusSha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "e33e161c7873ba0de633c0ac0f30772b446c1e32",
+        "bytes": 7251944,
+        "sha256": "c2d0ea2cc59d4c21b7fe43a71499342a00cbe530a1d5548770e91ecd6214adcc"
+      },
+      "path": null,
+      "selection": "fixed first 64 KiB of sao-mid-256; both 256 and 128 KiB TG28 controls hit 17.5 s because both use the same 64 KiB column-planning sample; this input uses the unchanged production 16 KiB planning threshold"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "kind": "metadata-only-parser-check",
+  "compressionExecuted": false,
+  "checks": [
+    {
+      "reference": "tests/p111-references.json",
+      "source": "p10",
+      "name": "adaptive-prose",
+      "version": 7,
+      "groups": 1,
+      "headerBytes": 17,
+      "containerBytes": 156,
+      "status": "PASS"
+    },
+    {
+      "reference": "tests/p111-references.json",
+      "source": "p10",
+      "name": "adaptive-periodic",
+      "version": 13,
+      "groups": 1,
+      "headerBytes": 18,
+      "containerBytes": 182,
+      "status": "PASS"
+    },
+    {
+      "reference": "tests/p111-references.json",
+      "source": "p10",
+      "name": "adaptive-mixed",
+      "version": 7,
+      "groups": 3,
+      "headerBytes": 33,
+      "containerBytes": 16547,
+      "status": "PASS"
+    },
+    {
+      "reference": "tests/p111-references.json",
+      "source": "p10",
+      "name": "guarded-orphans",
+      "version": 13,
+      "groups": 1,
+      "headerBytes": 25,
+      "containerBytes": 249,
+      "status": "PASS"
+    },
+    {
+      "reference": "tests/p111-references.json",
+      "source": "p10",
+      "name": "guarded-many-rules",
+      "version": 13,
+      "groups": 1,
+      "headerBytes": 86,
+      "containerBytes": 420,
+      "status": "PASS"
+    },
+    {
+      "reference": "tests/p111-wordpre-reference.json",
+      "source": "p10",
+      "name": "guarded-wordpre",
+      "version": 13,
+      "groups": 1,
+      "headerBytes": 16,
+      "containerBytes": 111,
+      "status": "PASS"
+    }
+  ],
+  "virtualV19": {
+    "flags": 1792,
+    "r": 8192,
+    "v15": true,
+    "entropyPayloadValidNotTested": true,
+    "status": "PASS"
+  }
+}

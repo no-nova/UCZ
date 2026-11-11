@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "scope": "receipt schema, source/archive hashes and stated bounds; does not rerun experiments or independently validate compression",
+  "receipts": 87,
+  "counts": {
+    "unit1": {
+      "PASS": 27,
+      "FAIL": 1
+    },
+    "unit2": {
+      "PASS": 21,
+      "FAIL": 1
+    },
+    "unit3": {
+      "PASS": 22,
+      "FAIL": 0
+    },
+    "unit4": {
+      "PASS": 15,
+      "FAIL": 0
+    }
+  },
+  "failures": [
+    {
+      "unit": "unit1",
+      "file": "synthetic-random--dual-boundary--1024-0--edge.json",
+      "timedOut": false,
+      "error": null
+    },
+    {
+      "unit": "unit2",
+      "file": "x-ray-mid--adaptive--262144-0--full-window.json",
+      "timedOut": true,
+      "error": "spawnSync /usr/local/bin/node ETIMEDOUT"
+    }
+  ],
+  "archives": 48,
+  "productionFingerprint": "539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65",
+  "baselineBytes": 40075423
+}

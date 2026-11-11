@@ -1,0 +1,56 @@
+{
+  "kind": "user-reported-partial-full-file-run",
+  "provenance": "Transcribed from the user's supplied log, not remeasured in Arena; raw result JSON and final Mozilla group directory were not supplied.",
+  "sourceCommit": null,
+  "sourceSha256": null,
+  "reportedEnvironment": {
+    "os": "Arch Linux",
+    "node": "v26.13.0",
+    "command": "xargs -P 2 invoking /tmp/run-one-silesia.sh",
+    "resultDirectory": "/tmp/p4",
+    "wrapperContentsKnown": false
+  },
+  "acceptance": "INCOMPLETE: 11 reported verified rows; Mozilla failed; no new locked baseline",
+  "baseline": {
+    "kind": "locked user-local P11.1",
+    "commit": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+    "fullFileCount": 12,
+    "totalBytes": 41814147
+  },
+  "rows": [
+    { "file": "xml", "reportedBytes": 339516, "lockedBestUcz": 349873, "deltaBytes": -10357, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "dickens", "reportedBytes": 2214517, "lockedBestUcz": 2248669, "deltaBytes": -34152, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "ooffice", "reportedBytes": 1955064, "lockedBestUcz": 1973904, "deltaBytes": -18840, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "mr", "reportedBytes": 1798884, "lockedBestUcz": 2039355, "deltaBytes": -240471, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "osdb", "reportedBytes": 2277558, "lockedBestUcz": 2318027, "deltaBytes": -40469, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "x-ray", "reportedBytes": 3548450, "lockedBestUcz": 3662990, "deltaBytes": -114540, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "sao", "reportedBytes": 3132317, "lockedBestUcz": 3747789, "deltaBytes": -615472, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "reymont", "reportedBytes": 1064930, "lockedBestUcz": 1092321, "deltaBytes": -27391, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "nci", "reportedBytes": 1217746, "lockedBestUcz": 1309875, "deltaBytes": -92129, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "samba", "reportedBytes": 3349194, "lockedBestUcz": 3407921, "deltaBytes": -58727, "reportedVerified": true, "reportedVersion": 20 },
+    { "file": "webster", "reportedBytes": 6276863, "lockedBestUcz": 6405652, "deltaBytes": -128789, "reportedVerified": true, "reportedVersion": 20 }
+  ],
+  "sameElevenFileSubset": {
+    "reportedBytes": 27175039,
+    "lockedBestUczBytes": 28556376,
+    "deltaBytes": -1381337,
+    "deltaPercent": -4.837227945170634,
+    "isFullTwelveFileTotal": false
+  },
+  "mozilla": {
+    "status": "FAILED",
+    "reportedBytes": null,
+    "lockedBestUcz": 13257771,
+    "error": "自动转置产生重复的方案规则",
+    "stackFunctions": [ "planHeader", "encodePreparedPlan", "finishPreparedPlan", "encodeGuardedPlans", "compressAdaptiveImpl", "compressAdaptive" ],
+    "actualCollidingRulesKnown": false
+  },
+  "historicalV14ComparisonInUserLog": {
+    "sameElevenFileBytes": 30511646,
+    "reportedPercentChange": -10.94,
+    "notP111": true,
+    "reportedSummedEncodingSeconds": 1581,
+    "historicalSummedEncodingSeconds": 1244,
+    "timingComparableToP111SixteenCoreRun": false
+  }
+}

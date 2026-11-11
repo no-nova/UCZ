@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict'
+import { encodeCM as stockEncode, decodeCM as stockDecode, withCMBlockSize as stockScope } from '@stock/coder'
+import { compressAdaptive, decompress } from '@stock/codec'
+import { encodeCM, decodeCM, withCMBlockSize, p15 } from '@lib/coder'
+import { load, eq, sha, ms, done } from './common'
+const [name,variant,b='65536',o='0']=process.argv.slice(2),{data,input}=load(name,Number(b),Number(o))
+let digits=0,letters=0,colons=0,newlines=0
+for(const x of data){if(x>=48&&x<=57)digits++;const low=x|32;if(low>=97&&low<=122)letters++;if(x===58)colons++;if(x===10)newlines++}
+const structure={digits,letters,colons,newlines,digitFraction:digits/data.length}
+async function main(){
+ if(variant==='adaptive'){
+  const t=performance.now(),result=await compressAdaptive(data,undefined,{serial:true}),encodeMs=ms(performance.now()-t),dt=performance.now(),out=decompress(result.container);eq(out,data)
+  done({unit:3,input,variant,structure,containerBytes:result.container.length,containerSha256:sha(result.container),version:result.container[3],encodeMs,decodeMs:ms(performance.now()-dt),roundtrip:true,contexts:result.contextComparison,segs:result.segs.map(s=>({start:s.start,end:s.end,cls:s.cls,spec:s.spec,compLen:s.compLen,wordPre:s.wordPre,trials:s.trials})),scope:'unmodified production adaptive control; NOT experimental text H8'});return
+ }
+ const [profile,candidate]=variant.split('-')
+ assert.ok(profile==='text'||profile==='bin');assert.ok(['control','numfield','numclass','puncword','sparse5'].includes(candidate))
+ const rows:any[]=[]
+ const t=performance.now(),base=stockScope(data.length,()=>stockEncode(data,profile,1,1,undefined,0,undefined,undefined,'v20')),encodeMs=ms(performance.now()-t),dt=performance.now();eq(stockScope(data.length,()=>stockDecode(base,data.length,profile,1,1,undefined,'v20')),data)
+ rows.push({mode:'production-v20-control',payloadBytes:base.length,payloadSha256:sha(base),encodeMs,decodeMs:ms(performance.now()-dt),roundtrip:true})
+ if(profile==='bin'){
+  const t=performance.now(),p=stockScope(data.length,()=>stockEncode(data,'bin',1,1,undefined,0,undefined,undefined,'v20',0,false,{context:'bin-stride4'})),encodeMs=ms(performance.now()-t),dt=performance.now();eq(stockScope(data.length,()=>stockDecode(p,data.length,'bin',1,1,undefined,'v20',0,false,{context:'bin-stride4'})),data)
+  rows.push({mode:'production-p141-stride4',payloadBytes:p.length,payloadSha256:sha(p),encodeMs,decodeMs:ms(performance.now()-dt),roundtrip:true})
+ }
+ p15.textContext=candidate
+ const then=performance.now(),alt=withCMBlockSize(data.length,()=>encodeCM(data,profile,1,1,undefined,0,undefined,undefined,'v20')),altMs=ms(performance.now()-then),d=performance.now(),restored=withCMBlockSize(data.length,()=>decodeCM(alt,data.length,profile,1,1,undefined,'v20'));eq(restored,data)
+ if(candidate==='control')eq(alt,base)
+ const bestControl=Math.min(...rows.map(r=>r.payloadBytes));rows.push({mode:candidate,payloadBytes:alt.length,payloadSha256:sha(alt),encodeMs:altMs,decodeMs:ms(performance.now()-d),roundtrip:true})
+ done({unit:3,input,variant,profile,wordPre:false,structure,rows,savedVsV20Bytes:base.length-alt.length,savedVsBestP141ControlBytes:bestControl-alt.length,letterWordHashUnchanged:true,experimentalHeaderBytesNotIncluded:true,decodedSha256:sha(restored),roundtrip:true,scope:'raw fixed-profile CM, H8-only experimental context; no dictionary and no adaptive adoption; new wire flag still required'})
+}
+main().catch(e=>{console.error(e);process.exitCode=1})

@@ -1,0 +1,73 @@
+
+> react-vite-tailwind@0.0.0 pretest:codec
+> node scripts/build-worker-code.mjs --check
+
+parallel-worker-code.ts 是最新的
+
+> react-vite-tailwind@0.0.0 test:codec
+> node tests/run.mjs && node tests/worker.mjs && node --test tests/p10-baseline.test.mjs
+
+P9 format tests passed (72 checks; frozen P7, v17 flags, scope, worker)
+P9 macro tests passed (14 checks; exact containers, header trap, fallback, metadata, full/partial probe reuse)
+P9 defaults tests passed (14 checks; selected flags, selective a2, exact costs/orphans, direct macro, worker metadata)
+P10 tests passed (12 checks; <=48 KiB inputs, virtual boundaries, actual scoped allocation, pure kernels, real worker batching/fallback)
+codec tests passed
+worker test passed
+TAP version 13
+# Subtest: exact 12-file floor passes and sums to 42368023
+ok 1 - exact 12-file floor passes and sums to 42368023
+  ---
+  duration_ms: 54.945514
+  type: 'test'
+  ...
+# Subtest: one byte regression fails even with permissive v14 tolerance
+ok 2 - one byte regression fails even with permissive v14 tolerance
+  ---
+  duration_ms: 59.055597
+  type: 'test'
+  ...
+# Subtest: a gain elsewhere cannot hide one file regressing
+ok 3 - a gain elsewhere cannot hide one file regressing
+  ---
+  duration_ms: 50.316988
+  type: 'test'
+  ...
+# Subtest: reported ratio cannot hide byte regression
+ok 4 - reported ratio cannot hide byte regression
+  ---
+  duration_ms: 46.474043
+  type: 'test'
+  ...
+# Subtest: verified, size and SHA checks remain mandatory
+ok 5 - verified, size and SHA checks remain mandatory
+  ---
+  duration_ms: 138.021493
+  type: 'test'
+  ...
+# Subtest: missing or duplicate standard rows fail full acceptance
+ok 6 - missing or duplicate standard rows fail full acceptance
+  ---
+  duration_ms: 106.286425
+  type: 'test'
+  ...
+# Subtest: invalid byte counts do not pass a hard floor
+ok 7 - invalid byte counts do not pass a hard floor
+  ---
+  duration_ms: 178.555875
+  type: 'test'
+  ...
+# Subtest: invalid tolerance fails instead of masking checks
+ok 8 - invalid tolerance fails instead of masking checks
+  ---
+  duration_ms: 36.06027
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 733.223485

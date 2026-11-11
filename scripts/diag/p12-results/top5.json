@@ -1,0 +1,471 @@
+{
+  "kind": "P12-conditional-arithmetic-not-benchmark",
+  "kbDefinition": "1000 bytes",
+  "warning": "No whole-file net gain measured. Min/max are observed cold-window rates applied to named byte coverage under identical-distribution assumptions, NOT confidence intervals or guaranteed upper bounds. Especially TG3 may already be selected. Never sum candidates: overlapping inputs/interactions. Macro/format/header and warm large models are not reproduced.",
+  "items": [
+    {
+      "rank": 1,
+      "key": "med16",
+      "title": "True 16-bit MED",
+      "measuredSavedBytesSum": 12346,
+      "measuredSavedKB": 12.346,
+      "measuredCostScope": "group CM payload; new UCZ transform/version not priced",
+      "areas": [
+        {
+          "scope": "mr",
+          "bytes": 9970564,
+          "cases": [
+            {
+              "agent": "agent2",
+              "name": "mr-mid",
+              "referenceVariants": [
+                "d16",
+                "byte-med",
+                "grad-v3"
+              ],
+              "candidate": "med16",
+              "inputBytes": 262144,
+              "referenceBytes": 55830,
+              "candidateBytes": 52177,
+              "savedBytes": 3653,
+              "metric": "bytes"
+            },
+            {
+              "agent": "agent2",
+              "name": "mr-late",
+              "referenceVariants": [
+                "d16",
+                "byte-med",
+                "grad-v3"
+              ],
+              "candidate": "med16",
+              "inputBytes": 262144,
+              "referenceBytes": 62997,
+              "candidateBytes": 58261,
+              "savedBytes": 4736,
+              "metric": "bytes"
+            }
+          ],
+          "assumedSavedBytesMin": 138940.6978302002,
+          "assumedSavedBytesMax": 180132.259765625,
+          "assumedSavedBytesMean": 159536.4787979126
+        },
+        {
+          "scope": "x-ray",
+          "bytes": 8474240,
+          "cases": [
+            {
+              "agent": "agent2",
+              "name": "x-ray-mid",
+              "referenceVariants": [
+                "d16",
+                "byte-med",
+                "grad-v3"
+              ],
+              "candidate": "med16",
+              "inputBytes": 262144,
+              "referenceBytes": 119784,
+              "candidateBytes": 117359,
+              "savedBytes": 2425,
+              "metric": "bytes"
+            },
+            {
+              "agent": "agent2",
+              "name": "x-ray-late",
+              "referenceVariants": [
+                "d16",
+                "byte-med",
+                "grad-v3"
+              ],
+              "candidate": "med16",
+              "inputBytes": 262144,
+              "referenceBytes": 112056,
+              "candidateBytes": 110524,
+              "savedBytes": 1532,
+              "metric": "bytes"
+            }
+          ],
+          "assumedSavedBytesMin": 49524.443359375,
+          "assumedSavedBytesMax": 78392.15087890625,
+          "assumedSavedBytesMean": 63958.297119140625
+        }
+      ],
+      "conditionalProjectionKB": [
+        188.4651411895752,
+        258.52441064453126
+      ],
+      "productionIncrementEstablished": false,
+      "complexity": "low transform / medium integration",
+      "fallbackRisk": "medium: endian, alignment, mixed data and wire compatibility",
+      "priority": "P1 research"
+    },
+    {
+      "rank": 2,
+      "key": "tg-coverage",
+      "title": "Existing TG3 structure coverage",
+      "measuredSavedBytesSum": 30525,
+      "measuredSavedKB": 30.525,
+      "measuredCostScope": "existing TG3 group payload including inner headers; baseline final groups unknown",
+      "areas": [
+        {
+          "scope": "libgkcontent.so .text",
+          "bytes": 4012816,
+          "cases": [
+            {
+              "agent": "agent3",
+              "name": "mozilla-code",
+              "referenceVariants": [
+                [
+                  "agent1",
+                  "mozilla-code",
+                  "base"
+                ]
+              ],
+              "candidate": "tg4",
+              "inputBytes": 262144,
+              "referenceBytes": 76362,
+              "candidateBytes": 69676,
+              "savedBytes": 6686,
+              "metric": "payloadBytes"
+            },
+            {
+              "agent": "agent3",
+              "name": "mozilla-code-late",
+              "referenceVariants": [
+                [
+                  "agent1",
+                  "mozilla-code-late",
+                  "base"
+                ]
+              ],
+              "candidate": "tg4",
+              "inputBytes": 262144,
+              "referenceBytes": 74239,
+              "candidateBytes": 66565,
+              "savedBytes": 7674,
+              "metric": "payloadBytes"
+            }
+          ],
+          "assumedSavedBytesMin": 102347.13659667969,
+          "assumedSavedBytesMax": 117471.12268066406,
+          "assumedSavedBytesMean": 109909.12963867188
+        },
+        {
+          "scope": "libgkcontent.so .rdata",
+          "bytes": 644352,
+          "cases": [
+            {
+              "agent": "agent3",
+              "name": "mozilla-resources",
+              "referenceVariants": [
+                "base",
+                "delta8",
+                "sub-transpose"
+              ],
+              "candidate": "tg8",
+              "inputBytes": 262144,
+              "referenceBytes": 23879,
+              "candidateBytes": 17649,
+              "savedBytes": 6230,
+              "metric": "payloadBytes"
+            },
+            {
+              "agent": "agent3",
+              "name": "mozilla-resources-late",
+              "referenceVariants": [
+                "base",
+                "delta8",
+                "sub-transpose"
+              ],
+              "candidate": "tg8",
+              "inputBytes": 262144,
+              "referenceBytes": 31408,
+              "candidateBytes": 21473,
+              "savedBytes": 9935,
+              "metric": "payloadBytes"
+            }
+          ],
+          "assumedSavedBytesMin": 15313.388671875,
+          "assumedSavedBytesMax": 24420.3076171875,
+          "assumedSavedBytesMean": 19866.84814453125
+        }
+      ],
+      "conditionalProjectionKB": [
+        117.6605252685547,
+        141.89143029785157
+      ],
+      "productionIncrementEstablished": false,
+      "complexity": "medium-high planner/aggregation investigation",
+      "fallbackRisk": "high attribution risk: current baseline may already realize the gain",
+      "priority": "P1 evidence/metadata first, not global enablement"
+    },
+    {
+      "rank": 3,
+      "key": "sao-carry",
+      "title": "Carry-aware LE32 field delta + current TG3",
+      "measuredSavedBytesSum": 4625,
+      "measuredSavedKB": 4.625,
+      "measuredCostScope": "TG3 payload plus 1-byte field mask; new outer transform/version not priced",
+      "areas": [
+        {
+          "scope": "sao (assume all records fit this distribution)",
+          "bytes": 7251944,
+          "cases": [
+            {
+              "agent": "agent2",
+              "name": "sao-mid",
+              "referenceVariants": [
+                "tg-base"
+              ],
+              "candidate": "tg-delta32",
+              "inputBytes": 262136,
+              "referenceBytes": 139892,
+              "candidateBytes": 139369,
+              "savedBytes": 523,
+              "metric": "bytes"
+            },
+            {
+              "agent": "agent2",
+              "name": "sao-late",
+              "referenceVariants": [
+                "tg-base"
+              ],
+              "candidate": "tg-delta32",
+              "inputBytes": 262136,
+              "referenceBytes": 137811,
+              "candidateBytes": 133709,
+              "savedBytes": 4102,
+              "metric": "bytes"
+            }
+          ],
+          "assumedSavedBytesMin": 14468.69835505234,
+          "assumedSavedBytesMax": 113481.07199316385,
+          "assumedSavedBytesMean": 63974.88517410809
+        }
+      ],
+      "conditionalProjectionKB": [
+        14.46869835505234,
+        113.48107199316385
+      ],
+      "productionIncrementEstablished": false,
+      "complexity": "medium",
+      "fallbackRisk": "medium-high: field alignment, heterogeneous records and sample overfit",
+      "priority": "P2 guarded candidate"
+    },
+    {
+      "rank": 4,
+      "key": "word-dict",
+      "title": "Actual-usage dictionary repack, v1-compatible",
+      "measuredSavedBytesSum": 1968,
+      "measuredSavedKB": 1.968,
+      "measuredCostScope": "actual complete single-group UCZ including dictionary, prefix, flags, outer header",
+      "areas": [
+        {
+          "scope": "xml (assume all bytes behave as sampled members)",
+          "bytes": 5345280,
+          "cases": [
+            {
+              "agent": "agent4",
+              "name": "xml-stats",
+              "referenceVariants": [
+                "plain",
+                "v1"
+              ],
+              "candidate": "pool-repack-v1",
+              "inputBytes": 262144,
+              "referenceBytes": 12135,
+              "candidateBytes": 11569,
+              "savedBytes": 566,
+              "metric": "bytes"
+            },
+            {
+              "agent": "agent4",
+              "name": "xml-mid",
+              "referenceVariants": [
+                "plain",
+                "v1"
+              ],
+              "candidate": "pool-repack-v1",
+              "inputBytes": 262144,
+              "referenceBytes": 5576,
+              "candidateBytes": 4930,
+              "savedBytes": 646,
+              "metric": "bytes"
+            }
+          ],
+          "assumedSavedBytesMin": 11541.09375,
+          "assumedSavedBytesMax": 13172.34375,
+          "assumedSavedBytesMean": 12356.71875
+        },
+        {
+          "scope": "nci (assume all bytes eligible TEXT3)",
+          "bytes": 33553445,
+          "cases": [
+            {
+              "agent": "agent4",
+              "name": "nci-mid",
+              "referenceVariants": [
+                "plain",
+                "v1"
+              ],
+              "candidate": "pool-repack-v1",
+              "inputBytes": 262144,
+              "referenceBytes": 13795,
+              "candidateBytes": 13500,
+              "savedBytes": 295,
+              "metric": "bytes"
+            },
+            {
+              "agent": "agent4",
+              "name": "nci-late",
+              "referenceVariants": [
+                "plain",
+                "v1"
+              ],
+              "candidate": "pool-repack-v1",
+              "inputBytes": 262144,
+              "referenceBytes": 13189,
+              "candidateBytes": 12728,
+              "savedBytes": 461,
+              "metric": "bytes"
+            }
+          ],
+          "assumedSavedBytesMin": 37758.889293670654,
+          "assumedSavedBytesMax": 59006.26428604126,
+          "assumedSavedBytesMean": 48382.57678985596
+        }
+      ],
+      "conditionalProjectionKB": [
+        49.29998304367066,
+        72.17860803604125
+      ],
+      "productionIncrementEstablished": false,
+      "complexity": "low-medium, no decoder-format change",
+      "fallbackRisk": "low wire risk but measured webster +1147 B; strict selection mandatory",
+      "priority": "P2, safest integration experiment"
+    },
+    {
+      "rank": 5,
+      "key": "gap-distance",
+      "title": "Correct disabled match-recovery distance before enabling",
+      "measuredSavedBytesSum": 5144,
+      "measuredSavedKB": 5.144,
+      "measuredCostScope": "raw CM payload only, not BCJ/TG-transformed groups or full UCZ",
+      "areas": [
+        {
+          "scope": "libgkcontent.so .text",
+          "bytes": 4012816,
+          "cases": [
+            {
+              "agent": "agent1",
+              "name": "mozilla-code",
+              "referenceVariants": [
+                "base"
+              ],
+              "candidate": "gap-distance",
+              "inputBytes": 262144,
+              "referenceBytes": 76362,
+              "candidateBytes": 75294,
+              "savedBytes": 1068,
+              "metric": "payloadBytes"
+            },
+            {
+              "agent": "agent1",
+              "name": "mozilla-code-late",
+              "referenceVariants": [
+                "base"
+              ],
+              "candidate": "gap-distance",
+              "inputBytes": 262144,
+              "referenceBytes": 74239,
+              "candidateBytes": 72908,
+              "savedBytes": 1331,
+              "metric": "payloadBytes"
+            }
+          ],
+          "assumedSavedBytesMin": 16348.600341796875,
+          "assumedSavedBytesMax": 20374.51971435547,
+          "assumedSavedBytesMean": 18361.560028076172
+        },
+        {
+          "scope": "ooffice .text",
+          "bytes": 5283840,
+          "cases": [
+            {
+              "agent": "agent1",
+              "name": "ooffice-code",
+              "referenceVariants": [
+                "base"
+              ],
+              "candidate": "gap-distance",
+              "inputBytes": 262144,
+              "referenceBytes": 114639,
+              "candidateBytes": 113393,
+              "savedBytes": 1246,
+              "metric": "payloadBytes"
+            },
+            {
+              "agent": "agent1",
+              "name": "ooffice-code-late",
+              "referenceVariants": [
+                "base"
+              ],
+              "candidate": "gap-distance",
+              "inputBytes": 262144,
+              "referenceBytes": 115407,
+              "candidateBytes": 114256,
+              "savedBytes": 1151,
+              "metric": "payloadBytes"
+            }
+          ],
+          "assumedSavedBytesMin": 23199.84375,
+          "assumedSavedBytesMax": 25114.6875,
+          "assumedSavedBytesMean": 24157.265625
+        },
+        {
+          "scope": "osdb (assume all bytes eligible BIN)",
+          "bytes": 10085684,
+          "cases": [
+            {
+              "agent": "agent1",
+              "name": "osdb-mid",
+              "referenceVariants": [
+                "base"
+              ],
+              "candidate": "gap-distance",
+              "inputBytes": 262144,
+              "referenceBytes": 74268,
+              "candidateBytes": 74082,
+              "savedBytes": 186,
+              "metric": "payloadBytes"
+            },
+            {
+              "agent": "agent1",
+              "name": "osdb-late",
+              "referenceVariants": [
+                "base"
+              ],
+              "candidate": "gap-distance",
+              "inputBytes": 262144,
+              "referenceBytes": 74484,
+              "candidateBytes": 74322,
+              "savedBytes": 162,
+              "metric": "payloadBytes"
+            }
+          ],
+          "assumedSavedBytesMin": 6232.760650634766,
+          "assumedSavedBytesMax": 7156.132598876953,
+          "assumedSavedBytesMean": 6694.446624755859
+        }
+      ],
+      "conditionalProjectionKB": [
+        45.78120474243164,
+        52.645339813232425
+      ],
+      "productionIncrementEstablished": false,
+      "complexity": "low arithmetic / medium format and dual-worker validation",
+      "fallbackRisk": "medium-high bitstream risk; recovery remains disabled in production",
+      "priority": "P2 version-isolated candidate"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+}
+
+.topo {
+  background-image:
+    repeating-radial-gradient(circle at 12% 8%, transparent 0 26px, rgba(56, 189, 248, 0.05) 26px 27px),
+    repeating-radial-gradient(circle at 88% 30%, transparent 0 34px, rgba(251, 191, 36, 0.04) 34px 35px),
+    repeating-radial-gradient(circle at 40% 95%, transparent 0 40px, rgba(251, 113, 133, 0.035) 40px 41px);
+  background-attachment: fixed;
+}

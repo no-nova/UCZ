@@ -1,0 +1,208 @@
+
+> react-vite-tailwind@0.0.0 pretest:codec
+> node scripts/build-worker-code.mjs --check
+
+parallel-worker-code.ts 是最新的
+
+> react-vite-tailwind@0.0.0 test:codec
+> node tests/run.mjs && node tests/worker.mjs && node --test tests/p10-baseline.test.mjs && node --test tests/p122-diagnostics.test.mjs && node --test tests/p13-diagnostics.test.mjs
+
+P13.1 exact P12 body-only prefix CM gate, dictionary invariance, inherited kernel, v15-only/null/collapse/length guards PASS
+{"case":"P13.1 real 256KiB TEXT worker + production restoration + complete UCZ guard","selectedKernels":["v15"],"gate":{"policy":"p12-contiguous-body","dictionaryBytes":126,"rawPrefixBytes":196608,"tokenPrefixBytes":8192,"eligible":[0],"plainBytes":[150,null],"bodyBytes":[19,null]},"bytes":109,"roundtrip":true,"workerFallbacks":0}
+P13 BCJ nonzero origins/discontiguous instruction seam: both kernels, actual worker, final bytes/flags/costs PASS
+P13 BCJ original target before upgrader: warm alias/block/re-admit and cold parity PASS
+P13 BCJ original target after upgrader: warm alias/block/re-admit and cold parity PASS
+P13 sample budget/seams/absolute positions/alignment and 0.15% ambiguity policy PASS
+{"case":"P13 real 256KiB candidate screening","screening":[{"kind":"raw","sampleBytes":196608,"trials":[{"kernel":"v15","spec":{"id":24,"s":1,"r":1},"bytes":30388},{"kernel":"v20","spec":{"id":24,"s":1,"r":1},"bytes":28402}],"selected":[1],"fullBytes":262144}],"fullCandidates":1,"containerBytes":37705,"roundtrip":true}
+P13 real worker 256KiB screen/candidate bytes/flags/cost parity PASS
+P13 >=32KiB BCJ/BCJ2/BCJ3 -> BCJ25 v15+v20, exact costs, evaluator, target gate and threshold PASS
+P13 BCJ cached-alias collision/free-target re-admission and real worker admission/flags/bytes/cost restoration PASS
+P13 merged BCJ s2 admission and zero redundant worker candidate jobs after family completion PASS
+P13 actual 256KiB four-way BCJ sample selection + worker variant metadata + final-container parity PASS
+P12.2 cached alias collision: 2D then TG3 targets occupied, original-stream fallback, unaffected cache reuse, cold/evaluator/cost/real-worker parity PASS (4193 B synthetic)
+P12.2 dictionary ownership, cached-alias metadata, large-upgrade predicate and malformed duplicate rejection PASS
+{"case":"late-transpose-rule-collision","inputBytes":4133,"initialRules":[{"id":10,"s":4,"r":1},{"id":22,"s":4,"r":1}],"singleGroupPromotesTo":{"id":22,"s":4,"r":1}}
+{"reverse":false,"bytes":791,"finalRules":[{"id":30,"s":4,"r":1},{"id":22,"s":4,"r":1}]}
+{"case":"late-transpose-rule-collision","inputBytes":4133,"initialRules":[{"id":22,"s":4,"r":1},{"id":10,"s":4,"r":1}],"singleGroupPromotesTo":{"id":22,"s":4,"r":1}}
+{"reverse":true,"bytes":791,"finalRules":[{"id":22,"s":4,"r":1},{"id":30,"s":4,"r":1}]}
+P12.2 collision: both group orders, occupied 2D/TG3 keys, exact legacy fallback, costs, evaluator and real-worker/container parity PASS (max 4174 B synthetic)
+P12.2 real worker/main-thread restoration: mixed-rule guarded plans, recovery on/off, exact container bytes and no unknown-cost orphan prefetch PASS
+P12.2 real worker explicit v20/recovery options, legacy-off jobs, scoped restoration and serialized flags PASS
+P12.2 kernel: four profiles/geometries, exact dual alt, mixer indices, H4/H6/H8, ms2 bounds, corrected gap distance and flags PASS
+P12.2 mixed v15/v20 group markers, 14 independent P12.1 v20 fixtures, strict old-kernel fallback and WORD-PRE v20 PASS
+P12.1 predictor oracle, 18 multi-part kernel roundtrips, split planes, BCJ25, uint32/64 carries/reverse/tails, v20-only format PASS
+P12.1 real worker: six WIDE16 modes, BCJ s2, TG3 exact bytes/flags/candidates/cost PASS
+P12.0 units PASS: multi-part kernel, v1 token constraints/roundtrip, BCJ gate/family, TG3, measured orphan exclusion
+Historical independent container/model/WORD-PRE decode PASS (includes v18 and pre-fixed-mht4 v19)
+P12.0 full family/absolute-position roundtrip PASS
+P12 embedded worker exact bytes/flags/cost/candidates PASS
+P9 format tests passed (72 checks; frozen P7, v17 flags, scope, worker)
+P9 macro tests passed (14 checks; exact containers, header trap, fallback, metadata, full/partial probe reuse)
+P9 defaults tests passed (14 checks; selected flags, selective a2, exact costs/orphans, direct macro, worker metadata)
+P10 tests passed (15 checks; <=48 KiB inputs, virtual boundaries, actual scoped allocation, pure kernels, real worker batching/fallback)
+P11 tests passed (9 checks; <=32 KiB inputs; real 24-bit allocation; exact rejected-base reuse and worker candidates)
+P11.1 tests passed (13 checks; 6 frozen P10 decode/current writer fixtures; <=48 KiB inputs; archived v19 decode; compact v18 writer)
+codec tests passed
+worker test passed
+TAP version 13
+# Subtest: exact 12-file floor passes and sums to 39947318
+ok 1 - exact 12-file floor passes and sums to 39947318
+  ---
+  duration_ms: 53.65277
+  type: 'test'
+  ...
+# Subtest: one byte regression fails even with permissive v14 tolerance
+ok 2 - one byte regression fails even with permissive v14 tolerance
+  ---
+  duration_ms: 42.334742
+  type: 'test'
+  ...
+# Subtest: a gain elsewhere cannot hide one file regressing
+ok 3 - a gain elsewhere cannot hide one file regressing
+  ---
+  duration_ms: 45.766667
+  type: 'test'
+  ...
+# Subtest: reported ratio cannot hide byte regression
+ok 4 - reported ratio cannot hide byte regression
+  ---
+  duration_ms: 63.215718
+  type: 'test'
+  ...
+# Subtest: verified, size and SHA checks remain mandatory
+ok 5 - verified, size and SHA checks remain mandatory
+  ---
+  duration_ms: 134.00774
+  type: 'test'
+  ...
+# Subtest: missing or duplicate standard rows fail full acceptance
+ok 6 - missing or duplicate standard rows fail full acceptance
+  ---
+  duration_ms: 95.903136
+  type: 'test'
+  ...
+# Subtest: invalid byte counts do not pass a hard floor
+ok 7 - invalid byte counts do not pass a hard floor
+  ---
+  duration_ms: 177.445343
+  type: 'test'
+  ...
+# Subtest: invalid tolerance fails instead of masking checks
+ok 8 - invalid tolerance fails instead of masking checks
+  ---
+  duration_ms: 35.729021
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 707.702345
+TAP version 13
+# Subtest: summary defaults to locked bestUcz and accepts an individual existing JSON path
+ok 1 - summary defaults to locked bestUcz and accepts an individual existing JSON path
+  ---
+  duration_ms: 73.829926
+  type: 'test'
+  ...
+# Subtest: malformed Mozilla result is incomplete, never a twelve-file success
+ok 2 - malformed Mozilla result is incomplete, never a twelve-file success
+  ---
+  duration_ms: 40.055725
+  type: 'test'
+  ...
+# Subtest: twelve valid same-source rows use the P17.1 39947318 ceiling
+ok 3 - twelve valid same-source rows use the P17.1 39947318 ceiling
+  ---
+  duration_ms: 39.313609
+  type: 'test'
+  ...
+# Subtest: duplicates and unverified or mismatched inputs cannot inflate summary coverage
+ok 4 - duplicates and unverified or mismatched inputs cannot inflate summary coverage
+  ---
+  duration_ms: 197.873307
+  type: 'test'
+  ...
+# Subtest: a one-byte regression cannot be offset by another gain; mixed sources stay explicit
+ok 5 - a one-byte regression cannot be offset by another gain; mixed sources stay explicit
+  ---
+  duration_ms: 84.061629
+  type: 'test'
+  ...
+# Subtest: gitHead for a source-only directory returns null without leaking fatal Git stderr
+ok 6 - gitHead for a source-only directory returns null without leaking fatal Git stderr
+  ---
+  duration_ms: 41.158245
+  type: 'test'
+  ...
+# Subtest: real bench-one CLI works from a foreign cwd on an archive without .git
+ok 7 - real bench-one CLI works from a foreign cwd on an archive without .git
+  ---
+  duration_ms: 264.622979
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 810.946516
+TAP version 13
+# Subtest: 40M is strict; the -35% encode-row threshold is inclusive and not wall time
+ok 1 - 40M is strict; the -35% encode-row threshold is inclusive and not wall time
+  ---
+  duration_ms: 1.668072
+  type: 'test'
+  ...
+# Subtest: numeric timing gain is not accepted as comparable without explicit local confirmation
+ok 2 - numeric timing gain is not accepted as comparable without explicit local confirmation
+  ---
+  duration_ms: 0.285643
+  type: 'test'
+  ...
+# Subtest: one-byte per-file regression cannot be offset by any other gain
+ok 3 - one-byte per-file regression cannot be offset by any other gain
+  ---
+  duration_ms: 0.731473
+  type: 'test'
+  ...
+# Subtest: twelve locked-baseline rows are nonregressing and now clear the 40M target
+ok 4 - twelve locked-baseline rows are nonregressing and now clear the 40M target
+  ---
+  duration_ms: 0.206048
+  type: 'test'
+  ...
+# Subtest: missing, duplicate, unverified, mixed-source and invalid-timing rows fail closed
+ok 5 - missing, duplicate, unverified, mixed-source and invalid-timing rows fail closed
+  ---
+  duration_ms: 0.630357
+  type: 'test'
+  ...
+# Subtest: local target CLI reports nonacceptance with nonzero exit and never rewrites the lock
+ok 6 - local target CLI reports nonacceptance with nonzero exit and never rewrites the lock
+  ---
+  duration_ms: 105.742027
+  type: 'test'
+  ...
+# Subtest: user-local wrapper has valid shell syntax; no full-file execution in this test
+ok 7 - user-local wrapper has valid shell syntax; no full-file execution in this test
+  ---
+  duration_ms: 2.969632
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 174.882142

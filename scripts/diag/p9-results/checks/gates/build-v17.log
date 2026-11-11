@@ -1,0 +1,20 @@
+
+> react-vite-tailwind@0.0.0 prebuild
+> node scripts/build-worker-code.mjs --check
+
+parallel-worker-code.ts 是最新的
+
+> react-vite-tailwind@0.0.0 build
+> vite build
+
+vite v7.3.2 building client environment for production...
+transforming...
+✓ 49 modules transformed.
+rendering chunks...
+[plugin vite:singlefile] 
+
+[plugin vite:singlefile] Inlining: index-C1Bm9T-7.js
+[plugin vite:singlefile] Inlining: style-tr5xX-CW.css
+computing gzip size...
+dist/index.html  388.77 kB │ gzip: 126.98 kB
+✓ built in 2.73s

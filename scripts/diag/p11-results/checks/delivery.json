@@ -1,0 +1,137 @@
+{
+  "kind": "p11-delivery-verification",
+  "branch": "arena/1220f47e-test",
+  "verifiedAtHead": "5e73553c89c588b547f4eb19d0c242278f2b6cf2",
+  "codeCommit": "5d51696a71157ffa0dc30fd54ac16a02315c7c5e",
+  "source": {
+    "sha256": "5227170a7cd2a9f8070fca63454d68fb28510641e68daa2ef7dfbed89c238b74",
+    "files": {
+      "src/lib/analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "src/lib/anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+      "src/lib/byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+      "src/lib/codec-jobs.ts": "36980fd0ad007e13b1f0dcd84e1da878c40d8b63adfd5bdf269323b19c34f8d9",
+      "src/lib/codec.ts": "5cb2474a59b8ce265f00a22b40ca77e24b28bb92d331b1a02e871bfaf3913b03",
+      "src/lib/coder.ts": "1643e16a689d76668f0be43c38bce5fafa56381247529fb5969de4284b2dd0d6",
+      "src/lib/compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+      "src/lib/limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+      "src/lib/lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+      "src/lib/micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+      "src/lib/parallel-jobs.ts": "5fac104a5a9db39eb88ab6ba63569bc83ce99a4dab06703205d759c9c5784616",
+      "src/lib/parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+      "src/lib/parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+      "src/lib/parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+      "src/lib/parallel-worker-code.ts": "3c11f4c93a1d391f79a68cead28e3189e4ab429635711c4e3fea6514765c295d",
+      "src/lib/parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+      "src/lib/parallel.ts": "e92e7f3f903f651637b053ef0d01590a0e4e51004b87baac546093a09f57b4f4",
+      "src/lib/payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+      "src/lib/samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+      "src/lib/sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+      "src/lib/transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+      "src/lib/transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+      "src/lib/unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+      "src/lib/viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+      "src/lib/wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a",
+      "package.json": "26dad95212a0a1405f609132f0e0962bc016dd81d13b57b0245280cce5484ff4",
+      "package-lock.json": "df13cb90fea7667a92d96dec1f7dae61a79b3b49aa38db8113f50b33a839341d",
+      "tsconfig.json": "2a760f56fa49b96935783a2c3b4ce63d67e4547fdace88c4f4361a0c4fc10848",
+      "scripts/diag/run.mjs": "e1d2110ffe8a80bc3fbb2dcd2288717fa2ea1cde7497cf69340eae67a0e9685f",
+      "scripts/diag/run-p9.mjs": "4beecd0f6027065e447221effe5fb23160999325ef94c14d1b33b9cf9545f744",
+      "scripts/diag/probe-p9-ab.ts": "33662dc92216a5ce64c438d804717d1d101694332bb77b4a2399234a7f8719d9",
+      "scripts/diag/p9-checkpoint.mjs": "ea090d2c1db61d30b39e487efbb5d9fea23625cf57a5c361f030f23742d95403",
+      "scripts/diag/baseline.json": "9f9b28e71cb1a5eeff10e9d101f8c8a764ef241e0d1c5cf6d1ebde70c838ca4a",
+      "scripts/diag/bench-one.ts": "dc708594d7ab7a647fa4996cad1e9b6efdf60962c28a89ed1ec878d880760a41",
+      "scripts/diag/check-baseline.mjs": "aaa473a53fe186a9763b28b81aaf5eccfd709013b64594d549488fc986170a3c",
+      "scripts/diag/probe-p10-smoke.ts": "d96c4a971fd81d864c2db0ad864727113922a47960e8067523999e0db1a348a5",
+      "scripts/diag/probe-p11-smoke.ts": "17155760698c2e2226ee7a90212a2710e9bdf6fef383a4565fbed89372aac9a5",
+      "scripts/diag/run-check.mjs": "b43e9c0b72342a0d9df0d937524c40f3e54e3db072c0b59c7a3415ff132c36b0",
+      "scripts/build-worker-code.mjs": "e07217bc9ca66bd8de9b98552c5a3f0600f1b1a0f05a05c63d9bcfad6dd646c1"
+    }
+  },
+  "testsTree": "beb2deeb23e6c67dfc2beda4cd6c3065062a7d2e",
+  "gates": [
+    {
+      "name": "worker-p11",
+      "command": [
+        "npm",
+        "run",
+        "check:worker"
+      ],
+      "passed": true,
+      "exitCode": 0,
+      "wallMs": 246,
+      "checkpoint": "1df0bc366c65e965ea0fb0c8683d63a1096c788e",
+      "testsTree": "beb2deeb23e6c67dfc2beda4cd6c3065062a7d2e",
+      "receipt": "scripts/diag/p11-results/checks/gates/worker-p11.json",
+      "receiptSha256": "8a7fe4c9b8bc0b22491e198c29561b28c258f062a68b96f171fc0ac8f43563d4",
+      "log": "scripts/diag/p11-results/checks/gates/worker-p11.log",
+      "logSha256": "2123cb42ab3939a71094d102000a40b3eab1a7e4dd5375f83e6f66910f847a30"
+    },
+    {
+      "name": "codec-p11",
+      "command": [
+        "npm",
+        "run",
+        "test:codec"
+      ],
+      "passed": true,
+      "exitCode": 0,
+      "wallMs": 262933,
+      "checkpoint": "5e73553c89c588b547f4eb19d0c242278f2b6cf2",
+      "testsTree": "beb2deeb23e6c67dfc2beda4cd6c3065062a7d2e",
+      "receipt": "scripts/diag/p11-results/checks/gates/codec-p11.json",
+      "receiptSha256": "750c024fc8701d88f31a2f8636190a1933c0d9fdfd86eb9cfd39fde578f0ce5d",
+      "log": "scripts/diag/p11-results/checks/gates/codec-p11.log",
+      "logSha256": "aecca570e96cdda17bc58d9ed55bdda13f40a433693d4b7b9ac99d5b4a97d0ae"
+    },
+    {
+      "name": "tsc-p11",
+      "command": [
+        "npx",
+        "tsc",
+        "--noEmit"
+      ],
+      "passed": true,
+      "exitCode": 0,
+      "wallMs": 4209,
+      "checkpoint": "b77ee597bc464df89809516da9004f460426ce9f",
+      "testsTree": "beb2deeb23e6c67dfc2beda4cd6c3065062a7d2e",
+      "receipt": "scripts/diag/p11-results/checks/gates/tsc-p11.json",
+      "receiptSha256": "f46c0ec11e84ec6ed53462d1eda74a42fb6c32dec2d599872213b6419ff49d93",
+      "log": "scripts/diag/p11-results/checks/gates/tsc-p11.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "build-p11",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "passed": true,
+      "exitCode": 0,
+      "wallMs": 2649,
+      "checkpoint": "b775c4ffb4aebc9ddd6ddf796acb49f5f5a588ba",
+      "testsTree": "beb2deeb23e6c67dfc2beda4cd6c3065062a7d2e",
+      "receipt": "scripts/diag/p11-results/checks/gates/build-p11.json",
+      "receiptSha256": "4020522c6bc89125b775eaa9891e7ec167273e6f184885b07530489b21836637",
+      "log": "scripts/diag/p11-results/checks/gates/build-p11.log",
+      "logSha256": "a8021b43cce8f3a69f38db9f87a6eeb758226100817c80b6d7f853a5c7c583f4"
+    }
+  ],
+  "smallSmoke": {
+    "path": "scripts/diag/p11-results/checks/small-smoke.json",
+    "sha256": "c44890a21a526472bb06e1d5f682b7cab146624abc0b887f8eeb823c33491702",
+    "checks": 9,
+    "maxActualInputBytes": 32768
+  },
+  "baseline": {
+    "bestUczBytes": 42038648,
+    "provenance": "User-local P10 d4bf4d8 report; no P11 corpus remeasurement in Arena"
+  },
+  "notes": [
+    "All four required gates executed and passed on this source; receipt/log hashes and committed test trees verified.",
+    "P11 virtual policy sizes/synthetic scheduling weights are not large-input compression measurements.",
+    "A mandatory unchanged macro is not proof an orphan loses. Distinct candidates retain strict complete-container guards; exact full bases/candidates are reused.",
+    "No P11 full-corpus byte or performance result is claimed. Final documentation/manifest commits leave tested source and tests unchanged."
+  ]
+}

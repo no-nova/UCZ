@@ -1,0 +1,77 @@
+{
+  "kind": "synthetic-cli-smoke",
+  "note": "4192-byte complete recovery fixture (old 4096-byte probe used a prefix); not a performance A/B or Silesia evidence.",
+  "result": {
+    "file": "recovery-smoke.txt",
+    "size": 4192,
+    "source": {
+      "commit": "ed3f54e3ebaeba82584c558966f8f85ecd39e58b",
+      "sha256": "2979a4956e72487bd5c5a9f88f8ae2f6756163c4b62fe3dcf9f21d5d7e9fb878"
+    },
+    "knobs": {
+      "modelTuning": {
+        "maxTableBits": 22,
+        "matchTableBits": 21,
+        "largeOnly": true
+      },
+      "a2Tuning": {
+        "resOn": true,
+        "textOn": true,
+        "wordPreTextOff": true
+      },
+      "planTuning": {
+        "perCandidateAlign": true,
+        "featureCandidates": true,
+        "orphanConsolidation": true,
+        "orphanMaxBytes": 2097152,
+        "orphanMaxFraction": 0.2,
+        "orphanMaxCount": 24,
+        "orphanAllowRawStore": true,
+        "orphanSliceProbe": 262144,
+        "macroUniformGate": true,
+        "macroDirectMaxBytes": 26214400,
+        "macroTextBypass": true,
+        "candidateTgV3": false,
+        "v15SinglePlain": true,
+        "sampleFloor": 8192,
+        "sampleCap": 16000,
+        "soloSampleCap": 65536,
+        "dropZeroHitIds": true,
+        "dropLegacyV12Ids": false,
+        "neutralPenalties": false,
+        "realHeaderCosts": true
+      }
+    },
+    "ucz": 125,
+    "ver": 7,
+    "modelFlags": 0,
+    "orphanComparison": null,
+    "macroComparison": null,
+    "pct": 2.98,
+    "encMs": 218,
+    "decMs": 13,
+    "verified": true,
+    "segs": 1,
+    "header": 14,
+    "sha256": "50c8811d9ac280468976575750883e3501a7818034c1a57f0ee3e674e06b05e9",
+    "maxRSSMiB": 95.7,
+    "codecs": [
+      {
+        "codec": "CM-BIN",
+        "n": 1,
+        "raw": 4192,
+        "comp": 111,
+        "rawPct": 100,
+        "compPct": 88.8
+      }
+    ],
+    "segDist": {
+      "median": 4192,
+      "p90": 4192,
+      "max": 4192,
+      "under4k": 0
+    },
+    "wallMs": 231,
+    "sourceUnchanged": true
+  }
+}

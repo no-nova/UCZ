@@ -1,0 +1,19 @@
+{
+  "kind": "bounded-production-adaptive-matrix",
+  "selection": "Use the first contiguous 65536 bytes of each precommitted P14 window, without changing its offset. The original 262144-byte Mozilla-code old-source adaptive run exceeded the 17-second child budget; the uniform prefix size keeps all subsequent endpoint cases bounded.",
+  "baselineRef": "ed09309a54155b799b7ea492b45df1422aab03ae",
+  "fullCorpusEncoded": false,
+  "cases": [
+    { "slice": "mozilla-code", "bytes": 65536, "requireDrop": true },
+    { "slice": "mozilla-resources", "bytes": 65536, "requireDrop": true },
+    { "slice": "osdb-mid", "bytes": 65536, "requireDrop": true },
+    { "slice": "mr-mid", "bytes": 65536, "requireDrop": true },
+    { "slice": "xml-mid", "bytes": 65536, "requireDrop": true },
+    { "slice": "ooffice-code", "bytes": 65536, "requireDrop": false }
+  ],
+  "additionalCases": [
+    { "slice": "xml-mid", "bytes": 262144, "requireDrop": true }
+  ],
+  "naturalLanguageGuards": ["dickens-mid", "webster-mid", "reymont-mid"],
+  "warning": "This matrix does not establish the full-file 12/12 acceptance or either total-size target. Fixed-plan kernel tests are separate and never counted as endpoint gains."
+}

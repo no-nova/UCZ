@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "key": "d4e1819ee07841b02e92e95edc6d7f4d5ba6c579d1dd774d0e370248deadbece",
+  "label": "macro-tg-mid-1m",
+  "file": "mozilla",
+  "n": 1048576,
+  "sourceSha256": "4b4648a6f89ae6064ffbf05f05799a559e8d0b73ba85d015e7c17c744d3b2eaf",
+  "resultPath": "/home/user/test/universal-adaptive-compression-system/scripts/diag/p9-results/d4e1819ee07841b02e92e95edc6d7f4d5ba6c579d1dd774d0e370248deadbece.json",
+  "startedAt": "2026-11-08T06:42:08.869Z",
+  "attempt": 1,
+  "pid": 13775,
+  "status": "complete",
+  "updatedAt": "2026-11-08T06:45:03.978Z"
+}

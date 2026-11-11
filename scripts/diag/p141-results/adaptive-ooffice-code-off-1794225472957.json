@@ -1,0 +1,658 @@
+{
+  "kind": "P14.1-bounded-implementation-test",
+  "case": "adaptive",
+  "slice": "ooffice-code",
+  "mode": "off",
+  "requestedBytes": 65536,
+  "status": "PASS",
+  "sourceRef": "working",
+  "commit": "f08217bb73b7012c5e8cbc5e92181083e0e82945",
+  "sourceSha256": "539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "cc8f9bbe23e3849473cc8c93ed077e027017b52a96364470a55764d062e9e530",
+    "coder.ts": "424d87a1d85d380f3019f7b18269135020049dcba428297c158227596c6d08aa",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "scripts": {
+    "scripts/diag/p141/adaptive.ts": "7fdb20e87824798e1f4cee9b952fe31cffad29aecd4810c4a38ce047a7d9f767",
+    "scripts/diag/p141/input.ts": "d72c1fa12d2a7e2842bd39f1148ff17f59841f1ef4dc60d224ede95ab707f69c",
+    "scripts/diag/p141/cases.json": "9331da99464e16b316f33e680995efe1da1cf2228213617eaf40726fa88dddf6",
+    "scripts/diag/p14/slices.json": "0ac072ebbd31a2c7c3cf7b40aef3d3653d24d73b47fe5712bbf09348f1f5c18a",
+    "tests/p141-implementation.test.mjs": "e1f8ca312bb01eb6943c88099a58b38e4b962378680aaaf2127eb064c66525da"
+  },
+  "bundleSha256": "164af419e07c5c8cd57fce12b844cf3fb5f5d9ae24c07f20e8ef3a0ecb17ed4c",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/tests/p141-implementation.test.mjs",
+    "adaptive",
+    "ooffice-code",
+    "off",
+    "65536"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 6450,
+  "exitCode": 0,
+  "stdout": "{\"test\":\"actual compressAdaptive -> production UCZ -> decompress\",\"input\":{\"name\":\"ooffice-code\",\"file\":\"ooffice\",\"offset\":4096,\"bytes\":65536,\"sha256\":\"f5ed832ebdc01e27dfea52b9d5dcec36e1b3ea928a3cf805af9a6925a6f9962f\",\"parentWindowBytes\":262144,\"parentWindowSha256\":\"634726a9a07d44bf12d81e951be43f0099e0300509a99667aa848cdb4019d033\",\"selection\":\"bounded prefix of P14 fixed window\"},\"mode\":\"off\",\"execution\":\"off\",\"serial\":true,\"requestedThreads\":1,\"scope\":\"unmodified adaptive chooser; no forced spec or plan\",\"containerBytes\":24512,\"containerSha256\":\"0cfed0c0d10b25022769ba85938839dc25bca84d5911953fc7c73ee02588267d\",\"version\":20,\"headerBytes\":22,\"encodeMs\":6005,\"decodeMs\":282,\"roundtrip\":true,\"decodedSha256\":\"f5ed832ebdc01e27dfea52b9d5dcec36e1b3ea928a3cf805af9a6925a6f9962f\",\"finalSpecs\":[\"25/2/1\"],\"stages\":[{\"msg\":\"扫描数据地形…\",\"pct\":5,\"ms\":1},{\"msg\":\"为每个区域试探最合适的编码规则…\",\"pct\":15,\"ms\":85},{\"msg\":\"区域 1/7 · 试探 BCJ-x86\",\"pct\":15,\"ms\":132},{\"msg\":\"区域 1/7 · 试探 BCJ2\",\"pct\":15,\"ms\":211},{\"msg\":\"区域 1/7 · 试探 BCJ3\",\"pct\":15,\"ms\":252},{\"msg\":\"区域 1/7 · 试探 BCJ3(MSB25)\",\"pct\":15,\"ms\":305},{\"msg\":\"区域 1/7 · 试探 SUB-TRANSPOSE(步长48, BIN)\",\"pct\":15,\"ms\":339},{\"msg\":\"区域 1/7 · 试探 TRANSPOSE(步长48)\",\"pct\":15,\"ms\":491},{\"msg\":\"区域 1/7 · 试探 GRAD-2D3(步长1, 行6)\",\"pct\":15,\"ms\":582},{\"msg\":\"区域 1/7 · 试探 CM-BIN\",\"pct\":15,\"ms\":627},{\"msg\":\"区域 1/7 · 试探 O0\",\"pct\":15,\"ms\":668},{\"msg\":\"区域 1/7 · 试探 CM-TEXT\",\"pct\":15,\"ms\":676},{\"msg\":\"区域 1/7 · 试探 SUB-ANCHOR(0x00, 0x08)\",\"pct\":15,\"ms\":721},{\"msg\":\"区域 1/7 · 试探 SUB-ANCHOR3(0x00, 0x08)\",\"pct\":15,\"ms\":812},{\"msg\":\"区域 1/7 · 试探 CM-TEXT2\",\"pct\":15,\"ms\":910},{\"msg\":\"区域 1/7 · 试探 CM-TEXT3\",\"pct\":15,\"ms\":1008},{\"msg\":\"区域 1/7 · 试探 CM-BIN2\",\"pct\":15,\"ms\":1058},{\"msg\":\"区域 1/7 · 试探 CM-BIN3\",\"pct\":15,\"ms\":1091},{\"msg\":\"区域 1/7 → BCJ-x86\",\"pct\":20,\"ms\":1133},{\"msg\":\"区域 2/7 · 试探 BCJ-x86\",\"pct\":20,\"ms\":1136},{\"msg\":\"区域 2/7 · 试探 BCJ2\",\"pct\":20,\"ms\":1139},{\"msg\":\"区域 2/7 · 试探 BCJ3\",\"pct\":20,\"ms\":1141},{\"msg\":\"区域 2/7 · 试探 BCJ3(MSB25)\",\"pct\":20,\"ms\":1143},{\"msg\":\"区域 2/7 · 试探 TRANSPOSE(步长48)\",\"pct\":20,\"ms\":1145},{\"msg\":\"区域 2/7 · 试探 CM-BIN\",\"pct\":20,\"ms\":1153},{\"msg\":\"区域 2/7 · 试探 CM-TEXT\",\"pct\":20,\"ms\":1155},{\"msg\":\"区域 2/7 · 试探 CM-TEXT2\",\"pct\":20,\"ms\":1156},{\"msg\":\"区域 2/7 · 试探 CM-TEXT3\",\"pct\":20,\"ms\":1158},{\"msg\":\"区域 2/7 · 试探 CM-BIN2\",\"pct\":20,\"ms\":1160},{\"msg\":\"区域 2/7 · 试探 CM-BIN3\",\"pct\":20,\"ms\":1161},{\"msg\":\"区域 2/7 → BCJ-x86\",\"pct\":25,\"ms\":1165},{\"msg\":\"区域 3/7 · 试探 BCJ-x86\",\"pct\":25,\"ms\":1208},{\"msg\":\"区域 3/7 · 试探 BCJ2\",\"pct\":25,\"ms\":1234},{\"msg\":\"区域 3/7 · 试探 BCJ3\",\"pct\":25,\"ms\":1262},{\"msg\":\"区域 3/7 · 试探 BCJ3(MSB25)\",\"pct\":25,\"ms\":1299},{\"msg\":\"区域 3/7 · 试探 SUB-TRANSPOSE(步长26, BIN)\",\"pct\":25,\"ms\":1332},{\"msg\":\"区域 3/7 · 试探 TRANSPOSE(步长26)\",\"pct\":25,\"ms\":1432},{\"msg\":\"区域 3/7 · 试探 GRAD-2D3(步长1, 行2500)\",\"pct\":25,\"ms\":1477},{\"msg\":\"区域 3/7 · 试探 CM-BIN\",\"pct\":25,\"ms\":1508},{\"msg\":\"区域 3/7 · 试探 O0\",\"pct\":25,\"ms\":1533},{\"msg\":\"区域 3/7 · 试探 CM-TEXT\",\"pct\":25,\"ms\":1540},{\"msg\":\"区域 3/7 · 试探 SUB-ANCHOR(0x00, 0x08)\",\"pct\":25,\"ms\":1570},{\"msg\":\"区域 3/7 · 试探 SUB-ANCHOR3(0x00, 0x08)\",\"pct\":25,\"ms\":1650},{\"msg\":\"区域 3/7 · 试探 CM-TEXT2\",\"pct\":25,\"ms\":1764},{\"msg\":\"区域 3/7 · 试探 CM-TEXT3\",\"pct\":25,\"ms\":1798},{\"msg\":\"区域 3/7 · 试探 CM-BIN2\",\"pct\":25,\"ms\":1836},{\"msg\":\"区域 3/7 · 试探 CM-BIN3\",\"pct\":25,\"ms\":1866},{\"msg\":\"区域 3/7 → BCJ-x86\",\"pct\":30,\"ms\":1906},{\"msg\":\"区域 4/7 · 试探 BCJ-x86\",\"pct\":30,\"ms\":1907},{\"msg\":\"区域 4/7 · 试探 BCJ2\",\"pct\":30,\"ms\":1908},{\"msg\":\"区域 4/7 · 试探 BCJ3\",\"pct\":30,\"ms\":1910},{\"msg\":\"区域 4/7 · 试探 BCJ3(MSB25)\",\"pct\":30,\"ms\":1911},{\"msg\":\"区域 4/7 · 试探 TRANSPOSE(步长32)\",\"pct\":30,\"ms\":1913},{\"msg\":\"区域 4/7 · 试探 CM-BIN\",\"pct\":30,\"ms\":1920},{\"msg\":\"区域 4/7 · 试探 CM-TEXT\",\"pct\":30,\"ms\":1921},{\"msg\":\"区域 4/7 · 试探 CM-TEXT2\",\"pct\":30,\"ms\":1923},{\"msg\":\"区域 4/7 · 试探 CM-TEXT3\",\"pct\":30,\"ms\":1924},{\"msg\":\"区域 4/7 · 试探 CM-BIN2\",\"pct\":30,\"ms\":1926},{\"msg\":\"区域 4/7 · 试探 CM-BIN3\",\"pct\":30,\"ms\":1928},{\"msg\":\"区域 4/7 → BCJ-x86\",\"pct\":35,\"ms\":1930},{\"msg\":\"区域 5/7 · 试探 BCJ-x86\",\"pct\":35,\"ms\":1960},{\"msg\":\"区域 5/7 · 试探 BCJ2\",\"pct\":35,\"ms\":2029},{\"msg\":\"区域 5/7 · 试探 BCJ3\",\"pct\":35,\"ms\":2113},{\"msg\":\"区域 5/7 · 试探 BCJ3(MSB25)\",\"pct\":35,\"ms\":2193},{\"msg\":\"区域 5/7 · 试探 SUB-TRANSPOSE(步长64, BIN)\",\"pct\":35,\"ms\":2271},{\"msg\":\"区域 5/7 · 试探 TRANSPOSE(步长64)\",\"pct\":35,\"ms\":2556},{\"msg\":\"区域 5/7 · 试探 CM-BIN\",\"pct\":35,\"ms\":2669},{\"msg\":\"区域 5/7 · 试探 O0\",\"pct\":35,\"ms\":2743},{\"msg\":\"区域 5/7 · 试探 CM-TEXT\",\"pct\":35,\"ms\":2760},{\"msg\":\"区域 5/7 · 试探 SUB-ANCHOR(0x00, 0x08)\",\"pct\":35,\"ms\":2830},{\"msg\":\"区域 5/7 · 试探 SUB-ANCHOR3(0x00, 0x08)\",\"pct\":35,\"ms\":3060},{\"msg\":\"区域 5/7 · 试探 CM-TEXT2\",\"pct\":35,\"ms\":3261},{\"msg\":\"区域 5/7 · 试探 CM-TEXT3\",\"pct\":35,\"ms\":3330},{\"msg\":\"区域 5/7 · 试探 CM-BIN2\",\"pct\":35,\"ms\":3414},{\"msg\":\"区域 5/7 · 试探 CM-BIN3\",\"pct\":35,\"ms\":3472},{\"msg\":\"区域 5/7 → BCJ-x86\",\"pct\":40,\"ms\":3546},{\"msg\":\"区域 6/7 · 试探 BCJ-x86\",\"pct\":40,\"ms\":3546},{\"msg\":\"区域 6/7 · 试探 BCJ2\",\"pct\":40,\"ms\":3548},{\"msg\":\"区域 6/7 · 试探 BCJ3\",\"pct\":40,\"ms\":3550},{\"msg\":\"区域 6/7 · 试探 BCJ3(MSB25)\",\"pct\":40,\"ms\":3559},{\"msg\":\"区域 6/7 · 试探 TRANSPOSE(步长28)\",\"pct\":40,\"ms\":3561},{\"msg\":\"区域 6/7 · 试探 CM-BIN\",\"pct\":40,\"ms\":3567},{\"msg\":\"区域 6/7 · 试探 CM-TEXT\",\"pct\":40,\"ms\":3568},{\"msg\":\"区域 6/7 · 试探 CM-TEXT2\",\"pct\":40,\"ms\":3570},{\"msg\":\"区域 6/7 · 试探 CM-TEXT3\",\"pct\":40,\"ms\":3571},{\"msg\":\"区域 6/7 · 试探 CM-BIN2\",\"pct\":40,\"ms\":3573},{\"msg\":\"区域 6/7 · 试探 CM-BIN3\",\"pct\":40,\"ms\":3575},{\"msg\":\"区域 6/7 → BCJ-x86\",\"pct\":45,\"ms\":3578},{\"msg\":\"区域 7/7 · 试探 BCJ-x86\",\"pct\":45,\"ms\":3603},{\"msg\":\"区域 7/7 · 试探 BCJ2\",\"pct\":45,\"ms\":3633},{\"msg\":\"区域 7/7 · 试探 BCJ3\",\"pct\":45,\"ms\":3661},{\"msg\":\"区域 7/7 · 试探 BCJ3(MSB25)\",\"pct\":45,\"ms\":3698},{\"msg\":\"区域 7/7 · 试探 SUB-TRANSPOSE(步长2, BIN)\",\"pct\":45,\"ms\":3731},{\"msg\":\"区域 7/7 · 试探 TRANSPOSE(步长2)\",\"pct\":45,\"ms\":3860},{\"msg\":\"区域 7/7 · 试探 GRAD-2D3(步长1, 行1968)\",\"pct\":45,\"ms\":3903},{\"msg\":\"区域 7/7 · 试探 CM-BIN\",\"pct\":45,\"ms\":3935},{\"msg\":\"区域 7/7 · 试探 O0\",\"pct\":45,\"ms\":3962},{\"msg\":\"区域 7/7 · 试探 CM-TEXT\",\"pct\":45,\"ms\":3969},{\"msg\":\"区域 7/7 · 试探 SUB-ANCHOR('\\\\n', 0x08)\",\"pct\":45,\"ms\":3994},{\"msg\":\"区域 7/7 · 试探 SUB-ANCHOR3('\\\\n', 0x08)\",\"pct\":45,\"ms\":4130},{\"msg\":\"区域 7/7 · 试探 SUB-ANCHOR(0x00, 0x08)\",\"pct\":45,\"ms\":4248},{\"msg\":\"区域 7/7 · 试探 SUB-ANCHOR3(0x00, 0x08)\",\"pct\":45,\"ms\":4329},{\"msg\":\"区域 7/7 · 试探 CM-TEXT2\",\"pct\":45,\"ms\":4413},{\"msg\":\"区域 7/7 · 试探 CM-TEXT3\",\"pct\":45,\"ms\":4440},{\"msg\":\"区域 7/7 · 试探 CM-BIN2\",\"pct\":45,\"ms\":4471},{\"msg\":\"区域 7/7 · 试探 CM-BIN3\",\"pct\":45,\"ms\":4502},{\"msg\":\"区域 7/7 → BCJ-x86\",\"pct\":50,\"ms\":4535},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":50,\"ms\":4537},{\"msg\":\"编码地形 1/1 · 0%\",\"pct\":50,\"ms\":4550},{\"msg\":\"编码地形 1/1 · 100%\",\"pct\":65,\"ms\":4756},{\"msg\":\"编码地形 1/1\",\"pct\":65,\"ms\":6004},{\"msg\":\"完整容器择优完成\",\"pct\":85,\"ms\":6005}],\"fullFileMeasured\":false,\"baselineBytes\":24512,\"savedBytes\":0,\"baselineSource\":\"ed09309a54155b799b7ea492b45df1422aab03ae\"}\n",
+  "stderr": "582ms 15% 区域 1/7 · 试探 GRAD-2D3(步长1, 行6)\n1091ms 15% 区域 1/7 · 试探 CM-BIN3\n1650ms 25% 区域 3/7 · 试探 SUB-ANCHOR3(0x00, 0x08)\n2193ms 35% 区域 5/7 · 试探 BCJ3(MSB25)\n2743ms 35% 区域 5/7 · 试探 O0\n3261ms 35% 区域 5/7 · 试探 CM-TEXT2\n3860ms 45% 区域 7/7 · 试探 TRANSPOSE(步长2)\n4413ms 45% 区域 7/7 · 试探 CM-TEXT2\n6004ms 65% 编码地形 1/1\n",
+  "result": {
+    "test": "actual compressAdaptive -> production UCZ -> decompress",
+    "input": {
+      "name": "ooffice-code",
+      "file": "ooffice",
+      "offset": 4096,
+      "bytes": 65536,
+      "sha256": "f5ed832ebdc01e27dfea52b9d5dcec36e1b3ea928a3cf805af9a6925a6f9962f",
+      "parentWindowBytes": 262144,
+      "parentWindowSha256": "634726a9a07d44bf12d81e951be43f0099e0300509a99667aa848cdb4019d033",
+      "selection": "bounded prefix of P14 fixed window"
+    },
+    "mode": "off",
+    "execution": "off",
+    "serial": true,
+    "requestedThreads": 1,
+    "scope": "unmodified adaptive chooser; no forced spec or plan",
+    "containerBytes": 24512,
+    "containerSha256": "0cfed0c0d10b25022769ba85938839dc25bca84d5911953fc7c73ee02588267d",
+    "version": 20,
+    "headerBytes": 22,
+    "encodeMs": 6005,
+    "decodeMs": 282,
+    "roundtrip": true,
+    "decodedSha256": "f5ed832ebdc01e27dfea52b9d5dcec36e1b3ea928a3cf805af9a6925a6f9962f",
+    "finalSpecs": [
+      "25/2/1"
+    ],
+    "stages": [
+      {
+        "msg": "扫描数据地形…",
+        "pct": 5,
+        "ms": 1
+      },
+      {
+        "msg": "为每个区域试探最合适的编码规则…",
+        "pct": 15,
+        "ms": 85
+      },
+      {
+        "msg": "区域 1/7 · 试探 BCJ-x86",
+        "pct": 15,
+        "ms": 132
+      },
+      {
+        "msg": "区域 1/7 · 试探 BCJ2",
+        "pct": 15,
+        "ms": 211
+      },
+      {
+        "msg": "区域 1/7 · 试探 BCJ3",
+        "pct": 15,
+        "ms": 252
+      },
+      {
+        "msg": "区域 1/7 · 试探 BCJ3(MSB25)",
+        "pct": 15,
+        "ms": 305
+      },
+      {
+        "msg": "区域 1/7 · 试探 SUB-TRANSPOSE(步长48, BIN)",
+        "pct": 15,
+        "ms": 339
+      },
+      {
+        "msg": "区域 1/7 · 试探 TRANSPOSE(步长48)",
+        "pct": 15,
+        "ms": 491
+      },
+      {
+        "msg": "区域 1/7 · 试探 GRAD-2D3(步长1, 行6)",
+        "pct": 15,
+        "ms": 582
+      },
+      {
+        "msg": "区域 1/7 · 试探 CM-BIN",
+        "pct": 15,
+        "ms": 627
+      },
+      {
+        "msg": "区域 1/7 · 试探 O0",
+        "pct": 15,
+        "ms": 668
+      },
+      {
+        "msg": "区域 1/7 · 试探 CM-TEXT",
+        "pct": 15,
+        "ms": 676
+      },
+      {
+        "msg": "区域 1/7 · 试探 SUB-ANCHOR(0x00, 0x08)",
+        "pct": 15,
+        "ms": 721
+      },
+      {
+        "msg": "区域 1/7 · 试探 SUB-ANCHOR3(0x00, 0x08)",
+        "pct": 15,
+        "ms": 812
+      },
+      {
+        "msg": "区域 1/7 · 试探 CM-TEXT2",
+        "pct": 15,
+        "ms": 910
+      },
+      {
+        "msg": "区域 1/7 · 试探 CM-TEXT3",
+        "pct": 15,
+        "ms": 1008
+      },
+      {
+        "msg": "区域 1/7 · 试探 CM-BIN2",
+        "pct": 15,
+        "ms": 1058
+      },
+      {
+        "msg": "区域 1/7 · 试探 CM-BIN3",
+        "pct": 15,
+        "ms": 1091
+      },
+      {
+        "msg": "区域 1/7 → BCJ-x86",
+        "pct": 20,
+        "ms": 1133
+      },
+      {
+        "msg": "区域 2/7 · 试探 BCJ-x86",
+        "pct": 20,
+        "ms": 1136
+      },
+      {
+        "msg": "区域 2/7 · 试探 BCJ2",
+        "pct": 20,
+        "ms": 1139
+      },
+      {
+        "msg": "区域 2/7 · 试探 BCJ3",
+        "pct": 20,
+        "ms": 1141
+      },
+      {
+        "msg": "区域 2/7 · 试探 BCJ3(MSB25)",
+        "pct": 20,
+        "ms": 1143
+      },
+      {
+        "msg": "区域 2/7 · 试探 TRANSPOSE(步长48)",
+        "pct": 20,
+        "ms": 1145
+      },
+      {
+        "msg": "区域 2/7 · 试探 CM-BIN",
+        "pct": 20,
+        "ms": 1153
+      },
+      {
+        "msg": "区域 2/7 · 试探 CM-TEXT",
+        "pct": 20,
+        "ms": 1155
+      },
+      {
+        "msg": "区域 2/7 · 试探 CM-TEXT2",
+        "pct": 20,
+        "ms": 1156
+      },
+      {
+        "msg": "区域 2/7 · 试探 CM-TEXT3",
+        "pct": 20,
+        "ms": 1158
+      },
+      {
+        "msg": "区域 2/7 · 试探 CM-BIN2",
+        "pct": 20,
+        "ms": 1160
+      },
+      {
+        "msg": "区域 2/7 · 试探 CM-BIN3",
+        "pct": 20,
+        "ms": 1161
+      },
+      {
+        "msg": "区域 2/7 → BCJ-x86",
+        "pct": 25,
+        "ms": 1165
+      },
+      {
+        "msg": "区域 3/7 · 试探 BCJ-x86",
+        "pct": 25,
+        "ms": 1208
+      },
+      {
+        "msg": "区域 3/7 · 试探 BCJ2",
+        "pct": 25,
+        "ms": 1234
+      },
+      {
+        "msg": "区域 3/7 · 试探 BCJ3",
+        "pct": 25,
+        "ms": 1262
+      },
+      {
+        "msg": "区域 3/7 · 试探 BCJ3(MSB25)",
+        "pct": 25,
+        "ms": 1299
+      },
+      {
+        "msg": "区域 3/7 · 试探 SUB-TRANSPOSE(步长26, BIN)",
+        "pct": 25,
+        "ms": 1332
+      },
+      {
+        "msg": "区域 3/7 · 试探 TRANSPOSE(步长26)",
+        "pct": 25,
+        "ms": 1432
+      },
+      {
+        "msg": "区域 3/7 · 试探 GRAD-2D3(步长1, 行2500)",
+        "pct": 25,
+        "ms": 1477
+      },
+      {
+        "msg": "区域 3/7 · 试探 CM-BIN",
+        "pct": 25,
+        "ms": 1508
+      },
+      {
+        "msg": "区域 3/7 · 试探 O0",
+        "pct": 25,
+        "ms": 1533
+      },
+      {
+        "msg": "区域 3/7 · 试探 CM-TEXT",
+        "pct": 25,
+        "ms": 1540
+      },
+      {
+        "msg": "区域 3/7 · 试探 SUB-ANCHOR(0x00, 0x08)",
+        "pct": 25,
+        "ms": 1570
+      },
+      {
+        "msg": "区域 3/7 · 试探 SUB-ANCHOR3(0x00, 0x08)",
+        "pct": 25,
+        "ms": 1650
+      },
+      {
+        "msg": "区域 3/7 · 试探 CM-TEXT2",
+        "pct": 25,
+        "ms": 1764
+      },
+      {
+        "msg": "区域 3/7 · 试探 CM-TEXT3",
+        "pct": 25,
+        "ms": 1798
+      },
+      {
+        "msg": "区域 3/7 · 试探 CM-BIN2",
+        "pct": 25,
+        "ms": 1836
+      },
+      {
+        "msg": "区域 3/7 · 试探 CM-BIN3",
+        "pct": 25,
+        "ms": 1866
+      },
+      {
+        "msg": "区域 3/7 → BCJ-x86",
+        "pct": 30,
+        "ms": 1906
+      },
+      {
+        "msg": "区域 4/7 · 试探 BCJ-x86",
+        "pct": 30,
+        "ms": 1907
+      },
+      {
+        "msg": "区域 4/7 · 试探 BCJ2",
+        "pct": 30,
+        "ms": 1908
+      },
+      {
+        "msg": "区域 4/7 · 试探 BCJ3",
+        "pct": 30,
+        "ms": 1910
+      },
+      {
+        "msg": "区域 4/7 · 试探 BCJ3(MSB25)",
+        "pct": 30,
+        "ms": 1911
+      },
+      {
+        "msg": "区域 4/7 · 试探 TRANSPOSE(步长32)",
+        "pct": 30,
+        "ms": 1913
+      },
+      {
+        "msg": "区域 4/7 · 试探 CM-BIN",
+        "pct": 30,
+        "ms": 1920
+      },
+      {
+        "msg": "区域 4/7 · 试探 CM-TEXT",
+        "pct": 30,
+        "ms": 1921
+      },
+      {
+        "msg": "区域 4/7 · 试探 CM-TEXT2",
+        "pct": 30,
+        "ms": 1923
+      },
+      {
+        "msg": "区域 4/7 · 试探 CM-TEXT3",
+        "pct": 30,
+        "ms": 1924
+      },
+      {
+        "msg": "区域 4/7 · 试探 CM-BIN2",
+        "pct": 30,
+        "ms": 1926
+      },
+      {
+        "msg": "区域 4/7 · 试探 CM-BIN3",
+        "pct": 30,
+        "ms": 1928
+      },
+      {
+        "msg": "区域 4/7 → BCJ-x86",
+        "pct": 35,
+        "ms": 1930
+      },
+      {
+        "msg": "区域 5/7 · 试探 BCJ-x86",
+        "pct": 35,
+        "ms": 1960
+      },
+      {
+        "msg": "区域 5/7 · 试探 BCJ2",
+        "pct": 35,
+        "ms": 2029
+      },
+      {
+        "msg": "区域 5/7 · 试探 BCJ3",
+        "pct": 35,
+        "ms": 2113
+      },
+      {
+        "msg": "区域 5/7 · 试探 BCJ3(MSB25)",
+        "pct": 35,
+        "ms": 2193
+      },
+      {
+        "msg": "区域 5/7 · 试探 SUB-TRANSPOSE(步长64, BIN)",
+        "pct": 35,
+        "ms": 2271
+      },
+      {
+        "msg": "区域 5/7 · 试探 TRANSPOSE(步长64)",
+        "pct": 35,
+        "ms": 2556
+      },
+      {
+        "msg": "区域 5/7 · 试探 CM-BIN",
+        "pct": 35,
+        "ms": 2669
+      },
+      {
+        "msg": "区域 5/7 · 试探 O0",
+        "pct": 35,
+        "ms": 2743
+      },
+      {
+        "msg": "区域 5/7 · 试探 CM-TEXT",
+        "pct": 35,
+        "ms": 2760
+      },
+      {
+        "msg": "区域 5/7 · 试探 SUB-ANCHOR(0x00, 0x08)",
+        "pct": 35,
+        "ms": 2830
+      },
+      {
+        "msg": "区域 5/7 · 试探 SUB-ANCHOR3(0x00, 0x08)",
+        "pct": 35,
+        "ms": 3060
+      },
+      {
+        "msg": "区域 5/7 · 试探 CM-TEXT2",
+        "pct": 35,
+        "ms": 3261
+      },
+      {
+        "msg": "区域 5/7 · 试探 CM-TEXT3",
+        "pct": 35,
+        "ms": 3330
+      },
+      {
+        "msg": "区域 5/7 · 试探 CM-BIN2",
+        "pct": 35,
+        "ms": 3414
+      },
+      {
+        "msg": "区域 5/7 · 试探 CM-BIN3",
+        "pct": 35,
+        "ms": 3472
+      },
+      {
+        "msg": "区域 5/7 → BCJ-x86",
+        "pct": 40,
+        "ms": 3546
+      },
+      {
+        "msg": "区域 6/7 · 试探 BCJ-x86",
+        "pct": 40,
+        "ms": 3546
+      },
+      {
+        "msg": "区域 6/7 · 试探 BCJ2",
+        "pct": 40,
+        "ms": 3548
+      },
+      {
+        "msg": "区域 6/7 · 试探 BCJ3",
+        "pct": 40,
+        "ms": 3550
+      },
+      {
+        "msg": "区域 6/7 · 试探 BCJ3(MSB25)",
+        "pct": 40,
+        "ms": 3559
+      },
+      {
+        "msg": "区域 6/7 · 试探 TRANSPOSE(步长28)",
+        "pct": 40,
+        "ms": 3561
+      },
+      {
+        "msg": "区域 6/7 · 试探 CM-BIN",
+        "pct": 40,
+        "ms": 3567
+      },
+      {
+        "msg": "区域 6/7 · 试探 CM-TEXT",
+        "pct": 40,
+        "ms": 3568
+      },
+      {
+        "msg": "区域 6/7 · 试探 CM-TEXT2",
+        "pct": 40,
+        "ms": 3570
+      },
+      {
+        "msg": "区域 6/7 · 试探 CM-TEXT3",
+        "pct": 40,
+        "ms": 3571
+      },
+      {
+        "msg": "区域 6/7 · 试探 CM-BIN2",
+        "pct": 40,
+        "ms": 3573
+      },
+      {
+        "msg": "区域 6/7 · 试探 CM-BIN3",
+        "pct": 40,
+        "ms": 3575
+      },
+      {
+        "msg": "区域 6/7 → BCJ-x86",
+        "pct": 45,
+        "ms": 3578
+      },
+      {
+        "msg": "区域 7/7 · 试探 BCJ-x86",
+        "pct": 45,
+        "ms": 3603
+      },
+      {
+        "msg": "区域 7/7 · 试探 BCJ2",
+        "pct": 45,
+        "ms": 3633
+      },
+      {
+        "msg": "区域 7/7 · 试探 BCJ3",
+        "pct": 45,
+        "ms": 3661
+      },
+      {
+        "msg": "区域 7/7 · 试探 BCJ3(MSB25)",
+        "pct": 45,
+        "ms": 3698
+      },
+      {
+        "msg": "区域 7/7 · 试探 SUB-TRANSPOSE(步长2, BIN)",
+        "pct": 45,
+        "ms": 3731
+      },
+      {
+        "msg": "区域 7/7 · 试探 TRANSPOSE(步长2)",
+        "pct": 45,
+        "ms": 3860
+      },
+      {
+        "msg": "区域 7/7 · 试探 GRAD-2D3(步长1, 行1968)",
+        "pct": 45,
+        "ms": 3903
+      },
+      {
+        "msg": "区域 7/7 · 试探 CM-BIN",
+        "pct": 45,
+        "ms": 3935
+      },
+      {
+        "msg": "区域 7/7 · 试探 O0",
+        "pct": 45,
+        "ms": 3962
+      },
+      {
+        "msg": "区域 7/7 · 试探 CM-TEXT",
+        "pct": 45,
+        "ms": 3969
+      },
+      {
+        "msg": "区域 7/7 · 试探 SUB-ANCHOR('\\n', 0x08)",
+        "pct": 45,
+        "ms": 3994
+      },
+      {
+        "msg": "区域 7/7 · 试探 SUB-ANCHOR3('\\n', 0x08)",
+        "pct": 45,
+        "ms": 4130
+      },
+      {
+        "msg": "区域 7/7 · 试探 SUB-ANCHOR(0x00, 0x08)",
+        "pct": 45,
+        "ms": 4248
+      },
+      {
+        "msg": "区域 7/7 · 试探 SUB-ANCHOR3(0x00, 0x08)",
+        "pct": 45,
+        "ms": 4329
+      },
+      {
+        "msg": "区域 7/7 · 试探 CM-TEXT2",
+        "pct": 45,
+        "ms": 4413
+      },
+      {
+        "msg": "区域 7/7 · 试探 CM-TEXT3",
+        "pct": 45,
+        "ms": 4440
+      },
+      {
+        "msg": "区域 7/7 · 试探 CM-BIN2",
+        "pct": 45,
+        "ms": 4471
+      },
+      {
+        "msg": "区域 7/7 · 试探 CM-BIN3",
+        "pct": 45,
+        "ms": 4502
+      },
+      {
+        "msg": "区域 7/7 → BCJ-x86",
+        "pct": 50,
+        "ms": 4535
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 50,
+        "ms": 4537
+      },
+      {
+        "msg": "编码地形 1/1 · 0%",
+        "pct": 50,
+        "ms": 4550
+      },
+      {
+        "msg": "编码地形 1/1 · 100%",
+        "pct": 65,
+        "ms": 4756
+      },
+      {
+        "msg": "编码地形 1/1",
+        "pct": 65,
+        "ms": 6004
+      },
+      {
+        "msg": "完整容器择优完成",
+        "pct": 85,
+        "ms": 6005
+      }
+    ],
+    "fullFileMeasured": false,
+    "baselineBytes": 24512,
+    "savedBytes": 0,
+    "baselineSource": "ed09309a54155b799b7ea492b45df1422aab03ae"
+  },
+  "maxRawSliceBytes": 262144,
+  "fullCorpusEncoded": false,
+  "baselinePromoted": false
+}

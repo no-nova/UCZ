@@ -1,0 +1,274 @@
+{
+  "kind": "P12-agent3-summary",
+  "probeCount": 28,
+  "codecRoundtrips": 24,
+  "statisticsOnly": 4,
+  "maxWallMs": 7207,
+  "referenceNote": "raw BIN v15 baseline reused from agent1 where identical slice SHA and production source; no whole-file or best-chooser claim",
+  "rows": [
+    {
+      "name": "ooffice-code",
+      "variant": "bcj",
+      "inputBytes": 262144,
+      "wallMs": 5004,
+      "payloadBytes": 102060,
+      "rawBinReference": 114639,
+      "deltaBytes": -12579,
+      "deltaPct": -10.972705623740609
+    },
+    {
+      "name": "ooffice-code",
+      "variant": "bcj-jcc",
+      "inputBytes": 262144,
+      "wallMs": 5202,
+      "payloadBytes": 102924,
+      "rawBinReference": 114639,
+      "deltaBytes": -11715,
+      "deltaPct": -10.219035406798739
+    },
+    {
+      "name": "mozilla-code",
+      "variant": "alpha-all",
+      "inputBytes": 262144,
+      "wallMs": 5225,
+      "payloadBytes": 86294,
+      "rawBinReference": 76362,
+      "deltaBytes": 9932,
+      "deltaPct": 13.006469186244463
+    },
+    {
+      "name": "mozilla-code",
+      "variant": "alpha-br",
+      "inputBytes": 262144,
+      "wallMs": 5123,
+      "payloadBytes": 77750,
+      "rawBinReference": 76362,
+      "deltaBytes": 1388,
+      "deltaPct": 1.8176579974332752
+    },
+    {
+      "name": "mozilla-code",
+      "variant": "bcj-jcc",
+      "inputBytes": 262144,
+      "wallMs": 5130,
+      "payloadBytes": 79944,
+      "rawBinReference": 76362,
+      "deltaBytes": 3582,
+      "deltaPct": 4.690814803174348
+    },
+    {
+      "name": "ooffice-code-late",
+      "variant": "bcj",
+      "inputBytes": 262144,
+      "wallMs": 5416,
+      "payloadBytes": 105258,
+      "rawBinReference": 115407,
+      "deltaBytes": -10149,
+      "deltaPct": -8.794093945774517
+    },
+    {
+      "name": "mozilla-code",
+      "variant": "bcj",
+      "inputBytes": 262144,
+      "wallMs": 5471,
+      "payloadBytes": 79944,
+      "rawBinReference": 76362,
+      "deltaBytes": 3582,
+      "deltaPct": 4.690814803174348
+    },
+    {
+      "name": "ooffice-code-late",
+      "variant": "bcj-jcc",
+      "inputBytes": 262144,
+      "wallMs": 5698,
+      "payloadBytes": 106223,
+      "rawBinReference": 115407,
+      "deltaBytes": -9184,
+      "deltaPct": -7.95792282963772
+    },
+    {
+      "name": "mozilla-resources",
+      "variant": "stats",
+      "inputBytes": 262144,
+      "wallMs": 724
+    },
+    {
+      "name": "osdb-mid",
+      "variant": "stats",
+      "inputBytes": 262144,
+      "wallMs": 864
+    },
+    {
+      "name": "mozilla-code",
+      "variant": "stats",
+      "inputBytes": 262144,
+      "wallMs": 946
+    },
+    {
+      "name": "ooffice-code",
+      "variant": "stats",
+      "inputBytes": 262144,
+      "wallMs": 1140
+    },
+    {
+      "name": "mozilla-resources",
+      "variant": "base",
+      "inputBytes": 262144,
+      "wallMs": 4083,
+      "payloadBytes": 26196,
+      "rawBinReference": 26196,
+      "deltaBytes": 0,
+      "deltaPct": 0.0
+    },
+    {
+      "name": "osdb-mid",
+      "variant": "sub-anchor-zero",
+      "inputBytes": 262144,
+      "wallMs": 5369,
+      "payloadBytes": 85254,
+      "rawBinReference": 74268,
+      "deltaBytes": 10986,
+      "deltaPct": 14.792373566004201
+    },
+    {
+      "name": "osdb-mid",
+      "variant": "page-delta",
+      "inputBytes": 262144,
+      "wallMs": 5511,
+      "payloadBytes": 248218,
+      "rawBinReference": 74268,
+      "deltaBytes": 173950,
+      "deltaPct": 234.21931383637636
+    },
+    {
+      "name": "mozilla-resources",
+      "variant": "tg8",
+      "inputBytes": 262144,
+      "wallMs": 5643,
+      "payloadBytes": 17649,
+      "rawBinReference": 26196,
+      "deltaBytes": -8547,
+      "deltaPct": -32.6271186440678
+    },
+    {
+      "name": "mozilla-resources",
+      "variant": "delta8",
+      "inputBytes": 262144,
+      "wallMs": 3103,
+      "payloadBytes": 23944,
+      "rawBinReference": 26196,
+      "deltaBytes": -2252,
+      "deltaPct": -8.596732325545887
+    },
+    {
+      "name": "mozilla-resources-late",
+      "variant": "delta8",
+      "inputBytes": 262144,
+      "wallMs": 3282,
+      "payloadBytes": 32659,
+      "rawBinReference": 31408,
+      "deltaBytes": 1251,
+      "deltaPct": 3.983061640346408
+    },
+    {
+      "name": "mozilla-resources-late",
+      "variant": "base",
+      "inputBytes": 262144,
+      "wallMs": 3866,
+      "payloadBytes": 31408,
+      "rawBinReference": 31408,
+      "deltaBytes": 0,
+      "deltaPct": 0.0
+    },
+    {
+      "name": "mozilla-resources-late",
+      "variant": "tg8",
+      "inputBytes": 262144,
+      "wallMs": 5354,
+      "payloadBytes": 21473,
+      "rawBinReference": 31408,
+      "deltaBytes": -9935,
+      "deltaPct": -31.632068262862965
+    },
+    {
+      "name": "mozilla-resources",
+      "variant": "sub-transpose",
+      "inputBytes": 262144,
+      "wallMs": 5964,
+      "payloadBytes": 23879,
+      "rawBinReference": 26196,
+      "deltaBytes": -2317,
+      "deltaPct": -8.844861810963511
+    },
+    {
+      "name": "mozilla-strings",
+      "variant": "base",
+      "inputBytes": 262144,
+      "wallMs": 6020,
+      "payloadBytes": 27448,
+      "rawBinReference": 27448,
+      "deltaBytes": 0,
+      "deltaPct": 0.0
+    },
+    {
+      "name": "mozilla-code",
+      "variant": "tg4",
+      "inputBytes": 262144,
+      "wallMs": 6809,
+      "payloadBytes": 69676,
+      "rawBinReference": 76362,
+      "deltaBytes": -6686,
+      "deltaPct": -8.755663811843583
+    },
+    {
+      "name": "osdb-mid",
+      "variant": "sub-transpose",
+      "inputBytes": 262144,
+      "wallMs": 7207,
+      "payloadBytes": 94673,
+      "rawBinReference": 74268,
+      "deltaBytes": 20405,
+      "deltaPct": 27.474820918834485
+    },
+    {
+      "name": "mozilla-strings",
+      "variant": "base-text",
+      "inputBytes": 262144,
+      "wallMs": 4676,
+      "payloadBytes": 26592,
+      "rawBinReference": 27448,
+      "deltaBytes": -856,
+      "deltaPct": -3.118624307781992
+    },
+    {
+      "name": "mozilla-resources-late",
+      "variant": "sub-transpose",
+      "inputBytes": 262144,
+      "wallMs": 5154,
+      "payloadBytes": 31784,
+      "rawBinReference": 31408,
+      "deltaBytes": 376,
+      "deltaPct": 1.1971472236372849
+    },
+    {
+      "name": "osdb-late",
+      "variant": "sub-anchor-zero",
+      "inputBytes": 262144,
+      "wallMs": 5824,
+      "payloadBytes": 85658,
+      "rawBinReference": 74484,
+      "deltaBytes": 11174,
+      "deltaPct": 15.001879598302992
+    },
+    {
+      "name": "mozilla-code-late",
+      "variant": "tg4",
+      "inputBytes": 262144,
+      "wallMs": 6203,
+      "payloadBytes": 66565,
+      "rawBinReference": 74239,
+      "deltaBytes": -7674,
+      "deltaPct": -10.336884925712898
+    }
+  ]
+}

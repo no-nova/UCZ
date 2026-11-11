@@ -1,0 +1,566 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "webster-mid",
+  "variant": "v2-repack",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "webster-mid",
+    "v2-repack"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "b735dc95051d4e8629925efc97de667b5c023a2f83a38a622f9ecab0a1149e06"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 7815,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "webster-mid",
+      "file": "webster",
+      "offset": 20729344,
+      "bytes": 262144,
+      "sha256": "657d081ba8a1786ed144e983814eef7acf2dbdff7f546f22252eceac424303d4",
+      "corpusBytes": 41458703,
+      "corpusSha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "731f5c9e35d0aa24857a42bc034829fa6e832b5b",
+        "bytes": 41458703,
+        "sha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "657d081ba8a1786ed144e983814eef7acf2dbdff7f546f22252eceac424303d4"
+    },
+    "variant": "v2-repack",
+    "cmBytes": 58407,
+    "payloadBytes": 58412,
+    "bytes": 58412,
+    "outerHeaderBytes": null,
+    "containerSha256": null,
+    "payloadSha256": "fcab9bd00a58b45c66aa7db5cf2b8a3d3eb078136c4efb2711f2018285a146de",
+    "roundtrip": true,
+    "preprocessMs": 5616.5049930000005,
+    "encodeDecodeMs": 7484.163721000001,
+    "short": {
+      "dictTokens": 89,
+      "one": 89,
+      "two": 0,
+      "headerRawBytes": 783,
+      "bodyRawBytes": 181007,
+      "cmInputBytes": 181790,
+      "bodyRatio": 0.6904869079589844,
+      "coverage": 0.3642311096191406,
+      "spaceSuffixHits": 4745,
+      "punctuationSuffixHits": 6002,
+      "oneHits": 14344,
+      "twoHits": 0,
+      "unusedTokens": 0,
+      "escapedOriginalBytes": 0,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 14344,
+      "twoHits": 0,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 166663,
+      "coveredOriginalBytes": 95481,
+      "coverage": 0.3642311096191406,
+      "spaceSuffixHits": 4745,
+      "punctuationSuffixHits": 6002,
+      "unusedTokens": 0,
+      "entries": [
+        {
+          "word": " of ",
+          "hits": 888,
+          "tier": 1
+        },
+        {
+          "word": " <i>",
+          "hits": 760,
+          "tier": 1
+        },
+        {
+          "word": ".</def></p>",
+          "hits": 657,
+          "tier": 1
+        },
+        {
+          "word": " the ",
+          "hits": 636,
+          "tier": 1
+        },
+        {
+          "word": "</i>",
+          "hits": 624,
+          "tier": 1
+        },
+        {
+          "word": "</hw> ",
+          "hits": 607,
+          "tier": 1
+        },
+        {
+          "word": " <i>l",
+          "hits": 590,
+          "tier": 1
+        },
+        {
+          "word": "</i> ",
+          "hits": 589,
+          "tier": 1
+        },
+        {
+          "word": "<i>",
+          "hits": 485,
+          "tier": 1
+        },
+        {
+          "word": "def>",
+          "hits": 434,
+          "tier": 1
+        },
+        {
+          "word": "and ",
+          "hits": 414,
+          "tier": 1
+        },
+        {
+          "word": "</i>, ",
+          "hits": 403,
+          "tier": 1
+        },
+        {
+          "word": ", <pos><i>n.",
+          "hits": 390,
+          "tier": 1
+        },
+        {
+          "word": "<i>l",
+          "hits": 364,
+          "tier": 1
+        },
+        {
+          "word": ".</b></sn> <",
+          "hits": 356,
+          "tier": 1
+        },
+        {
+          "word": "the ",
+          "hits": 332,
+          "tier": 1
+        },
+        {
+          "word": ".</i></p>",
+          "hits": 314,
+          "tier": 1
+        },
+        {
+          "word": "</i></pos> ",
+          "hits": 296,
+          "tier": 1
+        },
+        {
+          "word": "<p><sn><b>",
+          "hits": 284,
+          "tier": 1
+        },
+        {
+          "word": "<p><hw>Lu",
+          "hits": 273,
+          "tier": 1
+        },
+        {
+          "word": ".</def> ",
+          "hits": 271,
+          "tier": 1
+        },
+        {
+          "word": "<p><hw>L",
+          "hits": 252,
+          "tier": 1
+        },
+        {
+          "word": ".</",
+          "hits": 224,
+          "tier": 1
+        },
+        {
+          "word": "the",
+          "hits": 206,
+          "tier": 1
+        },
+        {
+          "word": "<p><blockquo",
+          "hits": 205,
+          "tier": 1
+        },
+        {
+          "word": ".</blockquot",
+          "hits": 198,
+          "tier": 1
+        },
+        {
+          "word": "</i></pos> <",
+          "hits": 195,
+          "tier": 1
+        },
+        {
+          "word": ".)</i> <def>",
+          "hits": 188,
+          "tier": 1
+        },
+        {
+          "word": " the",
+          "hits": 185,
+          "tier": 1
+        },
+        {
+          "word": "</b></col>",
+          "hits": 185,
+          "tier": 1
+        },
+        {
+          "word": ", <pos><i>a.",
+          "hits": 169,
+          "tier": 1
+        },
+        {
+          "word": ".</i></pos> ",
+          "hits": 168,
+          "tier": 1
+        },
+        {
+          "word": "<def>",
+          "hits": 159,
+          "tier": 1
+        },
+        {
+          "word": "<p><hw>",
+          "hits": 153,
+          "tier": 1
+        },
+        {
+          "word": "</hw>",
+          "hits": 143,
+          "tier": 1
+        },
+        {
+          "word": "</p>",
+          "hits": 135,
+          "tier": 1
+        },
+        {
+          "word": " <def>",
+          "hits": 117,
+          "tier": 1
+        },
+        {
+          "word": "of ",
+          "hits": 113,
+          "tier": 1
+        },
+        {
+          "word": "n.</i></p",
+          "hits": 112,
+          "tier": 1
+        },
+        {
+          "word": "<sn><b>",
+          "hits": 90,
+          "tier": 1
+        },
+        {
+          "word": "<p><",
+          "hits": 79,
+          "tier": 1
+        },
+        {
+          "word": ".</def>",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": ", <pos><i>",
+          "hits": 67,
+          "tier": 1
+        },
+        {
+          "word": "pos",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": "><i>",
+          "hits": 61,
+          "tier": 1
+        },
+        {
+          "word": "></p>",
+          "hits": 60,
+          "tier": 1
+        },
+        {
+          "word": "</i></pos>",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": "<hw>L",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": "n.</i></pos>",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": "<pos><i>",
+          "hits": 53,
+          "tier": 1
+        },
+        {
+          "word": "</i></",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": " <def>A",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": ".</i>",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": ">, <pos><i>",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": " <pos><i>",
+          "hits": 37,
+          "tier": 1
+        },
+        {
+          "word": ".</b></sn>",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": "> <def>",
+          "hits": 31,
+          "tier": 1
+        },
+        {
+          "word": ", <pos><i>a",
+          "hits": 24,
+          "tier": 1
+        },
+        {
+          "word": "<pos><i>n.</",
+          "hits": 22,
+          "tier": 1
+        },
+        {
+          "word": "<pos><i>a.</",
+          "hits": 20,
+          "tier": 1
+        },
+        {
+          "word": "i></pos> ",
+          "hits": 20,
+          "tier": 1
+        },
+        {
+          "word": "sn><b>",
+          "hits": 20,
+          "tier": 1
+        },
+        {
+          "word": "</b></",
+          "hits": 18,
+          "tier": 1
+        },
+        {
+          "word": "<hw>",
+          "hits": 18,
+          "tier": 1
+        },
+        {
+          "word": ".</i></pos>",
+          "hits": 14,
+          "tier": 1
+        },
+        {
+          "word": "</i> <def>",
+          "hits": 13,
+          "tier": 1
+        },
+        {
+          "word": "i></pos>",
+          "hits": 12,
+          "tier": 1
+        },
+        {
+          "word": "def",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": "n.</i>",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": " <pos><i>n.<",
+          "hits": 8,
+          "tier": 1
+        },
+        {
+          "word": "</blockquote",
+          "hits": 8,
+          "tier": 1
+        },
+        {
+          "word": "</i><",
+          "hits": 6,
+          "tier": 1
+        },
+        {
+          "word": "i></pos> <de",
+          "hits": 6,
+          "tier": 1
+        },
+        {
+          "word": "/i></pos> ",
+          "hits": 5,
+          "tier": 1
+        },
+        {
+          "word": "/i></pos> <d",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": "a.</i></pos>",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": "ef>",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": "i></pos> <",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": ".</b></sn> ",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": "</def>",
+          "hits": 3,
+          "tier": 1
+        },
+        {
+          "word": " <pos><i>a.<",
+          "hits": 2,
+          "tier": 1
+        },
+        {
+          "word": "</def></p>",
+          "hits": 2,
+          "tier": 1
+        },
+        {
+          "word": "</i></p>",
+          "hits": 2,
+          "tier": 1
+        },
+        {
+          "word": "<pos><i>a",
+          "hits": 2,
+          "tier": 1
+        },
+        {
+          "word": "/i></pos> <",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "</b></s",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "<pos><i>a.",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "<pos><i>n.",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": "></",
+          "hits": 1,
+          "tier": 1
+        }
+      ]
+    },
+    "scope": "research-only v2 envelope: mode byte + u32 token-stream length + CM(dict||body); no compatible production UCZ outer header, no codec v2 dispatch",
+    "maxRSSMiB": 331.32421875
+  }
+}

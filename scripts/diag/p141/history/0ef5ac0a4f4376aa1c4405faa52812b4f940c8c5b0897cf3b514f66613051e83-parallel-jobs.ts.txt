@@ -1,0 +1,38 @@
+// 并行任务的实际执行体：主线程与 worker 共用同一份代码，保证两边算出来的
+// 结果是同一个比特流。
+//
+// 每个任务接收数据视图与纯标量。v20 配置在同步任务体里临时应用并 finally
+// 恢复；任务体没有 await，不会把一个任务的配置泄漏给下一个任务。
+// 其它未序列化的非默认诊断旋钮由主线程门禁退回串行。
+import { chooseSpecForJob, encodeGroupForJob, encodeSpecsForJob } from './codec-jobs'
+import type { JobPayload, JobReply } from './parallel'
+import { cmV20Tuning } from './coder'
+
+/** 执行一个任务。返回结构化克隆安全的纯数据。 */
+export async function runJob(payload: JobPayload, data: Uint8Array): Promise<JobReply> {
+  const saved={...cmV20Tuning}
+  if(payload.cmV20) {
+    if(typeof payload.cmV20.enabled!=='boolean' || typeof payload.cmV20.binRecovery!=='boolean')throw Error('无效 v20 worker 配置')
+    Object.assign(cmV20Tuning,payload.cmV20)
+  }
+  try { return runJobSync(payload,data) } finally {Object.assign(cmV20Tuning,saved)}
+}
+function runJobSync(payload:JobPayload,data:Uint8Array):JobReply {
+  switch (payload.kind) {
+    case 'chooseSpec': {
+      const { start, end, cls, bestS, sampleLimit, base } = payload
+      return chooseSpecForJob(data.subarray(start, end), cls, bestS, sampleLimit, base, data.length)
+    }
+    case 'encodeGroup': {
+      const { parts, spec, positions, ends, skipBase, groupOptions } = payload
+      const slices = parts.map(([s, e]) => data.subarray(s, e))
+      return encodeGroupForJob(slices, spec, positions, ends, skipBase, groupOptions)
+    }
+    case 'encodeSpecs': {
+      const { start, end, specs, base } = payload
+      return encodeSpecsForJob(data.subarray(start, end), specs, base)
+    }
+    default:
+      throw new Error(`未知任务类型 ${(payload as { kind: string }).kind}`)
+  }
+}

@@ -1,0 +1,322 @@
+{
+ "dickens:text": {
+  "bytes": 255703,
+  "sha": "652582d455524615"
+ },
+ "dickens:textV2": {
+  "bytes": 249756,
+  "sha": "13af2d4e7a78f5b5"
+ },
+ "dickens:textV3": {
+  "bytes": 249325,
+  "sha": "a9b37c04e46f487a"
+ },
+ "dickens:bin": {
+  "bytes": 262186,
+  "sha": "f6759d6ecc2a84c6"
+ },
+ "dickens:binV3": {
+  "bytes": 261114,
+  "sha": "3f82845b2eb838ca"
+ },
+ "dickens:res2dV3": {
+  "bytes": 350492,
+  "sha": "a385aae96eab4c96"
+ },
+ "dickens:res": {
+  "bytes": 345124,
+  "sha": "0356585cffb4e929"
+ },
+ "dickens:o0": {
+  "bytes": 589428,
+  "sha": "4f95c6a84166449e"
+ },
+ "dickens:o1": {
+  "bytes": 448357,
+  "sha": "d5a7f57175e73cfe"
+ },
+ "dickens:spec10": {
+  "bytes": 71794,
+  "sha": "b6a2a70b867a6baf"
+ },
+ "dickens:spec22": {
+  "bytes": 71795,
+  "sha": "376ae77a8db6f359"
+ },
+ "dickens:spec26": {
+  "bytes": 198522,
+  "sha": "0702214eaf497711"
+ },
+ "dickens:spec27": {
+  "bytes": 161521,
+  "sha": "8517625ccfa3ec68"
+ },
+ "dickens:spec25": {
+  "bytes": 71686,
+  "sha": "ccf7cec8db08c8eb"
+ },
+ "dickens:spec8": {
+  "bytes": 181227,
+  "sha": "4742bad54ffbbcd1"
+ },
+ "dickens:spec13": {
+  "bytes": 71114,
+  "sha": "c3162bf5a0d600d4"
+ },
+ "xml:text": {
+  "bytes": 101069,
+  "sha": "40dc8e6f112a79f9"
+ },
+ "xml:textV2": {
+  "bytes": 98929,
+  "sha": "71840458a9effdcb"
+ },
+ "xml:textV3": {
+  "bytes": 98343,
+  "sha": "f3b8d73438b84346"
+ },
+ "xml:bin": {
+  "bytes": 103945,
+  "sha": "f9beaf0c82c2ec55"
+ },
+ "xml:binV3": {
+  "bytes": 103283,
+  "sha": "576459055d4b18ec"
+ },
+ "xml:res2dV3": {
+  "bytes": 164233,
+  "sha": "62ca8184a4d4e3b1"
+ },
+ "xml:res": {
+  "bytes": 161603,
+  "sha": "9fb75176cd0b58f3"
+ },
+ "xml:o0": {
+  "bytes": 639578,
+  "sha": "f76ee13be155942b"
+ },
+ "xml:o1": {
+  "bytes": 301884,
+  "sha": "841b40b55a518364"
+ },
+ "xml:spec10": {
+  "bytes": 12501,
+  "sha": "89e89487c3700dae"
+ },
+ "xml:spec22": {
+  "bytes": 12502,
+  "sha": "87a32a52bc65dfaa"
+ },
+ "xml:spec26": {
+  "bytes": 50384,
+  "sha": "dff6880c33fc0435"
+ },
+ "xml:spec27": {
+  "bytes": 27613,
+  "sha": "14ffc6637410fe8d"
+ },
+ "xml:spec25": {
+  "bytes": 12305,
+  "sha": "7f62c7c2a6f61162"
+ },
+ "xml:spec8": {
+  "bytes": 35516,
+  "sha": "c9f1602dad900589"
+ },
+ "xml:spec13": {
+  "bytes": 11671,
+  "sha": "b47259f6cbacd359"
+ },
+ "osdb:text": {
+  "bytes": 288972,
+  "sha": "50af863821950a33"
+ },
+ "osdb:textV2": {
+  "bytes": 288080,
+  "sha": "b94a38d3ef3208d1"
+ },
+ "osdb:textV3": {
+  "bytes": 282494,
+  "sha": "c73c71293d053dea"
+ },
+ "osdb:bin": {
+  "bytes": 277817,
+  "sha": "28df6bb30858eaa0"
+ },
+ "osdb:binV3": {
+  "bytes": 275986,
+  "sha": "9ada6f796134b290"
+ },
+ "osdb:res2dV3": {
+  "bytes": 374312,
+  "sha": "4ca0004fb3223bb5"
+ },
+ "osdb:res": {
+  "bytes": 352676,
+  "sha": "65ec679868b3dbdd"
+ },
+ "osdb:o0": {
+  "bytes": 865570,
+  "sha": "f7e48d63b42d421c"
+ },
+ "osdb:o1": {
+  "bytes": 676623,
+  "sha": "fab54aab84c9927a"
+ },
+ "osdb:spec10": {
+  "bytes": 76686,
+  "sha": "2b20e423aa44faf5"
+ },
+ "osdb:spec22": {
+  "bytes": 76687,
+  "sha": "fcb14301df5ebca4"
+ },
+ "osdb:spec26": {
+  "bytes": 227974,
+  "sha": "3c5e7ec082340ee9"
+ },
+ "osdb:spec27": {
+  "bytes": 136297,
+  "sha": "bf960ff64fb00ff5"
+ },
+ "osdb:spec25": {
+  "bytes": 76905,
+  "sha": "63372cc1479e62a0"
+ },
+ "osdb:spec8": {
+  "bytes": 172793,
+  "sha": "8f655fd8bb43bf54"
+ },
+ "osdb:spec13": {
+  "bytes": 80552,
+  "sha": "326e2e651b4ec734"
+ },
+ "nci:text": {
+  "bytes": 63385,
+  "sha": "8179ab08813f3616"
+ },
+ "nci:textV2": {
+  "bytes": 63315,
+  "sha": "0282fd651105c715"
+ },
+ "nci:textV3": {
+  "bytes": 62162,
+  "sha": "8bbe4cca9b2ee41b"
+ },
+ "nci:bin": {
+  "bytes": 65601,
+  "sha": "7337c6700979407d"
+ },
+ "nci:binV3": {
+  "bytes": 63386,
+  "sha": "79d4ab53c821ca3d"
+ },
+ "nci:res2dV3": {
+  "bytes": 130637,
+  "sha": "953bdc376caf306a"
+ },
+ "nci:res": {
+  "bytes": 120807,
+  "sha": "8d6247b472dcaa23"
+ },
+ "nci:o0": {
+  "bytes": 316328,
+  "sha": "085e6f3df65e9088"
+ },
+ "nci:o1": {
+  "bytes": 255800,
+  "sha": "1db459ee81032393"
+ },
+ "nci:spec10": {
+  "bytes": 15287,
+  "sha": "178ed1ca2d8872b3"
+ },
+ "nci:spec22": {
+  "bytes": 15288,
+  "sha": "9eed9ee202358f57"
+ },
+ "nci:spec26": {
+  "bytes": 29815,
+  "sha": "0bd41827713e2fa6"
+ },
+ "nci:spec27": {
+  "bytes": 29465,
+  "sha": "2ac6e04e71636caf"
+ },
+ "nci:spec25": {
+  "bytes": 14882,
+  "sha": "53781db23464f5fe"
+ },
+ "nci:spec8": {
+  "bytes": 39754,
+  "sha": "e4a1dd613d4e1853"
+ },
+ "nci:spec13": {
+  "bytes": 14976,
+  "sha": "b572d0d57e899860"
+ },
+ "mozilla:text": {
+  "bytes": 640713,
+  "sha": "86c8f3b04ecd4682"
+ },
+ "mozilla:textV2": {
+  "bytes": 639641,
+  "sha": "a75c83041bf61536"
+ },
+ "mozilla:textV3": {
+  "bytes": 638009,
+  "sha": "eb88e8692f54ad22"
+ },
+ "mozilla:bin": {
+  "bytes": 637607,
+  "sha": "a092a440b3af6e64"
+ },
+ "mozilla:binV3": {
+  "bytes": 637673,
+  "sha": "fe9d50a2bcf3231f"
+ },
+ "mozilla:res2dV3": {
+  "bytes": 689973,
+  "sha": "a4924ba58be53a80"
+ },
+ "mozilla:res": {
+  "bytes": 686933,
+  "sha": "6cda5438d8b4d90f"
+ },
+ "mozilla:o0": {
+  "bytes": 829379,
+  "sha": "29cf09f2c6c86914"
+ },
+ "mozilla:o1": {
+  "bytes": 748863,
+  "sha": "9f9d241aadd58241"
+ },
+ "mozilla:spec10": {
+  "bytes": 114154,
+  "sha": "f5fee1838f9bbe69"
+ },
+ "mozilla:spec22": {
+  "bytes": 114155,
+  "sha": "027138b48f41a904"
+ },
+ "mozilla:spec26": {
+  "bytes": 141185,
+  "sha": "0dbede42beac30af"
+ },
+ "mozilla:spec27": {
+  "bytes": 131153,
+  "sha": "dba927f9fa19e4be"
+ },
+ "mozilla:spec25": {
+  "bytes": 114310,
+  "sha": "137720ec6966ad96"
+ },
+ "mozilla:spec8": {
+  "bytes": 136950,
+  "sha": "a6c04aff03000a37"
+ },
+ "mozilla:spec13": {
+  "bytes": 117395,
+  "sha": "806d9f0d8d4818e0"
+ }
+}

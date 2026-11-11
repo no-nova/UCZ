@@ -1,0 +1,49 @@
+// ONE bounded experiment per process. Invoke with timeout --signal=KILL 19s.
+import { build } from 'esbuild'
+import { spawnSync, execFileSync } from 'node:child_process'
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs'
+import { join, resolve, basename } from 'node:path'
+import { createHash } from 'node:crypto'
+import { patchLibrary } from './patches.mjs'
+const start=performance.now(),[unit,name,variant,rawBytes='65536',rawOffset='0',phase='audit']=process.argv.slice(2)
+const safe=x=>typeof x==='string'&&/^[a-z0-9][a-z0-9_.-]*$/i.test(x)
+if(!['unit1','unit2','unit3','unit4'].includes(unit)||![name,variant,phase].every(safe))throw Error('run.mjs unitN input variant [bytes<=262144] [within-parent offset] [phase]')
+const bytes=Number(rawBytes),offset=Number(rawOffset)
+if(!Number.isSafeInteger(bytes)||bytes<1||bytes>262144||!Number.isSafeInteger(offset)||offset<0||offset+bytes>262144)throw Error('raw window exceeds 256KiB bound')
+const sha=x=>createHash('sha256').update(x).digest('hex')
+const dir=`scripts/diag/p15-results/${unit}`,path=resolve(`${dir}/${name}--${variant}--${bytes}-${offset}--${phase}.json`)
+if(existsSync(path))throw Error(`immutable receipt exists: ${path}`)
+mkdirSync(dir,{recursive:true});mkdirSync('scripts/diag/p15/history',{recursive:true})
+const sourceFiles=Object.fromEntries(readdirSync('src/lib').filter(f=>f.endsWith('.ts')).sort().map(f=>[f,sha(readFileSync(`src/lib/${f}`))]))
+const sourceSha256=sha(JSON.stringify(sourceFiles))
+if(sourceSha256!=='539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65')throw Error('P15.0 must use unchanged P14.1 production')
+function archive(file){const content=readFileSync(file),h=sha(content),to=`scripts/diag/p15/history/${h}-${basename(file)}.txt`;if(existsSync(to)){if(sha(readFileSync(to))!==h)throw Error('corrupt archive')}else writeFileSync(to,content,{flag:'wx'});return h}
+const scripts=Object.fromEntries(readdirSync('scripts/diag/p15').filter(f=>/\.(ts|mjs|json|md)$/.test(f)).sort().map(f=>[f,archive(`scripts/diag/p15/${f}`)]))
+archive('scripts/diag/p14/slices.json')
+for(const f of Object.keys(sourceFiles))archive(`src/lib/${f}`)
+const record={kind:'P15.0-bounded-audit',unit,name,variant,bytes,offset,phase,status:'FAIL',sourceFiles,sourceSha256,scripts,
+ commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),node:process.version,
+ baselineSha256:sha(readFileSync('scripts/diag/baseline.json')),maxRawBytes:262144,maxCMBytes:524288,innerBudgetMs:17000,
+ fullCorpusEncoded:false,productionSourceModified:false,patches:[]}
+try {
+ const folder=resolve(`.diag-state/p15/${unit}-${name}-${variant}-${bytes}-${offset}-${phase}-${process.pid}`),lib=join(folder,'lib')
+ mkdirSync(lib,{recursive:true})
+ for(const f of Object.keys(sourceFiles))writeFileSync(join(lib,f),readFileSync(`src/lib/${f}`))
+ const patch=(file,from,to)=>{const p=join(lib,file),s=readFileSync(p,'utf8');if(s.split(from).length!==2)throw Error(`expected unique ${file} patch: ${from.slice(0,100)}`);writeFileSync(p,s.replace(from,to));record.patches.push({file,from,to})}
+ patchLibrary(patch,f=>readFileSync(join(lib,f),'utf8'))
+ record.experimentalFiles=Object.fromEntries(Object.keys(sourceFiles).map(f=>[f,sha(readFileSync(join(lib,f)))]))
+ const bundle=join(folder,'probe.cjs')
+ await build({entryPoints:[`scripts/diag/p15/${unit}.ts`],bundle:true,platform:'node',format:'cjs',outfile:bundle,logLevel:'silent',plugins:[{name:'isolated-research',setup(b){
+  b.onResolve({filter:/^@lib\//},a=>({path:join(lib,a.path.slice(5)+'.ts')}))
+  b.onResolve({filter:/^@stock\//},a=>({path:resolve('src/lib',a.path.slice(7)+'.ts')}))
+ }}]})
+ record.bundleSha256=sha(readFileSync(bundle))
+ const child=spawnSync(process.execPath,[bundle,name,variant,String(bytes),String(offset)],{encoding:'utf8',timeout:Math.max(1,17000-Math.ceil(performance.now()-start)),killSignal:'SIGKILL',maxBuffer:8*1024*1024,env:{...process.env,UCZ_THREADS:'1'}})
+ Object.assign(record,{status:child.status===0&&!child.error?'PASS':'FAIL',exitCode:child.status,signal:child.signal,timedOut:child.error?.code==='ETIMEDOUT',error:child.error?.message,stdout:child.stdout,stderr:child.stderr})
+ if(record.status==='PASS')record.result=JSON.parse(child.stdout.trim().split('\n').at(-1))
+} catch(e){record.error=String(e?.stack??e)}
+record.durationMs=Math.round(performance.now()-start)
+for(const [f,h] of Object.entries(sourceFiles))if(sha(readFileSync(`src/lib/${f}`))!==h)throw Error(`PRODUCTION MUTATED: ${f}`)
+writeFileSync(path,JSON.stringify(record,null,2)+'\n',{flag:'wx'})
+console.log(JSON.stringify({receipt:path,status:record.status,durationMs:record.durationMs,result:record.result,error:record.error}))
+if(record.status!=='PASS'){if(record.stderr)console.error(record.stderr);process.exitCode=1}

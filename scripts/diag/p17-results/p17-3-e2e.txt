@@ -1,0 +1,27 @@
+P17.3 12-slice end-to-end (<=256 KiB each, serial), branch arena/1220f47e-test
+Baseline fd6385a = 773,804 B. After P17.3 = 773,804 B. Delta = 0 (0 wins / 0 regressions).
+
+dickens-mid     v22   69519  rt=true   accepted=false
+mozilla-mid     v22   80206  rt=true   accepted=false
+mr-mid          v21   48795  rt=true   accepted=false
+nci-mid         v22   13662  rt=true   accepted=false
+ooffice-mid     v20  100189  rt=true   accepted=false
+osdb-mid        v22   72355  rt=true   accepted=false
+reymont-mid     v15   48941  rt=true   accepted=false
+samba-c         v22   32130  rt=true   accepted=false
+sao-mid         v20  131922  rt=true   accepted=false
+webster-mid     v22   56350  rt=true   accepted=false
+xml-mid         v22    4501  rt=true   accepted=false
+x-ray-mid       v20  115234  rt=true   accepted=false
+
+Total 773,804 B.
+
+Why zero wins: P17.3 wired BCJ into v21/v22 (fixed three gate omissions plus a
+dropped transform), audited the transpose upgrade pipeline, and confirmed the
+id 18/19 single-part defect is already gone. On every real slice the strict
+P_new < P_old && C_new < C_old gate refused the candidates:
+  - ooffice-mid: 13/13 groups are BCJ3(MSB25,s=2). v20 = 100,139 B vs
+    bin-stride4 = 100,673 B (+534 B) and +matchDist = 100,647 B. BCJ3's bin
+    model already covers the structure the stride-4 context re-models.
+  - mozilla-code / mozilla-code-late: id24 bin-stride4 + matchDist IS accepted
+    (v22) - that path was already live and is unaffected.

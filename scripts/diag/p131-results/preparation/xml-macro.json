@@ -1,0 +1,366 @@
+{
+  "commit": "51ced1f2826ec84c088c46302a8271b9d5fc64ae",
+  "file": "xml",
+  "scope": "macro",
+  "node": "v22.22.3",
+  "probeSha256": "04b3f01fe4e5cd5331bec3b5c3d272dc118f42882e5d0d791c40ffeb90b0821b",
+  "runnerSha256": "5c2131e6084575ed479b048d46a52281377cca39e40945f055b3da437c31702d",
+  "bundleSha256": "136f6f38686f7d7c178cf4bc5cc37229b25fc43a70dc009b07ce1b7528497e1e",
+  "status": "PASS",
+  "durationMs": 5254,
+  "stdout": "{\"file\":\"xml\",\"scope\":\"macro\",\"inputBytes\":5345280,\"inputSha256\":\"0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c\",\"selection\":\"all analyze() non-FILL segments, direct macro TEXT_V3 hypothesis; not a full container\",\"analysisSegments\":[{\"start\":0,\"end\":162816,\"cls\":\"text\"},{\"start\":162816,\"end\":163840,\"cls\":\"repeat\"},{\"start\":163840,\"end\":416256,\"cls\":\"text\"},{\"start\":416256,\"end\":417280,\"cls\":\"repeat\"},{\"start\":417280,\"end\":596480,\"cls\":\"text\"},{\"start\":596480,\"end\":597504,\"cls\":\"repeat\"},{\"start\":597504,\"end\":986624,\"cls\":\"text\"},{\"start\":986624,\"end\":987648,\"cls\":\"repeat\"},{\"start\":987648,\"end\":1267200,\"cls\":\"text\"},{\"start\":1267200,\"end\":1268224,\"cls\":\"repeat\"},{\"start\":1268224,\"end\":1278464,\"cls\":\"text\"},{\"start\":1278464,\"end\":1279488,\"cls\":\"repeat\"},{\"start\":1279488,\"end\":1948672,\"cls\":\"text\"},{\"start\":1948672,\"end\":1949696,\"cls\":\"repeat\"},{\"start\":1949696,\"end\":2565632,\"cls\":\"text\"},{\"start\":2565632,\"end\":2566656,\"cls\":\"repeat\"},{\"start\":2566656,\"end\":3300864,\"cls\":\"text\"},{\"start\":3300864,\"end\":3301888,\"cls\":\"repeat\"},{\"start\":3301888,\"end\":3811840,\"cls\":\"text\"},{\"start\":3811840,\"end\":3812864,\"cls\":\"repeat\"},{\"start\":3812864,\"end\":4064256,\"cls\":\"text\"},{\"start\":4064256,\"end\":4065280,\"cls\":\"repeat\"},{\"start\":4065280,\"end\":4353024,\"cls\":\"text\"},{\"start\":4353024,\"end\":4354048,\"cls\":\"repeat\"},{\"start\":4354048,\"end\":4360192,\"cls\":\"text\"},{\"start\":4360192,\"end\":4361216,\"cls\":\"repeat\"},{\"start\":4361216,\"end\":4581888,\"cls\":\"text\"},{\"start\":4581888,\"end\":4582912,\"cls\":\"repeat\"},{\"start\":4582912,\"end\":4779008,\"cls\":\"text\"},{\"start\":4779008,\"end\":4780032,\"cls\":\"repeat\"},{\"start\":4780032,\"end\":4981760,\"cls\":\"text\"},{\"start\":4981760,\"end\":4982784,\"cls\":\"repeat\"},{\"start\":4982784,\"end\":5087744,\"cls\":\"text\"},{\"start\":5087744,\"end\":5088768,\"cls\":\"repeat\"},{\"start\":5088768,\"end\":5336064,\"cls\":\"text\"},{\"start\":5336064,\"end\":5337088,\"cls\":\"repeat\"},{\"start\":5337088,\"end\":5339332,\"cls\":\"text\"},{\"start\":5339332,\"end\":5345280,\"cls\":\"fill\"}],\"positions\":[0,162816,163840,416256,417280,596480,597504,986624,987648,1267200,1268224,1278464,1279488,1948672,1949696,2565632,2566656,3300864,3301888,3811840,3812864,4064256,4065280,4353024,4354048,4360192,4361216,4581888,4582912,4779008,4780032,4981760,4982784,5087744,5088768,5336064,5337088],\"lengths\":[162816,1024,252416,1024,179200,1024,389120,1024,279552,1024,10240,1024,669184,1024,615936,1024,734208,1024,509952,1024,251392,1024,287744,1024,6144,1024,220672,1024,196096,1024,201728,1024,104960,1024,247296,1024,2244],\"rawBytes\":5339332,\"rawSha256\":\"8f56324f64c3b49fe7be486eb25511a8f13a06ea09932e6fbc03ff8a43227ab2\",\"bodyBytes\":4007386,\"bodySha256\":\"443ba874d9e74a0e573d690cb869d9542d035a7822e3ed94c342b2fc0a7826e4\",\"dictionaryBytes\":559,\"headerSha256\":\"4c677acf73203146c76d116e0e2af2179591d1e9c497d33de19706dfc874d6fa\",\"dict\":[\"><Cvar><string val\",\"    <\",\"><list></list></\",\"</GAMES><GAMES_STARTED>\",\"</LINE>\",\"><string val\",\"</SURNAME><GIVEN_NAME>\",\"></\",\"_BATTER>\",\"><list></list><\",\"SACRIFICE_\",\"/></Cvar><\",\"><none></none></\",\"<LINE>\",\"STRUCK_OUT\",\"S><\",\"GAMES_STARTED>\",\"ES>\",\"><C\",\"GIVEN_NAME>\",\"></C\",\"><int val\",\"></list><\",\"><list><\",\"GAMES\",\"Cvar><string val\",\"      \",\"NAME>\",\"          \",\"></list></\",\"string val\",\" val\",\"list><\",\"string\",\"><none></none><\",\"ing \",\"</C\",\"LIN\",\"        \",\"r><string val\",\"t><\",\"none></none></\",\"/list><\",\"ist\",\"></li\",\"list\",\"list>\",\"     \",\"   \",\"ring \",\"string \",\"st>\",\"       \",\"         \",\"list></list></\",\"list></list><\",\"none></none><\",\"   <\",\"tring \"],\"collapse\":0.7505407043427904,\"analysisMs\":1000,\"prepareMs\":4164,\"totalMs\":5191,\"sourceFiles\":{\"analyze.ts\":\"7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9\",\"wordpre.ts\":\"4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b\"},\"cmCalls\":0}\n",
+  "stderr": "",
+  "result": {
+    "file": "xml",
+    "scope": "macro",
+    "inputBytes": 5345280,
+    "inputSha256": "0e82e54e695c1938e4193448022543845b33020c8be6bf3bf3ead2224903e08c",
+    "selection": "all analyze() non-FILL segments, direct macro TEXT_V3 hypothesis; not a full container",
+    "analysisSegments": [
+      {
+        "start": 0,
+        "end": 162816,
+        "cls": "text"
+      },
+      {
+        "start": 162816,
+        "end": 163840,
+        "cls": "repeat"
+      },
+      {
+        "start": 163840,
+        "end": 416256,
+        "cls": "text"
+      },
+      {
+        "start": 416256,
+        "end": 417280,
+        "cls": "repeat"
+      },
+      {
+        "start": 417280,
+        "end": 596480,
+        "cls": "text"
+      },
+      {
+        "start": 596480,
+        "end": 597504,
+        "cls": "repeat"
+      },
+      {
+        "start": 597504,
+        "end": 986624,
+        "cls": "text"
+      },
+      {
+        "start": 986624,
+        "end": 987648,
+        "cls": "repeat"
+      },
+      {
+        "start": 987648,
+        "end": 1267200,
+        "cls": "text"
+      },
+      {
+        "start": 1267200,
+        "end": 1268224,
+        "cls": "repeat"
+      },
+      {
+        "start": 1268224,
+        "end": 1278464,
+        "cls": "text"
+      },
+      {
+        "start": 1278464,
+        "end": 1279488,
+        "cls": "repeat"
+      },
+      {
+        "start": 1279488,
+        "end": 1948672,
+        "cls": "text"
+      },
+      {
+        "start": 1948672,
+        "end": 1949696,
+        "cls": "repeat"
+      },
+      {
+        "start": 1949696,
+        "end": 2565632,
+        "cls": "text"
+      },
+      {
+        "start": 2565632,
+        "end": 2566656,
+        "cls": "repeat"
+      },
+      {
+        "start": 2566656,
+        "end": 3300864,
+        "cls": "text"
+      },
+      {
+        "start": 3300864,
+        "end": 3301888,
+        "cls": "repeat"
+      },
+      {
+        "start": 3301888,
+        "end": 3811840,
+        "cls": "text"
+      },
+      {
+        "start": 3811840,
+        "end": 3812864,
+        "cls": "repeat"
+      },
+      {
+        "start": 3812864,
+        "end": 4064256,
+        "cls": "text"
+      },
+      {
+        "start": 4064256,
+        "end": 4065280,
+        "cls": "repeat"
+      },
+      {
+        "start": 4065280,
+        "end": 4353024,
+        "cls": "text"
+      },
+      {
+        "start": 4353024,
+        "end": 4354048,
+        "cls": "repeat"
+      },
+      {
+        "start": 4354048,
+        "end": 4360192,
+        "cls": "text"
+      },
+      {
+        "start": 4360192,
+        "end": 4361216,
+        "cls": "repeat"
+      },
+      {
+        "start": 4361216,
+        "end": 4581888,
+        "cls": "text"
+      },
+      {
+        "start": 4581888,
+        "end": 4582912,
+        "cls": "repeat"
+      },
+      {
+        "start": 4582912,
+        "end": 4779008,
+        "cls": "text"
+      },
+      {
+        "start": 4779008,
+        "end": 4780032,
+        "cls": "repeat"
+      },
+      {
+        "start": 4780032,
+        "end": 4981760,
+        "cls": "text"
+      },
+      {
+        "start": 4981760,
+        "end": 4982784,
+        "cls": "repeat"
+      },
+      {
+        "start": 4982784,
+        "end": 5087744,
+        "cls": "text"
+      },
+      {
+        "start": 5087744,
+        "end": 5088768,
+        "cls": "repeat"
+      },
+      {
+        "start": 5088768,
+        "end": 5336064,
+        "cls": "text"
+      },
+      {
+        "start": 5336064,
+        "end": 5337088,
+        "cls": "repeat"
+      },
+      {
+        "start": 5337088,
+        "end": 5339332,
+        "cls": "text"
+      },
+      {
+        "start": 5339332,
+        "end": 5345280,
+        "cls": "fill"
+      }
+    ],
+    "positions": [
+      0,
+      162816,
+      163840,
+      416256,
+      417280,
+      596480,
+      597504,
+      986624,
+      987648,
+      1267200,
+      1268224,
+      1278464,
+      1279488,
+      1948672,
+      1949696,
+      2565632,
+      2566656,
+      3300864,
+      3301888,
+      3811840,
+      3812864,
+      4064256,
+      4065280,
+      4353024,
+      4354048,
+      4360192,
+      4361216,
+      4581888,
+      4582912,
+      4779008,
+      4780032,
+      4981760,
+      4982784,
+      5087744,
+      5088768,
+      5336064,
+      5337088
+    ],
+    "lengths": [
+      162816,
+      1024,
+      252416,
+      1024,
+      179200,
+      1024,
+      389120,
+      1024,
+      279552,
+      1024,
+      10240,
+      1024,
+      669184,
+      1024,
+      615936,
+      1024,
+      734208,
+      1024,
+      509952,
+      1024,
+      251392,
+      1024,
+      287744,
+      1024,
+      6144,
+      1024,
+      220672,
+      1024,
+      196096,
+      1024,
+      201728,
+      1024,
+      104960,
+      1024,
+      247296,
+      1024,
+      2244
+    ],
+    "rawBytes": 5339332,
+    "rawSha256": "8f56324f64c3b49fe7be486eb25511a8f13a06ea09932e6fbc03ff8a43227ab2",
+    "bodyBytes": 4007386,
+    "bodySha256": "443ba874d9e74a0e573d690cb869d9542d035a7822e3ed94c342b2fc0a7826e4",
+    "dictionaryBytes": 559,
+    "headerSha256": "4c677acf73203146c76d116e0e2af2179591d1e9c497d33de19706dfc874d6fa",
+    "dict": [
+      "><Cvar><string val",
+      "    <",
+      "><list></list></",
+      "</GAMES><GAMES_STARTED>",
+      "</LINE>",
+      "><string val",
+      "</SURNAME><GIVEN_NAME>",
+      "></",
+      "_BATTER>",
+      "><list></list><",
+      "SACRIFICE_",
+      "/></Cvar><",
+      "><none></none></",
+      "<LINE>",
+      "STRUCK_OUT",
+      "S><",
+      "GAMES_STARTED>",
+      "ES>",
+      "><C",
+      "GIVEN_NAME>",
+      "></C",
+      "><int val",
+      "></list><",
+      "><list><",
+      "GAMES",
+      "Cvar><string val",
+      "      ",
+      "NAME>",
+      "          ",
+      "></list></",
+      "string val",
+      " val",
+      "list><",
+      "string",
+      "><none></none><",
+      "ing ",
+      "</C",
+      "LIN",
+      "        ",
+      "r><string val",
+      "t><",
+      "none></none></",
+      "/list><",
+      "ist",
+      "></li",
+      "list",
+      "list>",
+      "     ",
+      "   ",
+      "ring ",
+      "string ",
+      "st>",
+      "       ",
+      "         ",
+      "list></list></",
+      "list></list><",
+      "none></none><",
+      "   <",
+      "tring "
+    ],
+    "collapse": 0.7505407043427904,
+    "analysisMs": 1000,
+    "prepareMs": 4164,
+    "totalMs": 5191,
+    "sourceFiles": {
+      "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+    },
+    "cmCalls": 0
+  }
+}

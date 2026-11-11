@@ -1,0 +1,249 @@
+{
+  "kind": "P15.0-bounded-audit",
+  "unit": "unit1",
+  "name": "samba-mid",
+  "variant": "sub8-stride4",
+  "bytes": 65536,
+  "offset": 0,
+  "phase": "main",
+  "status": "PASS",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "cc8f9bbe23e3849473cc8c93ed077e027017b52a96364470a55764d062e9e530",
+    "coder.ts": "424d87a1d85d380f3019f7b18269135020049dcba428297c158227596c6d08aa",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "sourceSha256": "539d10e904c8d677273b8f6d8755ba30c7bc53d44351766500e6a7bccea5ea65",
+  "scripts": {
+    "PLAN.md": "9a40a368e3d9606437c7aeff6a29b1dee2b7e91602cecc2c2d78efaed09fdb7c",
+    "common.ts": "3a1d5435b6fcf04b9b2a88adae318fd415113c472ce93980618587e4ae7a9366",
+    "dual-append.ts": "11485e6f76875ca0e27663675d1937acff7b7813b9a4b03bad207443f5e9f301",
+    "patches.mjs": "f038ccccc1f834b0bf28cfede438f36dcdd7f8dd2241f5d3c80fb87dfd7ec36e",
+    "rec2.ts": "1b8aa37147409355c23495bb20bbe9e20e6eef00c18db44310cc076a5073f60b",
+    "run.mjs": "d472bcea8c8b2f1166177739f0152c277d0bf8005f85ef37f27061e31d2511f4",
+    "unit1.ts": "2759c08fb68abb9bec5c684be53bd1977a3224bc061acdec92561a9d1528a0a4",
+    "unit2.ts": "3781f617c6d7db0c8c90018685e8e551631deedbe877a2f716ec73c5d16d41f3",
+    "unit3.ts": "1cd7231002fcaeab959e2c24203a27f47c7763f277cb6da613b5450967f85e2c",
+    "unit4.ts": "7565da3bbc630f3a08236ab9e53e06c56f8cfbfd7e1f5c7a267e334afcd5b6e2"
+  },
+  "commit": "dcf80573cb31172c9a876aaa0346cc7748c26f96",
+  "node": "v22.22.3",
+  "baselineSha256": "6cb5eed94431cb53d30af6ce0ecf19f69a03e166841f229aafd8691fb26671e6",
+  "maxRawBytes": 262144,
+  "maxCMBytes": 524288,
+  "innerBudgetMs": 17000,
+  "fullCorpusEncoded": false,
+  "productionSourceModified": false,
+  "patches": [
+    {
+      "file": "coder.ts",
+      "from": "import { ByteWriter } from './byte-writer'",
+      "to": "import { ByteWriter } from './byte-writer'\nexport const p15 = {binStride:false,textContext:'control',resContext:'control'}\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "class Model {",
+      "to": "class Model {\n  p15Peer?:Model\n  p15NumHash=0; p15NumLen=0; p15Field=0; p15ClassHist=0; p15PunctDistance=0\n\n  private p15TextHash(old:number,b1:number,b2:number,b3:number,b4:number):number {\n    switch(p15.textContext) {\n      case 'numfield':return this.p15NumLen>0||b1===58 ? hh(this.p15NumHash&4095,this.p15NumLen&15,this.p15Field&7,b1) : old\n      case 'numclass':return this.p15NumLen>0||b1===58 ? hh(this.p15ClassHist&511,b1,this.p15NumLen&15,this.p15Field&7) : old\n      case 'puncword':return hh(this.p15ClassHist&63,this.curWord||this.prevWord,Math.min(15,this.p15PunctDistance))\n      case 'sparse5':return hh(b1,b3,this.g(5))\n      case 'control':return old\n      default:throw Error('unknown P15 text experiment')\n    }\n  }\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "wordTokens = false, options?: CMOptions) {\n    this.context = options?.context",
+      "to": "wordTokens = false, options?: CMOptions, p15Peer?:Model) {\n    this.p15Peer=p15Peer\n    if(p15Peer)this.msm=p15Peer.msm\n    this.context = options?.context"
+    },
+    {
+      "file": "coder.ts",
+      "from": "    this.buf = new Uint8Array(n + 1)",
+      "to": "    this.buf = p15Peer?.buf ?? new Uint8Array(n + 1)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "      this.tables.push(new Uint32Array(1 << bits).fill(32768 << 16))",
+      "to": "      this.tables.push(p15Peer && i<8 ? p15Peer.tables[i] : new Uint32Array(1 << bits).fill(32768 << 16))"
+    },
+    {
+      "file": "coder.ts",
+      "from": "    this.mht = new Int32Array(this.useMatch ? 1 << mhBits : 1)",
+      "to": "    this.mht = p15Peer?.mht ?? new Int32Array(this.useMatch ? 1 << mhBits : 1)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "      this.mht8 = new Int32Array(1 << mh8Bits)",
+      "to": "      this.mht8 = p15Peer?.mht8 ?? new Int32Array(1 << mh8Bits)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "      for (let i = 0; i < nctx; i++) {\n        let h = Math.imul(hashes[i] ^ cm, 0x85ebca6b)\n        h ^= h >>> 15\n        idx[i] = h >>> shift\n      }\n      for (let i = 0; i < nctx; i++) {\n        inputs[i] = STRETCH_l[(tables[i][idx[i]] >>> 16) >>> 4]\n      }",
+      "to": "      const peer=this.p15Peer,first=peer?8:0\n      if(peer)for(let i=0;i<8;i++){idx[i]=peer.idx[i];inputs[i]=peer.inputs[i]}\n      for (let i = first; i < nctx; i++) {\n        let h = Math.imul(hashes[i] ^ cm, 0x85ebca6b)\n        h ^= h >>> 15\n        idx[i] = h >>> shift\n      }\n      for (let i = first; i < nctx; i++) {\n        inputs[i] = STRETCH_l[(tables[i][idx[i]] >>> 16) >>> 4]\n      }"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  learn(y: number, prOverride?: number): void {\n    const nctx = this.nctx, N = this.ninputs\n    const inputs = this.inputs, idx = this.idx, weights = this.weights\n    const tables = this.tables, limit = this.limit\n    const err = ((y << 12) - (prOverride ?? this.pr)) * 8\n    const wb = this.wbase\n    for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + 0x8000) >> 16\n    if (this.dualPass) {\n      // v13 的第二套权重：误差项用上游概率（不含辅混洗，保证 base 流不被污染）。\n      const aw = this.altWeights, wb2 = this.altWbase\n      const err2 = ((y << 12) - this.altPr) * 8\n      for (let i = 0; i < N; i++) aw[wb2 + i] += (inputs[i] * err2 + 0x8000) >> 16\n    }\n    const w2 = this.weights2\n    if (this.isV15 && w2) {\n      // 辅权重用**校准后**的误差（与主权重一致），学习率减半。\n      const err3 = ((y << 12) - (prOverride ?? this.pr)) * (this.isV20 ? 2 : mixer2Tuning.lr2)\n      const wb3 = this.wbase2\n      for (let i = 0; i < N; i++) w2[wb3 + i] += (inputs[i] * err3 + 0x8000) >> 16\n    }\n    const target = y ? 65535 : 0\n    for (let i = 0; i < nctx; i++) {\n      const t = tables[i]\n      const k = idx[i]\n      const e = t[k]\n      const p = e >>> 16\n      const n = e & 255\n      // 一次读、一次写：概率与计数打包在同一字里。\n      t[k] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < limit ? n + 1 : n)\n    }\n    if (this.useApm) {\n      // 插值表的标准 SGD：两端各按权重向目标移动，权重和恰好等于 1。\n      const target = y ? 65535 : 0\n      const base = this.apmBase, tw = this.apmT\n      const a = tw[base]\n      tw[base] = a + ((target - a) >> apmTuning.rate)\n      const b = tw[base + 1]\n      tw[base + 1] = b + ((target - b) >> apmTuning.rate)\n      if (this.apm2On) {\n        const t2 = this.apm2T, b2 = this.apm2Base\n        const x2 = t2[b2]\n        t2[b2] = x2 + ((target - x2) >> apm2Tuning.rate)\n        const y2 = t2[b2 + 1]\n        t2[b2 + 1] = y2 + ((target - y2) >> apm2Tuning.rate)\n      }\n    }\n    const mi = this.mIdx\n    if (mi >= 0) {\n      const ok = this.mExpect === y ? 65535 : 0\n      if (this.matchStats) { this.matchStats.predictedBits++; if (ok) this.matchStats.correctBits++ }\n      const q = this.msm[mi]\n      this.msm[mi] = q + ((ok - q) >> 5)\n    }\n    this.c0 = (this.c0 << 1) | y\n    this.bit++\n    if (this.bit === 8) {\n      const byte = this.c0 & 255\n      this.buf[this.pos] = byte\n      this.pos++\n      this.c0 = 1\n      this.bit = 0\n      this.byteUpdate(byte)\n    }\n  }\n",
+      "to": "  learn(y: number, prOverride?: number): void {\n    const nctx = this.nctx, N = this.ninputs\n    const inputs = this.inputs, idx = this.idx, weights = this.weights\n    const tables = this.tables, limit = this.limit\n    const err = ((y << 12) - (prOverride ?? this.pr)) * 8\n    const wb = this.wbase\n    for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + 0x8000) >> 16\n    if (this.dualPass) {\n      // v13 的第二套权重：误差项用上游概率（不含辅混洗，保证 base 流不被污染）。\n      const aw = this.altWeights, wb2 = this.altWbase\n      const err2 = ((y << 12) - this.altPr) * 8\n      for (let i = 0; i < N; i++) aw[wb2 + i] += (inputs[i] * err2 + 0x8000) >> 16\n    }\n    const w2 = this.weights2\n    if (this.isV15 && w2) {\n      // 辅权重用**校准后**的误差（与主权重一致），学习率减半。\n      const err3 = ((y << 12) - (prOverride ?? this.pr)) * (this.isV20 ? 2 : mixer2Tuning.lr2)\n      const wb3 = this.wbase2\n      for (let i = 0; i < N; i++) w2[wb3 + i] += (inputs[i] * err3 + 0x8000) >> 16\n    }\n    const target = y ? 65535 : 0\n    for (let i = this.p15Peer ? 8 : 0; i < nctx; i++) {\n      const t = tables[i]\n      const k = idx[i]\n      const e = t[k]\n      const p = e >>> 16\n      const n = e & 255\n      // 一次读、一次写：概率与计数打包在同一字里。\n      t[k] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < limit ? n + 1 : n)\n    }\n    if (this.useApm) {\n      // 插值表的标准 SGD：两端各按权重向目标移动，权重和恰好等于 1。\n      const target = y ? 65535 : 0\n      const base = this.apmBase, tw = this.apmT\n      const a = tw[base]\n      tw[base] = a + ((target - a) >> apmTuning.rate)\n      const b = tw[base + 1]\n      tw[base + 1] = b + ((target - b) >> apmTuning.rate)\n      if (this.apm2On) {\n        const t2 = this.apm2T, b2 = this.apm2Base\n        const x2 = t2[b2]\n        t2[b2] = x2 + ((target - x2) >> apm2Tuning.rate)\n        const y2 = t2[b2 + 1]\n        t2[b2 + 1] = y2 + ((target - y2) >> apm2Tuning.rate)\n      }\n    }\n    const mi = this.mIdx\n    if (mi >= 0 && !this.p15Peer) {\n      const ok = this.mExpect === y ? 65535 : 0\n      if (this.matchStats) { this.matchStats.predictedBits++; if (ok) this.matchStats.correctBits++ }\n      const q = this.msm[mi]\n      this.msm[mi] = q + ((ok - q) >> 5)\n    }\n    this.c0 = (this.c0 << 1) | y\n    this.bit++\n    if (this.bit === 8) {\n      const byte = this.c0 & 255\n      this.buf[this.pos] = byte\n      this.pos++\n      this.c0 = 1\n      this.bit = 0\n      this.byteUpdate(byte)\n    }\n  }\n"
+    },
+    {
+      "file": "coder.ts",
+      "from": "    if (this.useMatch) {\n      const buf = this.buf",
+      "to": "    if (this.p15Peer) {\n      const p=this.p15Peer\n      this.mlen=p.mlen;this.mptr=p.mptr;this.mbyte=p.mbyte;this.lastDist=p.lastDist;this.gapLeft=p.gapLeft\n    } else if (this.useMatch) {\n      const buf = this.buf"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  private byteUpdate(byte: number) {",
+      "to": "  private byteUpdate(byte: number) {\n    if(p15.textContext!=='control'&&(this.profile==='text'||this.profile==='bin')) {\n      const digit=byte>=48&&byte<=57\n      if(digit){this.p15NumHash=(Math.imul(this.p15NumHash,257)+byte-47)>>>0;this.p15NumLen++}\n      else {this.p15NumHash=0;this.p15NumLen=0}\n      if(byte===10)this.p15Field=0;else if(byte===58)this.p15Field++\n      this.p15ClassHist=((this.p15ClassHist<<3)|charClass8(byte))&4095\n      const lower=byte|32,alnum=digit||(lower>=97&&lower<=122)\n      this.p15PunctDistance=alnum?Math.min(63,this.p15PunctDistance+1):0\n    }"
+    },
+    {
+      "file": "coder.ts",
+      "from": "H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : hh(b1,b3,b4);return",
+      "to": "H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : hh(b1,b3,b4);if(this.isV20&&!this.wordTokens&&p15.textContext!=='control')H[8]=this.p15TextHash(H[8],b1,b2,b3,b4);return"
+    },
+    {
+      "file": "coder.ts",
+      "from": "        if(this.isV20)this.computeGeometry(b1,b2)\n        return",
+      "to": "        if(this.isV20)this.computeGeometry(b1,b2)\n        if(this.isV20&&p15.binStride)H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)\n        if(this.isV20&&p15.textContext!=='control')H[8]=this.p15TextHash(H[8],b1,b2,b3,b4)\n        return"
+    },
+    {
+      "file": "coder.ts",
+      "from": "if(this.isV20)this.computeGeometry(b1,b2); return",
+      "to": "if(this.isV20)this.computeGeometry(b1,b2); if(this.isV20&&p15.resContext==='gradclass')H[8]=hh(phase,QV[gs],QV[gr],QV[(gs-gr)&255]); return"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  const n = data.length\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens, options)",
+      "to": "  const n = data.length\n  if(n>524288)throw Error(\"P15 CM input cap\")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, matchStats, wordTokens, options)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens, options)",
+      "to": "  if(n>524288)throw Error(\"P15 CM decode cap\")\n  const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens, options)"
+    },
+    {
+      "file": "coder.ts",
+      "from": "export type CMVariant = boolean | 'v13' | 'v15' | 'v20'",
+      "to": "// Appended to the isolated coder.ts, never imported by production.\n// Requires patchLibrary's per-model peer hooks. Only the H8 table differs.\nexport function encodeCMContextDual(data:Uint8Array, context:'bin-stride4'|'wp-token3') {\n  if(context!=='bin-stride4'&&context!=='wp-token3')throw Error('only H8-compatible contexts may share')\n  if(p15.binStride||p15.textContext!=='control'||p15.resContext!=='control')throw Error('dual sharing requires unchanged H0..7 topology')\n  const n=data.length;if(n>524288)throw Error('P15 dual CM budget')\n  const profile=context==='bin-stride4'?'bin':'text',wordTokens=context==='wp-token3'\n  const base=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens)\n  const alt=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens,{context},base)\n  for(let k=0;k<8;k++)if(base.tables[k]!==alt.tables[k])throw Error('tables not actually shared')\n  if(base.mht!==alt.mht||base.mht8!==alt.mht8||base.msm!==alt.msm||base.buf!==alt.buf)throw Error('match/input not shared')\n  if(base.apm2On!==alt.apm2On||base.weights===alt.weights||(base.weights2&&base.weights2===alt.weights2)||base.apmT===alt.apmT||(base.apm2T&&base.apm2T===alt.apm2T))throw Error('stream-specific learning must be independent')\n  const bOut=new ByteWriter(),aOut=new ByteWriter()\n  let b1=0,b2=0xffffffff,a1=0,a2=0xffffffff\n  for(let i=0;i<n;i++)for(let bit=7;bit>=0;bit--){\n    const y=(data[i]>>>bit)&1\n    // Both predictions MUST see the same pre-update shared tables/MSM.\n    const bp=base.step(y,true),ap=alt.step(y,true)\n    let x=mid(b1,b2,bp);if(y)b2=x;else b1=x+1\n    x=mid(a1,a2,ap);if(y)a2=x;else a1=x+1\n    // Base writes shared tables/MSM/match state ONCE. Alt learns its H8,\n    // weights, secondary weights, a1/a2 only; at byte boundaries it copies\n    // the newly updated match pointers without inserting again into mht.\n    base.learn(y);alt.learn(y)\n    while(((b1^b2)&0xff000000)===0){bOut.push(b2>>>24);b1=(b1<<8)>>>0;b2=((b2<<8)|255)>>>0}\n    while(((a1^a2)&0xff000000)===0){aOut.push(a2>>>24);a1=(a1<<8)>>>0;a2=((a2<<8)|255)>>>0}\n  }\n  const flush=(x1:number,x2:number,out:ByteWriter)=>{\n    for(let k=0;k<=4;k++){\n      const unit=2**(32-8*k),v=Math.ceil(x1/unit)*unit\n      if(v<=x2&&v<4294967296){for(let j=0;j<k;j++)out.push(Math.floor(v/2**(24-8*j))&255);break}\n    }return out.finish()\n  }\n  const sharedTableBytes=base.tables.slice(0,8).reduce((n,t)=>n+t.byteLength,0)\n  const sharedMatchBytes=base.mht.byteLength+(base.mht8?.byteLength??0)+base.msm.byteLength\n  return {base:markPayloadModel(flush(b1,b2,bOut),n?base.requiredFlags:0),alt:markPayloadModel(flush(a1,a2,aOut),n?alt.requiredFlags:0),\n    sharing:{sharedTableCount:8,sharedTableBytes,sharedMatchBytes,sharedInputBytes:base.buf.byteLength,\n      // Exact live typed-array accounting, NOT measured peak RSS.\n      avoidedDuplicateBytes:sharedTableBytes+sharedMatchBytes+base.buf.byteLength,\n      independentMixerAndApm:true,geometry:base.geometry}}\n}\n\nexport type CMVariant = boolean | 'v13' | 'v15' | 'v20'"
+    },
+    {
+      "file": "codec.ts",
+      "from": "function gatherGroup(",
+      "to": "export function gatherGroup("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function groupDelta(",
+      "to": "export function groupDelta("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function planColumnGroups(",
+      "to": "export function planColumnGroups("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function encodeGroupData(",
+      "to": "export function encodeGroupData("
+    },
+    {
+      "file": "codec.ts",
+      "from": "function encodeGroupedTranspose(",
+      "to": "export function encodeGroupedTranspose("
+    }
+  ],
+  "experimentalFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "4145aa74625f590bfa46ebd15048ea4405b63242bee0dd890932823027dd318f",
+    "codec.ts": "e0ba3da49c80b53664121d37ae23425672a01a6f1e17b4512173c8dd055c83f4",
+    "coder.ts": "9d4b067fef0bce07e7b61e0f122a7d3c5317bc2fc707bb2a2de7de729e4250e4",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "context-policy.ts": "43a447d95cdfbfb44360a65f25af4b96650789a8391bab87f3f49bbf67293dd2",
+    "group-policy.ts": "2d1c2998884468c3e8ec4093b554e3a887b8b9cff2e1bd830e01acd894328827",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "da2273eaf2dde11b89ab9e2839dec8ee7272913904b44aa8e4d166718ff68e18",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "ca71eb1e0000401030e3930240081e92b4ee732b5534d82c2fa79ff6fd9d25c5",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "95baf9d654f6f059fe8f42e9ba5b5ac434b8e85397b27e7c135d14de55951c96",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "546e0975c2dd89c2f9a3d61e6f090d9fdaae642061e5b63b95fc767c4d2d12a2",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "bundleSha256": "d1bcaf039f2b3a06ebfea20449182ad1197a4c2dd978841371648ad0e9ec215b",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "stdout": "{\"unit\":1,\"input\":{\"name\":\"samba-mid\",\"kind\":\"fixed-corpus-window\",\"file\":\"samba\",\"offset\":10803200,\"withinParentOffset\":0,\"bytes\":65536,\"sha256\":\"be734bce2f957ad6d0912b3f61ea152a94988b2b1ecc0fb69077e9af3a92f975\",\"parentWindowBytes\":262144,\"parentWindowSha256\":\"312acb8d0f4004a69a827840c48c6141d6142b3b6e55f090b457476feea434d1\"},\"variant\":\"sub8-stride4\",\"kernel\":\"v20\",\"payloadBytes\":4713,\"payloadSha256\":\"bb037843f442a533e376dd159d62f09e4a5222c8099a32af518c95f821e7d1dd\",\"subFrameIncluded\":true,\"layout\":{\"grouped\":true,\"modes\":[4,4,4,4,4,4,4,4],\"payloadSizes\":[4708]},\"encodeMs\":1087.945,\"decodeMs\":242.167,\"roundtrip\":true,\"scope\":\"real SUB transpose with fixed width8 and two members; inner planner may change; v13-to-v20 and H8 deltas must be separated; experimental, not UCZ\",\"fullFileMeasured\":false,\"productionSourceModified\":false}\n",
+  "stderr": "",
+  "result": {
+    "unit": 1,
+    "input": {
+      "name": "samba-mid",
+      "kind": "fixed-corpus-window",
+      "file": "samba",
+      "offset": 10803200,
+      "withinParentOffset": 0,
+      "bytes": 65536,
+      "sha256": "be734bce2f957ad6d0912b3f61ea152a94988b2b1ecc0fb69077e9af3a92f975",
+      "parentWindowBytes": 262144,
+      "parentWindowSha256": "312acb8d0f4004a69a827840c48c6141d6142b3b6e55f090b457476feea434d1"
+    },
+    "variant": "sub8-stride4",
+    "kernel": "v20",
+    "payloadBytes": 4713,
+    "payloadSha256": "bb037843f442a533e376dd159d62f09e4a5222c8099a32af518c95f821e7d1dd",
+    "subFrameIncluded": true,
+    "layout": {
+      "grouped": true,
+      "modes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "payloadSizes": [
+        4708
+      ]
+    },
+    "encodeMs": 1087.945,
+    "decodeMs": 242.167,
+    "roundtrip": true,
+    "scope": "real SUB transpose with fixed width8 and two members; inner planner may change; v13-to-v20 and H8 deltas must be separated; experimental, not UCZ",
+    "fullFileMeasured": false,
+    "productionSourceModified": false
+  },
+  "durationMs": 1534
+}

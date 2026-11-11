@@ -1,0 +1,725 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "webster-mid",
+  "variant": "words-punct",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "webster-mid",
+    "words-punct"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "4f48edc164e0fed5f869ff3120174ee9a5e8b2b3182930741214efb4f312c298"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 4892,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "webster-mid",
+      "file": "webster",
+      "offset": 20729344,
+      "bytes": 262144,
+      "sha256": "657d081ba8a1786ed144e983814eef7acf2dbdff7f546f22252eceac424303d4",
+      "corpusBytes": 41458703,
+      "corpusSha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "731f5c9e35d0aa24857a42bc034829fa6e832b5b",
+        "bytes": 41458703,
+        "sha256": "6a68f69b26daf09f9dd84f7470368553194a0b294fcfa80f1604efb11143a383"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "657d081ba8a1786ed144e983814eef7acf2dbdff7f546f22252eceac424303d4"
+    },
+    "variant": "words-punct",
+    "cmBytes": 59154,
+    "payloadBytes": 59158,
+    "bytes": 59179,
+    "outerHeaderBytes": 21,
+    "containerSha256": "530e06e08f22b39614d2249fc4bb5929d144089dd6e4a543042cc11c04aed72a",
+    "payloadSha256": "2f91659773b670b15e942b9adeaf281f257703a971a6649e918ca29b0dc5f4e7",
+    "roundtrip": true,
+    "preprocessMs": 148.338617,
+    "encodeDecodeMs": 4640.542828000001,
+    "short": {
+      "dictTokens": 120,
+      "one": 120,
+      "two": 0,
+      "headerRawBytes": 732,
+      "bodyRawBytes": 209801,
+      "cmInputBytes": 210533,
+      "bodyRatio": 0.8003273010253906,
+      "coverage": 0.2686653137207031,
+      "spaceSuffixHits": 7187,
+      "punctuationSuffixHits": 8346,
+      "oneHits": 18086,
+      "twoHits": 0,
+      "unusedTokens": 0,
+      "escapedOriginalBytes": 0,
+      "wordStats": {
+        "distinctCandidates": 14520,
+        "totalWords": 34133,
+        "totalWordBytes": 145396
+      }
+    },
+    "usage": {
+      "oneHits": 18086,
+      "twoHits": 0,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 191715,
+      "coveredOriginalBytes": 70429,
+      "coverage": 0.2686653137207031,
+      "spaceSuffixHits": 7187,
+      "punctuationSuffixHits": 8346,
+      "unusedTokens": 0,
+      "entries": [
+        {
+          "word": "def>",
+          "hits": 2004,
+          "tier": 1
+        },
+        {
+          "word": "pos>",
+          "hits": 1674,
+          "tier": 1
+        },
+        {
+          "word": "blockquote>",
+          "hits": 411,
+          "tier": 1
+        },
+        {
+          "word": "hw>",
+          "hits": 1500,
+          "tier": 1
+        },
+        {
+          "word": "the ",
+          "hits": 968,
+          "tier": 1
+        },
+        {
+          "word": "of ",
+          "hits": 1001,
+          "tier": 1
+        },
+        {
+          "word": "sn>",
+          "hits": 788,
+          "tier": 1
+        },
+        {
+          "word": "to ",
+          "hits": 605,
+          "tier": 1
+        },
+        {
+          "word": "and ",
+          "hits": 414,
+          "tier": 1
+        },
+        {
+          "word": "col>",
+          "hits": 370,
+          "tier": 1
+        },
+        {
+          "word": "or ",
+          "hits": 565,
+          "tier": 1
+        },
+        {
+          "word": "cd>",
+          "hits": 354,
+          "tier": 1
+        },
+        {
+          "word": "in ",
+          "hits": 408,
+          "tier": 1
+        },
+        {
+          "word": "which ",
+          "hits": 134,
+          "tier": 1
+        },
+        {
+          "word": "The ",
+          "hits": 192,
+          "tier": 1
+        },
+        {
+          "word": "with ",
+          "hits": 134,
+          "tier": 1
+        },
+        {
+          "word": "See ",
+          "hits": 150,
+          "tier": 1
+        },
+        {
+          "word": "ouml;",
+          "hits": 104,
+          "tier": 1
+        },
+        {
+          "word": "for ",
+          "hits": 129,
+          "tier": 1
+        },
+        {
+          "word": "Obs.",
+          "hits": 122,
+          "tier": 1
+        },
+        {
+          "word": "as ",
+          "hits": 231,
+          "tier": 1
+        },
+        {
+          "word": "from ",
+          "hits": 91,
+          "tier": 1
+        },
+        {
+          "word": "is ",
+          "hits": 220,
+          "tier": 1
+        },
+        {
+          "word": "by ",
+          "hits": 163,
+          "tier": 1
+        },
+        {
+          "word": "pertaining ",
+          "hits": 33,
+          "tier": 1
+        },
+        {
+          "word": "that ",
+          "hits": 75,
+          "tier": 1
+        },
+        {
+          "word": "called",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": "To ",
+          "hits": 127,
+          "tier": 1
+        },
+        {
+          "word": "one ",
+          "hits": 85,
+          "tier": 1
+        },
+        {
+          "word": "love",
+          "hits": 124,
+          "tier": 1
+        },
+        {
+          "word": "used ",
+          "hits": 61,
+          "tier": 1
+        },
+        {
+          "word": "Chaucer.",
+          "hits": 32,
+          "tier": 1
+        },
+        {
+          "word": "especially",
+          "hits": 25,
+          "tier": 1
+        },
+        {
+          "word": "Shak.",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": "sd>",
+          "hits": 104,
+          "tier": 1
+        },
+        {
+          "word": "fr.",
+          "hits": 103,
+          "tier": 1
+        },
+        {
+          "word": "being ",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": "also",
+          "hits": 67,
+          "tier": 1
+        },
+        {
+          "word": "grk>",
+          "hits": 66,
+          "tier": 1
+        },
+        {
+          "word": "are ",
+          "hits": 75,
+          "tier": 1
+        },
+        {
+          "word": "species",
+          "hits": 33,
+          "tier": 1
+        },
+        {
+          "word": "light",
+          "hits": 61,
+          "tier": 1
+        },
+        {
+          "word": "having ",
+          "hits": 30,
+          "tier": 1
+        },
+        {
+          "word": "on ",
+          "hits": 290,
+          "tier": 1
+        },
+        {
+          "word": "small",
+          "hits": 46,
+          "tier": 1
+        },
+        {
+          "word": "Spenser.",
+          "hits": 25,
+          "tier": 1
+        },
+        {
+          "word": "other",
+          "hits": 57,
+          "tier": 1
+        },
+        {
+          "word": "Low",
+          "hits": 108,
+          "tier": 1
+        },
+        {
+          "word": "Having ",
+          "hits": 28,
+          "tier": 1
+        },
+        {
+          "word": "Milton.",
+          "hits": 28,
+          "tier": 1
+        },
+        {
+          "word": "low",
+          "hits": 223,
+          "tier": 1
+        },
+        {
+          "word": "person",
+          "hits": 45,
+          "tier": 1
+        },
+        {
+          "word": "this ",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": "Project ",
+          "hits": 23,
+          "tier": 1
+        },
+        {
+          "word": "One ",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": "Bot.",
+          "hits": 49,
+          "tier": 1
+        },
+        {
+          "word": "Love",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": "who ",
+          "hits": 49,
+          "tier": 1
+        },
+        {
+          "word": "an ",
+          "hits": 171,
+          "tier": 1
+        },
+        {
+          "word": "manner",
+          "hits": 29,
+          "tier": 1
+        },
+        {
+          "word": "without ",
+          "hits": 21,
+          "tier": 1
+        },
+        {
+          "word": "Dryden.",
+          "hits": 24,
+          "tier": 1
+        },
+        {
+          "word": "Lu",
+          "hits": 583,
+          "tier": 1
+        },
+        {
+          "word": "be ",
+          "hits": 74,
+          "tier": 1
+        },
+        {
+          "word": "ibreve;",
+          "hits": 24,
+          "tier": 1
+        },
+        {
+          "word": "machine",
+          "hits": 40,
+          "tier": 1
+        },
+        {
+          "word": "Gutenberg",
+          "hits": 18,
+          "tier": 1
+        },
+        {
+          "word": "etc.",
+          "hits": 46,
+          "tier": 1
+        },
+        {
+          "word": "cf.",
+          "hits": 65,
+          "tier": 1
+        },
+        {
+          "word": "large",
+          "hits": 37,
+          "tier": 1
+        },
+        {
+          "word": "Cf.",
+          "hits": 64,
+          "tier": 1
+        },
+        {
+          "word": "Mac",
+          "hits": 162,
+          "tier": 1
+        },
+        {
+          "word": "not ",
+          "hits": 44,
+          "tier": 1
+        },
+        {
+          "word": "genus",
+          "hits": 32,
+          "tier": 1
+        },
+        {
+          "word": "you ",
+          "hits": 41,
+          "tier": 1
+        },
+        {
+          "word": "into ",
+          "hits": 30,
+          "tier": 1
+        },
+        {
+          "word": "adv.",
+          "hits": 39,
+          "tier": 1
+        },
+        {
+          "word": "lymphatic",
+          "hits": 18,
+          "tier": 1
+        },
+        {
+          "word": "like",
+          "hits": 47,
+          "tier": 1
+        },
+        {
+          "word": "Gr.",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": "aelig;",
+          "hits": 23,
+          "tier": 1
+        },
+        {
+          "word": "one's ",
+          "hits": 23,
+          "tier": 1
+        },
+        {
+          "word": "BR>",
+          "hits": 55,
+          "tier": 1
+        },
+        {
+          "word": "wf>",
+          "hits": 54,
+          "tier": 1
+        },
+        {
+          "word": "form",
+          "hits": 84,
+          "tier": 1
+        },
+        {
+          "word": "often ",
+          "hits": 23,
+          "tier": 1
+        },
+        {
+          "word": "plw>",
+          "hits": 36,
+          "tier": 1
+        },
+        {
+          "word": "several ",
+          "hits": 16,
+          "tier": 1
+        },
+        {
+          "word": "have ",
+          "hits": 27,
+          "tier": 1
+        },
+        {
+          "word": "sometimes",
+          "hits": 14,
+          "tier": 1
+        },
+        {
+          "word": "their",
+          "hits": 27,
+          "tier": 1
+        },
+        {
+          "word": "imp.",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": "long",
+          "hits": 75,
+          "tier": 1
+        },
+        {
+          "word": "resembling ",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": "under ",
+          "hits": 21,
+          "tier": 1
+        },
+        {
+          "word": "Pertaining",
+          "hits": 12,
+          "tier": 1
+        },
+        {
+          "word": "Zo",
+          "hits": 100,
+          "tier": 1
+        },
+        {
+          "word": "lost",
+          "hits": 34,
+          "tier": 1
+        },
+        {
+          "word": "Tennyson.",
+          "hits": 13,
+          "tier": 1
+        },
+        {
+          "word": "kind ",
+          "hits": 25,
+          "tier": 1
+        },
+        {
+          "word": "quality",
+          "hits": 17,
+          "tier": 1
+        },
+        {
+          "word": "state",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": "usually",
+          "hits": 17,
+          "tier": 1
+        },
+        {
+          "word": "about ",
+          "hits": 20,
+          "tier": 1
+        },
+        {
+          "word": "Lord",
+          "hits": 51,
+          "tier": 1
+        },
+        {
+          "word": "moon",
+          "hits": 38,
+          "tier": 1
+        },
+        {
+          "word": "Macro",
+          "hits": 31,
+          "tier": 1
+        },
+        {
+          "word": "etext",
+          "hits": 32,
+          "tier": 1
+        },
+        {
+          "word": "fist;",
+          "hits": 24,
+          "tier": 1
+        },
+        {
+          "word": "because ",
+          "hits": 14,
+          "tier": 1
+        },
+        {
+          "word": "all ",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": "common ",
+          "hits": 16,
+          "tier": 1
+        },
+        {
+          "word": "instrument",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": "it ",
+          "hits": 67,
+          "tier": 1
+        },
+        {
+          "word": "lord",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": "so ",
+          "hits": 47,
+          "tier": 1
+        },
+        {
+          "word": "lose",
+          "hits": 45,
+          "tier": 1
+        },
+        {
+          "word": "Written ",
+          "hits": 13,
+          "tier": 1
+        },
+        {
+          "word": "akin ",
+          "hits": 22,
+          "tier": 1
+        },
+        {
+          "word": "between",
+          "hits": 15,
+          "tier": 1
+        }
+      ]
+    },
+    "scope": "actual existing v1 WORD-PRE UCZ single TEXT3 group, dictionary and length prefix and model/header flags fully charged; forced dictionary, not chooser",
+    "maxRSSMiB": 198.94140625
+  }
+}

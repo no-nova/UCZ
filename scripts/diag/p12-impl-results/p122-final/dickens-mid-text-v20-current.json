@@ -1,0 +1,91 @@
+{
+  "phase": "p122-final",
+  "slice": "dickens-mid",
+  "case": "text-v20",
+  "commit": "c97b6d360805cafbf9e14ee0e7869e67c01671b7",
+  "workingSource": true,
+  "sourceSha256": "568d53f628b4938409a6c51cd54733b0a43e6d87ace92855ce7e623e9e72d60a",
+  "sourceFiles": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "bf6580e080ac4f70f9e47338dc801a7c60a466d73412cca087fcb2a7e6724c1d",
+    "codec.ts": "8b2777e0a11226f23a6361b48588aae625c2f0cf4cffc778671c2d0b2dd1de60",
+    "coder.ts": "c5486d9c627290688f53e8f3dfdb78396e0466f884f68c491d3a8ef18174aeb0",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "e09b398a9ff8901dd74820b25ab8a528177a81d9088f0084d6bf167d360bf86b",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "b1edfa807337af4a6c3b46ebe57cf806cd82dae08abb4f4cbeb0d847b3f5b335",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "9a0990bb000531f70d37e740649fd06f922e6afdb4cafaf379803371f38eff23",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "7e4197c827841a1340420b9615f93b66b6132b189b71f3663e3342b66e312f3d",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "b58046ed1889a509a4ccd5f9c0fbac0fd7fa4310b1df19ead1532a3af6ff491d",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "4e947711d058b71cd832348312b2c53e8397099cd2006dc17b4d1e1859f1927b"
+  },
+  "probeSha256": "27d66f19a30dc6309be3a85d8a06c78f3fe44421e033cfec4019c9aef9708ee5",
+  "runnerSha256": "a3017ab1af7717e15e59e51a25ab6ada8a3d4fdd6dc324e28c556b929b2e1c87",
+  "bundleSha256": "b6457cdade04fb04c9641614655192193de489c659578324c678ef4adcc3526d",
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12-impl/run.mjs",
+    "p122-final",
+    "dickens-mid",
+    "text-v20"
+  ],
+  "node": "v22.22.3",
+  "durationMs": 4440,
+  "status": "PASS",
+  "stdout": "{\"input\":{\"name\":\"dickens-mid\",\"file\":\"dickens\",\"offset\":5095936,\"bytes\":262144,\"sha256\":\"ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a\",\"corpusBytes\":10192446,\"corpusSha256\":\"b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a\",\"source\":{\"repo\":\"yewq/Silesia-compression-corpus\",\"blob\":\"c02047fdd075ed66e470ba8064d0263a94bb361d\",\"bytes\":10192446,\"sha256\":\"b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a\"},\"path\":\".diag-data/p12-slices/dickens-mid.bin\",\"selection\":\"fixed contiguous mid-file window\"},\"spec\":{\"id\":23,\"s\":1,\"r\":1},\"scope\":\"forced single v20 group; complete UCZ; not adaptive routing or base/v15 selection\",\"bytes\":69566,\"headerBytes\":22,\"version\":20,\"v15\":true,\"wordPre\":false,\"flags\":4096,\"containerSha256\":\"7205bee81f04e45ffdb4796f46eb75ceb708cc85350d739cac5d7ee600de3d59\",\"roundtrip\":true,\"candidates\":[{\"bytes\":69566,\"v15\":true,\"wordPre\":false,\"flags\":4096}],\"encodeDecodeMs\":4014}\n",
+  "stderr": "",
+  "result": {
+    "input": {
+      "name": "dickens-mid",
+      "file": "dickens",
+      "offset": 5095936,
+      "bytes": 262144,
+      "sha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a",
+      "corpusBytes": 10192446,
+      "corpusSha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c02047fdd075ed66e470ba8064d0263a94bb361d",
+        "bytes": 10192446,
+        "sha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a"
+      },
+      "path": ".diag-data/p12-slices/dickens-mid.bin",
+      "selection": "fixed contiguous mid-file window"
+    },
+    "spec": {
+      "id": 23,
+      "s": 1,
+      "r": 1
+    },
+    "scope": "forced single v20 group; complete UCZ; not adaptive routing or base/v15 selection",
+    "bytes": 69566,
+    "headerBytes": 22,
+    "version": 20,
+    "v15": true,
+    "wordPre": false,
+    "flags": 4096,
+    "containerSha256": "7205bee81f04e45ffdb4796f46eb75ceb708cc85350d739cac5d7ee600de3d59",
+    "roundtrip": true,
+    "candidates": [
+      {
+        "bytes": 69566,
+        "v15": true,
+        "wordPre": false,
+        "flags": 4096
+      }
+    ],
+    "encodeDecodeMs": 4014
+  }
+}

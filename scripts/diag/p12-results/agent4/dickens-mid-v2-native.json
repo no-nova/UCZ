@@ -1,0 +1,2036 @@
+{
+  "kind": "P12-bounded-oracle",
+  "agent": "agent4",
+  "name": "dickens-mid",
+  "variant": "v2",
+  "inputLimit": null,
+  "command": [
+    "/home/user/test/universal-adaptive-compression-system/scripts/diag/p12/run.mjs",
+    "agent4",
+    "dickens-mid",
+    "v2"
+  ],
+  "commit": "39de63153bba89f9f646efc864506e901866ba7a",
+  "productionReference": "a3b6c3dd3b69f0ac65b06482313de880a2322a4f",
+  "source": {
+    "analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+    "anchor.ts": "0be5f828f80f36fe239112324366b6653633bafe7405c80a350bb844a0d47b06",
+    "byte-writer.ts": "fac901cf83dd2a239238feb9ba9a506f20d8af1f02a99c5df6d630bd86c189f9",
+    "codec-jobs.ts": "89240c3734c9b349fa66ad7d22288e61f7d0a866627591e26e72de346575adee",
+    "codec.ts": "4effca11070c2aa3837758cf53c8c130d4c9489179dcf0097df0c37fbc19e0b9",
+    "coder.ts": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+    "compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+    "limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+    "lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+    "micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+    "parallel-jobs.ts": "69313c5d5de5b3f89174eac261f1f4a2bad2aeffe213a39d1864381c120aecb6",
+    "parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+    "parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+    "parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+    "parallel-worker-code.ts": "5c6998366379856a92f5f002a517cbec38f9a6518d88b77492b36b1abd6f644e",
+    "parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+    "parallel.ts": "09ffd4e9c72e7b059ab6861f406499a2ed63d8a93b5e08b3b846d830430d5f45",
+    "payload-model.ts": "34cbfb54e8c4438e4eaac5a7df935a7f0cb5bf9a9df57286b35a2141dd7d27af",
+    "samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+    "sub-peel.ts": "b8faae442e0af12d2444af0c9dadd6b9829ec8e28143b58abccd27777f8ea778",
+    "transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+    "transpose2d.ts": "1a2311506a4cad9b17596ee18a013264ff6340a8eaec610a6246f1454dfd207c",
+    "unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+    "viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+    "wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a"
+  },
+  "tools": {
+    "run.mjs": "cb2a73547f40ad3a1f4e5df1131aaddfd7be4f6262b7f66eb750210bf5e52bd0",
+    "patches.mjs": "ba3ba79373b2fe9b0cf43c7c8bb81651204a5d2a80362923bb8873a337cf7533",
+    "common.ts": "6e9875aca283989c3d059b0f4fc156f4c205b2bc89183fa4b477535c7ae6c84e",
+    "agent4.ts": "05fdd94a700d960bad4185866261745cb1c9f3819de8d6ca36d01b7db0ae3318"
+  },
+  "patches": [
+    {
+      "file": "coder.ts",
+      "originalSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "compiledSha256": "9ba6ed87d291748498116dd3eafe015c87f01e86bbe7d521aefea3d2b11d1888",
+      "modified": false
+    }
+  ],
+  "wallMs": 6720,
+  "budgetMs": 17500,
+  "status": "PASS",
+  "exitCode": 0,
+  "result": {
+    "input": {
+      "name": "dickens-mid",
+      "file": "dickens",
+      "offset": 5095936,
+      "bytes": 262144,
+      "sha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a",
+      "corpusBytes": 10192446,
+      "corpusSha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a",
+      "source": {
+        "repo": "yewq/Silesia-compression-corpus",
+        "blob": "c02047fdd075ed66e470ba8064d0263a94bb361d",
+        "bytes": 10192446,
+        "sha256": "b24c37886142e11d0ee687db6ab06f936207aa7f2ea1fd1d9a36763c7a507e6a"
+      },
+      "selection": "fixed contiguous mid-file window",
+      "parentSliceSha256": "ce11f66c2caeff3a8699867c4dcb635dbe38acc7c4c13d3bbbca1508d55f035a"
+    },
+    "variant": "v2",
+    "cmBytes": 81335,
+    "payloadBytes": 81340,
+    "bytes": 81340,
+    "outerHeaderBytes": null,
+    "containerSha256": null,
+    "payloadSha256": "26f6baeb5f4f5f628c1b9855a441c19430a3918cd818dfde517bc69e4d95cdcc",
+    "roundtrip": true,
+    "preprocessMs": 4897.228615999999,
+    "encodeDecodeMs": 6513.124876999999,
+    "short": {
+      "dictTokens": 383,
+      "one": 127,
+      "two": 256,
+      "headerRawBytes": 2438,
+      "bodyRawBytes": 172312,
+      "cmInputBytes": 174750,
+      "bodyRatio": 0.657318115234375,
+      "coverage": 0.5192337036132812,
+      "spaceSuffixHits": 21359,
+      "punctuationSuffixHits": 43,
+      "oneHits": 20502,
+      "twoHits": 12890,
+      "unusedTokens": 39,
+      "escapedOriginalBytes": 0,
+      "wordStats": null
+    },
+    "usage": {
+      "oneHits": 20502,
+      "twoHits": 12890,
+      "escapedOriginalBytes": 0,
+      "literalOriginalBytes": 126030,
+      "coveredOriginalBytes": 136114,
+      "coverage": 0.5192337036132812,
+      "spaceSuffixHits": 21359,
+      "punctuationSuffixHits": 43,
+      "unusedTokens": 39,
+      "entries": [
+        {
+          "word": "the ",
+          "hits": 560,
+          "tier": 1
+        },
+        {
+          "word": "and ",
+          "hits": 247,
+          "tier": 1
+        },
+        {
+          "word": "the",
+          "hits": 197,
+          "tier": 1
+        },
+        {
+          "word": "and",
+          "hits": 158,
+          "tier": 1
+        },
+        {
+          "word": " th",
+          "hits": 49,
+          "tier": 1
+        },
+        {
+          "word": " the",
+          "hits": 79,
+          "tier": 1
+        },
+        {
+          "word": " the ",
+          "hits": 164,
+          "tier": 1
+        },
+        {
+          "word": "to ",
+          "hits": 384,
+          "tier": 1
+        },
+        {
+          "word": "he ",
+          "hits": 379,
+          "tier": 1
+        },
+        {
+          "word": " and ",
+          "hits": 287,
+          "tier": 1
+        },
+        {
+          "word": "that ",
+          "hits": 150,
+          "tier": 1
+        },
+        {
+          "word": " and",
+          "hits": 60,
+          "tier": 1
+        },
+        {
+          "word": "that",
+          "hits": 43,
+          "tier": 1
+        },
+        {
+          "word": "of ",
+          "hits": 238,
+          "tier": 1
+        },
+        {
+          "word": " to ",
+          "hits": 363,
+          "tier": 1
+        },
+        {
+          "word": "her",
+          "hits": 183,
+          "tier": 1
+        },
+        {
+          "word": "was ",
+          "hits": 358,
+          "tier": 1
+        },
+        {
+          "word": " an",
+          "hits": 104,
+          "tier": 1
+        },
+        {
+          "word": ", and ",
+          "hits": 386,
+          "tier": 1
+        },
+        {
+          "word": "ing ",
+          "hits": 778,
+          "tier": 1
+        },
+        {
+          "word": "nd ",
+          "hits": 237,
+          "tier": 1
+        },
+        {
+          "word": " to",
+          "hits": 130,
+          "tier": 1
+        },
+        {
+          "word": "her ",
+          "hits": 352,
+          "tier": 1
+        },
+        {
+          "word": "ing",
+          "hits": 333,
+          "tier": 1
+        },
+        {
+          "word": ", and",
+          "hits": 53,
+          "tier": 1
+        },
+        {
+          "word": "with ",
+          "hits": 173,
+          "tier": 1
+        },
+        {
+          "word": "at ",
+          "hits": 359,
+          "tier": 1
+        },
+        {
+          "word": "in ",
+          "hits": 264,
+          "tier": 1
+        },
+        {
+          "word": " of ",
+          "hits": 349,
+          "tier": 1
+        },
+        {
+          "word": "was",
+          "hits": 76,
+          "tier": 1
+        },
+        {
+          "word": "ed ",
+          "hits": 925,
+          "tier": 1
+        },
+        {
+          "word": " that ",
+          "hits": 122,
+          "tier": 1
+        },
+        {
+          "word": " I ",
+          "hits": 310,
+          "tier": 1
+        },
+        {
+          "word": "as ",
+          "hits": 169,
+          "tier": 1
+        },
+        {
+          "word": "said ",
+          "hits": 26,
+          "tier": 1
+        },
+        {
+          "word": "with",
+          "hits": 37,
+          "tier": 1
+        },
+        {
+          "word": " that",
+          "hits": 20,
+          "tier": 1
+        },
+        {
+          "word": "ng ",
+          "hits": 109,
+          "tier": 1
+        },
+        {
+          "word": "er ",
+          "hits": 409,
+          "tier": 1
+        },
+        {
+          "word": ".  ",
+          "hits": 884,
+          "tier": 1
+        },
+        {
+          "word": "said",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": " he",
+          "hits": 65,
+          "tier": 1
+        },
+        {
+          "word": "hat ",
+          "hits": 109,
+          "tier": 1
+        },
+        {
+          "word": "his ",
+          "hits": 290,
+          "tier": 1
+        },
+        {
+          "word": ", an",
+          "hits": 6,
+          "tier": 1
+        },
+        {
+          "word": "had ",
+          "hits": 184,
+          "tier": 1
+        },
+        {
+          "word": " was ",
+          "hits": 147,
+          "tier": 1
+        },
+        {
+          "word": " of",
+          "hits": 78,
+          "tier": 1
+        },
+        {
+          "word": "my ",
+          "hits": 304,
+          "tier": 1
+        },
+        {
+          "word": " tha",
+          "hits": 18,
+          "tier": 1
+        },
+        {
+          "word": " in",
+          "hits": 203,
+          "tier": 1
+        },
+        {
+          "word": ", a",
+          "hits": 194,
+          "tier": 1
+        },
+        {
+          "word": " was",
+          "hits": 35,
+          "tier": 1
+        },
+        {
+          "word": "Peggotty",
+          "hits": 62,
+          "tier": 1
+        },
+        {
+          "word": "for ",
+          "hits": 132,
+          "tier": 1
+        },
+        {
+          "word": "for",
+          "hits": 213,
+          "tier": 1
+        },
+        {
+          "word": " her",
+          "hits": 80,
+          "tier": 1
+        },
+        {
+          "word": " in ",
+          "hits": 288,
+          "tier": 1
+        },
+        {
+          "word": "have ",
+          "hits": 136,
+          "tier": 1
+        },
+        {
+          "word": " ha",
+          "hits": 111,
+          "tier": 1
+        },
+        {
+          "word": "hat",
+          "hits": 43,
+          "tier": 1
+        },
+        {
+          "word": "his",
+          "hits": 57,
+          "tier": 1
+        },
+        {
+          "word": "on ",
+          "hits": 137,
+          "tier": 1
+        },
+        {
+          "word": " wa",
+          "hits": 65,
+          "tier": 1
+        },
+        {
+          "word": " a ",
+          "hits": 206,
+          "tier": 1
+        },
+        {
+          "word": "had",
+          "hits": 31,
+          "tier": 1
+        },
+        {
+          "word": "little ",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "you",
+          "hits": 150,
+          "tier": 1
+        },
+        {
+          "word": " with",
+          "hits": 44,
+          "tier": 1
+        },
+        {
+          "word": "she ",
+          "hits": 149,
+          "tier": 1
+        },
+        {
+          "word": "little",
+          "hits": 10,
+          "tier": 1
+        },
+        {
+          "word": " with ",
+          "hits": 173,
+          "tier": 1
+        },
+        {
+          "word": " her ",
+          "hits": 112,
+          "tier": 1
+        },
+        {
+          "word": " be",
+          "hits": 322,
+          "tier": 1
+        },
+        {
+          "word": " my ",
+          "hits": 154,
+          "tier": 1
+        },
+        {
+          "word": "have",
+          "hits": 9,
+          "tier": 1
+        },
+        {
+          "word": "is ",
+          "hits": 232,
+          "tier": 1
+        },
+        {
+          "word": "tha",
+          "hits": 48,
+          "tier": 1
+        },
+        {
+          "word": " said ",
+          "hits": 74,
+          "tier": 1
+        },
+        {
+          "word": " said",
+          "hits": 12,
+          "tier": 1
+        },
+        {
+          "word": "which ",
+          "hits": 90,
+          "tier": 1
+        },
+        {
+          "word": "n the",
+          "hits": 10,
+          "tier": 1
+        },
+        {
+          "word": "n the ",
+          "hits": 28,
+          "tier": 1
+        },
+        {
+          "word": "it ",
+          "hits": 250,
+          "tier": 1
+        },
+        {
+          "word": "not ",
+          "hits": 166,
+          "tier": 1
+        },
+        {
+          "word": "Copperfield",
+          "hits": 21,
+          "tier": 1
+        },
+        {
+          "word": "d t",
+          "hits": 8,
+          "tier": 1
+        },
+        {
+          "word": " had ",
+          "hits": 158,
+          "tier": 1
+        },
+        {
+          "word": "to",
+          "hits": 359,
+          "tier": 1
+        },
+        {
+          "word": "you ",
+          "hits": 99,
+          "tier": 1
+        },
+        {
+          "word": "she",
+          "hits": 84,
+          "tier": 1
+        },
+        {
+          "word": "e, ",
+          "hits": 494,
+          "tier": 1
+        },
+        {
+          "word": "n th",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": " you",
+          "hits": 114,
+          "tier": 1
+        },
+        {
+          "word": "me ",
+          "hits": 416,
+          "tier": 1
+        },
+        {
+          "word": " my",
+          "hits": 40,
+          "tier": 1
+        },
+        {
+          "word": "not",
+          "hits": 79,
+          "tier": 1
+        },
+        {
+          "word": "which",
+          "hits": 7,
+          "tier": 1
+        },
+        {
+          "word": "ould ",
+          "hits": 28,
+          "tier": 1
+        },
+        {
+          "word": "should ",
+          "hits": 60,
+          "tier": 1
+        },
+        {
+          "word": ",' said ",
+          "hits": 115,
+          "tier": 1
+        },
+        {
+          "word": "e t",
+          "hits": 42,
+          "tier": 1
+        },
+        {
+          "word": "or ",
+          "hits": 186,
+          "tier": 1
+        },
+        {
+          "word": " wh",
+          "hits": 178,
+          "tier": 1
+        },
+        {
+          "word": "re ",
+          "hits": 290,
+          "tier": 1
+        },
+        {
+          "word": " wit",
+          "hits": 1,
+          "tier": 1
+        },
+        {
+          "word": " sa",
+          "hits": 92,
+          "tier": 1
+        },
+        {
+          "word": "all",
+          "hits": 213,
+          "tier": 1
+        },
+        {
+          "word": " for",
+          "hits": 51,
+          "tier": 1
+        },
+        {
+          "word": " for ",
+          "hits": 201,
+          "tier": 1
+        },
+        {
+          "word": "when ",
+          "hits": 67,
+          "tier": 1
+        },
+        {
+          "word": " had",
+          "hits": 13,
+          "tier": 1
+        },
+        {
+          "word": " sh",
+          "hits": 77,
+          "tier": 1
+        },
+        {
+          "word": "ould",
+          "hits": 4,
+          "tier": 1
+        },
+        {
+          "word": " hi",
+          "hits": 11,
+          "tier": 1
+        },
+        {
+          "word": "should",
+          "hits": 12,
+          "tier": 1
+        },
+        {
+          "word": " wi",
+          "hits": 56,
+          "tier": 1
+        },
+        {
+          "word": " co",
+          "hits": 199,
+          "tier": 1
+        },
+        {
+          "word": "but ",
+          "hits": 67,
+          "tier": 1
+        },
+        {
+          "word": "ere",
+          "hits": 144,
+          "tier": 1
+        },
+        {
+          "word": "Traddles",
+          "hits": 73,
+          "tier": 1
+        },
+        {
+          "word": "would ",
+          "hits": 75,
+          "tier": 1
+        },
+        {
+          "word": " Mr. ",
+          "hits": 69,
+          "tier": 1
+        },
+        {
+          "word": "n t",
+          "hits": 52,
+          "tier": 1
+        },
+        {
+          "word": "en ",
+          "hits": 248,
+          "tier": 1
+        },
+        {
+          "word": " his ",
+          "hits": 50,
+          "tier": 1
+        },
+        {
+          "word": "t t",
+          "hits": 86,
+          "tier": 1
+        },
+        {
+          "word": "            ",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": ",' said",
+          "hits": 4,
+          "tier": 2
+        },
+        {
+          "word": "           ",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "Micawber",
+          "hits": 26,
+          "tier": 2
+        },
+        {
+          "word": " Peggotty",
+          "hits": 18,
+          "tier": 2
+        },
+        {
+          "word": " have ",
+          "hits": 91,
+          "tier": 2
+        },
+        {
+          "word": " in the",
+          "hits": 26,
+          "tier": 2
+        },
+        {
+          "word": " of th",
+          "hits": 27,
+          "tier": 2
+        },
+        {
+          "word": " in the ",
+          "hits": 94,
+          "tier": 2
+        },
+        {
+          "word": "          ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " of the",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "this ",
+          "hits": 61,
+          "tier": 2
+        },
+        {
+          "word": " of the ",
+          "hits": 50,
+          "tier": 2
+        },
+        {
+          "word": "Peggotty ",
+          "hits": 32,
+          "tier": 2
+        },
+        {
+          "word": "would",
+          "hits": 17,
+          "tier": 2
+        },
+        {
+          "word": "         ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " in th",
+          "hits": 17,
+          "tier": 2
+        },
+        {
+          "word": "could ",
+          "hits": 56,
+          "tier": 2
+        },
+        {
+          "word": "were ",
+          "hits": 57,
+          "tier": 2
+        },
+        {
+          "word": "d to ",
+          "hits": 14,
+          "tier": 2
+        },
+        {
+          "word": " she ",
+          "hits": 113,
+          "tier": 2
+        },
+        {
+          "word": " Peggott",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "in the ",
+          "hits": 63,
+          "tier": 2
+        },
+        {
+          "word": "from ",
+          "hits": 58,
+          "tier": 2
+        },
+        {
+          "word": "very ",
+          "hits": 120,
+          "tier": 2
+        },
+        {
+          "word": " sai",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ith ",
+          "hits": 36,
+          "tier": 2
+        },
+        {
+          "word": ",' sai",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "t the",
+          "hits": 18,
+          "tier": 2
+        },
+        {
+          "word": "in the",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": " have",
+          "hits": 16,
+          "tier": 2
+        },
+        {
+          "word": "Peggott",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "eggotty",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "about ",
+          "hits": 91,
+          "tier": 2
+        },
+        {
+          "word": " little",
+          "hits": 17,
+          "tier": 2
+        },
+        {
+          "word": " little ",
+          "hits": 74,
+          "tier": 2
+        },
+        {
+          "word": "of the",
+          "hits": 13,
+          "tier": 2
+        },
+        {
+          "word": "of the ",
+          "hits": 52,
+          "tier": 2
+        },
+        {
+          "word": "        ",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "could",
+          "hits": 18,
+          "tier": 2
+        },
+        {
+          "word": "ther",
+          "hits": 104,
+          "tier": 2
+        },
+        {
+          "word": "ed to ",
+          "hits": 176,
+          "tier": 2
+        },
+        {
+          "word": "there",
+          "hits": 28,
+          "tier": 2
+        },
+        {
+          "word": "all ",
+          "hits": 190,
+          "tier": 2
+        },
+        {
+          "word": "this",
+          "hits": 18,
+          "tier": 2
+        },
+        {
+          "word": "d th",
+          "hits": 12,
+          "tier": 2
+        },
+        {
+          "word": "t th",
+          "hits": 44,
+          "tier": 2
+        },
+        {
+          "word": "of th",
+          "hits": 17,
+          "tier": 2
+        },
+        {
+          "word": "aid ",
+          "hits": 34,
+          "tier": 2
+        },
+        {
+          "word": " of t",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "thought",
+          "hits": 16,
+          "tier": 2
+        },
+        {
+          "word": " and t",
+          "hits": 7,
+          "tier": 2
+        },
+        {
+          "word": "Mr. Peggotty",
+          "hits": 27,
+          "tier": 2
+        },
+        {
+          "word": "Mr. ",
+          "hits": 158,
+          "tier": 2
+        },
+        {
+          "word": "Miss ",
+          "hits": 55,
+          "tier": 2
+        },
+        {
+          "word": "ed t",
+          "hits": 119,
+          "tier": 2
+        },
+        {
+          "word": " not ",
+          "hits": 89,
+          "tier": 2
+        },
+        {
+          "word": "what ",
+          "hits": 58,
+          "tier": 2
+        },
+        {
+          "word": " his",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": " which ",
+          "hits": 59,
+          "tier": 2
+        },
+        {
+          "word": "when",
+          "hits": 8,
+          "tier": 2
+        },
+        {
+          "word": "out ",
+          "hits": 142,
+          "tier": 2
+        },
+        {
+          "word": "Spenlow",
+          "hits": 69,
+          "tier": 2
+        },
+        {
+          "word": "t the ",
+          "hits": 41,
+          "tier": 2
+        },
+        {
+          "word": "uld ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " Peggot",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " you ",
+          "hits": 142,
+          "tier": 2
+        },
+        {
+          "word": "in th",
+          "hits": 14,
+          "tier": 2
+        },
+        {
+          "word": "myself",
+          "hits": 57,
+          "tier": 2
+        },
+        {
+          "word": "d the",
+          "hits": 6,
+          "tier": 2
+        },
+        {
+          "word": "tion",
+          "hits": 294,
+          "tier": 2
+        },
+        {
+          "word": " Mr.",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "       ",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " Copperfield",
+          "hits": 25,
+          "tier": 2
+        },
+        {
+          "word": ".  I",
+          "hits": 120,
+          "tier": 2
+        },
+        {
+          "word": " not",
+          "hits": 42,
+          "tier": 2
+        },
+        {
+          "word": "here",
+          "hits": 47,
+          "tier": 2
+        },
+        {
+          "word": " it ",
+          "hits": 148,
+          "tier": 2
+        },
+        {
+          "word": " she",
+          "hits": 19,
+          "tier": 2
+        },
+        {
+          "word": "there ",
+          "hits": 40,
+          "tier": 2
+        },
+        {
+          "word": "Dora",
+          "hits": 167,
+          "tier": 2
+        },
+        {
+          "word": "about",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": "e, and ",
+          "hits": 113,
+          "tier": 2
+        },
+        {
+          "word": "e of ",
+          "hits": 171,
+          "tier": 2
+        },
+        {
+          "word": "d to",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "ere ",
+          "hits": 64,
+          "tier": 2
+        },
+        {
+          "word": "ed to",
+          "hits": 24,
+          "tier": 2
+        },
+        {
+          "word": "were",
+          "hits": 22,
+          "tier": 2
+        },
+        {
+          "word": " in t",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "ever",
+          "hits": 102,
+          "tier": 2
+        },
+        {
+          "word": "f the",
+          "hits": 15,
+          "tier": 2
+        },
+        {
+          "word": "ing t",
+          "hits": 189,
+          "tier": 2
+        },
+        {
+          "word": "Mr. Peggott",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "being ",
+          "hits": 52,
+          "tier": 2
+        },
+        {
+          "word": "f the ",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "r. Peggotty",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": ", that ",
+          "hits": 87,
+          "tier": 2
+        },
+        {
+          "word": "been ",
+          "hits": 85,
+          "tier": 2
+        },
+        {
+          "word": "and t",
+          "hits": 19,
+          "tier": 2
+        },
+        {
+          "word": " as ",
+          "hits": 109,
+          "tier": 2
+        },
+        {
+          "word": " thi",
+          "hits": 37,
+          "tier": 2
+        },
+        {
+          "word": ".  I ",
+          "hits": 201,
+          "tier": 2
+        },
+        {
+          "word": "Copperfiel",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "opperfield",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "thing",
+          "hits": 31,
+          "tier": 2
+        },
+        {
+          "word": "Peggot",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "eggott",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ggotty",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " my aunt",
+          "hits": 16,
+          "tier": 2
+        },
+        {
+          "word": " littl",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "very",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": " he ",
+          "hits": 143,
+          "tier": 2
+        },
+        {
+          "word": " which",
+          "hits": 7,
+          "tier": 2
+        },
+        {
+          "word": " Mr. Peggott",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": "ittle ",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "e to ",
+          "hits": 111,
+          "tier": 2
+        },
+        {
+          "word": " Copperfiel",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " that I ",
+          "hits": 24,
+          "tier": 2
+        },
+        {
+          "word": "before",
+          "hits": 10,
+          "tier": 2
+        },
+        {
+          "word": " at ",
+          "hits": 114,
+          "tier": 2
+        },
+        {
+          "word": "from",
+          "hits": 14,
+          "tier": 2
+        },
+        {
+          "word": "ave ",
+          "hits": 41,
+          "tier": 2
+        },
+        {
+          "word": "thought ",
+          "hits": 27,
+          "tier": 2
+        },
+        {
+          "word": "thin",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": ",' sa",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " and th",
+          "hits": 46,
+          "tier": 2
+        },
+        {
+          "word": ". Micawber",
+          "hits": 27,
+          "tier": 2
+        },
+        {
+          "word": "aunt",
+          "hits": 16,
+          "tier": 2
+        },
+        {
+          "word": " should ",
+          "hits": 35,
+          "tier": 2
+        },
+        {
+          "word": "returned",
+          "hits": 24,
+          "tier": 2
+        },
+        {
+          "word": " hav",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": " when ",
+          "hits": 76,
+          "tier": 2
+        },
+        {
+          "word": "d the ",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "ever ",
+          "hits": 66,
+          "tier": 2
+        },
+        {
+          "word": " no",
+          "hits": 102,
+          "tier": 2
+        },
+        {
+          "word": "ight",
+          "hits": 278,
+          "tier": 2
+        },
+        {
+          "word": "s, ",
+          "hits": 367,
+          "tier": 2
+        },
+        {
+          "word": " said Mr. ",
+          "hits": 21,
+          "tier": 2
+        },
+        {
+          "word": " should",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "think",
+          "hits": 51,
+          "tier": 2
+        },
+        {
+          "word": " I ha",
+          "hits": 67,
+          "tier": 2
+        },
+        {
+          "word": "e w",
+          "hits": 158,
+          "tier": 2
+        },
+        {
+          "word": "here ",
+          "hits": 66,
+          "tier": 2
+        },
+        {
+          "word": "ut ",
+          "hits": 112,
+          "tier": 2
+        },
+        {
+          "word": ". Peggotty",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "Mr. Peggot",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "e, and",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "r. Peggott",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": ", that",
+          "hits": 10,
+          "tier": 2
+        },
+        {
+          "word": "e was ",
+          "hits": 26,
+          "tier": 2
+        },
+        {
+          "word": "hat I ",
+          "hits": 20,
+          "tier": 2
+        },
+        {
+          "word": " but ",
+          "hits": 135,
+          "tier": 2
+        },
+        {
+          "word": " it",
+          "hits": 91,
+          "tier": 2
+        },
+        {
+          "word": "      ",
+          "hits": 1,
+          "tier": 2
+        },
+        {
+          "word": "e th",
+          "hits": 160,
+          "tier": 2
+        },
+        {
+          "word": "f th",
+          "hits": 8,
+          "tier": 2
+        },
+        {
+          "word": " said Mr",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "and th",
+          "hits": 27,
+          "tier": 2
+        },
+        {
+          "word": "ent",
+          "hits": 504,
+          "tier": 2
+        },
+        {
+          "word": " me",
+          "hits": 205,
+          "tier": 2
+        },
+        {
+          "word": " Micawber",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "Copperfie",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "before ",
+          "hits": 25,
+          "tier": 2
+        },
+        {
+          "word": "opperfiel",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "pperfield",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " Peggo",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " to th",
+          "hits": 52,
+          "tier": 2
+        },
+        {
+          "word": "though",
+          "hits": 14,
+          "tier": 2
+        },
+        {
+          "word": " Mr. Peggot",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "t of ",
+          "hits": 87,
+          "tier": 2
+        },
+        {
+          "word": " that I",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": " this ",
+          "hits": 15,
+          "tier": 2
+        },
+        {
+          "word": "thing ",
+          "hits": 65,
+          "tier": 2
+        },
+        {
+          "word": ", th",
+          "hits": 86,
+          "tier": 2
+        },
+        {
+          "word": "e a",
+          "hits": 270,
+          "tier": 2
+        },
+        {
+          "word": "know",
+          "hits": 151,
+          "tier": 2
+        },
+        {
+          "word": "nd t",
+          "hits": 25,
+          "tier": 2
+        },
+        {
+          "word": "said Mr. ",
+          "hits": 5,
+          "tier": 2
+        },
+        {
+          "word": "being",
+          "hits": 7,
+          "tier": 2
+        },
+        {
+          "word": "hen ",
+          "hits": 79,
+          "tier": 2
+        },
+        {
+          "word": "ittle",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "that I ",
+          "hits": 31,
+          "tier": 2
+        },
+        {
+          "word": " on ",
+          "hits": 96,
+          "tier": 2
+        },
+        {
+          "word": " to t",
+          "hits": 19,
+          "tier": 2
+        },
+        {
+          "word": "upon ",
+          "hits": 86,
+          "tier": 2
+        },
+        {
+          "word": " Copperfie",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "at the",
+          "hits": 49,
+          "tier": 2
+        },
+        {
+          "word": "er, ",
+          "hits": 115,
+          "tier": 2
+        },
+        {
+          "word": " said Mr.",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "Micawber ",
+          "hits": 29,
+          "tier": 2
+        },
+        {
+          "word": " would ",
+          "hits": 32,
+          "tier": 2
+        },
+        {
+          "word": " would",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": "littl",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "e to",
+          "hits": 26,
+          "tier": 2
+        },
+        {
+          "word": "what",
+          "hits": 9,
+          "tier": 2
+        },
+        {
+          "word": " the s",
+          "hits": 19,
+          "tier": 2
+        },
+        {
+          "word": ",' said Mr",
+          "hits": 10,
+          "tier": 2
+        },
+        {
+          "word": "nd th",
+          "hits": 37,
+          "tier": 2
+        },
+        {
+          "word": ", and t",
+          "hits": 70,
+          "tier": 2
+        },
+        {
+          "word": ",' said Mr. ",
+          "hits": 49,
+          "tier": 2
+        },
+        {
+          "word": "he s",
+          "hits": 51,
+          "tier": 2
+        },
+        {
+          "word": "my aunt",
+          "hits": 85,
+          "tier": 2
+        },
+        {
+          "word": "him",
+          "hits": 199,
+          "tier": 2
+        },
+        {
+          "word": " and s",
+          "hits": 36,
+          "tier": 2
+        },
+        {
+          "word": " fo",
+          "hits": 39,
+          "tier": 2
+        },
+        {
+          "word": " my aun",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " this",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "to the ",
+          "hits": 37,
+          "tier": 2
+        },
+        {
+          "word": "of t",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "ver",
+          "hits": 137,
+          "tier": 2
+        },
+        {
+          "word": "e of",
+          "hits": 23,
+          "tier": 2
+        },
+        {
+          "word": ". Micawbe",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "Miss",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": "s, and ",
+          "hits": 90,
+          "tier": 2
+        },
+        {
+          "word": "ld ",
+          "hits": 156,
+          "tier": 2
+        },
+        {
+          "word": " and w",
+          "hits": 32,
+          "tier": 2
+        },
+        {
+          "word": " re",
+          "hits": 204,
+          "tier": 2
+        },
+        {
+          "word": " were ",
+          "hits": 51,
+          "tier": 2
+        },
+        {
+          "word": "e s",
+          "hits": 157,
+          "tier": 2
+        },
+        {
+          "word": " him",
+          "hits": 75,
+          "tier": 2
+        },
+        {
+          "word": "ith",
+          "hits": 22,
+          "tier": 2
+        },
+        {
+          "word": " Traddles",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": ",' said M",
+          "hits": 4,
+          "tier": 2
+        },
+        {
+          "word": "ad ",
+          "hits": 102,
+          "tier": 2
+        },
+        {
+          "word": "e was",
+          "hits": 6,
+          "tier": 2
+        },
+        {
+          "word": "to th",
+          "hits": 13,
+          "tier": 2
+        },
+        {
+          "word": ", I ",
+          "hits": 169,
+          "tier": 2
+        },
+        {
+          "word": " could",
+          "hits": 10,
+          "tier": 2
+        },
+        {
+          "word": ". Peggott",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "Mr. Peggo",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "on the",
+          "hits": 44,
+          "tier": 2
+        },
+        {
+          "word": "r. Peggot",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": " said M",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "said Mr",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "looking ",
+          "hits": 40,
+          "tier": 2
+        },
+        {
+          "word": "other",
+          "hits": 103,
+          "tier": 2
+        },
+        {
+          "word": " from ",
+          "hits": 73,
+          "tier": 2
+        },
+        {
+          "word": "y aunt",
+          "hits": 18,
+          "tier": 2
+        },
+        {
+          "word": " could ",
+          "hits": 44,
+          "tier": 2
+        },
+        {
+          "word": "Copperfield,",
+          "hits": 30,
+          "tier": 2
+        },
+        {
+          "word": " Miss Mills",
+          "hits": 11,
+          "tier": 2
+        },
+        {
+          "word": ",' said Mr.",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "never ",
+          "hits": 59,
+          "tier": 2
+        },
+        {
+          "word": "said Mr.",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "ion",
+          "hits": 174,
+          "tier": 2
+        },
+        {
+          "word": " on",
+          "hits": 90,
+          "tier": 2
+        },
+        {
+          "word": " yo",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": "thi",
+          "hits": 3,
+          "tier": 2
+        },
+        {
+          "word": "wit",
+          "hits": 2,
+          "tier": 2
+        },
+        {
+          "word": " on the",
+          "hits": 53,
+          "tier": 2
+        },
+        {
+          "word": " so",
+          "hits": 168,
+          "tier": 2
+        },
+        {
+          "word": "into ",
+          "hits": 34,
+          "tier": 2
+        },
+        {
+          "word": " Mr. Peggo",
+          "hits": 0,
+          "tier": 2
+        },
+        {
+          "word": "I was ",
+          "hits": 64,
+          "tier": 2
+        },
+        {
+          "word": "Miss Mills",
+          "hits": 43,
+          "tier": 2
+        },
+        {
+          "word": "to the",
+          "hits": 3,
+          "tier": 2
+        }
+      ]
+    },
+    "scope": "research-only v2 envelope: mode byte + u32 token-stream length + CM(dict||body); no compatible production UCZ outer header, no codec v2 dispatch",
+    "maxRSSMiB": 369.5234375
+  }
+}

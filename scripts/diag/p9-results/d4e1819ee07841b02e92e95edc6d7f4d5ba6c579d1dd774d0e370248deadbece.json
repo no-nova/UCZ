@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "status": "complete",
+  "key": "d4e1819ee07841b02e92e95edc6d7f4d5ba6c579d1dd774d0e370248deadbece",
+  "identity": {
+    "schema": 1,
+    "sourceSha256": "4b4648a6f89ae6064ffbf05f05799a559e8d0b73ba85d015e7c17c744d3b2eaf",
+    "knobs": {
+      "planTuning": {
+        "perCandidateAlign": true,
+        "featureCandidates": true,
+        "orphanConsolidation": true,
+        "orphanMaxBytes": 131072,
+        "orphanMaxCount": 6,
+        "orphanAllowRawStore": false,
+        "orphanSliceProbe": 262144,
+        "macroUniformGate": true,
+        "candidateTgV3": true,
+        "v15SinglePlain": false,
+        "sampleFloor": 4096,
+        "sampleCap": 16000,
+        "soloSampleCap": 0,
+        "dropZeroHitIds": false,
+        "dropLegacyV12Ids": false,
+        "neutralPenalties": false
+      },
+      "a2Tuning": {
+        "resOn": true,
+        "textOn": true
+      },
+      "modelTuning": {
+        "maxTableBits": 21,
+        "matchTableBits": 20
+      }
+    },
+    "runtime": {
+      "node": "v22.22.3",
+      "v8": "12.4.254.21-node.56",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "trial": "0",
+    "input": {
+      "file": "mozilla",
+      "kind": "Silesia",
+      "fullSha256": "657fc3764b0c75ac9de9623125705831ebbfbe08fed248df73bc2dc66e2a963b",
+      "fullBytes": 51220480,
+      "sha256": "64603b58d5e6f72ad804dbedfef35d2470fcf625c43371ec5e1194028afdfe3c",
+      "offset": 25085952,
+      "requestedBytes": 1048576,
+      "n": 1048576
+    },
+    "encodeOptions": {
+      "serial": true
+    }
+  },
+  "label": "macro-tg-mid-1m",
+  "file": "mozilla",
+  "n": 1048576,
+  "ucz": 272647,
+  "ver": 15,
+  "containerSha256": "b1fb2d0994167330b3a5fc468d12a27d1a6c6f984a3bdbf7cb78d8bb7591e892",
+  "modelFlags": null,
+  "groups": [
+    {
+      "id": 30,
+      "s": 4,
+      "r": 1,
+      "v15": true,
+      "wordPre": false,
+      "payloadBytes": 272350
+    }
+  ],
+  "size": 1048576,
+  "sha256": "64603b58d5e6f72ad804dbedfef35d2470fcf625c43371ec5e1194028afdfe3c",
+  "pct": 26.001644,
+  "set": [
+    "a2Tuning.textOn=true",
+    "planTuning.macroUniformGate=true",
+    "planTuning.candidateTgV3=true"
+  ],
+  "knobs": {
+    "planTuning": {
+      "perCandidateAlign": true,
+      "featureCandidates": true,
+      "orphanConsolidation": true,
+      "orphanMaxBytes": 131072,
+      "orphanMaxCount": 6,
+      "orphanAllowRawStore": false,
+      "orphanSliceProbe": 262144,
+      "macroUniformGate": true,
+      "candidateTgV3": true,
+      "v15SinglePlain": false,
+      "sampleFloor": 4096,
+      "sampleCap": 16000,
+      "soloSampleCap": 0,
+      "dropZeroHitIds": false,
+      "dropLegacyV12Ids": false,
+      "neutralPenalties": false
+    },
+    "a2Tuning": {
+      "resOn": true,
+      "textOn": true
+    },
+    "modelTuning": {
+      "maxTableBits": 21,
+      "matchTableBits": 20
+    }
+  },
+  "source": {
+    "sha256": "4b4648a6f89ae6064ffbf05f05799a559e8d0b73ba85d015e7c17c744d3b2eaf",
+    "files": {
+      "src/lib/analyze.ts": "7693aa90597ee8a6eb67ec97dd57de35aff561e8a2a406d82876d61a7f379da9",
+      "src/lib/anchor.ts": "462957291d3a6eaf190a198385e4118a945df0add17682045178368ffa9d6e24",
+      "src/lib/byte-writer.ts": "ffc299e45dfeaef1af765cd238b794d368376706fa046d3a17ac52242b5116de",
+      "src/lib/codec-jobs.ts": "93696520d2b4a1611a66047d7e303359a1e999549a665b129847cdc2eb27de54",
+      "src/lib/codec.ts": "731337c70e4b97aea729205952eee2f0996dc0a7824b9924f222eaca33ecd96b",
+      "src/lib/coder.ts": "9b1a7498f721000af36d99ba678333e7af47376780b74034d0f3b547fc330fbe",
+      "src/lib/compress.worker.ts": "43e2dab49b0a7e39bf4f2f6e9b471c9d179cf700408baee5c3be8da747482e19",
+      "src/lib/limits.ts": "dfa1e22f8203dd1fcd6a40df722cab15d221b3b08234d6ebb14f9e8ef7ce9eee",
+      "src/lib/lzpre.ts": "74f6fae4751dfea496cfd48813299bcde5697d17d2166a4b994c93f8c63fe101",
+      "src/lib/micro.ts": "1f5d24c77fd08f728495984165f3eb301bf2eda617d19505ca33dd5e2e81ba2c",
+      "src/lib/parallel-jobs.ts": "5f57c42e842592c68cb1b490359f8a05e3d660405f2c7e8f58cb9bbad45816cf",
+      "src/lib/parallel-node.ts": "69baf53f1a0ee505849a26e818bbd951e39a6905dd1b37954e0f2468960906df",
+      "src/lib/parallel-pool.browser.ts": "28509ddb81321dd763367ce047fa37f5cce6ad796a21855b2744c0e7a190df9b",
+      "src/lib/parallel-pool.ts": "be295b73342b5da4795f92fad775e34650dca7225313dc2a6ff18b48715e0243",
+      "src/lib/parallel-worker-code.ts": "4f64dfb2ffb0bad7fa9fb850277e4f1965472fa9224212cb7f196c0ef9795db1",
+      "src/lib/parallel-worker.ts": "8b79cd32c26badfd1ba750acb7e558fe868e8c0412ca994aa269a277d5cd8996",
+      "src/lib/parallel.ts": "592d97c5a01259450d7807d583b82f395ae1e05fcf221b8b123003ee97e16e24",
+      "src/lib/samples.ts": "5036208ffde01ce86f9ed69fd2040b632b8f5087a628ea87ec55909ab88cf1d8",
+      "src/lib/sub-peel.ts": "b9627e7f404d01eb716dd3aea4a2f29bcf20e11b897d18105b337471d8aa075d",
+      "src/lib/transforms.ts": "6f58d4a07d6f5a9ff95f37cbb1f2ee23c229568ffb87875bc74897d38c0f9eaa",
+      "src/lib/transpose2d.ts": "6a10fc67350e70cae670b22a7586928d5bf676be8ccd0395601c2546323065ad",
+      "src/lib/unify.ts": "9029e1b01143fb44fa196acb319a0775d0e598dc1d9133c0ca64e314b65c2761",
+      "src/lib/viz.ts": "a4175d80e921c2f9f4a22a573f1fd5998c54fcc5003fd820b266b4c4ee8bdfe8",
+      "src/lib/wordpre.ts": "c6a119ad39aacaf865e7437586aa273be797b75b257068b96500b850d470270a",
+      "package.json": "b661ae63d84185acafd8d16dd206162e596a6ccbd378e2e9e0b960d1400891d1",
+      "package-lock.json": "df13cb90fea7667a92d96dec1f7dae61a79b3b49aa38db8113f50b33a839341d",
+      "tsconfig.json": "2a760f56fa49b96935783a2c3b4ce63d67e4547fdace88c4f4361a0c4fc10848",
+      "scripts/diag/run.mjs": "a10cf5e0ea918fbd48b82bc57f7f7ce925e5a5fc530752258e48f0dbd07935f6",
+      "scripts/diag/run-p9.mjs": "4beecd0f6027065e447221effe5fb23160999325ef94c14d1b33b9cf9545f744",
+      "scripts/diag/probe-p9-ab.ts": "22464a593000dc4a2602199e59494fa01a2f67e2208f0498de78ad4d68c4e3f9",
+      "scripts/diag/p9-checkpoint.mjs": "fa5d848b883c877aa22a2c580079432aa9e2ea13c5f37229a859d1ed1180a946",
+      "scripts/diag/baseline.json": "4db78f40e895dbcf06285801aa782342e29409be36627ce8924df7b893b269eb"
+    }
+  },
+  "commit": "d5f8d46debf45fb7a2d3eaea2418130aea76afad",
+  "environment": {
+    "node": "v22.22.3",
+    "v8": "12.4.254.21-node.56",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.60GHz",
+    "logicalCpus": 2
+  },
+  "startedAt": "2026-11-08T06:42:08.869Z",
+  "completedAt": "2026-11-08T06:45:03.978Z",
+  "segs": 131,
+  "header": 297,
+  "encMs": 170848,
+  "decMs": 4239,
+  "verified": true,
+  "maxRSSMiB": 345.4,
+  "recordSha256": "b1537e05ac07de65c70a33068dffeb9a4ed0e2c290cff9a0d9dc3b993de4c2cf"
+}

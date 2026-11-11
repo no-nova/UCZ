@@ -1,0 +1,24 @@
+
+> react-vite-tailwind@0.0.0 pretest:codec
+> node scripts/build-worker-code.mjs --check
+
+parallel-worker-code.ts 是最新的
+
+> react-vite-tailwind@0.0.0 test:codec
+> node tests/run.mjs && node tests/worker.mjs
+
+P9 format tests passed (72 checks; frozen P7, v17 flags, scope, worker)
+P9 macro tests passed (14 checks; exact containers, header trap, fallback, metadata, full/partial probe reuse)
+P9 defaults tests passed (14 checks; selected flags, selective a2, exact costs/orphans, direct macro, worker metadata)
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  import_node_assert.strict.ok(microResult.segs.some((s) => s.spec.id === ID.MICRO && s.micro?.weights.length === 5))
+
+    at test (/tmp/terrazip-test-niks2B/test.cjs:7499:29) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
