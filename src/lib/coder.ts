@@ -1141,7 +1141,7 @@ class Model {
           } else {
             const bs = b2s
             H[9] = 0
-            H[10] = this.symAepN > 2000000
+            H[10] = this.symAepN > 262144
               ? hh(0x165667B1, b1, bs[this.g(2)] >> 2, bs[this.g(3)] >> 2, bs[this.g(4)] >> 2, bs[this.g(5)] >> 2, bs[this.g(6)] >> 2) : 0
             if (this.nctx > 11) H[11] = this.symAepN > 2000000
               ? hh(0x9E3779B1, b1, bs[this.g(2)] >> 3, bs[this.g(3)] >> 3, bs[this.g(4)] >> 3, bs[this.g(5)] >> 3, bs[this.g(6)] >> 3, bs[this.g(7)] >> 3) : 0
@@ -1279,11 +1279,11 @@ class Model {
         ms = this.isV20 ? ((this.symDna || this.symProt) ? reg : this.mlen < 6 ? 1 : this.mlen < 16 ? 2 : 3) : ms2
       } else {
         inputs[nctx] = 0
-        if (this.symProt && this.symAepN > 2000000 && this.mlen > 0) ms = 4
+        if (this.symProt && this.symAepN > 1000000 && this.mlen > 0) ms = 4
       }
       inputs[nctx + 1] = 256
       this.lastPrimaryMs = ms
-      wbase = (bit * (this.symProt && this.symAepN > 2000000 ? 5 : this.isV20 ? 4 : 3) + ms) * N
+      wbase = (bit * (this.symProt && this.symAepN > 1000000 ? 5 : this.isV20 ? 4 : 3) + ms) * N
       if (this.symDna && this.symAepClean) wbase = ((bit * 4 + ms) * 2 + (mIdx >= 0 && this.symMMc === 0 ? 1 : 0)) * N
       // 与 p() 相同的整数点积，按同样顺序累加以保证逐位一致。
       // P17.2: `inputs[N-1]` is the constant 256 bias, so its term is hoisted out
@@ -1952,12 +1952,13 @@ class Model {
       } else if (this.symProt && pos >= this.symSeedK + 1) {
         if (this.mlen === 0 && pos <= this.shadowUntil && pos >= 5) {
           let relock = -1
-          const maxD = this.symAepN > 2000000 ? 48 : 16
+          const fastShadow = this.symAepN > 262144
+          const maxD = fastShadow ? 48 : 16
           for (let ad = 0; ad <= maxD && relock < 0; ad++) {
             for (const sg of ad === 0 ? [0] : [-1, 1]) {
               const d = sg * ad, cand = pos + this.shadowDelta + d
               if (cand < 5 || cand >= pos) continue
-              const need = this.symAepN > 2000000 ? (ad === 0 ? 4 : ad > 16 ? 6 : 5) : 5
+              const need = fastShadow ? (ad === 0 ? 4 : ad > 16 ? 6 : 5) : 5
               let ok = true
               for (let k = 1; k <= need; k++) if (buf[cand-k] !== buf[pos-k]) { ok = false; break }
               if (ok) { relock = cand; break }
