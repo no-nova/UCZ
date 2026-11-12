@@ -898,6 +898,7 @@ class Model {
     this.symP5Free = this.symProt
     this.symP5Coarse = this.symProt && this.context !== 'sym-5bit-gap'
     if (this.symProt) {
+      this.symAepN = n
       this.symSeedK2 = 8
       this.symSeedK = 8
       this.symSeedGate = 24
@@ -983,7 +984,7 @@ class Model {
           else if (this.wordTokens && (containerModel?.wordPreTextOff ?? a2Tuning.wordPreTextOff)) this.requiredFlags |= CM_FLAG_WORD_PRE_A2_OFF
         } else if (profile === 'res' && !(containerModel?.resOn ?? a2Tuning.resOn)) this.requiredFlags |= CM_FLAG_RES_A2_OFF
       }
-      if (apm2Tuning.on && transposeInnerSuppress.depth === 0 && a2Suppress.depth === 0 && a2Eligible(this.profile, this.wordTokens)) {
+      if (!this.symDna && !this.symProt && apm2Tuning.on && transposeInnerSuppress.depth === 0 && a2Suppress.depth === 0 && a2Eligible(this.profile, this.wordTokens)) {
         this.apm2On = true
         this.apm2Nctx2 = apm2CtxCount2()
         this.apm2T = new Uint16Array(this.apm2Nctx2 * APM_SLOTS)
