@@ -907,7 +907,7 @@ class Model {
     }
     // P18.2: the nine ladder lengths {2,3,4,5,6,7,8,9,11} are the winning
     // context ladder for quaternary streams (byte-identical in encoder/decoder).
-    if (this.symDna) this.symLadder = [2, 3, 4, 5, 6, 7, 8, 9, 11]
+    if (this.symDna) this.symLadder = [2, 3, 4, 5, 6, 7, 9, 12, 14]
     const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
