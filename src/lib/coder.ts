@@ -1138,7 +1138,14 @@ class Model {
             H[9] = hh(exp + 1, this.symMMc > 0 ? 1 : 0, this.mlen < 4 ? this.mlen : 3)
             H[10] = hh(exp + 1, b2s[b1], this.mptr + 1 < this.pos ? b2s[this.buf[this.mptr + 1]] >> 2 : 8)
             if (this.nctx > 11) H[11] = (this.mptr > 0 && this.mptr + 1 < this.pos) ? hh(b2s[this.buf[this.mptr - 1]] + 1, exp + 1, b2s[this.buf[this.mptr + 1]] + 1) : 0
-          } else { H[9] = 0; H[10] = 0; if (this.nctx > 11) H[11] = 0 }
+          } else {
+            const bs = b2s
+            H[9] = 0
+            H[10] = this.symAepN > 2000000
+              ? hh(0x165667B1, b1, bs[this.g(2)] >> 2, bs[this.g(3)] >> 2, bs[this.g(4)] >> 2, bs[this.g(5)] >> 2, bs[this.g(6)] >> 2) : 0
+            if (this.nctx > 11) H[11] = this.symAepN > 2000000
+              ? hh(0x9E3779B1, b1, bs[this.g(2)] >> 3, bs[this.g(3)] >> 3, bs[this.g(4)] >> 3, bs[this.g(5)] >> 3, bs[this.g(6)] >> 3, bs[this.g(7)] >> 3) : 0
+          }
           return
         }
         H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=this.symBits===2?mix32(this.symKm9):this.context==='sym-5bit-gap'?hh(b1,b2,b3,b4,this.g(5)):hh(this.curWord,b1);H[7]=this.symBits===2?mix32(this.symKm10):this.context==='sym-5bit-gap'?hh(b1,b2,b4,this.g(7),this.g(8)):hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
@@ -1272,10 +1279,11 @@ class Model {
         ms = this.isV20 ? ((this.symDna || this.symProt) ? reg : this.mlen < 6 ? 1 : this.mlen < 16 ? 2 : 3) : ms2
       } else {
         inputs[nctx] = 0
+        if (this.symProt && this.symAepN > 2000000 && this.mlen > 0) ms = 4
       }
       inputs[nctx + 1] = 256
       this.lastPrimaryMs = ms
-      wbase = (bit * (this.isV20 ? 4 : 3) + ms) * N
+      wbase = (bit * (this.symProt && this.symAepN > 2000000 ? 5 : this.isV20 ? 4 : 3) + ms) * N
       if (this.symDna && this.symAepClean) wbase = ((bit * 4 + ms) * 2 + (mIdx >= 0 && this.symMMc === 0 ? 1 : 0)) * N
       // 与 p() 相同的整数点积，按同样顺序累加以保证逐位一致。
       // P17.2: `inputs[N-1]` is the constant 256 bias, so its term is hoisted out
@@ -1590,6 +1598,7 @@ class Model {
   symMMc = 0
   symLocalFlag = false
   symTblS: Int32Array | null = null
+  symTblG: Int32Array | null = null
   symTblL: Int32Array | null = null
   shadowDelta = 0
   shadowUntil = 0
@@ -2047,6 +2056,27 @@ class Model {
           if (s4) {
             if (pos - ts[hb] > 4) { ts[hb+3]=ts[hb+2]; ts[hb+2]=ts[hb+1]; ts[hb+1]=ts[hb]; ts[hb]=pos }
           } else ts[hs] = pos
+        }
+        // Sibling-pair 10-mer homolog seed for gapped protein contexts.
+        if (this.symProt && this.context === 'sym-5bit-gap' && this.symAepN > 2000000 && this.mlen === 0 && pos >= 10) {
+          const gbits = this.symAepN > 10000000 ? 22 : 21
+          if (!this.symTblG) this.symTblG = new Int32Array(1 << gbits)
+          const tg = this.symTblG
+          let hg = 0x811c9dc5
+          for (let d = 0; d < 10; d++) hg = Math.imul(hg ^ ((b2s[buf[pos - 1 - d]] >> 1) + 1), 0x01000193)
+          hg = (hg ^ (hg >>> 15)) & ((1 << gbits) - 1)
+          const ep = tg[hg]
+          let ok = ep >= 10 && ep < pos
+          if (ok) {
+            let ex = 0
+            for (let d = 0; d < 10; d++) {
+              const a = b2s[buf[ep - 1 - d]], b = b2s[buf[pos - 1 - d]]
+              if ((a >> 1) !== (b >> 1)) { ok = false; break }
+              if (a === b) ex++
+            }
+            if (ok && ex >= 7) { bestL = 10; bestP = ep; bestE = 10 }
+          }
+          tg[hg] = pos
         }
         // Local tandem-repeat horizon: 4-mer <=128, 5-mer <=4096, 6-mer <=65536.
         if (pos >= 6 && this.mlen === 0) {
