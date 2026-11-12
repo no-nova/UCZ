@@ -1566,7 +1566,7 @@ class Model {
           const n = this.symAepN || 0
           const kstar = n > 0 && h > 0 ? Math.log2(n) / h : 0
           this.symAepClean = kstar >= 12.3
-          if (kstar >= 12.3) this.symLadder = [2, 3, 4, 5, 7, 9, 11, 13, 0]
+          if (kstar >= 12.3) this.symLadder = [2, 3, 4, 5, 7, 9, 12, 14, 0]
           this.symAepDone = true
         }
       }
