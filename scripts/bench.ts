@@ -7,7 +7,7 @@ async function main() {
   const filename = args.find(a => !a.startsWith('--'))
   if (!filename) throw new Error('用法: npm run bench -- <文件路径> [--single] [--no-external] [--verbose]')
   const info = await stat(filename)
-  if (info.size > 64 * 1024 * 1024) throw new Error('命令行基准目前限 64 MiB；避免系统内存不足。')
+  if (info.size > 256 * 1024 * 1024) throw new Error('命令行基准目前限 256 MiB；避免系统内存不足。')
   const data = await readFile(filename)
   console.log(`文件: ${filename}\n原始: ${data.length} B`)
   let last = 0

@@ -4308,21 +4308,22 @@ function distinctBytes(data: Uint8Array, cap: number): number {
 function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg: string, pct: number) => void): Compressed | null {
   if (!planTuning.symbolFastPath) return null
   const n = data.length
-  if (n < 262144) return null
-  const k = distinctBytes(data, 4)
-  if (k < 2 || k > 4) return null
+  if (n < 4096) return null
+  const k = distinctBytes(data, 32)
+  if (k < 2 || k > 32) return null
   const sampleLen = Math.min(n, 196608)
   const sample = data.subarray(0, sampleLen)
   onStage?.('低基数符号流：采样比较 8 位与低基数符号模型…', 10)
   const probe = (ctx?: CMContext) => withCMBlockSize(n, () => encodeCM(sample, 'text', 1, 1, undefined, 0, undefined, undefined, 'v20', 0, false, ctx ? { context: ctx } : undefined)).length
   const plainBytes = probe(undefined)
-  const candidates: { ctx: CMContext; bytes: number }[] = (['sym-2bit'] as CMContext[]).map(ctx => ({ ctx, bytes: probe(ctx) }))
+  const contexts: CMContext[] = k <= 4 ? ['sym-2bit'] : ['sym-5bit-gap']
+  const candidates: { ctx: CMContext; bytes: number }[] = contexts.map(ctx => ({ ctx, bytes: probe(ctx) }))
   candidates.sort((a, b) => a.bytes - b.bytes)
   const symBytes = candidates[0].bytes
-  // Quaternary files are won by >1 %; letter streams by ~0.1 %, so the margin
-  // must stay below that or A/I would fall back to the multi-pass pipeline.
-  if (symBytes >= plainBytes * 0.999) return null
-  onStage?.('低基数符号流：整份文件单遍 2 位符号编码…', 20)
+  // Quaternary files are won by >1 %, letter streams by a wider margin. The
+  // sample only selects the mode; the final encode always covers the full file.
+  if (k <= 4 ? symBytes >= plainBytes * 0.999 : symBytes >= plainBytes) return null
+  onStage?.('低基数符号流：整份文件单遍低基数符号编码…', 20)
   const spec: Spec = { id: ID.TEXT_V3, s: 1, r: 1 }
   const ctx = candidates[0].ctx
   const payload = encodeTerrainGroup([data], spec, undefined, undefined, undefined, [0], 'v20', { context: ctx })

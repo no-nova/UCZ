@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import * as zlib from 'node:zlib'
 
 const exec = promisify(execFile)
-const limit = 64 * 1024 * 1024
+const limit = 256 * 1024 * 1024
 const jobs = [
   {label:'Zstandard -3', run: async d => { const t = performance.now(); const p = await promisify(zlib.zstdCompress)(d, {params:{[zlib.constants.ZSTD_c_compressionLevel]:3}}); const encodeMs = performance.now() - t; return [p, await promisify(zlib.zstdDecompress)(p), encodeMs] }},
   {label:'Zstandard -19', run: async d => { const t = performance.now(); const p = await promisify(zlib.zstdCompress)(d, {params:{[zlib.constants.ZSTD_c_compressionLevel]:19}}); const encodeMs = performance.now() - t; return [p, await promisify(zlib.zstdDecompress)(p), encodeMs] }},

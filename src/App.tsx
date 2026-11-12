@@ -235,7 +235,7 @@ export default function App() {
                 还原 .ucz 文件
               </button>
             </div>
-            <p className="max-w-3xl text-xs leading-relaxed text-slate-500">每个文件最多 64 MiB（{formatBytes(MAX_INPUT_BYTES)}），超限或空文件单独提示，不影响其它任务。文件按并发上限排队，开始处理时才读取；大文件模型可能占用数百 MiB 内存，低内存设备建议选择 1 个任务。高并发（24 个以上）会同时驻留多份模型，请确认内存充足。</p>
+            <p className="max-w-3xl text-xs leading-relaxed text-slate-500">每个文件最多 256 MiB（{formatBytes(MAX_INPUT_BYTES)}），超限或空文件单独提示，不影响其它任务。文件按并发上限排队，开始处理时才读取；大文件模型可能占用数百 MiB 内存，低内存设备建议选择 1 个任务。高并发（24 个以上）会同时驻留多份模型，请确认内存充足。</p>
             <input ref={fileRef} type="file" multiple aria-label="选择待压缩文件" disabled={!!stage || benchBusy} hidden onChange={e => { onFiles(e.target.files); e.target.value = '' }} />
             <input ref={uczRef} type="file" accept=".ucz" aria-label="选择待还原文件" disabled={busy || !!stage || benchBusy} hidden onChange={e => { onRestore(e.target.files?.[0]); e.target.value = '' }} />
           </div>
