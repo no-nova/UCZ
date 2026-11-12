@@ -1672,7 +1672,11 @@ class Model {
                 const ok3 = buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]
                 let ok = ok3
                 if (!ok && this.mlen >= 16 && q >= 4) {
-                  ok = buf[q-1]===buf[pos-1] && buf[q-2]===buf[pos-2] && buf[q-3]===buf[pos-3] && buf[q-4]===buf[pos-4]
+                  if (this.symAepN > 2000000 && this.symAepN <= 10000000) {
+                    let ex=0, co=0
+                    for (let k=1;k<=4;k++) { const a=this.byteToSym![buf[q-k]], b=this.byteToSym![buf[pos-k]]; if (a===b) ex++; else if ((a>>2)===(b>>2)) co++ }
+                    ok = ex === 4 || (ex >= 3 && co >= 1)
+                  } else ok = buf[q-1]===buf[pos-1] && buf[q-2]===buf[pos-2] && buf[q-3]===buf[pos-3] && buf[q-4]===buf[pos-4]
                 }
                 if (!ok && this.mlen >= 12 && this.symMMc >= 3 && q >= 4) {
                   let ex=0, coarse=0
