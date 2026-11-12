@@ -1807,7 +1807,7 @@ class Model {
           }
           hf = (hf ^ (hf >>> 15)) & 0x1fffff
           hr = (hr ^ (hr >>> 15)) & 0x1fffff
-          const cf = tl[hf]
+          const cf = bestL < 64 ? tl[hf] : 0
           if (cf >= 11 && cf < pos) {
             let L = 0
             while (L < 64 && cf - 1 - L >= 0 && buf[cf - 1 - L] === buf[pos - 1 - L]) L++
@@ -1816,7 +1816,7 @@ class Model {
               if (L > bestL) { bestL = L; bestP = cf; bestD = 0; bestLocal = true; bestE = L }
             }
           }
-          const cr = tl[hr]
+          const cr = bestL < 64 ? tl[hr] : 0
           if (cr >= 12) {
             let L = 0
             while (L < 64 && pos - 1 - L >= 0 && cr - 11 + L >= 0 && buf[pos - 1 - L] === cp[buf[cr - 11 + L]]) L++

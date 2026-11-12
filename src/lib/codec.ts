@@ -4326,15 +4326,19 @@ function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg
   // far better than a generic 5-bit symbol stream.
   if (k >= 5) {
     let spaces = 0
-    for (let i = 0; i < n; i++) {
-      const b = data[i]
-      if (b === 0x20) spaces++
-      // The 5-bit path targets printable symbol alphabets (protein letters).
-      // Reject binary/control-heavy streams so the normal adaptive pipeline
-      // keeps its richer transforms (e.g. slope/audio-like synthetic data).
-      else if (b < 0x21 || b > 0x7e) return null
-    }
+    for (let i = 0; i < n; i++) if (data[i] === 0x20) spaces++
     if (spaces * 100 >= n) return null
+    // P18.6: binary-agnostic smooth-ramp guard. Synthetic numeric slopes are
+    // categorical streams in disguise; their adjacent bytes almost always
+    // differ by exactly one. A 4 KiB prefix is enough to identify them without
+    // assuming any particular byte alphabet (printable ASCII or otherwise).
+    const rampLen = Math.min(n, 4096)
+    let step1 = 0
+    for (let i = 1; i < rampLen; i++) {
+      const d = data[i] - data[i - 1]
+      if (d !== 0 && (d === 1 || d === -1)) step1++
+    }
+    if (step1 * 2 >= rampLen) return null
   }
   // A 64 KiB sample flips AITDCC I to the coarse-seeded 5-bit mode (+19 B),
   // so both paths keep the proven 192 KiB sample.
