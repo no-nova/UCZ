@@ -15,10 +15,10 @@ export const cmV20Tuning = { enabled: true, binRecovery: true }
 /** P18.0 universal low-cardinality symbol modes (symbol-agnostic). */
 export type SymContext = 'sym-2bit' | 'sym-5bit' | 'sym-5bit-gap'
 export const isSymContext = (c?: string): c is SymContext => c === 'sym-2bit' || c === 'sym-5bit' || c === 'sym-5bit-gap'
-export interface SymAlphabet { k: number; bits: number; symToByte: Uint8Array; byteToSym: Uint8Array; compByte: Uint8Array }
+export interface SymAlphabet { k: number; bits: number; symToByte: Uint8Array; byteToSym: Uint8Array; compByte: Uint8Array; minCount?: number }
 /**
- * Rank alphabet: distinct bytes sorted by descending frequency (ties by ascending
- * byte value). `rank ^ 1` is the universal antiparallel involution (`compByte`),
+ * Rank alphabet: distinct bytes sorted by descending frequency (ties by first
+ * occurrence). `rank ^ 1` is the universal antiparallel involution (`compByte`),
  * so no ASCII/DNA literal is ever needed.
  */
 export function symAlphabetFromList(list: ArrayLike<number>, context: SymContext): SymAlphabet {
@@ -34,13 +34,57 @@ function symAlphabetBuild(orderIn: number[], context: SymContext): SymAlphabet {
   for (let b = 0; b < 256; b++) compByte[b] = symToByte[byteToSym[b] ^ 1]
   return { k: order.length, bits, symToByte, byteToSym, compByte }
 }
+/** P19.1: canonical first-occurrence tie-break, independent of raw byte labels. */
+function involutionChoice(data: Uint8Array, order: number[]): number {
+  const scan = Math.min(data.length, 65536)
+  if (scan < 10) return 1
+  const rank = new Uint8Array(256)
+  order.forEach((b, r) => { rank[b] = r })
+  const fwd = new Set<number>()
+  const hash = (i: number, tau: number): number => {
+    let h = 0x811c9dc5
+    for (let j = 9; j >= 0; j--) {
+      const r = tau === 1 ? rank[data[i + j]] ^ 1 : tau === 2 ? rank[data[i + j]] ^ 2 : rank[data[i + j]] ^ 3
+      h = Math.imul(h ^ (r + 1), 0x01000193)
+    }
+    return h >>> 0
+  }
+  for (let i = 0; i + 10 <= scan; i++) {
+    let h = 0x811c9dc5
+    for (let j = 0; j < 10; j++) h = Math.imul(h ^ (rank[data[i + j]] + 1), 0x01000193)
+    fwd.add(h >>> 0)
+  }
+  let best = 1, bestHits = -1
+  for (let tau = 1; tau <= 3; tau++) {
+    let hits = 0
+    for (let i = 0; i + 10 <= scan; i++) if (fwd.has(hash(i, tau))) hits++
+    if (hits > bestHits) { bestHits = hits; best = tau }
+  }
+  return best
+}
+
 export function symAlphabetOf(data: Uint8Array, context: SymContext): SymAlphabet {
-  const cnt = new Float64Array(256)
-  for (let i = 0; i < data.length; i++) cnt[data[i]]++
+  const cnt = new Float64Array(256), first = new Int32Array(256).fill(-1)
+  for (let i = 0; i < data.length; i++) {
+    const b = data[i]
+    if (cnt[b] === 0) first[b] = i
+    cnt[b]++
+  }
   const order: number[] = []
   for (let b = 0; b < 256; b++) if (cnt[b] > 0) order.push(b)
-  order.sort((a, b) => cnt[b] - cnt[a] || a - b)
-  return symAlphabetBuild(order, context)
+  order.sort((a, b) => cnt[b] - cnt[a] || first[a] - first[b])
+  // P19.1: discover the antiparallel involution from the stream itself.  The
+  // three fixed-point-free pairings are the only possibilities for K=4.
+  if (context === 'sym-2bit' && order.length === 4) {
+    const tau = involutionChoice(data, order)
+    if (tau === 2) { const o = order.slice(); [o[1], o[2]] = [o[2], o[1]]; order.splice(0, order.length, ...o) }
+    else if (tau === 3) { const o = order.slice(); [o[1], o[3]] = [o[3], o[1]]; order.splice(0, order.length, ...o) }
+  }
+  const sm = symAlphabetBuild(order, context)
+  let min = Infinity
+  for (const b of order) min = Math.min(min, cnt[b])
+  sm.minCount = min
+  return sm
 }
 /**
  * P18.4: distributional symbol tree. Symbols with similar left/right flanking
@@ -50,6 +94,7 @@ export function symAlphabetOf(data: Uint8Array, context: SymContext): SymAlphabe
  */
 function symContextOrder(data: Uint8Array, map: SymAlphabet): number[] {
   const K = map.k
+  const clean = map.minCount !== undefined && map.minCount >= (data.length >>> 10)
   const identity = Array.from({ length: K }, (_, i) => map.symToByte[i])
   if (K < 4 || K > 32 || data.length < 3) return identity
   const rank = new Uint8Array(256)
@@ -64,7 +109,7 @@ function symContextOrder(data: Uint8Array, map: SymAlphabet): number[] {
   }
   const vec = new Float64Array(2 * K * K)
   for (let a = 0; a < K; a++) {
-    if (data.length > 2000000 && data.length <= 10000000) {
+    if (data.length > 2000000 && clean) {
       let sl = 0, sr = 0
       for (let x = 0; x < K; x++) { sl += L[a * K + x]; sr += R[a * K + x] }
       sl += K; sr += K
@@ -914,6 +959,7 @@ class Model {
     this.symP5Coarse = this.symProt && this.context !== 'sym-5bit-gap'
     if (this.symProt) {
       this.symAepN = n
+      this.symClean = sm?.k !== undefined && sm.k <= 20
       this.symSeedK2 = 8
       this.symSeedK = 8
       this.symSeedGate = 24
@@ -928,6 +974,7 @@ class Model {
     if (this.symDna) {
       this.symLadder = [2, 3, 4, 5, 6, 7, 9, 12, 0]
       this.symAepN = n
+      this.symClean = false
     }
     const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
@@ -1605,6 +1652,7 @@ class Model {
   symK = new Int32Array(16)
   symLadder: number[] | null = null
   symAepN = 0
+  symClean = false
   symAepPos = 0
   symAepDone = false
   symAepClean = false
@@ -1697,7 +1745,7 @@ class Model {
                 const ok3 = buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]
                 let ok = ok3
                 if (!ok && this.mlen >= 16 && q >= 4) {
-                  if (this.symAepN > 2000000 && this.symAepN <= 10000000) {
+                  if (this.symAepN > 2000000 && this.symClean) {
                     let ex=0, co=0
                     for (let k=1;k<=4;k++) { const a=this.byteToSym![buf[q-k]], b=this.byteToSym![buf[pos-k]]; if (a===b) ex++; else if ((a>>2)===(b>>2)) co++ }
                     ok = ex === 4 || (ex >= 3 && co >= 1)
@@ -2018,7 +2066,7 @@ class Model {
         // Homologous protein spaced seed: 6 care residues over 9 (110110110), >=7/9.
         if (pos >= 9 && this.mlen < 10) {
           const sbits = this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19
-          const s4 = this.symAepN > 2000000 && this.symAepN <= 10000000
+          const s4 = this.symAepN > 2000000 && this.symClean
           if (!this.symTblS) this.symTblS = new Int32Array((1 << sbits) * (s4 ? 4 : 1))
           const ts = this.symTblS
           let hs = 0x811c9dc5
@@ -2189,8 +2237,9 @@ export function encodeCM(
 ): Uint8Array {
   if (isSymContext(options?.context)) {
     const ctx = options!.context as SymContext
-    let map = symAlphabetOf(data, ctx)
-    if (map.bits === 5) map = symAlphabetFromList(symContextOrder(data, map), ctx)
+    const baseMap = symAlphabetOf(data, ctx)
+    let map = baseMap
+    if (map.bits === 5) { map = symAlphabetFromList(symContextOrder(data, map), ctx); map.minCount = baseMap.minCount }
     const body = encodeCMImpl(data, profile, s, r, costOut, costOff, blockCost, onProgress, variant, geomStride, undefined, undefined, wordTokens, { ...options, symMap: map })
     const out = new Uint8Array(1 + map.k + body.length)
     out[0] = map.k

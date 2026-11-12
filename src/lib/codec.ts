@@ -4325,17 +4325,19 @@ function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg
   // bytes are word-delimited text, which the normal text/LZ/CM pipeline models
   // far better than a generic 5-bit symbol stream.
   if (k >= 5) {
-    let spaces = 0
-    for (let i = 0; i < n; i++) if (data[i] === 0x20) spaces++
-    if (spaces * 100 >= n) return null
-    // P18.6: binary-agnostic smooth-ramp guard. Synthetic numeric slopes are
-    // categorical streams in disguise; their adjacent bytes almost always
-    // differ by exactly one. A 4 KiB prefix is enough to identify them without
-    // assuming any particular byte alphabet (printable ASCII or otherwise).
+    // P19.1: canonical smooth-ramp guard.  Ranks are derived only from
+    // frequency and first occurrence, so a byte permutation cannot change it.
     const rampLen = Math.min(n, 4096)
+    const freq = new Float64Array(256), first = new Int32Array(256).fill(-1)
+    for (let i = 0; i < rampLen; i++) { const b = data[i]; if (freq[b] === 0) first[b] = i; freq[b]++ }
+    const active: number[] = []
+    for (let b = 0; b < 256; b++) if (freq[b] > 0) active.push(b)
+    active.sort((a, b) => freq[b] - freq[a] || first[a] - first[b])
+    const rank = new Uint8Array(256)
+    active.forEach((b, r) => { rank[b] = r })
     let step1 = 0
     for (let i = 1; i < rampLen; i++) {
-      const d = data[i] - data[i - 1]
+      const d = rank[data[i]] - rank[data[i - 1]]
       if (d !== 0 && (d === 1 || d === -1)) step1++
     }
     if (step1 * 2 >= rampLen) return null

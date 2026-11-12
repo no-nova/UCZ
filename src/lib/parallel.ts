@@ -75,7 +75,7 @@ export function threadCount(): number {
   const raw = process.env?.UCZ_THREADS
   if (raw !== undefined) {
     const env = Number(raw)
-    if (Number.isFinite(env) && env >= 1) return Math.floor(env)
+    if (Number.isFinite(env) && env >= 1) return Math.min(Math.floor(env), memorySafeThreads())
   }
   let cores = 1
   try {
@@ -84,16 +84,23 @@ export function threadCount(): number {
     // 浏览器端 typeof process 的判断已经提前返回）。
     cores = osParallelism()
   } catch { cores = 1 }
-  // 至少 1 个；上限 8 以避免内存与调度开销失控（每线程要独立模型表）。
+  // 至少 1 个；硬上限由宪法总预算给出，而不是只看本机核数。
   const capped = Math.min(Math.floor(cores) || 1, 8)
   return Math.min(capped, memorySafeThreads())
 }
 
+/** P19.1 hard constitutional budget: 3.5 GiB workers + 512 MiB headroom. */
+export const CONSTITUTIONAL_MAX_RAM_MIB = 3584
+const CONSTITUTIONAL_HEADROOM_MIB = 512
+
 /**
- * 依据可用内存收窄并发度：24-bit 模型仅上下文表就占 576 MiB；按每 worker 1024 MiB 预算限制默认并发。
- * 探不到总内存时不做限制（浏览器端由线程数上限兜底）。
+ * 依据可用内存收窄并发度。24-bit 模型每组上下文 576 MiB；按每 worker
+ * 1024 MiB 的最坏预算，宪法硬上限最多 3 个 worker（3×1024 + 512 = 3584 MiB）。
+ * 无论本机有多少核，都不允许突破该总预算。
  */
-export function memorySafeThreads(): number {
+export function memorySafeThreads(chunkBytes = 0): number {
+  const perWorkerMiB = chunkBytes > 8 * 1024 * 1024 ? 1024 : chunkBytes > 0 ? 512 : 1024
+  const hard = Math.max(1, Math.floor((CONSTITUTIONAL_MAX_RAM_MIB - CONSTITUTIONAL_HEADROOM_MIB) / perWorkerMiB))
   let totalMiB = 0
   try {
     const p = process as unknown as { memoryUsage?: () => { rss: number } }
@@ -104,9 +111,10 @@ export function memorySafeThreads(): number {
       if (m > 0) totalMiB = m / 1048576
     }
   } catch { totalMiB = 0 }
-  if (!(totalMiB > 0)) return 8
-  // 每个线程按 1024 MiB 预算（576 MiB 表、36 MiB 匹配表、载荷与 GC 余量），至少 1024 MiB 余量。
-  return Math.max(1, Math.min(8, Math.floor((totalMiB - 1024) / 1024)))
+  if (!(totalMiB > 0)) return hard
+  // 本机可用内存也要留出主线程余量；与宪法硬上限取最小值。
+  const byMemory = Math.max(1, Math.floor((totalMiB - 1024) / 1024))
+  return Math.max(1, Math.min(8, hard, byMemory))
 }
 
 let memLimitFn: (() => number) | null = null
