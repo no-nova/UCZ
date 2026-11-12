@@ -876,6 +876,7 @@ class Model {
     this.geometry = cmTableShape(n)
     const sm = (options as any)?.symMap as SymAlphabet | undefined
     this.symBits = sm ? sm.bits : 8
+    this.symAlphaK = sm ? sm.k : 256
     this.symToByte = sm ? sm.symToByte : null
     this.byteToSym = sm ? sm.byteToSym : null
     this.compByte = sm ? sm.compByte : null
@@ -1406,6 +1407,26 @@ class Model {
     }
   }
 
+  forcedZero(): boolean {
+    if (!this.symProt || this.bit >= this.symBits) return false
+    const b = this.symBits - 1 - this.bit
+    const prefix = this.c0 & ((1 << this.bit) - 1)
+    return ((prefix << (b + 1)) | (1 << b)) >= this.symAlphaK
+  }
+
+  skipZero(): void {
+    this.c0 <<= 1
+    this.bit++
+    if (this.bit === this.symBits) {
+      const byte = this.symToByte![this.c0 & ((1 << this.symBits) - 1)]
+      this.buf[this.pos] = byte
+      this.pos++
+      this.c0 = 1
+      this.bit = 0
+      this.byteUpdate(byte)
+    }
+  }
+
   p(): number {
     const { nctx, inputs, idx, hashes, c0 } = this
     const cm = Math.imul(c0, 0x9e3779b1)
@@ -1519,6 +1540,7 @@ class Model {
   }
 
   symBits = 8
+  symAlphaK = 256
   symToByte: Uint8Array | null = null
   byteToSym: Uint8Array | null = null
   compByte: Uint8Array | null = null
@@ -1643,10 +1665,21 @@ class Model {
           // and keep walking the current template (hysteresis).
           let switched = false
           if (this.symProt && this.mlen >= 8 && this.symMMc >= 2) {
-            for (const d of [-1, 1, -2, 2, -3, 3]) {
+            const ds = this.symAepN > 2000000 && this.mlen >= 12 ? [-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8] : [-3,-2,-1,1,2,3]
+            for (const d of ds) {
               const q = this.mptr + d
-              if (q >= 4 && q < pos && buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]) {
-                this.mptr = q; this.symMMc = 0; this.symExact = 0; switched = true; break
+              if (q >= 4 && q < pos) {
+                const ok3 = buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]
+                let ok = ok3
+                if (!ok && this.mlen >= 16 && q >= 4) {
+                  ok = buf[q-1]===buf[pos-1] && buf[q-2]===buf[pos-2] && buf[q-3]===buf[pos-3] && buf[q-4]===buf[pos-4]
+                }
+                if (!ok && this.mlen >= 12 && this.symMMc >= 3 && q >= 4) {
+                  let ex=0, coarse=0
+                  for (let k=1;k<=4;k++) { const a=this.byteToSym![buf[q-k]], b=this.byteToSym![buf[pos-k]]; if (a===b) ex++; else if ((a>>2)===(b>>2)) coarse++ }
+                  ok = ex >= 3 && ex + coarse === 4
+                }
+                if (ok) { this.mptr = q; this.symMMc = 0; this.symExact = 0; switched = true; break }
               }
             }
           }
@@ -2083,6 +2116,7 @@ function encodeCMImpl(data: Uint8Array, profile: Profile, s: number, r: number, 
     let c = 0
     for (let b = m.symBits < 8 ? m.symBits - 1 : 7; b >= 0; b--) {
       const y = m.symBits < 8 ? (m.byteToSym![byte] >> b) & 1 : (byte >> b) & 1
+      if (m.forcedZero()) { m.skipZero(); continue }
       const p = m.step(y, true)
       const xm = mid(x1, x2, p)
       if (y) x2 = xm
@@ -2252,9 +2286,10 @@ function decodeCMImpl(payload: Uint8Array, n:number, profile:Profile, s:number, 
   for (let i = 0; i < 4; i++) x = ((x << 8) | next()) >>> 0
   let x1 = 0
   let x2 = 0xffffffff
-  const total = n * (m.symBits < 8 ? m.symBits : 8)
-  for (let t = 0; t < total; t++) {
+  let t = 0
+  while (m.pos < n) {
     if (onProgress && (t & 0x1fffff) === 0) onProgress(t / 8, n)
+    if (m.forcedZero()) { m.skipZero(); t++; continue }
     const p = m.step(1, true)
     const xm = mid(x1, x2, p)
     let y: number
@@ -2271,6 +2306,7 @@ function decodeCMImpl(payload: Uint8Array, n:number, profile:Profile, s:number, 
       x2 = ((x2 << 8) | 255) >>> 0
       x = ((x << 8) | next()) >>> 0
     }
+    t++
   }
   onProgress?.(n, n)
   return m.buf.subarray(0, n)
