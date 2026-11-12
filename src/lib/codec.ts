@@ -4318,7 +4318,7 @@ function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg
   if (!planTuning.symbolFastPath) return null
   const n = data.length
   // Keep the normal segmenter's FILL/carve decisions on tiny 4 KiB streams.
-  if (n < 8192) return null
+  if (n < 4096) return null
   const k = distinctBytes(data, 32)
   if (k < 2 || k > 32) return null
   // P18.5: lowercase prose also fits K<=32. A >=1% ASCII-space share means the
