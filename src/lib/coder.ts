@@ -1642,7 +1642,15 @@ class Model {
           // and whose preceding k-mer verifies; otherwise tolerate the mismatch
           // and keep walking the current template (hysteresis).
           let switched = false
-          if (this.symTbl && (this.symDna || this.symProt)) {
+          if (this.symProt && this.mlen >= 8 && this.symMMc >= 2) {
+            for (const d of [-1, 1, -2, 2, -3, 3]) {
+              const q = this.mptr + d
+              if (q >= 4 && q < pos && buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]) {
+                this.mptr = q; this.symMMc = 0; this.symExact = 0; switched = true; break
+              }
+            }
+          }
+          if (!switched && this.symTbl && (this.symDna || this.symProt)) {
             const kk2 = this.symSeedK, b2s2 = this.byteToSym!
             let h2 = 0x811c9dc5
             for (let q = pos - kk2; q < pos; q++) h2 = Math.imul(h2 ^ (b2s2[buf[q]] + 1), 0x01000193)
