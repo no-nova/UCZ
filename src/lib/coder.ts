@@ -803,9 +803,15 @@ class Model {
     this.byteToSym = sm ? sm.byteToSym : null
     this.compByte = sm ? sm.compByte : null
     this.symKm9 = 0; this.symKm10 = 0; this.symDir = 1; this.symTbl = null
-    this.symSeedK = this.symBits === 2 ? 14 : 8
-    this.symSeedGate = this.symBits === 2 ? 40 : 16
-    this.symRc = this.symBits === 2
+    // P18.2: the quaternary path uses the verified 17-mer multi-seed tracker.
+    // sym-5bit keeps its original 8-mer seed/gate untouched.
+    this.symDna = this.symBits === 2
+    this.symSeedK = this.symDna ? 17 : 8
+    this.symSeedGate = this.symDna ? 40 : 16
+    this.symRc = this.symDna
+    // P18.2: the nine ladder lengths {2,3,4,5,6,7,8,9,11} are the winning
+    // context ladder for quaternary streams (byte-identical in encoder/decoder).
+    if (this.symDna) this.symLadder = [2, 3, 4, 5, 6, 7, 8, 9, 11]
     const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
@@ -1000,6 +1006,10 @@ class Model {
           H[8] = lineHash
           return
         }
+        if (this.symBits === 2 && this.symLadder) {
+          for (let i = 0; i < 9; i++) H[i] = mix32((this.symK[this.symLadder[i]] + 1) * 2654435761 | 0)
+          return
+        }
         H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=this.symBits===2?mix32(this.symKm9):this.context==='sym-5bit-gap'?hh(b1,b2,b3,b4,this.g(5)):hh(this.curWord,b1);H[7]=this.symBits===2?mix32(this.symKm10):this.context==='sym-5bit-gap'?hh(b1,b2,b4,this.g(7),this.g(8)):hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
       }
     }
@@ -1116,8 +1126,9 @@ class Model {
         inputs[nctx] = eb ? st : -st
         mIdx = mi
         mExpect = eb
+        if (this.symDna && this.symMMc > this.symPred) inputs[nctx] = 0
         ms2 = this.mlen < 16 ? 1 : 2
-        ms = this.isV20 ? (this.mlen < 6 ? 1 : this.mlen < 16 ? 2 : 3) : ms2
+        ms = this.isV20 ? (this.symDna ? (this.mlen >= 14 ? 3 : 0) : this.mlen < 6 ? 1 : this.mlen < 16 ? 2 : 3) : ms2
       } else {
         inputs[nctx] = 0
       }
@@ -1378,11 +1389,22 @@ class Model {
   symSeedK = 14
   symSeedGate = 40
   symRc = false
+  symDna = false
+  symMM = 10
+  symPred = 2
+  symHyst = 2
+  symMMc = 0
+  symLocalFlag = false
+  symTblS: Int32Array | null = null
+  symTblL: Int32Array | null = null
+  symK = new Int32Array(13)
+  symLadder: number[] | null = null
   private byteUpdate(byte: number) {
     if (this.symBits < 8) {
       const r = this.byteToSym![byte]
       this.symKm9 = ((this.symKm9 << 2) | r) & 0x3ffff
       this.symKm10 = ((this.symKm10 << 2) | r) & 0xfffff
+      for (let o = 1; o <= 12; o++) this.symK[o] = ((this.symK[o] << 2) | r) & ((1 << (2 * o)) - 1)
     }
     if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
@@ -1425,7 +1447,54 @@ class Model {
           this.gapLeft = match3Tuning.gapWait
         } else if (this.gapLeft > 0) this.gapLeft--
       }
-      if (this.mlen > 0 && (this.symDir < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) === byte) {
+      if (this.symDna) {
+        const sd = this.symDir
+        const exp = this.mlen > 0 ? (sd < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) : -1
+        if (this.mlen > 0 && exp === byte) {
+          this.mlen++
+          this.mptr += sd
+          if (this.mlen >= 17) this.symLocalFlag = false
+          if (this.symMMc > 0) this.symMMc = Math.max(0, this.symMMc - this.symHyst)
+        } else if (this.mlen >= (this.symLocalFlag ? 11 : 14) && this.symMMc < (this.symLocalFlag ? Math.min(this.symMM, 2) : this.symMM)) {
+          // P18.2: a mismatch may be an allele of another repeat copy. Switch to
+          // the most recent 4-way bucket candidate whose next symbol is `byte`
+          // and whose preceding k-mer verifies; otherwise tolerate the mismatch
+          // and keep walking the current template (hysteresis).
+          let switched = false
+          if (this.symTbl) {
+            const kk2 = this.symSeedK, b2s2 = this.byteToSym!
+            let h2 = 0x811c9dc5
+            for (let q = pos - kk2; q < pos; q++) h2 = Math.imul(h2 ^ (b2s2[buf[q]] + 1), 0x01000193)
+            h2 = (h2 ^ (h2 >>> 15)) & 0x3fffff
+            const b2 = h2 << 2, cands = this.symTbl
+            for (let w = 0; w < 4; w++) {
+              const cd = cands[b2 + w]
+              if (cd >= kk2 && cd < pos && buf[cd] === byte) {
+                let ok = true
+                for (let d = 1; d <= kk2; d++) if (buf[cd - d] !== buf[pos - d]) { ok = false; break }
+                if (ok) {
+                  this.mptr = cd
+                  this.mlen = Math.max(this.mlen, kk2)
+                  this.symDir = 1
+                  this.symMMc = 0
+                  this.symLocalFlag = false
+                  switched = true
+                  break
+                }
+              }
+            }
+          }
+          if (!switched) {
+            this.symMMc++
+            this.mptr += sd
+          }
+        } else {
+          this.mlen = 0
+          this.symDir = 1
+          this.symMMc = 0
+          this.symLocalFlag = false
+        }
+      } else if (this.mlen > 0 && (this.symDir < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) === byte) {
         this.mlen++
         this.mptr += this.symDir
       } else { this.mlen = 0; this.symDir = 1 }
@@ -1465,7 +1534,115 @@ class Model {
         if (this.mhtOlder) this.mhtOlder[h] = this.mht[h]
         this.mht[h] = pos
       }
-      if (this.symBits < 8 && pos >= this.symSeedK + 2) {
+      if (this.symDna && pos >= this.symSeedK + 2) {
+        const kk = this.symSeedK, b2s = this.byteToSym!, cp = this.compByte!
+        const hashAt = (e: number, rev: boolean): number => {
+          let h = 0x811c9dc5
+          if (rev) { for (let q = e - 1; q >= e - kk; q--) h = Math.imul(h ^ (b2s[cp[buf[q]]] + 1), 0x01000193) }
+          else { for (let q = e - kk; q < e; q++) h = Math.imul(h ^ (b2s[buf[q]] + 1), 0x01000193) }
+          h ^= h >>> 15
+          return h & 0x3fffff
+        }
+        if (!this.symTbl) this.symTbl = new Int32Array((1 << 22) * 4)
+        const tf = this.symTbl
+        const kf = hashAt(pos, false)
+        let bestL = 0, bestP = 0, bestD = 0, bestLocal = false
+        if (this.mlen < this.symSeedGate) {
+          for (let w = 0; w < 4; w++) {
+            const ef = tf[(kf << 2) + w]
+            if (ef >= kk && ef < pos) {
+              let j = 0
+              while (j < 96 && ef - kk + j >= 0 && buf[ef - kk + j] === buf[pos - kk + j]) j++
+              if (j >= kk && j > bestL) { bestL = j; bestP = ef; bestD = 0; bestLocal = false }
+            }
+          }
+        }
+        if (this.mlen < this.symSeedGate) {
+          const kr = hashAt(pos, true)
+          for (let w = 0; w < 4; w++) {
+            const er = tf[(kr << 2) + w]
+            if (er >= kk && er - kk - 1 >= 0) {
+              let j = 1
+              while (j <= 128 && pos - j >= 0 && er - kk - 1 + j >= 0 && buf[pos - j] === cp[buf[er - kk - 1 + j]]) j++
+              const l = j - 1
+              if (l >= 16 && l > bestL) { bestL = l; bestP = er - kk - 1; bestD = 1; bestLocal = false }
+            }
+          }
+        }
+        // Codon-wobble spaced seed: 14 care bases over a 21 bp span, >=18/21
+        // verified. This recovers paralogous repeats that a contiguous k-mer
+        // misses because of synonymous third positions.
+        if (pos >= 21 && this.mlen < 14) {
+          if (!this.symTblS) this.symTblS = new Int32Array(1 << 20)
+          const ts = this.symTblS
+          let hf = 0x811c9dc5, hr = 0x811c9dc5
+          for (let d = 0; d < 21; d++) {
+            if (d % 3 === 2) continue
+            hf = Math.imul(hf ^ (b2s[buf[pos - 1 - d]] + 1), 0x01000193)
+            hr = Math.imul(hr ^ (b2s[cp[buf[pos - 1 - d]]] + 1), 0x01000193)
+          }
+          hf = (hf ^ (hf >>> 15)) & 0xfffff
+          hr = (hr ^ (hr >>> 15)) & 0xfffff
+          const ep = ts[hf]
+          if (ep >= 21 && ep < pos) {
+            let m = 0
+            for (let d = 0; d < 21; d++) if (buf[ep - 1 - d] === buf[pos - 1 - d]) m++
+            if (m >= 18) { bestL = 21; bestP = ep; bestD = 0; bestLocal = false }
+          }
+          const er = ts[hr]
+          if (er >= 22) {
+            let m = 0
+            for (let d = 0; d < 21; d++) if (buf[pos - 1 - d] === cp[buf[er - 21 + d]]) m++
+            if (m >= 18) { bestL = 21; bestP = er - 22; bestD = 1; bestLocal = false }
+          }
+          ts[hf] = pos
+        }
+        // Local distance-horizon seed: 11-mer table plus the significance gate
+        // 2L - log2(dist) >= 22, i.e. 11 bp within 128, 13 bp within 4 KiB,
+        // 15 bp within 64 KiB. Only consulted when no global match is active.
+        if (pos >= 12 && this.mlen === 0) {
+          if (!this.symTblL) this.symTblL = new Int32Array(1 << 21)
+          const tl = this.symTblL
+          let hf = 0x811c9dc5, hr = 0x811c9dc5
+          for (let d = 1; d <= 11; d++) {
+            hf = Math.imul(hf ^ (b2s[buf[pos - d]] + 1), 0x01000193)
+            hr = Math.imul(hr ^ (b2s[cp[buf[pos - d]]] + 1), 0x01000193)
+          }
+          hf = (hf ^ (hf >>> 15)) & 0x1fffff
+          hr = (hr ^ (hr >>> 15)) & 0x1fffff
+          const cf = tl[hf]
+          if (cf >= 11 && cf < pos) {
+            let L = 0
+            while (L < 64 && cf - 1 - L >= 0 && buf[cf - 1 - L] === buf[pos - 1 - L]) L++
+            const dist = pos - cf
+            if ((dist <= 128 && L >= 11) || (dist <= 4096 && L >= 13) || (dist <= 65536 && L >= 15)) {
+              if (L > bestL) { bestL = L; bestP = cf; bestD = 0; bestLocal = true }
+            }
+          }
+          const cr = tl[hr]
+          if (cr >= 12) {
+            let L = 0
+            while (L < 64 && pos - 1 - L >= 0 && cr - 11 + L >= 0 && buf[pos - 1 - L] === cp[buf[cr - 11 + L]]) L++
+            const dist = pos - cr
+            if ((dist <= 128 && L >= 11) || (dist <= 4096 && L >= 13) || (dist <= 65536 && L >= 15)) {
+              if (L > bestL) { bestL = L; bestP = cr - 12; bestD = 1; bestLocal = true }
+            }
+          }
+          tl[hf] = pos
+        }
+        if (bestL > this.mlen) {
+          this.mlen = bestL
+          this.mptr = bestP
+          this.symDir = bestD ? -1 : 1
+          this.symLocalFlag = bestLocal
+          this.symMMc = 0
+        }
+        const b4 = kf << 2
+        tf[b4 + 3] = tf[b4 + 2]
+        tf[b4 + 2] = tf[b4 + 1]
+        tf[b4 + 1] = tf[b4]
+        tf[b4] = pos
+      } else if (this.symBits < 8 && pos >= this.symSeedK + 2) {
         const kk = this.symSeedK, b2s = this.byteToSym!, cp = this.compByte!
         const hashAt = (e: number, rev: boolean): number => {
           let h = 0x811c9dc5
