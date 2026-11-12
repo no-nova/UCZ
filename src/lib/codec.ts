@@ -12,7 +12,7 @@ import { encodeAnchor, decodeAnchor, anchorRowCount, anchorPotential, MAX_ANCHOR
 import { analyze, detectAnchors, detectLagCandidates, detectRecordStride, detectWide16Lag, BLOCK, type Analysis, type Cls } from './analyze'
 import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, type CostBins, type CMVariant, type Profile } from './coder'
 import { wordPreFwdSampled, wordPreInv, dictHeaderLen, collapseWithDict, type WordPreResult } from './wordpre'
-import { deltaFwd, deltaInv, medFwd, medInv, d16Fwd, d16Inv, bcjFwd, bcjInv, bcjMsbFwd, bcjMsbInv, wide16Fwd, wide16Inv, wordRowDelta, anchorFoldFwd, anchorFoldInv } from './transforms'
+import { deltaFwd, deltaInv, medFwd, medInv, d16Fwd, d16Inv, bcjFwd, bcjInv, bcjMsbFwd, bcjMsbInv, discoverRel32Triggers, wide16Fwd, wide16Inv, wordRowDelta, anchorFoldFwd, anchorFoldInv } from './transforms'
 import { CM_FAMILIES, isFamilyCM } from './unify'
 import { threadCount, type JobPayload, type JobReply } from './parallel'
 import { closeNodePool, nodeParallelReady, runNodeJobs } from './parallel-node'
@@ -104,7 +104,7 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
   if (context === 'bin-stride4') return !wordPre && (sp.id === ID.TRANSPOSE_GROUP_V3
     ? sp.s >= 2 && sp.s <= 64 && sp.r === 1
     : ([ID.BIN, ID.BIN_V2, ID.BIN_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
-      || ([ID.BCJ, ID.BCJ_V2, ID.BCJ_V3] as number[]).includes(sp.id) && (sp.s === 1 || (sp.id === ID.BCJ_V3 && sp.s === 2)) && sp.r === 1)
+      || ([ID.BCJ, ID.BCJ_V2, ID.BCJ_V3] as number[]).includes(sp.id) && (sp.id === ID.BCJ_V3 ? (sp.s >= 1 && sp.r >= 1) : (sp.s === 1 && sp.r === 1)))
   if (context === 'text-sparse5') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   // P17.7: the line/field column predictors run the same `text` CM on the same
   // raw text stream as text-sparse5 — they substitute three of that model's nine
@@ -148,12 +148,12 @@ function joinContextBin(parts: readonly Uint8Array[]): Uint8Array {
  */
 function contextFilterForward(part: Uint8Array, sp: Spec, position = 0): Uint8Array {
   if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3)
-    return (sp.id === ID.BCJ_V3 && sp.s === 2 ? bcjMsbFwd : bcjFwd)(part, position)
+    return (sp.id === ID.BCJ_V3 ? bcjMsbFwd : bcjFwd)(part, position, ...(sp.id === ID.BCJ_V3 && sp.s > 2 ? [sp.s - 1, sp.r - 1] : []))
   return part
 }
 function contextFilterInverse(part: Uint8Array, sp: Spec, position = 0): Uint8Array {
   if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3)
-    return (sp.id === ID.BCJ_V3 && sp.s === 2 ? bcjMsbInv : bcjInv)(part, position)
+    return (sp.id === ID.BCJ_V3 ? bcjMsbInv : bcjInv)(part, position, ...(sp.id === ID.BCJ_V3 && sp.s > 2 ? [sp.s - 1, sp.r - 1] : []))
   return part
 }
 function joinContextBinFiltered(parts: readonly Uint8Array[], sp: Spec, positions?: number[]): Uint8Array {
@@ -176,7 +176,7 @@ function fmtAnchor(b:number):string {
 export function specLabel(sp: Spec): string {
   const c = CODECS[sp.id].short
   if (sp.id === ID.WIDE_GRAD) return `${c}(${['','D16','MED8','MED16','GRAD332','AVG16','ZZ-GRAD332','ZZ-AVG16','ZZ-MED16'][sp.s]}, 行${sp.r})`
-  if (sp.id === ID.BCJ_V3 && sp.s === 2) return `${c}(MSB25)`
+  if (sp.id === ID.BCJ_V3 && sp.s !== 1) return `${c}(MSB25)`
   if (sp.id === ID.MICRO) return `${c}(步长${sp.s}, 行${sp.r})`
   if ((sp.id === ID.SUB_TRANSPOSE || sp.id === ID.SUB_TRANSPOSE_V3)) return `${c}(步长${sp.s}, ${sp.r & 1 ? 'TEXT' : 'BIN'})`
   if ((sp.id === ID.SUB_ANCHOR || sp.id === ID.SUB_ANCHOR_V3)) return `${c}(${fmtAnchor(sp.s)}, 0x${(sp.r & 127).toString(16).padStart(2,'0')})`
@@ -1039,7 +1039,7 @@ function withRowA2Off<T>(sp: Spec, fn: () => T): T {
   try { return fn() } finally { a2Suppress.depth-- }
 }
 
-const v20Spec = (sp: Spec) => (sp.id === ID.WIDE_GRAD && sp.s >= 3) || (sp.id === ID.BCJ_V3 && sp.s === 2)
+const v20Spec = (sp: Spec) => (sp.id === ID.WIDE_GRAD && sp.s >= 3) || (sp.id === ID.BCJ_V3 && sp.s !== 1)
 const markV20Transform = (p: Uint8Array) => markPayloadModel(p, payloadModelFlags(p) | V20_FLAG_TRANSFORMS)
 function checkWide(sp: Spec, lengths: readonly number[]) {
   if (!Number.isInteger(sp.s) || sp.s < 1 || sp.s > (transformsV20Enabled() ? 8 : 2)
@@ -1171,7 +1171,7 @@ function encodeTerrainGroupImpl(parts: Uint8Array[], sp: Spec, cost?: Float32Arr
     const part = parts[pi]
     let transformed = part
     if (sp.id === ID.ANCHOR_FOLD) transformed = anchorFoldFwd(part,sp.s,sp.r)
-    else if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3) transformed = (sp.id===ID.BCJ_V3 && sp.s===2 ? bcjMsbFwd : bcjFwd)(part, positions?.[pi] ?? 0)
+    else if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3) transformed = (sp.id===ID.BCJ_V3 ? bcjMsbFwd : bcjFwd)(part, positions?.[pi] ?? 0, ...(sp.id===ID.BCJ_V3 && sp.s>2 ? [sp.s-1,sp.r-1] : []))
     if (sp.id === ID.DELTA || sp.id === ID.DELTA_V3) transformed = deltaFwd(part, sp.s)
     else if (sp.id === ID.GRAD || sp.id === ID.GRAD_V2 || sp.id === ID.GRAD_V3 || sp.id === ID.WIDE_GRAD) transformed = medFwd(part, sp.s, sp.r)
     else if (sp.id === ID.D16) transformed = d16Fwd(part, sp.s, sp.r)
@@ -1291,7 +1291,7 @@ function decodeTerrainGroupWordPre(payload: Uint8Array, n: number, lengths: numb
   return lengths.map((len, index) => {
     const part = joined.subarray(pos, pos + len); pos += len
     const how = sp.id
-    if (how === ID.BCJ || how === ID.BCJ_V2 || how === ID.BCJ_V3) return (sp.id===ID.BCJ_V3 && sp.s===2 ? bcjMsbInv : bcjInv)(part, positions?.[index] ?? 0)
+    if (how === ID.BCJ || how === ID.BCJ_V2 || how === ID.BCJ_V3) return (sp.id===ID.BCJ_V3 ? bcjMsbInv : bcjInv)(part, positions?.[index] ?? 0, ...(sp.id===ID.BCJ_V3 && sp.s>2 ? [sp.s-1,sp.r-1] : []))
     if (how === ID.DELTA || how === ID.DELTA_V3) return deltaInv(part, sp.s)
     if (how === ID.GRAD || how === ID.GRAD_V2 || how === ID.GRAD_V3 || how === ID.WIDE_GRAD) return medInv(part, sp.s, sp.r)
     if (how === ID.D16) return d16Inv(part, sp.s, sp.r)
@@ -1403,7 +1403,7 @@ function decodeTerrainGroupImpl(payload: Uint8Array, lengths: number[], sp: Spec
   return lengths.map((len, index) => {
     const part = joined.subarray(pos, pos + len); pos += len
     if (sp.id === ID.ANCHOR_FOLD) return anchorFoldInv(part,sp.s,sp.r)
-    if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3) return (sp.id===ID.BCJ_V3 && sp.s===2 ? bcjMsbInv : bcjInv)(part, positions?.[index] ?? 0)
+    if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3) return (sp.id===ID.BCJ_V3 ? bcjMsbInv : bcjInv)(part, positions?.[index] ?? 0, ...(sp.id===ID.BCJ_V3 && sp.s>2 ? [sp.s-1,sp.r-1] : []))
     if (sp.id === ID.DELTA || sp.id === ID.DELTA_V3) return deltaInv(part, sp.s)
     if (sp.id === ID.GRAD || sp.id === ID.GRAD_V2 || sp.id === ID.GRAD_V3 || sp.id === ID.WIDE_GRAD) return medInv(part, sp.s, sp.r)
     if (sp.id === ID.D16) return d16Inv(part, sp.s, sp.r)
@@ -1711,12 +1711,8 @@ export function candidatesFor(seg: Uint8Array, cls: Cls, bestS: number, lagSampl
   if (uniform) return [{ id: ID.FILL, s: 1, r: 1 }]
   // Cheap gate only; the actual trial must beat the other candidates by 2%.
   if (cls === 'binary' || cls === 'repeat' || cls === 'noise') {
-    let calls = 0, plausible = 0
-    for (let i = 0; i + 4 < lagSample.length; i++) if (lagSample[i] === 0xe8 || lagSample[i] === 0xe9) {
-      calls++; if (lagSample[i + 4] === 0 || lagSample[i + 4] === 255) plausible++
-      i += 4
-    }
-    if (calls >= 6 && plausible * 5 >= calls) { add(ID.BCJ); add(ID.BCJ_V2); add(ID.BCJ_V3); if(transformsV20Enabled())add(ID.BCJ_V3,2) }
+    const [op0, op1] = discoverRel32Triggers(seg)
+    if (op0 >= 0 && transformsV20Enabled()) add(ID.BCJ_V3, op0 + 1, op1 + 1)
   }
   // Candidate gates are cheap and bounded; actual sample encoding includes row
   // lengths and stream headers. The whole region must fit the row-count cap.
@@ -2548,7 +2544,7 @@ function sampleFamilyBytes(members:PlanGroup[],segs:SegResult[],target:Spec,data
 // 严格择优（unified < separate）保证最坏情况下不会比原方案差；
 // 失败的尝试只多花一次编码，不改动分组、ID 或容器格式。
 async function unifyFamilies(data:Uint8Array,groups:PlanGroup[],segs:SegResult[],onStage:((msg:string,pct:number)=>void)|undefined,yieldIfNeeded:()=>Promise<void>,run?:EncodeRun):Promise<PlanGroup[]>{
-  const matches=(g:PlanGroup,f:typeof CM_FAMILIES[number])=>f.members.includes(g.spec.id) && (g.spec.s===1 || (f.name==='BCJ'&&g.spec.s===2)) && g.spec.r===1
+  const matches=(g:PlanGroup,f:typeof CM_FAMILIES[number])=>f.members.includes(g.spec.id) && (g.spec.s===1 || (f.name==='BCJ'&&g.spec.s>=2)) && g.spec.r===1
   if(groups.filter(g=>isFamilyCM(g.spec.id)).length<2) return groups
   let out=groups.slice()
   for(const family of CM_FAMILIES){
@@ -2889,7 +2885,7 @@ function joinForSpec(parts: Uint8Array[], sp: Spec, positions: number[]): { data
 function applyForward(part: Uint8Array, sp: Spec, position: number): Uint8Array {
   // WIDE_GRAD 的 s===1 依 encodeTerrainGroup 顶部特例：逐分片 d16Fwd(1,1)。
   if (sp.id === ID.WIDE_GRAD && sp.s === 1) return d16Fwd(part, 1, 1)
-  if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3) return (sp.id===ID.BCJ_V3 && sp.s===2 ? bcjMsbFwd : bcjFwd)(part, position)
+  if (sp.id === ID.BCJ || sp.id === ID.BCJ_V2 || sp.id === ID.BCJ_V3) return (sp.id===ID.BCJ_V3 ? bcjMsbFwd : bcjFwd)(part, position, ...(sp.id===ID.BCJ_V3 && sp.s>2 ? [sp.s-1,sp.r-1] : []))
   if (sp.id === ID.DELTA || sp.id === ID.DELTA_V3) return deltaFwd(part, sp.s)
   if (sp.id === ID.GRAD || sp.id === ID.GRAD_V2 || sp.id === ID.GRAD_V3 || sp.id === ID.WIDE_GRAD) return medFwd(part, sp.s, sp.r)
   if (sp.id === ID.D16) return d16Fwd(part, sp.s, sp.r)
@@ -3064,7 +3060,7 @@ function validPlanSpec(sp:Spec):boolean {
   if(anchor ? s<0||s>255 : s<1) return false
   if(([ID.TRANSPOSE,ID.TRANSPOSE_GROUP,ID.TRANSPOSE_2D,ID.TRANSPOSE_GROUP_V3,ID.PEEL] as number[]).includes(id) && (s<2||s>64||r!==1)) return false
   if(([ID.BCJ,ID.BCJ_V2,ID.TEXT_V2,ID.BIN_V2,ID.TEXT_V3,ID.BIN_V3] as number[]).includes(id) && (s!==1||r!==1)) return false
-  if(id===ID.BCJ_V3 && (r!==1 || (s!==1 && !(s===2 && transformsV20Enabled())))) return false
+  if(id===ID.BCJ_V3 && (r!==1 || (s!==1 && !(s>=2 && transformsV20Enabled())))) return false
   if(id===ID.ANCHOR && (s>256||r!==1)) return false
   if(anchor && (r>255||!((r&127)>=32||(r&127)===9||((r&127)>=2&&(r&127)<=24)))) return false
   if((id===ID.SUB_TRANSPOSE||id===ID.SUB_TRANSPOSE_V3) && (s<2||s>64||(r!==1&&r!==2))) return false
@@ -4595,7 +4591,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     g15.push(v15)
     gWp.push(wp)
     const key = `${id},${s},${r}`
-    if (id > (c[3] >= 21 ? ID.BITPLANE : c[3] >= 14 ? ID.WIDE_GRAD : c[3] >= 13 ? ID.TRANSPOSE_GROUP_V3 : c[3] >= 12 ? ID.TRANSPOSE_2D : c[3] >= 11 ? ID.MICRO : c[3] >= 10 ? ID.SUB_ANCHOR : c[3] >= 9 ? ID.PEEL : c[3] >= 8 ? ID.ANCHOR_FOLD : c[3] >= 7 ? ID.ANCHOR : c[3] >= 6 ? ID.BCJ : c[3] >= 5 ? ID.TRANSPOSE_GROUP : c[3] >= 4 ? ID.TRANSPOSE : ID.D16) || (id === ID.ANCHOR_FOLD || id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3 ? s > 255 : s < 1) || r < 1 || ((id === ID.TRANSPOSE || id === ID.TRANSPOSE_GROUP || id === ID.TRANSPOSE_2D || id === ID.TRANSPOSE_GROUP_V3 || id === ID.PEEL) && (s < 2 || s > 64 || r !== 1)) || ((id === ID.BCJ || id === ID.BCJ_V2 || id === ID.TEXT_V2 || id === ID.BIN_V2 || id === ID.TEXT_V3 || id === ID.BIN_V3) && (s !== 1 || r !== 1)) || (id === ID.BCJ_V3 && (r!==1 || (s!==1 && !(s===2 && transformsV20Enabled())))) || (id === ID.ANCHOR && (s > 256 || r !== 1)) || ((id === ID.ANCHOR_FOLD || id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3) && (r > 255 || !((r & 127) >= 32 || (r & 127) === 9 || ((r & 127) >= 2 && (r & 127) <= 24)))) || ((id === ID.SUB_TRANSPOSE || id === ID.SUB_TRANSPOSE_V3) && (s<2 || s>64 || (r!==1 && r!==2))) || ((id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3) && ((r&127)>=32 || (r&127)===9) && s===(r&127)) || (id === ID.WIDE_GRAD && ((s<1 || s>(transformsV20Enabled()?8:2)) || r<256 || r>8192 || r%2!==0)) || (id === ID.MICRO && (s>16 || r>4096)) || seen.has(key)) throw new Error('无效的规则字典')
+    if (id > (c[3] >= 21 ? ID.BITPLANE : c[3] >= 14 ? ID.WIDE_GRAD : c[3] >= 13 ? ID.TRANSPOSE_GROUP_V3 : c[3] >= 12 ? ID.TRANSPOSE_2D : c[3] >= 11 ? ID.MICRO : c[3] >= 10 ? ID.SUB_ANCHOR : c[3] >= 9 ? ID.PEEL : c[3] >= 8 ? ID.ANCHOR_FOLD : c[3] >= 7 ? ID.ANCHOR : c[3] >= 6 ? ID.BCJ : c[3] >= 5 ? ID.TRANSPOSE_GROUP : c[3] >= 4 ? ID.TRANSPOSE : ID.D16) || (id === ID.ANCHOR_FOLD || id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3 ? s > 255 : s < 1) || r < 1 || ((id === ID.TRANSPOSE || id === ID.TRANSPOSE_GROUP || id === ID.TRANSPOSE_2D || id === ID.TRANSPOSE_GROUP_V3 || id === ID.PEEL) && (s < 2 || s > 64 || r !== 1)) || ((id === ID.BCJ || id === ID.BCJ_V2 || id === ID.TEXT_V2 || id === ID.BIN_V2 || id === ID.TEXT_V3 || id === ID.BIN_V3) && (s !== 1 || r !== 1)) || (id === ID.BCJ_V3 && (r<1 || (s<1))) || (id === ID.ANCHOR && (s > 256 || r !== 1)) || ((id === ID.ANCHOR_FOLD || id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3) && (r > 255 || !((r & 127) >= 32 || (r & 127) === 9 || ((r & 127) >= 2 && (r & 127) <= 24)))) || ((id === ID.SUB_TRANSPOSE || id === ID.SUB_TRANSPOSE_V3) && (s<2 || s>64 || (r!==1 && r!==2))) || ((id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3) && ((r&127)>=32 || (r&127)===9) && s===(r&127)) || (id === ID.WIDE_GRAD && ((s<1 || s>(transformsV20Enabled()?8:2)) || r<256 || r>8192 || r%2!==0)) || (id === ID.MICRO && (s>16 || r>4096)) || seen.has(key)) throw new Error('无效的规则字典')
     seen.add(key); specs.push({ id, s, r }); payloadLens.push(pl)
   }
   if(c[3]===21 && !gContext.some(Boolean) && !specs.some(s=>s.id===ID.REC2||s.id===ID.BITPLANE))throw Error('v21 容器没有上下文组或 REC2')
