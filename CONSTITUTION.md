@@ -24,10 +24,19 @@
 6. **Zero Corpus Fingerprinting and No Non-Monotonic Sandwich Gates.** Every
    threshold must follow a monotonic MDL/sample-complexity or memory-budget law.
    Gates of the form `A < n <= B` tuned to benchmark file sizes are forbidden.
-7. **Unknown-Meaning Byte Stream and S256 Bijection Invariance.** For symbol-
-   structural streams, replacing every byte by any bijection
-   `π ∈ S256` must preserve symbol discovery, mode selection, and compressed size.
-   Canonical symbol identity is derived from rank/frequency, never from raw labels.
+7. **Unknown-Meaning Byte Stream, Symbolic Bijection, and Ring Isometry.**
+   The engine recognizes two mathematically distinct model classes:
+   - **Type I — symbolic / grammatical / homology models** (`sym-*`, `text-*`).
+     These operate on a discrete alphabet `Σ` and MUST satisfy symmetric-group
+     invariance: replacing every byte by any bijection `π ∈ S256` preserves
+     symbol discovery, mode selection, and compressed size (`C(π(X)) = C(X)`).
+     Canonical identity is derived only from invariant rank/role statistics,
+     never from raw byte labels.
+   - **Type II — algebraic ring / metric models** (`REC*`, delta, linear
+     prediction). These operate on `(Z_256, +, -)` and MUST satisfy ring-isometry
+     invariance `x -> ±x + c (mod 256)`. They are not required to be invariant
+     under arbitrary symbol permutations, because doing so would erase the
+     modular arithmetic they model. D/REC2 is the canonical Type II example.
 8. **Hard Peak RAM Limit ≤ 4 GB.** `CONSTITUTIONAL_MAX_RAM_MIB = 3584` with 512 MiB
    headroom across all workers, tiers, and scratch buffers, even at
    `MAX_INPUT_BYTES = 256 MiB`. The scheduler must enforce a hard cap, not a hope.
