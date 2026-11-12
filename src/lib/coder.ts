@@ -43,6 +43,83 @@ export function symAlphabetOf(data: Uint8Array, context: SymContext): SymAlphabe
   return symAlphabetBuild(order, context)
 }
 /**
+ * P18.4: distributional symbol tree. Symbols with similar left/right flanking
+ * distributions become siblings, so the existing binary subdivision of each
+ * 5-bit symbol is also a conservative amino-acid substitution tree. The result
+ * is written into the ordinary 1+K symbol header, so decoding needs no change.
+ */
+function symContextOrder(data: Uint8Array, map: SymAlphabet): number[] {
+  const K = map.k
+  const identity = Array.from({ length: K }, (_, i) => map.symToByte[i])
+  if (K < 4 || K > 32 || data.length < 3) return identity
+  const rank = new Uint8Array(256)
+  for (let r = 0; r < K; r++) rank[map.symToByte[r]] = r
+  const L = new Float64Array(K * K), R = new Float64Array(K * K)
+  let prev = rank[data[0]]
+  for (let i = 1; i < data.length - 1; i++) {
+    const a = rank[data[i]], next = rank[data[i + 1]]
+    L[a * K + prev]++
+    R[a * K + next]++
+    prev = a
+  }
+  const vec = new Float64Array(2 * K * K)
+  for (let a = 0; a < K; a++) {
+    let nl = 0, nr = 0
+    for (let x = 0; x < K; x++) { nl += L[a * K + x] * L[a * K + x]; nr += R[a * K + x] * R[a * K + x] }
+    nl = Math.sqrt(nl) || 1
+    nr = Math.sqrt(nr) || 1
+    for (let x = 0; x < K; x++) {
+      vec[a * 2 * K + x] = L[a * K + x] / nl
+      vec[a * 2 * K + K + x] = R[a * K + x] / nr
+    }
+  }
+  type Node = { members: number[]; c: Float64Array; left?: Node; right?: Node; dummy: boolean }
+  let level: Node[] = []
+  for (let a = 0; a < 32; a++) {
+    const dummy = a >= K
+    const c = new Float64Array(2 * K)
+    if (!dummy) c.set(vec.subarray(a * 2 * K, (a + 1) * 2 * K))
+    level.push({ members: dummy ? [] : [a], c, dummy })
+  }
+  const sim = (a: Node, b: Node): number => {
+    if (a.dummy || b.dummy) return -2
+    let d = 0
+    for (let i = 0; i < a.c.length; i++) d += a.c[i] * b.c[i]
+    return d
+  }
+  // Keep the tree perfectly balanced (32 leaves -> 5 bits) by pairing every
+  // level. Dummy leaves carry K up to 32 without changing the bit depth.
+  while (level.length > 1) {
+    const used = new Uint8Array(level.length), next: Node[] = []
+    for (let i = 0; i < level.length; i++) {
+      if (used[i]) continue
+      let bj = -1, bs = -Infinity
+      for (let j = i + 1; j < level.length; j++) {
+        if (used[j]) continue
+        const v = sim(level[i], level[j])
+        if (v > bs) { bs = v; bj = j }
+      }
+      if (bj < 0) { next.push(level[i]); used[i] = 1; continue }
+      const c = new Float64Array(level[i].c.length)
+      for (let q = 0; q < c.length; q++) c[q] = (level[i].c[q] + level[bj].c[q]) / 2
+      let nn = 0
+      for (let q = 0; q < c.length; q++) nn += c[q] * c[q]
+      nn = Math.sqrt(nn) || 1
+      for (let q = 0; q < c.length; q++) c[q] /= nn
+      next.push({ members: [...level[i].members, ...level[bj].members], c, left: level[i], right: level[bj], dummy: level[i].dummy && level[bj].dummy })
+      used[i] = used[bj] = 1
+    }
+    level = next
+  }
+  const order: number[] = []
+  const walk = (n: Node) => {
+    if (n.left) { walk(n.left); walk(n.right!) }
+    else if (!n.dummy) order.push(n.members[0])
+  }
+  walk(level[0])
+  return order.map(r => map.symToByte[r])
+}
+/**
  * v22 writer switch. Write-only: the decoder is driven purely by the container flag
  * (withContainerModel → containerModel.matchDistance), so flipping it can never
  * change how an existing stream is interpreted. Tests/archived replay turn it off
@@ -817,6 +894,9 @@ class Model {
     this.symMdir = this.symDna
     this.symSp4 = this.symDna
     this.symAlphabetK = sm ? sm.k : 20
+    this.symP5Soft = this.symProt
+    this.symP5Free = this.symProt
+    this.symP5Coarse = this.symProt && this.context !== 'sym-5bit-gap'
     if (this.symProt) {
       this.symSeedK2 = 8
       this.symSeedK = 8
@@ -870,7 +950,7 @@ class Model {
     if (this.matchDistOn) this.mhtOlder = new Int32Array(1 << mhBits)
     else if (this.useMatch && matchExperiment && matchExperiment !== 'single') this.mhtOlder = new Int32Array(1 << mhBits)
     if (this.symDna) this.msm = new Uint16Array(32 * 5 * 16).fill(49152)
-    else if (this.symProt) this.msm = new Uint16Array(32 * 5 * 4).fill(49152)
+    else if (this.symProt) this.msm = new Uint16Array(32 * 5 * 8).fill(49152)
     else if (this.matchDistOn || (this.useMatch && matchExperiment === 'dual-distance')) this.msm = new Uint16Array(32 * 5).fill(49152)
     if (matchStats) matchStats.matchTableBytes = this.mht.byteLength + (this.mhtOlder?.byteLength ?? 0) + this.msm.byteLength
     if (this.isV20) {
@@ -1153,7 +1233,7 @@ class Model {
         if (this.symDna) {
           mi = ((mi0 * 4 + reg) * 2 + (this.symDir < 0 ? 1 : 0)) * 2 + (bit === 0 && this.symLastBitOk === 0 ? 1 : 0)
         } else if (this.symProt) {
-          mi = mi0 * 4 + reg
+          mi = (mi0 * 4 + reg) * 2 + (this.symP5Free && this.symMMc > 0 ? 1 : 0)
         }
         const st = STRETCH_l[msm[mi] >>> 4]
         inputs[nctx] = eb ? st : -st
@@ -1335,7 +1415,7 @@ class Model {
       if (this.symDna) {
         mi = ((mi0 * 4 + reg) * 2 + (this.symDir < 0 ? 1 : 0)) * 2 + (this.bit === 0 && this.symLastBitOk === 0 ? 1 : 0)
       } else if (this.symProt) {
-        mi = mi0 * 4 + reg
+        mi = (mi0 * 4 + reg) * 2 + (this.symP5Free && this.symMMc > 0 ? 1 : 0)
       }
       const st = STRETCH[this.msm[mi] >>> 4]
       inputs[nctx] = eb ? st : -st
@@ -1433,6 +1513,10 @@ class Model {
   symTbl: Int32Array | null = null
   symSeedK = 14
   symProt = false
+  symP5Soft = false
+  symP5Free = false
+  symP5Coarse = false
+  symTblC: Int32Array | null = null
   symExact = 0
   symExactCut = 3
   symExactOn = false
@@ -1509,9 +1593,11 @@ class Model {
       if (this.symDna || this.symProt) {
         const sd = this.symDir
         const exp = this.mlen > 0 ? (sd < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) : -1
-        if (this.mlen > 0 && exp === byte) {
+        const softSib = this.symP5Soft && this.mlen > 0 && exp >= 0 && ((this.byteToSym![byte] >> 1) === (this.byteToSym![exp] >> 1))
+        if (this.mlen > 0 && (exp === byte || softSib)) {
           this.mlen++
-          this.symExact++
+          if (exp === byte) this.symExact++
+          else this.symExact = 0
           this.mptr += sd
           if (this.mlen >= 17) this.symLocalFlag = false
           if (this.symMMc > 0) this.symMMc = Math.max(0, this.symMMc - this.symHyst)
@@ -1767,6 +1853,24 @@ class Model {
             }
           }
         }
+        // P18.4: coarse equivalence seed. Ten consecutive sym>>2 symbols (30
+        // bits), accepted only when >=14/16 residues share the same coarse class.
+        if (this.symP5Coarse && this.mlen === 0 && pos >= 10) {
+          if (!this.symTblC) this.symTblC = new Int32Array(1 << 21)
+          const tc = this.symTblC
+          let hc = 0x811c9dc5
+          for (let q = pos - 10; q < pos; q++) hc = Math.imul(hc ^ ((b2s[buf[q]] >> 2) + 1), 0x01000193)
+          hc = (hc ^ (hc >>> 15)) & 0x1fffff
+          const ep = tc[hc]
+          if (ep >= 10 && ep < pos) {
+            let cm = 0
+            for (let d = 0; d < 16 && ep - 1 - d >= 0 && pos - 1 - d >= 0; d++) {
+              if ((b2s[buf[ep - 1 - d]] >> 2) === (b2s[buf[pos - 1 - d]] >> 2)) cm++
+            }
+            if (cm >= 14) { bestL = 10; bestP = ep; bestE = 0 }
+          }
+          tc[hc] = pos
+        }
         // Homologous protein spaced seed: 6 care residues over 9 (110110110), >=7/9.
         if (pos >= 9 && this.mlen < 10) {
           if (!this.symTblS) this.symTblS = new Int32Array(1 << 19)
@@ -1899,7 +2003,8 @@ export function encodeCM(
 ): Uint8Array {
   if (isSymContext(options?.context)) {
     const ctx = options!.context as SymContext
-    const map = symAlphabetOf(data, ctx)
+    let map = symAlphabetOf(data, ctx)
+    if (map.bits === 5) map = symAlphabetFromList(symContextOrder(data, map), ctx)
     const body = encodeCMImpl(data, profile, s, r, costOut, costOff, blockCost, onProgress, variant, geomStride, undefined, undefined, wordTokens, { ...options, symMap: map })
     const out = new Uint8Array(1 + map.k + body.length)
     out[0] = map.k

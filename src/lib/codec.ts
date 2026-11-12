@@ -4316,7 +4316,7 @@ function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg
   onStage?.('低基数符号流：采样比较 8 位与低基数符号模型…', 10)
   const probe = (ctx?: CMContext) => withCMBlockSize(n, () => encodeCM(sample, 'text', 1, 1, undefined, 0, undefined, undefined, 'v20', 0, false, ctx ? { context: ctx } : undefined)).length
   const plainBytes = probe(undefined)
-  const contexts: CMContext[] = k <= 4 ? ['sym-2bit'] : ['sym-5bit-gap']
+  const contexts: CMContext[] = k <= 4 ? ['sym-2bit'] : ['sym-5bit', 'sym-5bit-gap']
   const candidates: { ctx: CMContext; bytes: number }[] = contexts.map(ctx => ({ ctx, bytes: probe(ctx) }))
   candidates.sort((a, b) => a.bytes - b.bytes)
   const symBytes = candidates[0].bytes
