@@ -907,7 +907,7 @@ class Model {
     }
     // P18.2: the nine ladder lengths {2,3,4,5,6,7,8,9,11} are the winning
     // context ladder for quaternary streams (byte-identical in encoder/decoder).
-    if (this.symDna) this.symLadder = [2, 3, 4, 5, 6, 7, 9, 12, 14]
+    if (this.symDna) this.symLadder = [2, 3, 4, 5, 6, 7, 9, 12, 0]
     const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
@@ -1540,14 +1540,14 @@ class Model {
   symLocalFlag = false
   symTblS: Int32Array | null = null
   symTblL: Int32Array | null = null
-  symK = new Int32Array(13)
+  symK = new Int32Array(16)
   symLadder: number[] | null = null
   private byteUpdate(byte: number) {
     if (this.symBits < 8) {
       const r = this.byteToSym![byte]
       this.symKm9 = ((this.symKm9 << 2) | r) & 0x3ffff
       this.symKm10 = ((this.symKm10 << 2) | r) & 0xfffff
-      for (let o = 1; o <= 12; o++) this.symK[o] = ((this.symK[o] << 2) | r) & ((1 << (2 * o)) - 1)
+      for (let o = 1; o <= 15; o++) this.symK[o] = ((this.symK[o] << 2) | r) & (o === 15 ? 0x3fffffff : (1 << (2 * o)) - 1)
     }
     if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
