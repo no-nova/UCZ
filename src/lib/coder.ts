@@ -1,7 +1,7 @@
 import { ByteWriter } from './byte-writer'
 import { V21_FLAG_CONTEXTS, contextCodeOf, type CMContext, type CMOptions } from './context-policy'
 export type { CMOptions, CMContext } from './context-policy'
-import { markPayloadModel } from './payload-model'
+import { markPayloadModel, payloadModelFlags } from './payload-model'
 
 // 二进制算术编码器 + 逐比特上下文混合(Context Mixing)预测器
 // 全部使用整数运算 / 确定性表,保证编码端与解码端逐比特一致 => 严格无损。
@@ -12,6 +12,36 @@ export type CMVariant = boolean | 'v13' | 'v15' | 'v20'
 export const isAPMKernel = (variant: CMVariant): variant is 'v15' | 'v20' => variant === 'v15' || variant === 'v20'
 /** v20 candidates are strictly compared against retained v15 streams. */
 export const cmV20Tuning = { enabled: true, binRecovery: true }
+/** P18.0 universal low-cardinality symbol modes (symbol-agnostic). */
+export type SymContext = 'sym-2bit' | 'sym-5bit' | 'sym-5bit-gap'
+export const isSymContext = (c?: string): c is SymContext => c === 'sym-2bit' || c === 'sym-5bit' || c === 'sym-5bit-gap'
+export interface SymAlphabet { k: number; bits: number; symToByte: Uint8Array; byteToSym: Uint8Array; compByte: Uint8Array }
+/**
+ * Rank alphabet: distinct bytes sorted by descending frequency (ties by ascending
+ * byte value). `rank ^ 1` is the universal antiparallel involution (`compByte`),
+ * so no ASCII/DNA literal is ever needed.
+ */
+export function symAlphabetFromList(list: ArrayLike<number>, context: SymContext): SymAlphabet {
+  return symAlphabetBuild(Array.from(list), context)
+}
+function symAlphabetBuild(orderIn: number[], context: SymContext): SymAlphabet {
+  const bits = context === 'sym-2bit' ? 2 : 5
+  const limit = bits === 2 ? 4 : 32
+  const order = orderIn
+  if (order.length > limit) throw Error('低基数符号模式超出字母表上限')
+  const symToByte = new Uint8Array(32), byteToSym = new Uint8Array(256), compByte = new Uint8Array(256)
+  order.forEach((b, r) => { symToByte[r] = b; byteToSym[b] = r })
+  for (let b = 0; b < 256; b++) compByte[b] = symToByte[byteToSym[b] ^ 1]
+  return { k: order.length, bits, symToByte, byteToSym, compByte }
+}
+export function symAlphabetOf(data: Uint8Array, context: SymContext): SymAlphabet {
+  const cnt = new Float64Array(256)
+  for (let i = 0; i < data.length; i++) cnt[data[i]]++
+  const order: number[] = []
+  for (let b = 0; b < 256; b++) if (cnt[b] > 0) order.push(b)
+  order.sort((a, b) => cnt[b] - cnt[a] || a - b)
+  return symAlphabetBuild(order, context)
+}
 /**
  * v22 writer switch. Write-only: the decoder is driven purely by the container flag
  * (withContainerModel → containerModel.matchDistance), so flipping it can never
@@ -767,6 +797,15 @@ class Model {
     this.minLen = profile === 'text' && !v3 ? 5 : 4
     // P9-2：表宽走 cmTableBits()，编码端与解码端共用同一个公式与同一个上限。
     this.geometry = cmTableShape(n)
+    const sm = (options as any)?.symMap as SymAlphabet | undefined
+    this.symBits = sm ? sm.bits : 8
+    this.symToByte = sm ? sm.symToByte : null
+    this.byteToSym = sm ? sm.byteToSym : null
+    this.compByte = sm ? sm.compByte : null
+    this.symKm9 = 0; this.symKm10 = 0; this.symDir = 1; this.symTbl = null
+    this.symSeedK = this.symBits === 2 ? 14 : 8
+    this.symSeedGate = this.symBits === 2 ? 40 : 16
+    this.symRc = this.symBits === 2
     const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
@@ -961,7 +1000,7 @@ class Model {
           H[8] = lineHash
           return
         }
-        H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=hh(this.curWord,b1);H[7]=hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
+        H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=this.symBits===2?mix32(this.symKm9):this.context==='sym-5bit-gap'?hh(b1,b2,b3,b4,this.g(5)):hh(this.curWord,b1);H[7]=this.symBits===2?mix32(this.symKm10):this.context==='sym-5bit-gap'?hh(b1,b2,b4,this.g(7),this.g(8)):hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
       }
     }
     switch (this.profile) {
@@ -1039,7 +1078,7 @@ class Model {
     const hashes = this.hashes, idx = this.idx, inputs = this.inputs
     const tables = this.tables, weights = this.weights
     const STRETCH_l = STRETCH, shift = this.shift
-    const useMatch = this.useMatch, msm = this.msm
+    const useMatch = this.useMatch, msm = this.msm, symBits = this.symBits, byteToSym = this.byteToSym
     const matchExperiment = this.matchExperiment
     const matchDistOn = this.matchDistOn
     const useApm = this.useApm
@@ -1070,8 +1109,8 @@ class Model {
         inputs[i] = STRETCH_l[(tables[i][idx[i]] >>> 16) >>> 4]
       }
       let ms = 0, ms2 = 0
-      if (useMatch && this.mlen > 0 && (this.mbyte | 256) >> (8 - bit) === c0) {
-        const eb = (this.mbyte >> (7 - bit)) & 1
+      if (useMatch && this.mlen > 0 && ((symBits < 8 ? (byteToSym![this.mbyte] | (1 << symBits)) : (this.mbyte | 256)) >> (symBits - bit)) === c0) {
+        const eb = ((symBits < 8 ? (byteToSym![this.mbyte] | (1 << symBits)) : (this.mbyte | 256)) >> (symBits - 1 - bit)) & 1
         const mi = (this.mlen > 31 ? 31 : this.mlen) + (matchDistOn || matchExperiment === 'dual-distance' ? this.matchDistance * 32 : 0)
         const st = STRETCH_l[msm[mi] >>> 4]
         inputs[nctx] = eb ? st : -st
@@ -1218,8 +1257,8 @@ class Model {
     }
     this.c0 = (this.c0 << 1) | y
     this.bit++
-    if (this.bit === 8) {
-      const byte = this.c0 & 255
+    if (this.bit === (this.symBits < 8 ? this.symBits : 8)) {
+      const byte = this.symBits < 8 ? this.symToByte![this.c0 & ((1 << this.symBits) - 1)] : (this.c0 & 255)
       this.buf[this.pos] = byte
       this.pos++
       this.c0 = 1
@@ -1240,8 +1279,8 @@ class Model {
     }
     let ms = 0
     this.mIdx = -1
-    if (this.useMatch && this.mlen > 0 && (this.mbyte | 256) >> (8 - this.bit) === c0) {
-      const eb = (this.mbyte >> (7 - this.bit)) & 1
+    if (this.useMatch && this.mlen > 0 && ((this.symBits < 8 ? (this.byteToSym![this.mbyte] | (1 << this.symBits)) : (this.mbyte | 256)) >> (this.symBits - this.bit)) === c0) {
+      const eb = ((this.symBits < 8 ? (this.byteToSym![this.mbyte] | (1 << this.symBits)) : (this.mbyte | 256)) >> (this.symBits - 1 - this.bit)) & 1
       const mi = (this.mlen > 31 ? 31 : this.mlen) + (this.matchDistOn || this.matchExperiment === 'dual-distance' ? this.matchDistance * 32 : 0)
       const st = STRETCH[this.msm[mi] >>> 4]
       inputs[nctx] = eb ? st : -st
@@ -1289,8 +1328,8 @@ class Model {
     }
     this.c0 = (this.c0 << 1) | y
     this.bit++
-    if (this.bit === 8) {
-      const byte = this.c0 & 255
+    if (this.bit === (this.symBits < 8 ? this.symBits : 8)) {
+      const byte = this.symBits < 8 ? this.symToByte![this.c0 & ((1 << this.symBits) - 1)] : (this.c0 & 255)
       this.buf[this.pos] = byte
       this.pos++
       this.c0 = 1
@@ -1328,7 +1367,23 @@ class Model {
     }
   }
 
+  symBits = 8
+  symToByte: Uint8Array | null = null
+  byteToSym: Uint8Array | null = null
+  compByte: Uint8Array | null = null
+  symKm9 = 0
+  symKm10 = 0
+  symDir = 1
+  symTbl: Int32Array | null = null
+  symSeedK = 14
+  symSeedGate = 40
+  symRc = false
   private byteUpdate(byte: number) {
+    if (this.symBits < 8) {
+      const r = this.byteToSym![byte]
+      this.symKm9 = ((this.symKm9 << 2) | r) & 0x3ffff
+      this.symKm10 = ((this.symKm10 << 2) | r) & 0xfffff
+    }
     if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
       const lower = byte | 32
@@ -1365,15 +1420,15 @@ class Model {
       // Legacy v15 retains its old experimental semantics. Only v20 BIN uses
       // the serialized recovery flag and corrected post-write distance.
       if (this.gapRecovery) {
-        if (this.mlen > 0 && buf[this.mptr] !== byte) {
+        if (this.mlen > 0 && (this.symDir < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) !== byte) {
           this.lastDist = this.isV20 ? pos - 1 - this.mptr : pos - this.mptr
           this.gapLeft = match3Tuning.gapWait
         } else if (this.gapLeft > 0) this.gapLeft--
       }
-      if (this.mlen > 0 && buf[this.mptr] === byte) {
+      if (this.mlen > 0 && (this.symDir < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) === byte) {
         this.mlen++
-        this.mptr++
-      } else this.mlen = 0
+        this.mptr += this.symDir
+      } else { this.mlen = 0; this.symDir = 1 }
       if (pos >= 4) {
         let h = Math.imul(buf[pos - 1] + 1, 0x9e3779b1)
         h = Math.imul(h ^ (buf[pos - 2] + 1), 0x85ebca6b)
@@ -1410,6 +1465,40 @@ class Model {
         if (this.mhtOlder) this.mhtOlder[h] = this.mht[h]
         this.mht[h] = pos
       }
+      if (this.symBits < 8 && pos >= this.symSeedK + 2) {
+        const kk = this.symSeedK, b2s = this.byteToSym!, cp = this.compByte!
+        const hashAt = (e: number, rev: boolean): number => {
+          let h = 0x811c9dc5
+          if (rev) { for (let q = e - 1; q >= e - kk; q--) h = Math.imul(h ^ (b2s[cp[buf[q]]] + 1), 0x01000193) }
+          else { for (let q = e - kk; q < e; q++) h = Math.imul(h ^ (b2s[buf[q]] + 1), 0x01000193) }
+          h ^= h >>> 15
+          return h & 0x3fffff
+        }
+        if (!this.symTbl) this.symTbl = new Int32Array(1 << 22)
+        const tf = this.symTbl
+        const kf = hashAt(pos, false)
+        let bestL = 0, bestP = 0, bestD = 0
+        if (this.mlen < this.symSeedGate) {
+          const ef = tf[kf]
+          if (ef >= kk && ef < pos) {
+            let j = 0
+            while (j < 96 && ef - kk + j >= 0 && buf[ef - kk + j] === buf[pos - kk + j]) j++
+            if (j >= kk) { bestL = j; bestP = ef; bestD = 0 }
+          }
+        }
+        if (this.symRc && this.mlen < this.symSeedGate) {
+          const kr = hashAt(pos, true)
+          const er = tf[kr]
+          if (er >= kk && er - kk - 1 >= 0) {
+            let j = 1
+            while (j <= 128 && pos - j >= 0 && er - kk - 1 + j >= 0 && buf[pos - j] === cp[buf[er - kk - 1 + j]]) j++
+            const l = j - 1
+            if (l >= 16 && l > bestL) { bestL = l; bestP = er - kk - 1; bestD = 1 }
+          }
+        }
+        if (bestL > this.mlen) { this.mlen = bestL; this.mptr = bestP; this.symDir = bestD ? -1 : 1 }
+        tf[kf] = pos
+      }
       // Legacy v15 only queries below 6; v20 also checks lengths 6..31,
       // accepting a verified >=6-byte candidate only when it is longer.
       const m8 = this.mht8
@@ -1440,7 +1529,7 @@ class Model {
         const cand = pos - this.lastDist
         if (cand >= 1 && buf[cand - 1] === buf[pos - 1]) { this.mptr = cand; this.mlen = 2; this.gapLeft = 0 }
       }
-      this.mbyte = this.mlen > 0 ? buf[this.mptr] : 0
+      this.mbyte = this.mlen > 0 ? (this.symDir < 0 ? this.compByte![buf[this.mptr]] : buf[this.mptr]) : 0
     }
     this.prevByte = byte
     this.computeContexts()
@@ -1465,6 +1554,16 @@ export function encodeCM(
   onProgress?: (done: number, total: number) => void,
   variant: CMVariant = false, geomStride = 0, wordTokens = false, options?: CMOptions,
 ): Uint8Array {
+  if (isSymContext(options?.context)) {
+    const ctx = options!.context as SymContext
+    const map = symAlphabetOf(data, ctx)
+    const body = encodeCMImpl(data, profile, s, r, costOut, costOff, blockCost, onProgress, variant, geomStride, undefined, undefined, wordTokens, { ...options, symMap: map })
+    const out = new Uint8Array(1 + map.k + body.length)
+    out[0] = map.k
+    out.set(map.symToByte.subarray(0, map.k), 1)
+    out.set(body, 1 + map.k)
+    return markPayloadModel(out, payloadModelFlags(body))
+  }
   return encodeCMImpl(data, profile, s, r, costOut, costOff, blockCost, onProgress, variant, geomStride, undefined, undefined, wordTokens, options)
 }
 
@@ -1478,8 +1577,8 @@ function encodeCMImpl(data: Uint8Array, profile: Profile, s: number, r: number, 
   for (let i = 0; i < n; i++) {
     const byte = data[i]
     let c = 0
-    for (let b = 7; b >= 0; b--) {
-      const y = (byte >> b) & 1
+    for (let b = m.symBits < 8 ? m.symBits - 1 : 7; b >= 0; b--) {
+      const y = m.symBits < 8 ? (m.byteToSym![byte] >> b) & 1 : (byte >> b) & 1
       const p = m.step(y, true)
       const xm = mid(x1, x2, p)
       if (y) x2 = xm
@@ -1630,6 +1729,14 @@ export function encodeCMDual(
 }
 
 export function decodeCM(payload: Uint8Array, n: number, profile: Profile, s = 1, r = 1, onProgress?: (done: number, total: number) => void, variant: CMVariant = false, geomStride = 0, wordTokens = false, options?: CMOptions): Uint8Array {
+  if (isSymContext(options?.context)) {
+    const ctx = options!.context as SymContext
+    if (payload.length < 1) throw Error('低基数符号头缺失')
+    const k = payload[0]
+    if (k < 1 || k > (ctx === 'sym-2bit' ? 4 : 32) || payload.length < 1 + k) throw Error('低基数符号头非法')
+    const map = symAlphabetFromList(payload.subarray(1, 1 + k), ctx)
+    return decodeCMImpl(payload.subarray(1 + k), n, profile, s, r, onProgress, variant, geomStride, undefined, wordTokens, { ...options, symMap: map })
+  }
   return decodeCMImpl(payload,n,profile,s,r,onProgress,variant,geomStride,undefined,wordTokens,options)
 }
 
@@ -1641,7 +1748,7 @@ function decodeCMImpl(payload: Uint8Array, n:number, profile:Profile, s:number, 
   for (let i = 0; i < 4; i++) x = ((x << 8) | next()) >>> 0
   let x1 = 0
   let x2 = 0xffffffff
-  const total = n * 8
+  const total = n * (m.symBits < 8 ? m.symBits : 8)
   for (let t = 0; t < total; t++) {
     if (onProgress && (t & 0x1fffff) === 0) onProgress(t / 8, n)
     const p = m.step(1, true)

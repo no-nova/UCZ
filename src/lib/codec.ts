@@ -110,6 +110,10 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
   // raw text stream as text-sparse5 — they substitute three of that model's nine
   // contexts, so the eligibility rule is identical (no WORD-PRE dictionary).
   if (context === 'text-linecol' || context === 'text-lexcol' || context === 'text-tabcol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
+  // P18.0: universal low-cardinality symbol modes. Same `text` CM on the same raw
+  // bytes (no WORD-PRE dictionary); the cardinality check itself is done by the
+  // screen from the actual data, so wire legality only needs the rule shape.
+  if (context === 'sym-2bit' || context === 'sym-5bit' || context === 'sym-5bit-gap') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   if (context === 'wide-geom') return !wordPre && sp.id === ID.WIDE_GRAD && sp.s >= 6 && sp.s <= 8 && sp.r >= 256 && sp.r <= 8192 && sp.r % 2 === 0
   if (context === 'wp-merge') return wordPre && sp.id === ID.TEXT_V3 && sp.s === 1 && sp.r === 1
   // P17.6: the word-trigram H[8] is orthogonal to WORD-PRE dictionary collapsing.
@@ -1260,7 +1264,7 @@ export function encodeTerrainGroup(parts: Uint8Array[], sp: Spec, cost?: Float32
         return markPayloadModel(p,payloadModelFlags(p)|V21_FLAG_CONTEXTS)
       }
       if(options?.context==='wide-geom') { checkWide(sp,parts.map(p=>p.length));return encodeWide16(parts,sp,cost,blockCost,onProgress,kernel,options) }
-      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol')
+      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol'||options?.context==='sym-2bit'||options?.context==='sym-5bit'||options?.context==='sym-5bit-gap')
         return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,options.context==='wp-token3',options)
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return encodeGroupedTranspose(parts,sp.s,blockCost ?? (cost ? {values:cost,blockSize:1} : undefined),onProgress,true,undefined,'v20',options)
       if(options?.context==='bin-stride4') {
@@ -1306,7 +1310,7 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
         return lengths.map(len=>{const p=joined.subarray(at,at+len);at+=len;return sp.id===ID.GRAD_V3?medInv(p,sp.s,sp.r):deltaInv(p,sp.s)})
       }
       if(options?.context==='wide-geom') {checkWide(sp,lengths);return decodeWide16(payload,lengths,sp,onProgress,kernel,options)}
-      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol') && !wordPre) {
+      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol'||options?.context==='sym-2bit'||options?.context==='sym-5bit'||options?.context==='sym-5bit-gap') && !wordPre) {
         const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,options.context==='wp-token3',options)
         let p=0;return lengths.map(n=>{const part=joined.subarray(p,p+n);p+=n;return part})
       }
@@ -4667,6 +4671,14 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol','text-lexcol','text-tabcol']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
+    if(modes.length&&rawText&&rawBytes>=CONTEXT_MIN_BYTES){
+      // P18.0: universal low-cardinality symbol screening. K comes from the data.
+      let k=0
+      const seen=new Uint8Array(256),bufAll=joinContextBin(parts)
+      for(let i=0;i<bufAll.length;i++)if(!seen[bufAll[i]]){seen[bufAll[i]]=1;k++}
+      if(k<=4)modes.push('sym-2bit')
+      else if(k<=32){modes.push('sym-5bit','sym-5bit-gap')}
+    }
     if(!modes.length||rawBytes<CONTEXT_MIN_BYTES){result.skipped='ineligible-or-small';return result}
     let pre:WordPreResult|null=null,joined:Uint8Array|undefined
     if(wordPre) {
