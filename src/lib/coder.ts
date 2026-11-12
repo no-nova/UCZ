@@ -1943,10 +1943,15 @@ class Model {
       } else if (this.symProt && pos >= this.symSeedK + 1) {
         if (this.mlen === 0 && pos <= this.shadowUntil && pos >= 5) {
           let relock = -1
-          for (let ad = 0; ad <= 16 && relock < 0; ad++) {
+          const maxD = this.symAepN > 2000000 ? 48 : 16
+          for (let ad = 0; ad <= maxD && relock < 0; ad++) {
             for (const sg of ad === 0 ? [0] : [-1, 1]) {
               const d = sg * ad, cand = pos + this.shadowDelta + d
-              if (cand >= 5 && cand < pos && buf[cand-1]===buf[pos-1] && buf[cand-2]===buf[pos-2] && buf[cand-3]===buf[pos-3] && buf[cand-4]===buf[pos-4] && buf[cand-5]===buf[pos-5]) { relock = cand; break }
+              if (cand < 5 || cand >= pos) continue
+              const need = this.symAepN > 2000000 ? (ad === 0 ? 4 : ad > 16 ? 6 : 5) : 5
+              let ok = true
+              for (let k = 1; k <= need; k++) if (buf[cand-k] !== buf[pos-k]) { ok = false; break }
+              if (ok) { relock = cand; break }
             }
           }
           if (relock >= 0) { this.mptr = relock; this.mlen = 8; this.symMMc = 0; this.symExact = 0; this.shadowUntil = 0 }
@@ -2002,28 +2007,46 @@ class Model {
         }
         // Homologous protein spaced seed: 6 care residues over 9 (110110110), >=7/9.
         if (pos >= 9 && this.mlen < 10) {
-          if (!this.symTblS) this.symTblS = new Int32Array(1 << (this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19))
+          const sbits = this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19
+          const s4 = this.symAepN > 2000000 && this.symAepN <= 10000000
+          if (!this.symTblS) this.symTblS = new Int32Array((1 << sbits) * (s4 ? 4 : 1))
           const ts = this.symTblS
           let hs = 0x811c9dc5
           for (let d = 0; d < 9; d++) {
             if (d % 3 === 2) continue
             hs = Math.imul(hs ^ (b2s[buf[pos - 1 - d]] + 1), 0x01000193)
           }
-          hs = (hs ^ (hs >>> 15)) & ((1 << (this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19)) - 1)
-          const ep = ts[hs]
-          if (ep >= 9 && ep < pos) {
+          hs = (hs ^ (hs >>> 15)) & ((1 << sbits) - 1)
+          const hb = s4 ? hs << 2 : hs
+          const scanEp = (ep: number): number => {
+            if (ep < 9 || ep >= pos) return -1
             let m = 0, mm = 0
             for (let d = 0; d < 9; d++) {
               if (buf[ep - 1 - d] === buf[pos - 1 - d]) m++
               else if (++mm > 2) break
             }
-            if (m >= 7) {
-              let tr = 0
-              while (tr < 9 && buf[ep - 1 - tr] === buf[pos - 1 - tr]) tr++
-              if (9 > bestL) { bestL = 9; bestP = ep; bestE = tr }
+            if (m < 7) return -1
+            let sc = 0
+            for (let k = 1; k <= 16 && ep - k >= 0 && pos - k >= 0; k++) {
+              const a = b2s[buf[ep - k]], b = b2s[buf[pos - k]]
+              if (a === b) sc += 2; else if ((a >> 2) === (b >> 2)) sc++
             }
+            return sc
           }
-          ts[hs] = pos
+          let bestSc = -1, bestEp = -1
+          const nw = s4 ? 4 : 1
+          for (let w = 0; w < nw; w++) {
+            const ep = ts[hb + w], sc = scanEp(ep)
+            if (sc > bestSc) { bestSc = sc; bestEp = ep }
+          }
+          if (bestEp >= 0) {
+            let tr = 0
+            while (tr < 9 && buf[bestEp - 1 - tr] === buf[pos - 1 - tr]) tr++
+            if (9 > bestL) { bestL = 9; bestP = bestEp; bestE = tr }
+          }
+          if (s4) {
+            if (pos - ts[hb] > 4) { ts[hb+3]=ts[hb+2]; ts[hb+2]=ts[hb+1]; ts[hb+1]=ts[hb]; ts[hb]=pos }
+          } else ts[hs] = pos
         }
         // Local tandem-repeat horizon: 4-mer <=128, 5-mer <=4096, 6-mer <=65536.
         if (pos >= 6 && this.mlen === 0) {
