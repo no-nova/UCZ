@@ -1564,7 +1564,9 @@ class Model {
             if (q > 0) h -= q * Math.log2(q)
           }
           const n = this.symAepN || 0
-          this.symAepClean = n > 0 && h > 0 && Math.log2(n) / h >= 12.3
+          const kstar = n > 0 && h > 0 ? Math.log2(n) / h : 0
+          this.symAepClean = kstar >= 12.3
+          if (kstar >= 12.3) this.symLadder = [2, 3, 4, 5, 7, 9, 11, 13, 0]
           this.symAepDone = true
         }
       }
