@@ -63,6 +63,19 @@ function involutionChoice(data: Uint8Array, order: number[]): number {
   return best
 }
 
+
+/** P19.2: canonical, non-zero internal byte keys for symbol modes. */
+const CANON_SYM_BASE = 65
+function canonicalModelMap(map: SymAlphabet): SymAlphabet {
+  const order = Array.from({ length: map.k }, (_, i) => CANON_SYM_BASE + i)
+  return symAlphabetBuild(order, map.bits === 2 ? 'sym-2bit' : 'sym-5bit')
+}
+function canonicalizeSymbols(data: Uint8Array, map: SymAlphabet): Uint8Array {
+  const out = new Uint8Array(data.length)
+  for (let i = 0; i < data.length; i++) out[i] = CANON_SYM_BASE + map.byteToSym[data[i]]
+  return out
+}
+
 export function symAlphabetOf(data: Uint8Array, context: SymContext): SymAlphabet {
   const cnt = new Float64Array(256), first = new Int32Array(256).fill(-1)
   for (let i = 0; i < data.length; i++) {
@@ -959,7 +972,7 @@ class Model {
     this.symP5Coarse = this.symProt && this.context !== 'sym-5bit-gap'
     if (this.symProt) {
       this.symAepN = n
-      this.symClean = sm?.k !== undefined && sm.k <= 20
+      this.symClean = sm?.k !== undefined && sm.k <= 21
       this.symSeedK2 = 8
       this.symSeedK = 8
       this.symSeedGate = 24
@@ -1414,7 +1427,7 @@ class Model {
     const nctx = this.nctx, N = this.ninputs
     const inputs = this.inputs, idx = this.idx, weights = this.weights
     const tables = this.tables, limit = this.limit
-    const err = ((y << 12) - (prOverride ?? this.pr)) * (this.symDna ? 5 : this.symProt ? (this.symAepN < 8192 ? 10 : 4) : 8)
+    const err = ((y << 12) - (prOverride ?? this.pr)) * (this.symDna ? 2 : this.symProt ? (this.symAepN < 8192 ? 10 : 3) : 8)
     const wb = this.wbase
     for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + 0x8000) >> 16
     if (this.dualPass) {
@@ -1446,9 +1459,9 @@ class Model {
       const target = y ? 65535 : 0
       const base = this.apmBase, tw = this.apmT
       const a = tw[base]
-      tw[base] = a + ((target - a) >> (apmTuning.rate + (this.symDna ? 3 : 0)))
+      tw[base] = a + ((target - a) >> (apmTuning.rate + (this.symDna ? 2 : 0)))
       const b = tw[base + 1]
-      tw[base + 1] = b + ((target - b) >> (apmTuning.rate + (this.symDna ? 3 : 0)))
+      tw[base + 1] = b + ((target - b) >> (apmTuning.rate + (this.symDna ? 2 : 0)))
       if (this.apm2On) {
         const t2 = this.apm2T, b2 = this.apm2Base
         const x2 = t2[b2]
@@ -1547,7 +1560,7 @@ class Model {
 
   update(y: number) {
     const { nctx, inputs, idx } = this
-    const err = ((y << 12) - this.pr) * (this.symDna ? 5 : this.symProt ? (this.symAepN < 8192 ? 10 : 4) : 8)
+    const err = ((y << 12) - this.pr) * (this.symDna ? 2 : this.symProt ? (this.symAepN < 8192 ? 10 : 3) : 8)
     const N = this.ninputs
     const w = this.weights
     const wb = this.wbase
@@ -1745,7 +1758,7 @@ class Model {
                 const ok3 = buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]
                 let ok = ok3
                 if (!ok && this.mlen >= 16 && q >= 4) {
-                  if (this.symAepN > 2000000 && this.symClean) {
+                  if (this.symAepN > 1000000 && this.symClean) {
                     let ex=0, co=0
                     for (let k=1;k<=4;k++) { const a=this.byteToSym![buf[q-k]], b=this.byteToSym![buf[pos-k]]; if (a===b) ex++; else if ((a>>2)===(b>>2)) co++ }
                     ok = ex === 4 || (ex >= 3 && co >= 1)
@@ -2066,7 +2079,7 @@ class Model {
         // Homologous protein spaced seed: 6 care residues over 9 (110110110), >=7/9.
         if (pos >= 9 && this.mlen < 10) {
           const sbits = this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19
-          const s4 = this.symAepN > 2000000 && this.symClean
+          const s4 = this.symAepN > 1000000 && this.symClean
           if (!this.symTblS) this.symTblS = new Int32Array((1 << sbits) * (s4 ? 4 : 1))
           const ts = this.symTblS
           let hs = 0x811c9dc5
@@ -2240,7 +2253,8 @@ export function encodeCM(
     const baseMap = symAlphabetOf(data, ctx)
     let map = baseMap
     if (map.bits === 5) { map = symAlphabetFromList(symContextOrder(data, map), ctx); map.minCount = baseMap.minCount }
-    const body = encodeCMImpl(data, profile, s, r, costOut, costOff, blockCost, onProgress, variant, geomStride, undefined, undefined, wordTokens, { ...options, symMap: map })
+    const modelMap = canonicalModelMap(map)
+    const body = encodeCMImpl(canonicalizeSymbols(data, map), profile, s, r, costOut, costOff, blockCost, onProgress, variant, geomStride, undefined, undefined, wordTokens, { ...options, symMap: modelMap })
     const out = new Uint8Array(1 + map.k + body.length)
     out[0] = map.k
     out.set(map.symToByte.subarray(0, map.k), 1)
@@ -2419,7 +2433,9 @@ export function decodeCM(payload: Uint8Array, n: number, profile: Profile, s = 1
     const k = payload[0]
     if (k < 1 || k > (ctx === 'sym-2bit' ? 4 : 32) || payload.length < 1 + k) throw Error('低基数符号头非法')
     const map = symAlphabetFromList(payload.subarray(1, 1 + k), ctx)
-    return decodeCMImpl(payload.subarray(1 + k), n, profile, s, r, onProgress, variant, geomStride, undefined, wordTokens, { ...options, symMap: map })
+    const out = decodeCMImpl(payload.subarray(1 + k), n, profile, s, r, onProgress, variant, geomStride, undefined, wordTokens, { ...options, symMap: canonicalModelMap(map) })
+    for (let i = 0; i < n; i++) out[i] = map.symToByte[out[i] - CANON_SYM_BASE]
+    return out
   }
   return decodeCMImpl(payload,n,profile,s,r,onProgress,variant,geomStride,undefined,wordTokens,options)
 }
