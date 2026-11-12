@@ -1559,6 +1559,8 @@ export const planTuning = {
   neutralPenalties: false,
   /** Actual serialized header widths, not empirical ratio multipliers. */
   realHeaderCosts: true,
+  /** P18.1: screen-then-single-pass fast path for K <= 4 streams. */
+  symbolFastPath: true,
 }
 
 const DEFAULT_WORKER_TUNING = JSON.stringify({ planTuning, modelTuning, a2Tuning, cmV20Tuning })
@@ -4285,6 +4287,59 @@ export function refineBitplane(data:Uint8Array,baseline:Compressed):Compressed {
   } catch {return baseline}
 }
 
+/** P18.1: fast path for large pure low-cardinality streams (K <= 4). */
+function distinctBytes(data: Uint8Array, cap: number): number {
+  const seen = new Uint8Array(256)
+  let k = 0
+  for (let i = 0; i < data.length; i++) { const b = data[i]; if (!seen[b]) { seen[b] = 1; if (++k > cap) return k } }
+  return k
+}
+
+/**
+ * A quaternary file (DNA/protein-like, K <= 4) is won by `'sym-2bit'` + `v20`
+ * by >1 %, but the generic pipeline only discovers that after it has already
+ * spent three full 8-bit passes on the same bytes. Screen the two modes on a
+ * bounded sample at the FULL table tier and, when the symbol mode wins, encode
+ * the buffer exactly once.
+ *
+ * Every other shape returns null, so the caller falls back to the untouched
+ * pipeline (byte-identical to the pre-P18.1 result).
+ */
+function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg: string, pct: number) => void): Compressed | null {
+  if (!planTuning.symbolFastPath) return null
+  const n = data.length
+  if (n < 262144) return null
+  const k = distinctBytes(data, 4)
+  if (k < 2 || k > 4) return null
+  const sampleLen = Math.min(n, 196608)
+  const sample = data.subarray(0, sampleLen)
+  onStage?.('低基数符号流：采样比较 8 位与低基数符号模型…', 10)
+  const probe = (ctx?: CMContext) => withCMBlockSize(n, () => encodeCM(sample, 'text', 1, 1, undefined, 0, undefined, undefined, 'v20', 0, false, ctx ? { context: ctx } : undefined)).length
+  const plainBytes = probe(undefined)
+  const candidates: { ctx: CMContext; bytes: number }[] = (['sym-2bit'] as CMContext[]).map(ctx => ({ ctx, bytes: probe(ctx) }))
+  candidates.sort((a, b) => a.bytes - b.bytes)
+  const symBytes = candidates[0].bytes
+  // Quaternary files are won by >1 %; letter streams by ~0.1 %, so the margin
+  // must stay below that or A/I would fall back to the multi-pass pipeline.
+  if (symBytes >= plainBytes * 0.999) return null
+  onStage?.('低基数符号流：整份文件单遍 2 位符号编码…', 20)
+  const spec: Spec = { id: ID.TEXT_V3, s: 1, r: 1 }
+  const ctx = candidates[0].ctx
+  const payload = encodeTerrainGroup([data], spec, undefined, undefined, undefined, [0], 'v20', { context: ctx })
+  const segs: SegResult[] = [{ start: 0, end: n, cls: 'text', spec, label: `CM-TEXT3 [${ctx}]`, rawLen: n, compLen: payload.length, trials: [] }]
+  const groups: PlanGroup[] = [{ spec, members: [0], payload, v15: true, context: ctx }]
+  const header = planHeader(n, segs, groups)
+  const container = new Uint8Array(header.length + payload.length)
+  container.set(header)
+  container.set(payload, header.length)
+  const blockCost = new Float32Array(analysis.blocks.length)
+  const blockSeg = new Int32Array(analysis.blocks.length)
+  const rate = payload.length * 8 / n
+  for (let b = 0; b < analysis.blocks.length; b++) { blockCost[b] = rate; blockSeg[b] = 0 }
+  retainedPlanGroups.set(container, groups)
+  return { container, analysis, segs, blockCost, blockSeg, overhead: header.length }
+}
+
 async function compressAdaptiveImpl(
   data: Uint8Array, onStage?: (msg: string, pct: number) => void,
   options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean },
@@ -4296,6 +4351,10 @@ async function compressAdaptiveImpl(
   await tick()
   const analysis = analyze(data)
   const n = data.length
+  {
+      const fast = lowCardinalityPlan(data, analysis, onStage)
+    if (fast) return fast
+  }
   onStage?.('为每个区域试探最合适的编码规则…', 15)
   await tick()
 
