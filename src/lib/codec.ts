@@ -2161,7 +2161,9 @@ export function planSpecReservations<T extends { spec: Spec }>(groups: readonly 
 
 // A plan starts after the existing anchor-unification pass. It is an explicit
 // assignment, not a request to rerun candidate selection or anchor optimization.
-export interface PlanSegment { start:number; end:number; cls:Cls; spec:Spec; trialBytes?:number; compLen?:number }
+export interface PlanSegment { start:number; end:number; cls:Cls; spec:Spec; trialBytes?:number; compLen?:number
+  /** P18.5: low-cardinality plans pin their exact v20 CM context. */
+  context?: CMContext }
 export interface PlanCost { totalBytes:number; headerBytes:number; payloadBytes:number; groupCount:number; segmentCount:number }
 // reusePayload：载荷已在同族归一阶段按同一规则编码完成，序列化时直接复用。
 interface EncodedGroup {
@@ -3100,8 +3102,15 @@ export function evaluatePlan(data:Uint8Array,picks:readonly PlanSegment[],option
       const encoded=encodePlanTranspose(parts,g.spec,undefined,sp=>reservations.available(g,sp))
       reservations.claim(g,encoded.spec);g.spec=encoded.spec;g.payload=encoded.payload
     } else {
-      g.payload=encodeTerrainGroup(parts,g.spec,undefined,undefined,undefined,positions)
-      if(v15Depth===0) g.v15=chooseGroupV15(parts,g,positions,undefined,sp=>reservations.available(g,sp))
+      const ctxSegment=segs[g.members[0]].context
+      if(ctxSegment) {
+        g.context=ctxSegment
+        g.v15=true
+        g.payload=encodeTerrainGroup(parts,g.spec,undefined,undefined,undefined,positions,'v20',{context:ctxSegment})
+      } else {
+        g.payload=encodeTerrainGroup(parts,g.spec,undefined,undefined,undefined,positions)
+        if(v15Depth===0) g.v15=chooseGroupV15(parts,g,positions,undefined,sp=>reservations.available(g,sp))
+      }
       reservations.claim(g,g.spec)
     }
   }
@@ -4308,9 +4317,27 @@ function distinctBytes(data: Uint8Array, cap: number): number {
 function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg: string, pct: number) => void): Compressed | null {
   if (!planTuning.symbolFastPath) return null
   const n = data.length
-  if (n < 4096) return null
+  // Keep the normal segmenter's FILL/carve decisions on tiny 4 KiB streams.
+  if (n < 8192) return null
   const k = distinctBytes(data, 32)
   if (k < 2 || k > 32) return null
+  // P18.5: lowercase prose also fits K<=32. A >=1% ASCII-space share means the
+  // bytes are word-delimited text, which the normal text/LZ/CM pipeline models
+  // far better than a generic 5-bit symbol stream.
+  if (k >= 5) {
+    let spaces = 0
+    for (let i = 0; i < n; i++) {
+      const b = data[i]
+      if (b === 0x20) spaces++
+      // The 5-bit path targets printable symbol alphabets (protein letters).
+      // Reject binary/control-heavy streams so the normal adaptive pipeline
+      // keeps its richer transforms (e.g. slope/audio-like synthetic data).
+      else if (b < 0x21 || b > 0x7e) return null
+    }
+    if (spaces * 100 >= n) return null
+  }
+  // A 64 KiB sample flips AITDCC I to the coarse-seeded 5-bit mode (+19 B),
+  // so both paths keep the proven 192 KiB sample.
   const sampleLen = Math.min(n, 196608)
   const sample = data.subarray(0, sampleLen)
   onStage?.('低基数符号流：采样比较 8 位与低基数符号模型…', 10)
@@ -4327,7 +4354,7 @@ function lowCardinalityPlan(data: Uint8Array, analysis: Analysis, onStage?: (msg
   const spec: Spec = { id: ID.TEXT_V3, s: 1, r: 1 }
   const ctx = candidates[0].ctx
   const payload = encodeTerrainGroup([data], spec, undefined, undefined, undefined, [0], 'v20', { context: ctx })
-  const segs: SegResult[] = [{ start: 0, end: n, cls: 'text', spec, label: `CM-TEXT3 [${ctx}]`, rawLen: n, compLen: payload.length, trials: [] }]
+  const segs: SegResult[] = [{ start: 0, end: n, cls: 'text', spec, label: `CM-TEXT3 [${ctx}]`, rawLen: n, compLen: payload.length, trials: [], context: ctx }]
   const groups: PlanGroup[] = [{ spec, members: [0], payload, v15: true, context: ctx }]
   const header = planHeader(n, segs, groups)
   const container = new Uint8Array(header.length + payload.length)

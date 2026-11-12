@@ -1642,8 +1642,11 @@ class Model {
             for (let w = 0; w < 4; w++) {
               const cd = ts3[(hs << 2) + w]
               if (cd >= 21 && cd < pos && buf[cd] === byte) {
-                let m = 0
-                for (let d = 0; d < 21; d++) if (buf[cd - 1 - d] === buf[pos - 1 - d]) m++
+                let m = 0, mm = 0
+                for (let d = 0; d < 21; d++) {
+                  if (buf[cd - 1 - d] === buf[pos - 1 - d]) m++
+                  else if (++mm > 3) break
+                }
                 if (m >= 18) {
                   this.mptr = cd
                   this.mlen = Math.max(this.mlen, 21)
@@ -1762,16 +1765,22 @@ class Model {
           for (let w = 0; w < 4; w++) {
             const ep = ts[(hf << 2) + w]
             if (ep >= 21 && ep < pos) {
-              let m = 0
-              for (let d = 0; d < 21; d++) if (buf[ep - 1 - d] === buf[pos - 1 - d]) m++
+              let m = 0, mm = 0
+              for (let d = 0; d < 21; d++) {
+                if (buf[ep - 1 - d] === buf[pos - 1 - d]) m++
+                else if (++mm > 3) break
+              }
               if (m >= 18 && m > bestM) { bestM = m; bestEP = ep; bestED = 0 }
             }
           }
           for (let w = 0; w < 4; w++) {
             const er = ts[(hr << 2) + w]
             if (er >= 22) {
-              let m = 0
-              for (let d = 0; d < 21; d++) if (buf[pos - 1 - d] === cp[buf[er - 21 + d]]) m++
+              let m = 0, mm = 0
+              for (let d = 0; d < 21; d++) {
+                if (buf[pos - 1 - d] === cp[buf[er - 21 + d]]) m++
+                else if (++mm > 3) break
+              }
               if (m >= 18 && m > bestM) { bestM = m; bestEP = er - 22; bestED = 1 }
             }
           }
@@ -1863,9 +1872,10 @@ class Model {
           hc = (hc ^ (hc >>> 15)) & 0x1fffff
           const ep = tc[hc]
           if (ep >= 10 && ep < pos) {
-            let cm = 0
+            let cm = 0, mm = 0
             for (let d = 0; d < 16 && ep - 1 - d >= 0 && pos - 1 - d >= 0; d++) {
               if ((b2s[buf[ep - 1 - d]] >> 2) === (b2s[buf[pos - 1 - d]] >> 2)) cm++
+              else if (++mm > 2) break
             }
             if (cm >= 14) { bestL = 10; bestP = ep; bestE = 0 }
           }
@@ -1883,8 +1893,11 @@ class Model {
           hs = (hs ^ (hs >>> 15)) & 0x7ffff
           const ep = ts[hs]
           if (ep >= 9 && ep < pos) {
-            let m = 0
-            for (let d = 0; d < 9; d++) if (buf[ep - 1 - d] === buf[pos - 1 - d]) m++
+            let m = 0, mm = 0
+            for (let d = 0; d < 9; d++) {
+              if (buf[ep - 1 - d] === buf[pos - 1 - d]) m++
+              else if (++mm > 2) break
+            }
             if (m >= 7) {
               let tr = 0
               while (tr < 9 && buf[ep - 1 - tr] === buf[pos - 1 - tr]) tr++
