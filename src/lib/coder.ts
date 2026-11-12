@@ -700,7 +700,7 @@ class Model {
   shift: number
   hashes = new Int32Array(16)
   idx = new Int32Array(16)
-  inputs = new Int32Array(12)
+  inputs = new Int32Array(16)
   // 每个上下文一张 32 位表：高 16 位是概率，低 8 位是更新计数。
   // 原实现用 Uint16Array + Uint8Array 两张表，同一槽位要两次随机访存；
   // 合并成一次读改写后，每比特的高延迟访存次数从 2·nctx 降到 nctx。
@@ -905,8 +905,9 @@ class Model {
       this.symMM = 8
       this.symHyst = 2
       this.symPred = 2
-      this.nctx = 11
+      this.nctx = this.context === 'sym-5bit-gap' && n > 3000000 ? 12 : 11
     }
+    if (this.symProt) this.inputs = new Int32Array(this.nctx > 11 ? 16 : 12)
     // P18.2: the nine ladder lengths {2,3,4,5,6,7,8,9,11} are the winning
     // context ladder for quaternary streams (byte-identical in encoder/decoder).
     if (this.symDna) {
@@ -1121,7 +1122,8 @@ class Model {
             const exp = b2s[this.buf[this.mptr]]
             H[9] = hh(exp + 1, this.symMMc > 0 ? 1 : 0, this.mlen < 4 ? this.mlen : 3)
             H[10] = hh(exp + 1, b2s[b1], this.mptr + 1 < this.pos ? b2s[this.buf[this.mptr + 1]] >> 2 : 8)
-          } else { H[9] = 0; H[10] = 0 }
+            if (this.nctx > 11) H[11] = (this.mptr > 0 && this.mptr + 1 < this.pos) ? hh(b2s[this.buf[this.mptr - 1]] + 1, exp + 1, b2s[this.buf[this.mptr + 1]] + 1) : 0
+          } else { H[9] = 0; H[10] = 0; if (this.nctx > 11) H[11] = 0 }
           return
         }
         H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4);H[5]=hh(b1,b2,b3,b4,this.g(5),this.g(6));H[6]=this.symBits===2?mix32(this.symKm9):this.context==='sym-5bit-gap'?hh(b1,b2,b3,b4,this.g(5)):hh(this.curWord,b1);H[7]=this.symBits===2?mix32(this.symKm10):this.context==='sym-5bit-gap'?hh(b1,b2,b4,this.g(7),this.g(8)):hh(this.prevWord,this.curWord||b1);H[8]=this.context === 'wp-token3' ? hh(this.prevPrevWord,this.prevWord,this.curWord||b1) : this.context === 'text-sparse5' ? hh(b1,b3,this.g(5)) : hh(b1,b3,b4);return
