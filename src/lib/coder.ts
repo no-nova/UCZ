@@ -64,13 +64,27 @@ function symContextOrder(data: Uint8Array, map: SymAlphabet): number[] {
   }
   const vec = new Float64Array(2 * K * K)
   for (let a = 0; a < K; a++) {
-    let nl = 0, nr = 0
-    for (let x = 0; x < K; x++) { nl += L[a * K + x] * L[a * K + x]; nr += R[a * K + x] * R[a * K + x] }
-    nl = Math.sqrt(nl) || 1
-    nr = Math.sqrt(nr) || 1
-    for (let x = 0; x < K; x++) {
-      vec[a * 2 * K + x] = L[a * K + x] / nl
-      vec[a * 2 * K + K + x] = R[a * K + x] / nr
+    if (data.length > 2000000 && data.length <= 10000000) {
+      let sl = 0, sr = 0
+      for (let x = 0; x < K; x++) { sl += L[a * K + x]; sr += R[a * K + x] }
+      sl += K; sr += K
+      let nl = 0, nr = 0
+      for (let x = 0; x < K; x++) {
+        const vl = Math.sqrt((L[a * K + x] + 1) / sl), vr = Math.sqrt((R[a * K + x] + 1) / sr)
+        vec[a * 2 * K + x] = vl; vec[a * 2 * K + K + x] = vr
+        nl += vl * vl; nr += vr * vr
+      }
+      nl = Math.sqrt(nl) || 1; nr = Math.sqrt(nr) || 1
+      for (let x = 0; x < K; x++) { vec[a * 2 * K + x] /= nl; vec[a * 2 * K + K + x] /= nr }
+    } else {
+      let nl = 0, nr = 0
+      for (let x = 0; x < K; x++) { nl += L[a * K + x] * L[a * K + x]; nr += R[a * K + x] * R[a * K + x] }
+      nl = Math.sqrt(nl) || 1
+      nr = Math.sqrt(nr) || 1
+      for (let x = 0; x < K; x++) {
+        vec[a * 2 * K + x] = L[a * K + x] / nl
+        vec[a * 2 * K + K + x] = R[a * K + x] / nr
+      }
     }
   }
   type Node = { members: number[]; c: Float64Array; left?: Node; right?: Node; dummy: boolean }
@@ -1577,6 +1591,8 @@ class Model {
   symLocalFlag = false
   symTblS: Int32Array | null = null
   symTblL: Int32Array | null = null
+  shadowDelta = 0
+  shadowUntil = 0
   symK = new Int32Array(16)
   symLadder: number[] | null = null
   symAepN = 0
@@ -1746,6 +1762,10 @@ class Model {
             this.mptr += sd
           }
         } else {
+          if (this.symProt && this.mlen >= 16) {
+            this.shadowDelta = this.mptr - pos
+            this.shadowUntil = pos + 512
+          }
           this.mlen = 0
           this.symDir = 1
           this.symMMc = 0
@@ -1921,6 +1941,16 @@ class Model {
         tf[b4 + 1] = tf[b4]
         tf[b4] = pos
       } else if (this.symProt && pos >= this.symSeedK + 1) {
+        if (this.mlen === 0 && pos <= this.shadowUntil && pos >= 5) {
+          let relock = -1
+          for (let ad = 0; ad <= 16 && relock < 0; ad++) {
+            for (const sg of ad === 0 ? [0] : [-1, 1]) {
+              const d = sg * ad, cand = pos + this.shadowDelta + d
+              if (cand >= 5 && cand < pos && buf[cand-1]===buf[pos-1] && buf[cand-2]===buf[pos-2] && buf[cand-3]===buf[pos-3] && buf[cand-4]===buf[pos-4] && buf[cand-5]===buf[pos-5]) { relock = cand; break }
+            }
+          }
+          if (relock >= 0) { this.mptr = relock; this.mlen = 8; this.symMMc = 0; this.symExact = 0; this.shadowUntil = 0 }
+        }
         const kk = this.symSeedK, b2s = this.byteToSym!
         const hashAt = (e: number, k: number): number => {
           let h = 0x811c9dc5
@@ -1931,14 +1961,23 @@ class Model {
         if (!this.symTbl) this.symTbl = new Int32Array((1 << 22) * 4)
         const tf = this.symTbl
         const kf = hashAt(pos, kk)
-        let bestL = 0, bestP = 0, bestE = 0
+        let bestL = 0, bestP = 0, bestE = 0, bestScore = -1
         if (this.mlen < this.symSeedGate) {
           for (let w = 0; w < 4; w++) {
             const ep = tf[(kf << 2) + w]
             if (ep >= kk && ep < pos) {
               let j = 0
               while (j < 64 && ep - kk + j >= 0 && buf[ep - kk + j] === buf[pos - kk + j]) j++
-              if (j >= kk && j > bestL) { bestL = j; bestP = ep; bestE = j }
+              if (j >= kk) {
+                let sc = 0
+                if (this.symAepN > 2000000) {
+                  for (let k = 1; k <= 16 && ep - k >= 0 && pos - k >= 0; k++) {
+                    const a = b2s[buf[ep - k]], b = b2s[buf[pos - k]]
+                    if (a === b) sc += 2; else if ((a >> 2) === (b >> 2)) sc++
+                  }
+                }
+                if (j > bestL || sc > bestScore) { bestL = j; bestP = ep; bestE = j; bestScore = sc }
+              }
             }
           }
         }
