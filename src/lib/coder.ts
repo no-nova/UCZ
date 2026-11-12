@@ -1117,7 +1117,7 @@ class Model {
         }
         if (this.symProt) {
           H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=hh(b1,b2,b3,b4)
-          H[5]=hh(b1,b2,b3,b4,this.g(5)); H[6]=hh(b1,b3,b4); H[7]=hh(b1,b2,b4); H[8]=hh(b1,b4,this.g(5))
+          H[5]=hh(b1,b2,b3,b4,this.g(5)); H[6]=hh(b1,b3,b4); H[7]=this.context==='sym-5bit-gap' && this.symAepN > 2000000 ? hh(b1,b3,this.g(5)) : hh(b1,b2,b4); H[8]=hh(b1,b4,this.g(5))
           const b2s = this.byteToSym!
           if (this.mlen > 0) {
             const exp = b2s[this.buf[this.mptr]]
@@ -1959,14 +1959,14 @@ class Model {
         }
         // Homologous protein spaced seed: 6 care residues over 9 (110110110), >=7/9.
         if (pos >= 9 && this.mlen < 10) {
-          if (!this.symTblS) this.symTblS = new Int32Array(1 << 19)
+          if (!this.symTblS) this.symTblS = new Int32Array(1 << (this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19))
           const ts = this.symTblS
           let hs = 0x811c9dc5
           for (let d = 0; d < 9; d++) {
             if (d % 3 === 2) continue
             hs = Math.imul(hs ^ (b2s[buf[pos - 1 - d]] + 1), 0x01000193)
           }
-          hs = (hs ^ (hs >>> 15)) & 0x7ffff
+          hs = (hs ^ (hs >>> 15)) & ((1 << (this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19)) - 1)
           const ep = ts[hs]
           if (ep >= 9 && ep < pos) {
             let m = 0, mm = 0
