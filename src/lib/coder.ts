@@ -907,7 +907,10 @@ class Model {
     }
     // P18.2: the nine ladder lengths {2,3,4,5,6,7,8,9,11} are the winning
     // context ladder for quaternary streams (byte-identical in encoder/decoder).
-    if (this.symDna) this.symLadder = [2, 3, 4, 5, 6, 7, 9, 12, 0]
+    if (this.symDna) {
+      this.symLadder = [2, 3, 4, 5, 6, 7, 9, 12, 0]
+      this.symAepN = n
+    }
     const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
@@ -1248,6 +1251,7 @@ class Model {
       inputs[nctx + 1] = 256
       this.lastPrimaryMs = ms
       wbase = (bit * (this.isV20 ? 4 : 3) + ms) * N
+      if (this.symDna && this.symAepClean) wbase = ((bit * 4 + ms) * 2 + (mIdx >= 0 && this.symMMc === 0 ? 1 : 0)) * N
       // 与 p() 相同的整数点积，按同样顺序累加以保证逐位一致。
       // P17.2: `inputs[N-1]` is the constant 256 bias, so its term is hoisted out
       // of the loop. Integer addition is associative and the loop order is
@@ -1428,7 +1432,8 @@ class Model {
     }
     inputs[nctx + 1] = 256
     const N = this.ninputs
-    const wb = (this.bit * 3 + ms) * N
+    let wb = (this.bit * 3 + ms) * N
+    if (this.symDna && this.symAepClean) wb = ((this.bit * 4 + ms) * 2 + (this.mIdx >= 0 && this.symMMc === 0 ? 1 : 0)) * N
     this.wbase = wb
     let dot = 0
     const w = this.weights
@@ -1542,9 +1547,27 @@ class Model {
   symTblL: Int32Array | null = null
   symK = new Int32Array(16)
   symLadder: number[] | null = null
+  symAepN = 0
+  symAepPos = 0
+  symAepDone = false
+  symAepClean = false
+  symAepCounts = new Int32Array(4)
   private byteUpdate(byte: number) {
     if (this.symBits < 8) {
       const r = this.byteToSym![byte]
+      if (this.symDna && !this.symAepDone) {
+        this.symAepCounts[r]++
+        if (++this.symAepPos === 4096) {
+          let h = 0
+          for (let i = 0; i < 4; i++) {
+            const q = this.symAepCounts[i] / 4096
+            if (q > 0) h -= q * Math.log2(q)
+          }
+          const n = this.symAepN || 0
+          this.symAepClean = n > 0 && h > 0 && Math.log2(n) / h >= 12.3
+          this.symAepDone = true
+        }
+      }
       this.symKm9 = ((this.symKm9 << 2) | r) & 0x3ffff
       this.symKm10 = ((this.symKm10 << 2) | r) & 0xfffff
       for (let o = 1; o <= 15; o++) this.symK[o] = ((this.symK[o] << 2) | r) & (o === 15 ? 0x3fffffff : (1 << (2 * o)) - 1)
