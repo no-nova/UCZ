@@ -1334,7 +1334,7 @@ class Model {
     const nctx = this.nctx, N = this.ninputs
     const inputs = this.inputs, idx = this.idx, weights = this.weights
     const tables = this.tables, limit = this.limit
-    const err = ((y << 12) - (prOverride ?? this.pr)) * 8
+    const err = ((y << 12) - (prOverride ?? this.pr)) * ((this.symDna || this.symProt) ? 6 : 8)
     const wb = this.wbase
     for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + 0x8000) >> 16
     if (this.dualPass) {
@@ -1366,9 +1366,9 @@ class Model {
       const target = y ? 65535 : 0
       const base = this.apmBase, tw = this.apmT
       const a = tw[base]
-      tw[base] = a + ((target - a) >> apmTuning.rate)
+      tw[base] = a + ((target - a) >> (this.symDna ? apmTuning.rate + 2 : apmTuning.rate))
       const b = tw[base + 1]
-      tw[base + 1] = b + ((target - b) >> apmTuning.rate)
+      tw[base + 1] = b + ((target - b) >> (this.symDna ? apmTuning.rate + 2 : apmTuning.rate))
       if (this.apm2On) {
         const t2 = this.apm2T, b2 = this.apm2Base
         const x2 = t2[b2]
@@ -1447,7 +1447,7 @@ class Model {
 
   update(y: number) {
     const { nctx, inputs, idx } = this
-    const err = ((y << 12) - this.pr) * 8
+    const err = ((y << 12) - this.pr) * ((this.symDna || this.symProt) ? 6 : 8)
     const N = this.ninputs
     const w = this.weights
     const wb = this.wbase
