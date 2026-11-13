@@ -76,29 +76,11 @@ export function d16Inv(r: Uint8Array, ch: number, order: number): Uint8Array {
 
 // Reversible x86 E8/E9 rel32 normalization. All positions are modulo 2^32.
 // It is deliberately not an instruction disassembler or standard XZ BCJ stream.
-export function discoverRel32Triggers(data: Uint8Array): [number, number] {
-  const n = data.length, hit = new Int32Array(256), cnt = new Int32Array(256)
-  for (let i = 0; i + 4 < n; i++) {
-    const b = data[i]; cnt[b]++
-    if (data[i + 4] === 0 || data[i + 4] === 255) hit[b]++
-  }
-  let bg = 0
-  for (let i = 0; i + 4 < n; i++) if (data[i + 4] === 0 || data[i + 4] === 255) bg++
-  const base = n > 4 ? bg / (n - 4) : 0
-  const rank: { b: number; h: number; r: number }[] = []
-  for (let b = 0; b < 256; b++) if (cnt[b] >= 32) {
-    const r = hit[b] / cnt[b]
-    if (r >= 0.5 && r >= base * 3) rank.push({ b, h: hit[b], r })
-  }
-  rank.sort((a, b) => b.h - a.h || a.b - b.b)
-  const a = rank[0]?.b ?? -1, c = rank[1]?.b ?? a
-  return [a, c]
-}
-function bcjTransform(data: Uint8Array, base: number, inverse: boolean, op0: number, op1: number): Uint8Array {
+function bcjTransform(data: Uint8Array, base: number, inverse: boolean): Uint8Array {
   // Uint8Array.slice copies, but Node Buffer.slice aliases the input.
   const out = new Uint8Array(data)
   for (let i = 0; i + 4 < out.length; i++) {
-    if (out[i] !== op0 && out[i] !== op1) continue
+    if (out[i] !== 0xe8 && out[i] !== 0xe9) continue
     const rel = (out[i + 1] | (out[i + 2] << 8) | (out[i + 3] << 16) | (out[i + 4] << 24)) >>> 0
     const pc = (base + i + 5) >>> 0
     const value = (inverse ? rel - pc : rel + pc) >>> 0
@@ -108,8 +90,8 @@ function bcjTransform(data: Uint8Array, base: number, inverse: boolean, op0: num
   }
   return out
 }
-export function bcjFwd(data: Uint8Array, base = 0, op0?: number, op1?: number): Uint8Array { if (op0 === undefined) { const t = discoverRel32Triggers(data); op0 = t[0]; op1 = t[1] } return bcjTransform(data, base, false, op0, op1!) }
-export function bcjInv(data: Uint8Array, base = 0, op0?: number, op1?: number): Uint8Array { if (op0 === undefined) { const t = discoverRel32Triggers(data); op0 = t[0]; op1 = t[1] } return bcjTransform(data, base, true, op0, op1!) }
+export function bcjFwd(data: Uint8Array, base = 0): Uint8Array { return bcjTransform(data, base, false) }
+export function bcjInv(data: Uint8Array, base = 0): Uint8Array { return bcjTransform(data, base, true) }
 
 // Self-delimiting column fold: the last complete row ends at the same offset
 // after transposition; the unterminated suffix is left unchanged.
@@ -208,10 +190,10 @@ export const grad332Inv = (d: Uint8Array, rowBytes: number) => wide16Inv(d, rowB
 export const avg16Fwd = (d: Uint8Array, rowBytes: number) => wide16Fwd(d, rowBytes, 5)
 export const avg16Inv = (d: Uint8Array, rowBytes: number) => wide16Inv(d, rowBytes, 5)
 
-function bcjMsbTransform(data: Uint8Array, base: number, inverse: boolean, op0: number, op1: number): Uint8Array {
+function bcjMsbTransform(data: Uint8Array, base: number, inverse: boolean): Uint8Array {
   const out = new Uint8Array(data)
   for (let i = 0; i + 4 < out.length; i++) {
-    if (out[i] !== op0 && out[i] !== op1) continue
+    if (out[i] !== 0xe8 && out[i] !== 0xe9) continue
     if (out[i + 4] === 0 || out[i + 4] === 255) {
       const rel = out[i + 1] | out[i + 2] << 8 | out[i + 3] << 16 | out[i + 4] << 24
       const pc = (base + i + 5) >>> 0
@@ -226,8 +208,8 @@ function bcjMsbTransform(data: Uint8Array, base: number, inverse: boolean, op0: 
   }
   return out
 }
-export const bcjMsbFwd = (d: Uint8Array, base = 0, op0?: number, op1?: number) => { if (op0 === undefined) { const t = discoverRel32Triggers(d); op0 = t[0]; op1 = t[1] } return bcjMsbTransform(d, base, false, op0, op1!) }
-export const bcjMsbInv = (d: Uint8Array, base = 0, op0?: number, op1?: number) => { if (op0 === undefined) { const t = discoverRel32Triggers(d); op0 = t[0]; op1 = t[1] } return bcjMsbTransform(d, base, true, op0, op1!) }
+export const bcjMsbFwd = (d: Uint8Array, base = 0) => bcjMsbTransform(d, base, false)
+export const bcjMsbInv = (d: Uint8Array, base = 0) => bcjMsbTransform(d, base, true)
 
 /** Carry/borrow-preserving LE uint32/uint64 row differences. Bytes are in the
  * gatherer's orientation; reverse residuals back to that orientation for BIN.
