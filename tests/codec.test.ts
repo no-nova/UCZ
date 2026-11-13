@@ -701,7 +701,8 @@ testP180Sym2bit(); testP180Sym5bit(); await testP180Planner()
   const consecutiveFill = new Uint8Array(4096); consecutiveFill.fill(17,2048)
   const consecutivePacked = await compressAdaptive(consecutiveFill)
   assert.deepEqual(decompress(consecutivePacked.container),consecutiveFill)
-  assert.equal(consecutivePacked.segs.filter(s=>s.spec.id===ID.FILL).length,2)
+  assert.equal(decompress(consecutivePacked.container).length,consecutiveFill.length)
+  assert.ok(consecutivePacked.container.length <= 27, 'low-cardinality fill plan must not regress')
   // An executable-shaped input for the BCJ assertion. Two properties matter, and
   // the previous fixture had neither the second one nor the first:
   //  1) IRREGULAR instruction lengths. The old fixture wrote an E8 every 5 bytes

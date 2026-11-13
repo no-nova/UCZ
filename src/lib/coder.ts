@@ -979,7 +979,7 @@ class Model {
       this.symMM = 8
       this.symHyst = 2
       this.symPred = 2
-      this.nctx = this.context === 'sym-5bit-gap' && n > 3000000 ? 12 : 11
+      this.nctx = this.context === 'sym-5bit-gap' && this.symAepN > 3000000 ? 12 : 11
     }
     if (this.symProt) this.inputs = new Int32Array(this.nctx > 11 ? 16 : 12)
     // P18.2: the nine ladder lengths {2,3,4,5,6,7,8,9,11} are the winning
@@ -1751,14 +1751,14 @@ class Model {
           // and keep walking the current template (hysteresis).
           let switched = false
           if (this.symProt && this.mlen >= 8 && this.symMMc >= 2) {
-            const ds = this.symAepN > 2000000 && this.mlen >= 12 ? [-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8] : [-3,-2,-1,1,2,3]
+            const ds = (this.symAepN > 2000000 || (this.symAepN > 262144 && this.symAepN <= 6000000 && this.symAlphaK <= 22 && this.symClean)) && this.mlen >= 12 ? [-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8] : [-3,-2,-1,1,2,3]
             for (const d of ds) {
               const q = this.mptr + d
               if (q >= 4 && q < pos) {
                 const ok3 = buf[q - 1] === buf[pos - 1] && buf[q - 2] === buf[pos - 2] && buf[q - 3] === buf[pos - 3]
                 let ok = ok3
                 if (!ok && this.mlen >= 16 && q >= 4) {
-                  if (this.symAepN > 1000000 && this.symClean) {
+                  if (this.symAepN > 262144 && this.symAepN <= 6000000 && this.symAlphaK <= 22 && this.symClean) {
                     let ex=0, co=0
                     for (let k=1;k<=4;k++) { const a=this.byteToSym![buf[q-k]], b=this.byteToSym![buf[pos-k]]; if (a===b) ex++; else if ((a>>2)===(b>>2)) co++ }
                     ok = ex === 4 || (ex >= 3 && co >= 1)
@@ -2078,8 +2078,8 @@ class Model {
         }
         // Homologous protein spaced seed: 6 care residues over 9 (110110110), >=7/9.
         if (pos >= 9 && this.mlen < 10) {
-          const sbits = this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : 19
-          const s4 = this.symAepN > 1000000 && this.symClean
+          const sbits = this.symAepN > 10000000 ? 23 : this.symAepN > 2000000 ? 21 : this.symAepN > 262144 && this.symAlphaK <= 22 ? 21 : 19
+          const s4 = this.symAepN > 262144 && this.symAlphaK <= 22 && this.symClean
           if (!this.symTblS) this.symTblS = new Int32Array((1 << sbits) * (s4 ? 4 : 1))
           const ts = this.symTblS
           let hs = 0x811c9dc5

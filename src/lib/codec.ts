@@ -3793,6 +3793,14 @@ export async function compressAdaptive(
     const upgraded=refineGroupCodecs(data,carved)
     const rec2=refineRec2(data,upgraded)
     const bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
+    // Small closed-loop text fallback: keep the legacy TEXT plan in the real
+    // byte competition instead of letting the context upgrade erase it.
+    if(data.length<131072 && bp.segs.length===1 && bp.segs[0].spec.id===ID.TEXT_V3){
+      try{
+        const legacy=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'text',spec:{id:ID.TEXT,s:1,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
+        if(legacy.container.length<bp.container.length)return legacy
+      }catch{}
+    }
     return bp
   }
   finally { await closeNodePool() }
@@ -4762,7 +4770,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-linecol',spec)?['text-linecol','text-lexcol','text-tabcol']
+    let modes:CMContext[]=rawText && contextSpecAllowed('text-linecol',spec)?['text-linecol','text-lexcol','text-tabcol','wp-token3']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     if(modes.length&&rawText&&rawBytes>=CONTEXT_MIN_BYTES){
