@@ -363,6 +363,12 @@ export const BIN_TEN_MIN_BYTES = 64 * 1024
  * on P (272,702 -> 272,635 B).
  */
 export const BIN_EMA_GATE = 15600
+/**
+ * P25.1: the twelfth slot costs another full 24-bit table, so it needs a longer
+ * stream than the eleventh to amortise its cold start (measured: the 72 KB planner
+ * canary loses its ANCHOR choice when it is enabled that early).
+ */
+export const BIN_TWELVE_MIN_BYTES = 256 * 1024
 export const modelTuning = { maxTableBits: 24, matchTableBits: 23, largeOnly: true }
 
 /** Raw text and WORD-PRE keep a2 by default; saved flags retain legacy off policies. */
@@ -828,6 +834,9 @@ class Model {
   minLen: number
   mht: Int32Array
   mhtOlder?: Int32Array
+  /** P25.1: second older history table (`v20` only) — three-way candidate scan. */
+  mhtO2?: Int32Array
+  private matchTabs: Int32Array[] = []
   /**
    * v15 的 8 字节长距匹配表。4 字节哈希（mht）在 33 MB 跨度上会被高频短串
    * 碰撞覆盖，记不住几 MB 外的长重复块；8 字节上下文的碰撞率低几个数量级。
@@ -899,6 +908,8 @@ class Model {
   gapRecovery = false
   /** v20 `bin` 且流长达到 `BIN_TEN_MIN_BYTES`：启用第十个上下文。 */
   binTenOn = false
+  /** P25.1: `bin` stream长到 `BIN_TWELVE_MIN_BYTES`，启用第十二个上下文。 */
+  binTwelveOn = false
   lastPrimaryMs = 0
   /** 双流模式：step() 额外算一遍 v13 权重，learn() 分别更新两套权重。 */
   dualPass = false
@@ -996,7 +1007,8 @@ class Model {
     this.buf = contextPeer?.buf ?? new Uint8Array(n + 1)
     const v3 = variant === 'v13' || isAPMKernel(variant)
     this.binTenOn = v3 && profile === 'bin' && variant === 'v20' && n >= BIN_TEN_MIN_BYTES
-    this.nctx = this.binTenOn ? 11
+    this.binTwelveOn = this.binTenOn && n >= BIN_TWELVE_MIN_BYTES
+    this.nctx = this.binTwelveOn ? 12 : this.binTenOn ? 11
       : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
     this.useMatch = profile === 'text' || profile === 'bin'
     this.minLen = profile === 'text' && !v3 ? 5 : 4
@@ -1085,11 +1097,17 @@ class Model {
     // 4-gram is not evicted by itself. Enabled by the serialized option, never by
     // the diagnostic experiment switch.
     if (this.matchDistOn) this.mhtOlder = new Int32Array(1 << mhBits)
+    // P25.1: a 4-byte hash slot is overwritten by the next accidental collision, so
+    // keep one more generation and pick the candidate with the longest verified
+    // history (ties -> newest). Only `v20` streams get the extra table, keeping every
+    // `v15` fixture byte-identical.
     else if (this.useMatch && matchExperiment && matchExperiment !== 'single') this.mhtOlder = new Int32Array(1 << mhBits)
+    if (this.useMatch && this.isV20 && n >= BIN_TEN_MIN_BYTES) this.mhtO2 = new Int32Array(1 << mhBits)
+    this.matchTabs = [this.mhtOlder, this.mhtO2].filter((t): t is Int32Array => t !== undefined)
     if (this.symDna) this.msm = new Uint16Array(32 * 5 * 16).fill(49152)
     else if (this.symProt) this.msm = new Uint16Array(32 * 5 * 8).fill(49152)
     else if (this.matchDistOn || (this.useMatch && matchExperiment === 'dual-distance')) this.msm = new Uint16Array(32 * 5).fill(49152)
-    if (matchStats) matchStats.matchTableBytes = this.mht.byteLength + (this.mhtOlder?.byteLength ?? 0) + this.msm.byteLength
+    if (matchStats) matchStats.matchTableBytes = this.mht.byteLength + (this.mhtOlder?.byteLength ?? 0) + (this.mhtO2?.byteLength ?? 0) + this.msm.byteLength
     if (this.isV20) {
       this.requiredFlags |= V20_FLAG_CM
       if (this.gapRecovery) this.requiredFlags |= V20_FLAG_BIN_RECOVERY
@@ -1204,7 +1222,11 @@ class Model {
         // G_lane1 -364 B, H_bcj -2,052 B, O_mid -1,524 B, O1_lane1 -1 B.
         if(this.binTenOn) H[10]=hh(b3>>>2,this.g(6),this.g(9))
         // P25.0: high-entropy gate — identical integer `emaErr` on both sides.
-        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0 }
+        // P25.1: the twelfth slot takes the quantized consecutive waveform, which is
+        // orthogonal to `H[10]`'s {3,6,9} lags: measured on G_lane1 -249 B, H_bcj
+        // -1,661 B, O1_lane1 -135 B, O_mid -398 B when both slots exist.
+        if(this.binTwelveOn) H[11]=hh(b1>>>2,b2>>>2,b3>>>2)
+        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binTwelveOn) H[11]=0 }
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
         return
@@ -1490,6 +1512,13 @@ class Model {
           pr = r2.pr
         }
       } else pr = upr
+    }
+    if (this.binTenOn && this.emaErr > BIN_EMA_GATE) {
+      // P25.1: same synchronized damping idea as `text-vertcol`, one step gentler
+      // than the text gate. Measured on the incompressible P lane: -90 B.
+      pr += (2048 - pr) >> 4
+      if (pr < 1) pr = 1
+      else if (pr > 4095) pr = 4095
     }
     if (this.vertTbl && (this.probeFreeze || vertTuning.damp) && this.emaErr > vertTuning.thr) {
       // High-entropy stream: the byte error EMA is computed with identical integer
@@ -1986,8 +2015,10 @@ class Model {
             if (this.matchStats) this.matchStats.candidatesChecked++
             if (l >= this.minLen && (!this.symProt || l >= 6)) { this.mlen = l; this.mptr = cand; this.symExact = l }
           }
-          if (this.mhtOlder) {
-            const older = this.mhtOlder[h]
+          const olds = this.matchTabs
+          for (let oi = 0; oi < olds.length; oi++) {
+            const at = olds[oi]
+            const older = at[h]
             if (older > 0) {
               let l = 0
               while (l < 32 && older - 1 - l >= 0 && buf[older - 1 - l] === buf[pos - 1 - l]) l++
@@ -2005,6 +2036,7 @@ class Model {
             if (this.matchStats) { this.matchStats.matchesStarted++; this.matchStats.distanceStarts[this.matchDistance]++ }
           }
         }
+        if (this.mhtO2 && this.mhtOlder) this.mhtO2[h] = this.mhtOlder[h]
         if (this.mhtOlder) this.mhtOlder[h] = this.mht[h]
         this.mht[h] = pos
       }
