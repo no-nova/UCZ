@@ -369,6 +369,8 @@ export const BIN_EMA_GATE = 15600
  * canary loses its ANCHOR choice when it is enabled that early).
  */
 export const BIN_TWELVE_MIN_BYTES = 256 * 1024
+/** P25.2: the tenth `text-vertcol` slot only pays for itself past this length. */
+export const TEXT_COL_WORD_MIN_BYTES = 64 * 1024
 export const modelTuning = { maxTableBits: 24, matchTableBits: 23, largeOnly: true }
 
 /** Raw text and WORD-PRE keep a2 by default; saved flags retain legacy off policies. */
@@ -909,7 +911,7 @@ class Model {
   /** v20 `bin` 且流长达到 `BIN_TEN_MIN_BYTES`：启用第十个上下文。 */
   binTenOn = false
   /** P25.1: `bin` stream长到 `BIN_TWELVE_MIN_BYTES`，启用第十二个上下文。 */
-  binTwelveOn = false
+  binLadderOn = false
   lastPrimaryMs = 0
   /** 双流模式：step() 额外算一遍 v13 权重，learn() 分别更新两套权重。 */
   dualPass = false
@@ -1007,9 +1009,12 @@ class Model {
     this.buf = contextPeer?.buf ?? new Uint8Array(n + 1)
     const v3 = variant === 'v13' || isAPMKernel(variant)
     this.binTenOn = v3 && profile === 'bin' && variant === 'v20' && n >= BIN_TEN_MIN_BYTES
-    this.binTwelveOn = this.binTenOn && n >= BIN_TWELVE_MIN_BYTES
-    this.nctx = this.binTwelveOn ? 12 : this.binTenOn ? 11
+    this.binLadderOn = this.binTenOn && n >= BIN_TWELVE_MIN_BYTES
+    this.nctx = this.binLadderOn ? 13 : this.binTenOn ? 11
       : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
+    // P25.2: `text-vertcol` spends a tenth slot on the word/column triple once the
+    // stream is long enough. The counter stays the same nine-slot ladder otherwise.
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 10
     this.useMatch = profile === 'text' || profile === 'bin'
     this.minLen = profile === 'text' && !v3 ? 5 : 4
     // P9-2：表宽走 cmTableBits()，编码端与解码端共用同一个公式与同一个上限。
@@ -1225,8 +1230,13 @@ class Model {
         // P25.1: the twelfth slot takes the quantized consecutive waveform, which is
         // orthogonal to `H[10]`'s {3,6,9} lags: measured on G_lane1 -249 B, H_bcj
         // -1,661 B, O1_lane1 -135 B, O_mid -398 B when both slots exist.
-        if(this.binTwelveOn) H[11]=hh(b1>>>2,b2>>>2,b3>>>2)
-        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binTwelveOn) H[11]=0 }
+        if(this.binLadderOn) H[11]=hh(b1>>>2,b2>>>2,b3>>>2)
+        // P25.2: the thirteenth slot is the 5-bit-quantised 1..4 lag bundle. It is the
+        // zero-regression winner of the 13A-13D screen (13B/13C/13D each gained on `H`
+        // but lost 100-366 B on `G`/`O`): G_lane1 -111 B, H_bcj -640 B,
+        // O1_lane1 -47 B, O_mid -146 B, P_seg0_lane0 0 B.
+        if(this.binLadderOn) H[12]=hh(b1>>>3,b2>>>3,b3>>>3,b4>>>3)
+        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0 } }
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
         return
@@ -1271,6 +1281,11 @@ class Model {
           H[6] = this.context === 'text-tabcol' || this.context === 'text-vertcol' ? lineCond : hh(this.prevWord, this.curWord || b1)
           H[7] = fieldHash
           H[8] = lineHash
+          // P25.2: `text-vertcol` tenth slot — the word/column triple. Measured on the
+          // direct `text` path: B -468 B, C -185 B, K -350 B; the 2D `hh(b1,prevF,prevL)`
+          // variant gained on B but cost 70-190 B on C/K, and the 6-char template lost
+          // on all three. Frozen (high-entropy) bytes keep the slot dark, like vertTbl.
+          if (this.context === 'text-vertcol' && this.nctx > 9) H[9] = this.emaErr > vertTuning.thr ? 0 : hh(this.curWord ^ b1, this.prevWord, this.fieldIdx & 0xff)
           return
         }
         if (this.symBits === 2 && this.symLadder) {
