@@ -4,7 +4,7 @@ import { V21_FLAG_CONTEXTS, GROUP_CONTEXT_MASK, GROUP_CONTEXT_EXT_BIT, GROUP_MAT
 import { payloadModelFlags, markPayloadModel, inheritPayloadModel } from './payload-model'
 import { MAX_SINGLE_CM_BYTES, MAX_OUTPUT_BYTES } from './limits'
 import { detectRec2, rec2Forward, rec2Inverse } from './rec2'
-import { bitplaneEntropyGate, bitplaneStoreTrigger, bitplaneFullProof, encodeBitplanesBitCM, BITPLANE_BYTE_CM, BITPLANE_BIT_CM, decodeBitplanes } from './bitplane'
+import { bitplaneEntropyGate, bitplaneStoreTrigger, bitplaneFullProof, encodeBitplanesBitCM, BITPLANE_BYTE_CM, BITPLANE_BIT_CM, BITPLANE_PERIOD_CM, decodeBitplanes, encodePeriodBytes, decodePeriodBytes } from './bitplane'
 import { encodeTranspose2d, decodeTranspose2d } from './transpose2d'
 import { fitMicroSeed, microFwd, microInv, microWeights, MICRO_SEED_BYTES } from './micro'
 import { encodePeeledTranspose, decodePeeledTranspose, encodePeeledAnchor, decodePeeledAnchor, inspectPeeledTranspose, inspectPeeledAnchor, type SubPeelInfo, type AnchorSubInfo } from './sub-peel'
@@ -1331,8 +1331,8 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
 function decodeTerrainGroupImpl(payload: Uint8Array, lengths: number[], sp: Spec, onProgress?: (done: number, total: number) => void, positions?: number[], kernel: CMVariant = false, wordPre = false, options?: CMOptions): Uint8Array[] {
   let n = lengths.reduce((sum, len) => sum + len, 0)
   if(sp.id===ID.BITPLANE) {
-    if(kernel!=='v20'||wordPre||sp.s!==1||(sp.r!==BITPLANE_BYTE_CM&&sp.r!==BITPLANE_BIT_CM))throw Error('无效位平面解码参数')
-    const joined=decodeBitplanes(payload,n,sp.r);let at=0
+    if(kernel!=='v20'||wordPre||sp.s!==1||(sp.r!==BITPLANE_BYTE_CM&&sp.r!==BITPLANE_BIT_CM&&sp.r!==BITPLANE_PERIOD_CM))throw Error('无效位平面解码参数')
+    const joined=sp.r===BITPLANE_PERIOD_CM?decodePeriodBytes(payload,n):decodeBitplanes(payload,n,sp.r);let at=0
     return lengths.map(len=>{const part=joined.subarray(at,at+len);at+=len;return part})
   }
   if(sp.id===ID.REC2) {
@@ -2954,7 +2954,7 @@ export function planHeader(n:number,segs:readonly PlanSegment[],groups:readonly 
     // `text` CM, so matchDist reaches it through CMOptions exactly as context does.
     if(g.matchDist && (!g.v15 || !(flags&V20_FLAG_CM) || !matchDistProfileAllowed(g.spec.id, g.context)))
       throw Error('无效的 v22 组匹配模型元数据')
-    if((g.spec.id===ID.REC2||g.spec.id===ID.BITPLANE) && (g.context || g.wordPre || !g.v15 || g.spec.s!==1 || (g.spec.id===ID.REC2 ? g.spec.r!==1 : (g.spec.r!==BITPLANE_BYTE_CM && g.spec.r!==BITPLANE_BIT_CM)) || (flags&(V21_FLAG_CONTEXTS|V20_FLAG_CM|V20_FLAG_TRANSFORMS))!==(V21_FLAG_CONTEXTS|V20_FLAG_CM|V20_FLAG_TRANSFORMS))) throw Error('无效 REC2 格式标记')
+    if((g.spec.id===ID.REC2||g.spec.id===ID.BITPLANE) && (g.context || g.wordPre || !g.v15 || g.spec.s!==1 || (g.spec.id===ID.REC2 ? g.spec.r!==1 : (g.spec.r!==BITPLANE_BYTE_CM && g.spec.r!==BITPLANE_BIT_CM && g.spec.r!==BITPLANE_PERIOD_CM)) || (flags&(V21_FLAG_CONTEXTS|V20_FLAG_CM|V20_FLAG_TRANSFORMS))!==(V21_FLAG_CONTEXTS|V20_FLAG_CM|V20_FLAG_TRANSFORMS))) throw Error('无效 REC2 格式标记')
     // v22 nests the whole v21 namespace, so a v22 payload may declare it while the
     // group carries no context code (the flag then only records the format lineage).
     if(!g.context && g.spec.id!==ID.REC2 && g.spec.id!==ID.BITPLANE && (flags&V21_FLAG_CONTEXTS) && !(flags&V22_FLAG_MATCH_DISTANCE)) throw Error('v21 载荷缺少组上下文标记')
@@ -4298,6 +4298,19 @@ export function refineBitplane(data:Uint8Array,baseline:Compressed):Compressed {
   try {
     if(data.length>MAX_OUTPUT_BYTES || data.length%8!==0)return baseline
     const rawStored=baseline.segs.reduce((n,sg)=>n+(sg.spec.id===ID.STORE?sg.rawLen:0),0)
+    if(rawStored*2>=data.length){
+    const period=encodePeriodBytes(data)
+    if(period){
+      const pspec={id:ID.BITPLANE,s:1,r:BITPLANE_PERIOD_CM},pseg:SegResult={start:0,end:data.length,cls:'noise',spec:pspec,label:specLabel(pspec),rawLen:data.length,compLen:period.length,trials:[],modelFlags:payloadModelFlags(period)}
+      markPayloadModel(period,payloadModelFlags(period)|V21_FLAG_CONTEXTS|V20_FLAG_CM|V20_FLAG_TRANSFORMS)
+      const ph=planHeader(data.length,[pseg],[{spec:pspec,members:[0],payload:period,v15:true}]),pt=ph.length+period.length
+      if(pt<baseline.container.length){
+        const pc=new Uint8Array(pt);pc.set(ph);pc.set(period,ph.length)
+        const pbc=new Float32Array(baseline.blockCost.length);pbc.fill(period.length*8/data.length)
+        return {...baseline,container:pc,segs:[pseg],blockCost:pbc,blockSeg:new Int32Array(baseline.blockSeg.length),overhead:ph.length}
+      }
+    }
+    }
     if(!bitplaneEntropyGate(data) && !bitplaneStoreTrigger(data.length,rawStored))return baseline
     const screen=bitplaneFullProof(data)
     if(!screen.proof.some(Boolean))return baseline
@@ -4605,7 +4618,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // CM profile constrain this bit.
     if(matchDist && (!cm20 || !((c[4]|(c[5]<<8))&V22_FLAG_MATCH_DISTANCE) || !matchDistProfileAllowed(id,context)))
       throw Error('v22 组匹配模型标记与规则不兼容')
-    if((id===ID.REC2||id===ID.BITPLANE) && (c[3]!==21 || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM))))throw Error('无效 REC2 组标记')
+    if((id===ID.REC2||id===ID.BITPLANE) && (c[3]!==21 || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
     gContext.push(context)
     gMatchDist.push(matchDist)
     g20.push(cm20)

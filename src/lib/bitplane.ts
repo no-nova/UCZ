@@ -24,6 +24,7 @@ export const BITPLANE_SCREEN_THRESHOLD=0.975
 /** Plane format tags carried by the group's `r` (id33 keeps r=1 compatible). */
 export const BITPLANE_BYTE_CM=1
 export const BITPLANE_BIT_CM=2
+export const BITPLANE_PERIOD_CM=4
 
 /** The legacy statistical screen. Retained for diagnostics and for old receipts;
  * it is NOT the adoption gate any more, because at 16..20 orders the corrected
@@ -221,6 +222,48 @@ export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLA
   for(let i=0;i<q*8;i++)out[i]|=((plane[i>>>3]>>>(i&7))&1)<<b
  }
  out.set(payload.subarray(pos),q*8);return out
+}
+
+/** P22.2: emergent byte recurrence at a power-of-two lag:
+ *   data[i] = data[i-D] + table[i % P]  (mod 256), for all i >= D.
+ * The prefix and the small delta table are stored raw; the tail is free. */
+export function encodePeriodBytes(data:Uint8Array):Uint8Array|null {
+ const n=data.length
+ for(let k=8;k<=22;k++){
+  const D=1<<k
+  if(D>=n)break
+  const sample=Math.min(4096,n-D)
+  let P=0
+  for(let p=1;p<=256;p++){
+   if(p>=sample)break
+   let ok=true
+   for(let i=D+p;i<D+sample;i++)if(((data[i]-data[i-D])&255)!==((data[i-p]-data[i-p-D])&255)){ok=false;break}
+   if(ok){P=p;break}
+  }
+  if(!P)continue
+  const table=new Uint8Array(P)
+  for(let i=0;i<P;i++)table[i]=(data[D+i]-data[i])&255
+  let ok=true
+  for(let i=D;i<n;i++)if(data[i]!==((data[i-D]+table[i%P])&255)){ok=false;break}
+  if(!ok)continue
+  const out=new Uint8Array(5+D+P)
+  out[0]=D&255;out[1]=D>>>8&255;out[2]=D>>>16&255;out[3]=D>>>24&255
+  out[4]=P&255
+  out.set(data.subarray(0,D),5);out.set(table,5+D)
+  return out
+ }
+ return null
+}
+
+export function decodePeriodBytes(payload:Uint8Array,n:number):Uint8Array {
+ if(payload.length<5)throw Error('周期字节载荷被截断')
+ const D=(payload[0]|payload[1]<<8|payload[2]<<16|payload[3]<<24)>>>0
+ const P=payload[4]||256
+ if(D<256||D>=n||P<1||P>256||payload.length!==5+D+P)throw Error('无效周期字节载荷')
+ const out=new Uint8Array(n);out.set(payload.subarray(5,5+D),0)
+ const table=payload.subarray(5+D)
+ for(let i=D;i<n;i++)out[i]=(out[i-D]+table[i%P])&255
+ return out
 }
 
 /** Fixed order set for the r=2 wire format; the encoder must match. */
