@@ -3777,6 +3777,21 @@ export async function compressGuardedPlanForProbe(data: Uint8Array, picks: reado
     options?.batchGuards !== false, options?.runJobs, options?.reuseGuardBases !== false)
 }
 
+function coalesceCompressedPlan(dataLen: number, cp: Compressed): Compressed {
+  if (cp.segs.some(s => s.spec.id !== ID.TEXT_V3 && s.spec.id !== ID.FILL)) return cp
+  const groups = retainedPlanGroups.get(cp.container)
+  if (!groups) return cp
+  const c = coalesceContiguousPlanSegments(dataLen, cp.segs, groups)
+  if (!c.adopted) return cp
+  const hdr = planHeader(dataLen, c.segs, c.groups)
+  const container = new Uint8Array(hdr.length + c.groups.reduce((n, g) => n + g.payload.length, 0))
+  container.set(hdr)
+  let w = hdr.length
+  for (const g of c.groups) { container.set(g.payload, w); w += g.payload.length }
+  retainedPlanGroups.set(container, c.groups)
+  return { ...cp, container, overhead: hdr.length }
+}
+
 export async function compressAdaptive(
   data: Uint8Array,
   onStage?: (msg: string, pct: number) => void,
@@ -3806,10 +3821,10 @@ export async function compressAdaptive(
     if(data.length<131072 && bp.segs.length===1 && bp.segs[0].spec.id===ID.TEXT_V3){
       try{
         const legacy=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'text',spec:{id:ID.TEXT,s:1,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
-        if(legacy.container.length<bp.container.length)return legacy
+        if(legacy.container.length<bp.container.length)return coalesceCompressedPlan(data.length,legacy)
       }catch{}
     }
-    return bp
+    return coalesceCompressedPlan(data.length,bp)
   }
   finally { await closeNodePool() }
 }
