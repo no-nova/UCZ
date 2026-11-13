@@ -174,4 +174,4 @@ export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLA
 }
 
 /** Fixed order set for the r=2 wire format; the encoder must match. */
-export const BITPLANE_BIT_ORDERS:readonly number[]=[16,20]
+export const BITPLANE_BIT_ORDERS:readonly number[]=[16,20,24]
