@@ -12,6 +12,8 @@ import { encodeAnchor, decodeAnchor, anchorRowCount, anchorPotential, MAX_ANCHOR
 import { analyze, detectAnchors, detectLagCandidates, detectRecordStride, detectWide16Lag, BLOCK, type Analysis, type Cls } from './analyze'
 import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, type CostBins, type CMVariant, type Profile } from './coder'
 import { wordPreFwdSampled, wordPreInv, dictHeaderLen, collapseWithDict, type WordPreResult } from './wordpre'
+
+const ENABLE_WORDPRE = true
 import { deltaFwd, deltaInv, medFwd, medInv, d16Fwd, d16Inv, bcjFwd, bcjInv, bcjMsbFwd, bcjMsbInv, discoverRel32Triggers, wide16Fwd, wide16Inv, wordRowDelta, anchorFoldFwd, anchorFoldInv } from './transforms'
 import { CM_FAMILIES, isFamilyCM } from './unify'
 import { threadCount, type JobPayload, type JobReply } from './parallel'
@@ -2700,7 +2702,7 @@ function groupV15Candidates(parts: Uint8Array[], spec: Spec, positions: number[]
     }
     if(sampled)screening.push({kind:'raw',sampleBytes:sampled.bytes,trials:recipes.map((r,i)=>({...r,spec:{...r.spec},bytes:rawCosts[i]})),selected,fullBytes:rawLen*selected.length})
     let wordPre:Uint8Array|null=null,wordPreV20:Uint8Array|null=null
-    if(spec.id===ID.TEXT_V3) {
+    if(ENABLE_WORDPRE && spec.id===ID.TEXT_V3) {
       const joined=joinForSpec(parts,spec,positions)
       const pre=joined&&rawLen>=32768?wordPreFwdSampled(joined.data,256*1024):null
       if(sampled) {
@@ -4751,13 +4753,13 @@ export function contextProposalsForGroup(spec:Spec,
 /** A job computes controls/candidates, never chooses a container. */
 export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,positions:number[],
   retained?:{payload:Uint8Array;flags:number;wordPre:boolean},screen=true,rawText=false,lateMatchDist=true):ContextCandidates {
-  const rawBytes=parts.reduce((n,p)=>n+p.length,0),wordPre=!rawText && spec.id===ID.TEXT_V3
+  const rawBytes=parts.reduce((n,p)=>n+p.length,0),wordPre=ENABLE_WORDPRE && !rawText && spec.id===ID.TEXT_V3
   const result:ContextCandidates={spec:{...spec},rawBytes,wordPre,control:null,trials:[],controlReused:false,fullCandidateInputBytes:0}
   try {
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-sparse5',spec)?['text-sparse5','wp-token3','text-linecol','text-lexcol','text-tabcol']
+    let modes:CMContext[]=rawText && contextSpecAllowed('text-linecol',spec)?['text-linecol','text-lexcol','text-tabcol']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     if(modes.length&&rawText&&rawBytes>=CONTEXT_MIN_BYTES){

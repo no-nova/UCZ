@@ -121,24 +121,20 @@ export function analyze(d: Uint8Array): Analysis {
     let hi = 0
     for (let i = a; i < b; i++) {
       hist[d[i]]++
-      if (d[i] >= 128) hi++
     }
     let uniqC = 0
     for (let i = 0; i < 256; i++) if (hist[i]) uniqC++
     const h0 = entropy(hist, len)
     let hd = 9
     let bestS = 1
-    let mad = 0
     let rowHd = 9
     for (const s of [...STRIDES, 24, 32, 48, 64, 128, 256]) {
       if (len <= s + 8) continue
       dh.fill(0)
-      let sum = 0
       let cnt = 0
       for (let i = Math.max(a, s); i < b; i++) {
         const v = (d[i] - d[i - s]) & 255
         dh[v]++
-        sum += v < 128 ? v : 256 - v
         cnt++
       }
       const e = entropy(dh, cnt)
@@ -146,7 +142,6 @@ export function analyze(d: Uint8Array): Analysis {
       if (e < hd) {
         hd = e
         bestS = s
-        mad = sum / cnt / 128
       }
     }
     if (hd === 9) hd = h0
@@ -161,9 +156,9 @@ export function analyze(d: Uint8Array): Analysis {
       text: textRatio(d, a, b),
       rep: len > 4 ? Math.min(1, repCount[bi] / (len - 3)) : 0,
       uniq: uniqC / 256,
-      hi: hi / Math.max(1, len),
-      zero: hist[0] / Math.max(1, len),
-      mad,
+      hi: 0,
+      zero: 0,
+      mad: 0,
       cls: 'binary',
     })
   }
@@ -212,7 +207,7 @@ export function analyze(d: Uint8Array): Analysis {
   }
   if (n === 0) segs.length = 0
   const refined = cleanTinySeams(d, refineFillSeams(d, segs))
-  return { blocks, segs: refined, pca: pca(blocks), features: FEATURE_NAMES }
+  return { blocks, segs: refined, pca: { x: [], y: [], block: 0 }, features: FEATURE_NAMES }
 }
 
 // Refine only regions classified as fill. Long constant runs are extended across
