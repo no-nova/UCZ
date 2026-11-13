@@ -247,7 +247,7 @@ export function drawDigram(
 
 export function drawPca(
   cv: HTMLCanvasElement,
-  pts: { x: number; y: number; block: number }[],
+  pts: { x: number; y: number; block: number }[] | null | undefined,
   blockSeg: Int32Array,
   colors: number[][],
   sel: number,
@@ -273,9 +273,10 @@ export function drawPca(
     ctx.stroke()
   }
   const pad = 22
+  const list = Array.isArray(pts) ? pts : []
   // 先画未选中,再画选中
   for (const pass of [0, 1]) {
-    for (const p of pts) {
+    for (const p of list) {
       const sg = blockSeg[p.block]
       const isSel = sel < 0 || sg === sel
       if ((pass === 1) !== isSel) continue

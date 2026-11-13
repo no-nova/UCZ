@@ -90,14 +90,14 @@ export function DigramView(props: {
 }
 
 export function PcaView(props: {
-  pts: { x: number; y: number; block: number }[]
+  pts?: { x: number; y: number; block: number }[] | null
   blockSeg: Int32Array
   colors: number[][]
   sel: number
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    if (ref.current) drawPca(ref.current, props.pts, props.blockSeg, props.colors, props.sel)
+    if (ref.current) drawPca(ref.current, props.pts ?? [], props.blockSeg, props.colors, props.sel)
   }, [props.pts, props.blockSeg, props.colors, props.sel])
   return <canvas ref={ref} className="w-full rounded-xl border border-white/10 bg-black/40" />
 }
