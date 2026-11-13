@@ -25,6 +25,11 @@ export const vertTuning = {
   damp: true,
   /** Freeze the row/word tracker so random bytes cannot pollute real columns. */
   freeze: true,
+  /** Also stop reading and training `vertTbl` on frozen (random) bytes: the
+   *  column stays pinned, so every bit would train one hot table entry. */
+  freezeTbl: true,
+  /** Deep-noise threshold for the stronger damping shift. */
+  thr2: 14800,
   /**
    * Feed both previous-row predictors on every bit. The table key already
    * contains `c0`, so prefix-match and prefix-mismatch learn separate
@@ -790,6 +795,8 @@ class Model {
   r: number
   nctx: number
   ninputs: number
+  get tblFrozen(): boolean { return vertTuning.freezeTbl && this.emaErr > vertTuning.thr }
+  get dampShift(): number { return this.emaErr > vertTuning.thr2 ? 3 : 4 }
   shift: number
   hashes = new Int32Array(16)
   idx = new Int32Array(16)
@@ -1391,8 +1398,9 @@ class Model {
         const okF = pf !== 0 && vc0 === ((1 << vbit) | (pf >>> (8 - vbit)))
         const okL = pl !== 0 && vc0 === ((1 << vbit) | (pl >>> (8 - vbit)))
         const ung = vertTuning.ungated
-        if (pf !== 0 && (ung || okF)) { const k = (pf << 8) | vc0; this.vertIdx = k; inputs[nctx + 1] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 1] = 0
-        if (pl !== 0 && (ung || okL)) { const k = 65536 + ((pl << 8) | vc0); this.vertIdx2 = k; inputs[nctx + 2] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 2] = 0
+        const vfrz = this.tblFrozen
+        if (!vfrz && pf !== 0 && (ung || okF)) { const k = (pf << 8) | vc0; this.vertIdx = k; inputs[nctx + 1] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 1] = 0
+        if (!vfrz && pl !== 0 && (ung || okL)) { const k = 65536 + ((pl << 8) | vc0); this.vertIdx2 = k; inputs[nctx + 2] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 2] = 0
       }
       this.lastPrimaryMs = ms
       wbase = (bit * (this.symProt && this.symAepN > 1000000 ? 5 : this.isV20 ? 4 : 3) + ms) * N
@@ -1455,10 +1463,10 @@ class Model {
         }
       } else pr = upr
     }
-    if (this.vertTbl && vertTuning.damp && this.emaErr > vertTuning.thr) {
+    if (this.vertTbl && (this.probeFreeze || vertTuning.damp) && this.emaErr > vertTuning.thr) {
       // High-entropy stream: the byte error EMA is computed with identical integer
       // math on both sides, so damping the final probability is bit-synchronized.
-      pr += (2048 - pr) >> 4
+      pr += (2048 - pr) >> this.dampShift
       if (pr < 1) pr = 1
       else if (pr > 4095) pr = 4095
     }
@@ -1533,7 +1541,8 @@ class Model {
       this.byteErr += y ? (4096 - (prOverride ?? this.pr)) : (prOverride ?? this.pr)
       const target = y ? 65535 : 0
       const lim = this.limit, t = this.vertTbl
-      const k1 = this.vertIdx, k2 = this.vertIdx2
+      const vfrzLearn = this.tblFrozen
+      const k1 = vfrzLearn ? -1 : this.vertIdx, k2 = vfrzLearn ? -1 : this.vertIdx2
       if (k1 >= 0) { const e = t[k1], p = e >>> 16, n = e & 255; t[k1] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < lim ? n + 1 : n) }
       if (k2 >= 0) { const e = t[k2], p = e >>> 16, n = e & 255; t[k2] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < lim ? n + 1 : n) }
       this.vertIdx = -1; this.vertIdx2 = -1
