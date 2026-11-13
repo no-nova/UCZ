@@ -77,7 +77,7 @@ function predict(m: BitCMModel, history: number): number {
   for (let i = 0; i < masks.length; i++) {
     const index = history & masks[i]
     const n0 = z[i][index], n1 = o[i][index]
-    const prob = Math.max(1, Math.min(PSCALE - 1, (((2 * n1 + 1) * PSCALE) / (2 * (n0 + n1) + 2)) | 0))
+    const prob = Math.max(1, Math.min(PSCALE - 1, (((2048 * n1 + 1) * PSCALE) / (2048 * (n0 + n1) + 2)) | 0))
     const value = stretchTable[prob]
     st[i] = value
     mixed += w[i] * value
