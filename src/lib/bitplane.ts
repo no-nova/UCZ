@@ -229,28 +229,47 @@ export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLA
  * The prefix and the small delta table are stored raw; the tail is free. */
 export function encodePeriodBytes(data:Uint8Array):Uint8Array|null {
  const n=data.length
- for(let k=8;k<=22;k++){
-  const D=1<<k
-  if(D>=n)break
-  const sample=Math.min(4096,n-D)
+ const tried=new Set<number>()
+ const tryD=(D:number):Uint8Array|null=>{
+  if(D<256||D>=n||tried.has(D))return null
+  tried.add(D)
+  const sample=Math.min(2048,n-D)
+  // Find the delta period on a short sample first; only exact streams reach full verify.
+  const d0=new Uint8Array(256)
+  for(let i=0;i<256;i++)d0[i]=(data[D+i]-data[i])&255
   let P=0
   for(let p=1;p<=256;p++){
    if(p>=sample)break
    let ok=true
-   for(let i=D+p;i<D+sample;i++)if(((data[i]-data[i-D])&255)!==((data[i-p]-data[i-p-D])&255)){ok=false;break}
+   for(let i=p;i<256;i++)if(d0[i]!==d0[i-p]){ok=false;break}
    if(ok){P=p;break}
   }
-  if(!P)continue
+  if(!P)return null
   const table=new Uint8Array(P)
   for(let i=0;i<P;i++)table[i]=(data[D+i]-data[i])&255
-  let ok=true
-  for(let i=D;i<n;i++)if(data[i]!==((data[i-D]+table[i%P])&255)){ok=false;break}
-  if(!ok)continue
+  for(let i=D;i<n;i++)if(data[i]!==((data[i-D]+table[i%P])&255))return null
   const out=new Uint8Array(5+D+P)
   out[0]=D&255;out[1]=D>>>8&255;out[2]=D>>>16&255;out[3]=D>>>24&255
   out[4]=P&255
   out.set(data.subarray(0,D),5);out.set(table,5+D)
   return out
+ }
+ for(let k=8;k<=22;k++){const r=tryD(1<<k);if(r)return r}
+ // Arbitrary integer D: the lag-1 delta of a P-periodic byte recurrence is itself
+ // periodic, so its primitive period p0 divides (or is a multiple of) the true P.
+ // Search D = k*p0; this finds non-dyadic integer lags exactly without O(n^2).
+ const m=Math.min(8192,n-1),d1=new Uint8Array(m)
+ for(let i=0;i<m;i++)d1[i]=(data[i+1]-data[i])&255
+ let p0=0
+ for(let p=1;p<=256;p++){
+  let ok=true
+  for(let i=p;i<m;i++)if(d1[i]!==d1[i-p]){ok=false;break}
+  if(ok){p0=p;break}
+ }
+ if(p0){
+  for(let D=p0;D<n/2;D+=p0){
+   const r=tryD(D);if(r)return r
+  }
  }
  return null
 }

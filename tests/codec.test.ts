@@ -703,6 +703,16 @@ testP180Sym2bit(); testP180Sym5bit(); await testP180Planner()
   assert.deepEqual(decompress(consecutivePacked.container),consecutiveFill)
   assert.equal(decompress(consecutivePacked.container).length,consecutiveFill.length)
   assert.ok(consecutivePacked.container.length <= 27, 'low-cardinality fill plan must not regress')
+
+  // P22.3: arbitrary non-dyadic lag with a small periodic byte delta.
+  const lagN = 60000, lagD = 10000
+  const lagData = new Uint8Array(lagN)
+  for (let i = 0; i < lagD; i++) lagData[i] = (i * 131 + 17) & 255
+  for (let i = lagD; i < lagN; i++) lagData[i] = (lagData[i - lagD] + ((i % 16) * 31 + 7)) & 255
+  const lagPacked = await compressAdaptive(lagData)
+  assert.equal(decompress(lagPacked.container).length, lagN)
+  assert.deepEqual(decompress(lagPacked.container), lagData)
+  assert.ok(lagPacked.container.length <= 10250, `arbitrary lag period plan should trigger (${lagPacked.container.length})`)
   // An executable-shaped input for the BCJ assertion. Two properties matter, and
   // the previous fixture had neither the second one nor the first:
   //  1) IRREGULAR instruction lengths. The old fixture wrote an E8 every 5 bytes
