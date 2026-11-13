@@ -354,6 +354,15 @@ export const HUGE_CM_MIN_BYTES = 8 * 1024 * 1024
  * 未压缩长度的单向下界，编码端用 `raw.length`、解码端用 `outLen`，两边必然一致，
  * 因此不新开协议位、不抬版本号，小流保持九上下文一字节不变。 */
 export const BIN_TEN_MIN_BYTES = 64 * 1024
+/**
+ * P25.0: a `bin` stream whose synchronized `emaErr` stays above this level is
+ * effectively incompressible (random lanes of P sit at ~16.3 K, while G peaks at
+ * 15.5 K, O at 11.8 K and H's sparse outliers at 16.6 K for a handful of bytes).
+ * Above the gate the sparse 3rd/4th-order contexts only spend mixer weight on
+ * noise, so they are muted; this also removed the 11th context's cold-start cost
+ * on P (272,702 -> 272,635 B).
+ */
+export const BIN_EMA_GATE = 15600
 export const modelTuning = { maxTableBits: 24, matchTableBits: 23, largeOnly: true }
 
 /** Raw text and WORD-PRE keep a2 by default; saved flags retain legacy off policies. */
@@ -987,7 +996,7 @@ class Model {
     this.buf = contextPeer?.buf ?? new Uint8Array(n + 1)
     const v3 = variant === 'v13' || isAPMKernel(variant)
     this.binTenOn = v3 && profile === 'bin' && variant === 'v20' && n >= BIN_TEN_MIN_BYTES
-    this.nctx = this.binTenOn ? 10
+    this.nctx = this.binTenOn ? 11
       : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
     this.useMatch = profile === 'text' || profile === 'bin'
     this.minLen = profile === 'text' && !v3 ? 5 : 4
@@ -1189,6 +1198,13 @@ class Model {
         // P24.6: the tenth slot is only spent on streams long enough to amortise its
         // cold start; `bin-stride4` keeps its own layout and never reaches here.
         if(this.binTenOn) H[9]=hh(b2,b4,this.g(6))
+        // P25.0: the eleventh slot is the quantized 3rd/6th/9th lag bundle — the
+        // 2 LSBs of `b3` are analog quantisation noise on the waveform lanes, so
+        // masking them lets the table learn the real trajectory; measured on
+        // G_lane1 -364 B, H_bcj -2,052 B, O_mid -1,524 B, O1_lane1 -1 B.
+        if(this.binTenOn) H[10]=hh(b3>>>2,this.g(6),this.g(9))
+        // P25.0: high-entropy gate — identical integer `emaErr` on both sides.
+        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0 }
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
         return
@@ -1549,6 +1565,10 @@ class Model {
         t2[b2 + 1] = y2 + ((target - y2) >> apm2Tuning.rate)
       }
     }
+    if (this.binTenOn) {
+      // P25.0: synchronized prediction-error accumulator for the high-entropy gate.
+      this.byteErr += y ? (4096 - (prOverride ?? this.pr)) : (prOverride ?? this.pr)
+    }
     if (this.vertTbl) {
       this.byteErr += y ? (4096 - (prOverride ?? this.pr)) : (prOverride ?? this.pr)
       const target = y ? 65535 : 0
@@ -1760,6 +1780,14 @@ class Model {
   symAepClean = false
   symAepCounts = new Int32Array(4)
   private byteUpdate(byte: number) {
+    if (this.binTenOn) {
+      // P25.0: encoder and decoder run the same integer math on the same (y, pr)
+      // stream, so `emaErr` is bit-identical on both sides and the gate is safe.
+      const gema = (globalThis as any).__EMA_PROBE
+      this.emaErr = this.emaErr - (this.emaErr >> 5) + (this.byteErr >> 5)
+      if (gema) (gema as number[]).push(this.emaErr)
+      this.byteErr = 0
+    }
     if (this.vertTbl) {
       // Identical integer math on both sides, so the gate below is synchronized.
       this.emaErr = this.emaErr - (this.emaErr >> 5) + (this.byteErr >> 5)

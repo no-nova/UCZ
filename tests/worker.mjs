@@ -24,7 +24,9 @@ try {
         })
         worker.postMessage({type:'run',data,...options}, [data.buffer])
       })
-      assert.ok(result.verified); assert.deepEqual(result.data, original)
+      assert.ok(result.verified)
+      { const a=result.data,b=original; assert.equal(a.length,b.length)
+        for(let i=0;i<a.length;i++) if(a[i]!==b[i]) assert.fail(`worker 第 ${i} 字节不同 ${a[i]} != ${b[i]}`) }
       assert.ok(messages.length > 0); assert.ok(heartbeats > 0)
       return {result, messages}
     } finally { clearInterval(timer); await worker.terminate() }

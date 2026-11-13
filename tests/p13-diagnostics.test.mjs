@@ -132,7 +132,9 @@ test('local target CLI reports nonacceptance with nonzero exit and never rewrite
     writeFileSync(join(dir,'xml.json'),'')
     r=run();assert.ifError(r.error);assert.equal(r.status,2)
     assert.match(r.stderr,/P13 target check failed/)
-    assert.deepEqual(readFileSync(baselinePath),baselineBytes)
+    { const a=readFileSync(baselinePath),b=Buffer.from(baselineBytes)
+      assert.equal(a.length,b.length)
+      for(let i=0;i<a.length;i++) if(a[i]!==b[i]) assert.fail(`baseline 第 ${i} 字节不同 ${a[i]} != ${b[i]}`) }
   } finally {rmSync(dir,{recursive:true,force:true})}
 })
 test('user-local wrapper has valid shell syntax; no full-file execution in this test',()=>{
