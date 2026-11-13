@@ -110,7 +110,7 @@ export function contextSpecAllowed(context: CMContext, sp: Spec, wordPre = false
   // P17.7: the line/field column predictors run the same `text` CM on the same
   // raw text stream as text-sparse5 — they substitute three of that model's nine
   // contexts, so the eligibility rule is identical (no WORD-PRE dictionary).
-  if (context === 'text-linecol' || context === 'text-lexcol' || context === 'text-tabcol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
+  if (context === 'text-linecol' || context === 'text-lexcol' || context === 'text-tabcol' || context === 'text-vertcol') return !wordPre && ([ID.TEXT, ID.TEXT_V2, ID.TEXT_V3] as number[]).includes(sp.id) && sp.s === 1 && sp.r === 1
   // P18.0: universal low-cardinality symbol modes. Same `text` CM on the same raw
   // bytes (no WORD-PRE dictionary); the cardinality check itself is done by the
   // screen from the actual data, so wire legality only needs the rule shape.
@@ -1265,7 +1265,7 @@ export function encodeTerrainGroup(parts: Uint8Array[], sp: Spec, cost?: Float32
         return markPayloadModel(p,payloadModelFlags(p)|V21_FLAG_CONTEXTS)
       }
       if(options?.context==='wide-geom') { checkWide(sp,parts.map(p=>p.length));return encodeWide16(parts,sp,cost,blockCost,onProgress,kernel,options) }
-      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol'||options?.context==='sym-2bit'||options?.context==='sym-5bit'||options?.context==='sym-5bit-gap')
+      if(options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol'||options?.context==='text-vertcol'||options?.context==='sym-2bit'||options?.context==='sym-5bit'||options?.context==='sym-5bit-gap')
         return encodeCM(joinContextBin(parts),'text',1,1,cost,0,blockCost,onProgress,kernel,0,options.context==='wp-token3',options)
       if(options?.context==='bin-stride4' && sp.id===ID.TRANSPOSE_GROUP_V3) return encodeGroupedTranspose(parts,sp.s,blockCost ?? (cost ? {values:cost,blockSize:1} : undefined),onProgress,true,undefined,'v20',options)
       if(options?.context==='bin-stride4') {
@@ -1311,7 +1311,7 @@ export function decodeTerrainGroup(payload: Uint8Array, lengths: number[], sp: S
         return lengths.map(len=>{const p=joined.subarray(at,at+len);at+=len;return sp.id===ID.GRAD_V3?medInv(p,sp.s,sp.r):deltaInv(p,sp.s)})
       }
       if(options?.context==='wide-geom') {checkWide(sp,lengths);return decodeWide16(payload,lengths,sp,onProgress,kernel,options)}
-      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol'||options?.context==='sym-2bit'||options?.context==='sym-5bit'||options?.context==='sym-5bit-gap') && !wordPre) {
+      if((options?.context==='text-sparse5'||options?.context==='wp-token3'||options?.context==='text-linecol'||options?.context==='text-lexcol'||options?.context==='text-tabcol'||options?.context==='text-vertcol'||options?.context==='sym-2bit'||options?.context==='sym-5bit'||options?.context==='sym-5bit-gap') && !wordPre) {
         const joined=decodeCM(payload,lengths.reduce((a,b)=>a+b,0),'text',1,1,onProgress,kernel,0,options.context==='wp-token3',options)
         let p=0;return lengths.map(n=>{const part=joined.subarray(p,p+n);p+=n;return part})
       }
@@ -4809,6 +4809,11 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     let modes:CMContext[]=rawText && contextSpecAllowed('text-linecol',spec)?['text-linecol','text-lexcol','text-tabcol','wp-token3']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
+    // P24: the vertical-predictor layout (`text-vertcol`) is the same nine-context
+    // `text` model plus two gated column inputs, so it is legal exactly where the
+    // other column layouts are. It is offered only for groups large enough to pay
+    // for its 192 KiB sample trial; below that the probe cannot resolve it.
+    if(modes.length&&rawText&&rawBytes>=CONTEXT_SCREEN_MIN_BYTES&&contextSpecAllowed('text-vertcol',spec)) modes.push('text-vertcol')
     if(modes.length&&rawText&&rawBytes>=CONTEXT_MIN_BYTES){
       // P18.0: universal low-cardinality symbol screening. K comes from the data.
       let k=0
@@ -4951,8 +4956,12 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
       // widens to 0.8% and up to four distinct contexts are priced on the full group.
       // Every promotion is still gated by the complete-container comparison.
       if(pick) {
+        // P24: with five raw-text candidates the pool grows by one so the previous
+        // winner is always still priced on the full group; the complete-container
+        // gate, not the pool size, decides adoption.
+        const promoteCap=rawText&&modes.includes('text-vertcol')?5:4
         for(const t of positive) {
-          if(modes.length>=4) break
+          if(modes.length>=promoteCap) break
           if(t.bytes<=pick.bytes*1.008 && !modes.includes(t.context)) modes.push(t.context)
         }
       }

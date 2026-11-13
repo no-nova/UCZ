@@ -888,6 +888,12 @@ class Model {
   /** Shift masks of recent line/field matches (low bit = most recent byte). */
   lineEqMask = 0xff
   fieldEqMask = 0xff
+  // ---- P24 'text-vertcol' vertical predictor -------------------------------
+  /** Learned P(next bit | previous-row/line byte, MSB-first prefix), 2 x 65536. */
+  vertTbl?: Uint32Array
+  /** Active table indices for this bit (-1 = predictor gated off). */
+  vertIdx = -1
+  vertIdx2 = -1
   /** Non-P7 features actually used by this stream (not the global policy). */
   requiredFlags = 0
   geometry: CMTableShape
@@ -902,7 +908,7 @@ class Model {
         || (this.context === 'bin-stride4' && (profile !== 'bin' || wordTokens))
         || (this.context === 'wide-geom' && (profile !== 'res2d' || geomStride <= 0 || wordTokens))
         || (this.context === 'text-sparse5' && (profile !== 'text' || geomStride !== 0 || wordTokens))
-        || ((this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') && (profile !== 'text' || geomStride !== 0 || wordTokens))
+        || ((this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || this.context === 'text-vertcol') && (profile !== 'text' || geomStride !== 0 || wordTokens))
         || ((this.context === 'wp-token3' || this.context === 'wp-merge') && (profile !== 'text' || !wordTokens || geomStride !== 0)))
         throw Error('无效的 v21 CM 上下文 / profile / 格式标志')
       this.requiredFlags |= V21_FLAG_CONTEXTS
@@ -932,10 +938,11 @@ class Model {
     this.geomStride = geomStride
     // WORD-PRE 词元只对 v15 内核有意义：v13/v2 的比特流必须一字节不变。
     this.wordTokens = wordTokens && isAPMKernel(variant)
-    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') {
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || this.context === 'text-vertcol') {
       this.lineColBytes = new Uint8Array(256)
       this.fieldColBytes = new Uint8Array(8 * 64)
     }
+    if (this.context === 'text-vertcol') this.vertTbl = new Uint32Array(2 * 65536).fill(32768 << 16)
     this.profile = profile
     this.s = Math.max(1, s)
     this.r = Math.max(1, r)
@@ -1001,7 +1008,7 @@ class Model {
       this.tables.push(contextPeer && i < 8 ? contextPeer.tables[i] : new Uint32Array(1 << bits).fill(32768 << 16))
     }
     this.limit = profile === 'text' || profile === 'bin' ? 80 : 250
-    this.ninputs = this.nctx + 2
+    this.ninputs = this.nctx + (this.vertTbl ? 4 : 2)
     const primaryGroups = this.isV20 ? 32 : 24 // 8 bits × 4 (or legacy 3) match states
     this.weights = new Int32Array(primaryGroups * this.ninputs)
     this.altWeights = new Int32Array(primaryGroups * this.ninputs)
@@ -1144,7 +1151,7 @@ class Model {
         return
       }
       if(this.profile === 'text') {
-        if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') {
+        if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || this.context === 'text-vertcol') {
           // P17.8: `text-lexcol` is the source-code variant of the column model. It
           // keeps BOTH word slots (`word0 = hh(curWord,b1)` and the word bigram) and
           // spends the remaining two slots on the field/line hashes. `text-linecol`
@@ -1180,7 +1187,7 @@ class Model {
             ? mix32((prevL | (this.lineCol << 8) | (this.lineEqMask << 16) | (b1 << 24)) | 0)
             : hh(this.prevWord, this.curWord || b1)
           H[5] = hh(this.curWord, b1)
-          H[6] = this.context === 'text-tabcol' ? lineCond : hh(this.prevWord, this.curWord || b1)
+          H[6] = this.context === 'text-tabcol' || this.context === 'text-vertcol' ? lineCond : hh(this.prevWord, this.curWord || b1)
           H[7] = fieldHash
           H[8] = lineHash
           return
@@ -1341,7 +1348,23 @@ class Model {
         inputs[nctx] = 0
         if (this.symProt && this.symAepN > 1000000 && this.mlen > 0) ms = 4
       }
-      inputs[nctx + 1] = 256
+      const biasIdx = this.vertTbl ? nctx + 3 : nctx + 1
+      inputs[biasIdx] = 256
+      if (this.vertTbl) {
+        // P24 vertical column predictor. `c0` is (1 << bit) | (prefix bits), so a
+        // previous byte `p` has coded exactly the same MSB-first prefix iff
+        // c0 === (1 << bit) | (p >>> (8 - bit)) (at bit 0 both sides equal 1).
+        const vc0 = c0, vbit = bit
+        const fPos = (this.fieldIdx << 6) | this.fieldCol
+        const pf = this.fieldColBytes[fPos]
+        const pl = this.lineColBytes[this.lineCol]
+        // Gated: a predictor only contributes while the byte it comes from has coded
+        // exactly the same MSB-first prefix the mixer is now predicting.
+        const okF = pf !== 0 && vc0 === ((1 << vbit) | (pf >>> (8 - vbit)))
+        const okL = pl !== 0 && vc0 === ((1 << vbit) | (pl >>> (8 - vbit)))
+        if (okF) { const k = (pf << 8) | vc0; this.vertIdx = k; inputs[nctx + 1] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 1] = 0
+        if (okL) { const k = 65536 + ((pl << 8) | vc0); this.vertIdx2 = k; inputs[nctx + 2] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 2] = 0
+      }
       this.lastPrimaryMs = ms
       wbase = (bit * (this.symProt && this.symAepN > 1000000 ? 5 : this.isV20 ? 4 : 3) + ms) * N
       if (this.symDna && this.symAepClean) wbase = ((bit * 4 + ms) * 2 + (mIdx >= 0 && this.symMMc === 0 ? 1 : 0)) * N
@@ -1469,6 +1492,14 @@ class Model {
         const y2 = t2[b2 + 1]
         t2[b2 + 1] = y2 + ((target - y2) >> apm2Tuning.rate)
       }
+    }
+    if (this.vertTbl) {
+      const target = y ? 65535 : 0
+      const lim = this.limit, t = this.vertTbl
+      const k1 = this.vertIdx, k2 = this.vertIdx2
+      if (k1 >= 0) { const e = t[k1], p = e >>> 16, n = e & 255; t[k1] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < lim ? n + 1 : n) }
+      if (k2 >= 0) { const e = t[k2], p = e >>> 16, n = e & 255; t[k2] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < lim ? n + 1 : n) }
+      this.vertIdx = -1; this.vertIdx2 = -1
     }
     const mi = this.mIdx
     if (mi >= 0 && !this.contextPeer) {
@@ -1692,7 +1723,7 @@ class Model {
       this.symKm10 = ((this.symKm10 << 2) | r) & 0xfffff
       for (let o = 1; o <= 15; o++) this.symK[o] = ((this.symK[o] << 2) | r) & (o === 15 ? 0x3fffffff : (1 << (2 * o)) - 1)
     }
-    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol') this.updateLineCol(byte)
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || this.context === 'text-vertcol') this.updateLineCol(byte)
     if (this.profile === 'text' && this.variant) {
       const lower = byte | 32
       const asciiLetter = lower >= 97 && lower <= 122

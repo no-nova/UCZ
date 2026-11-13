@@ -13,6 +13,7 @@ import { testP177TransposeFlags, testP177Coalesce, testP177LineCol, testP177Pock
 import { testP178TextContexts, testP178Pockets, testP178BcjCoalesce } from './p178.test'
 import { testP179TextContexts, testP179GroupCodecs } from './p179.test'
 import { testP180Sym2bit, testP180Sym5bit, testP180Planner } from './p180.test'
+import { testP243VerticalColumns } from './p24.test'
 import { MAX_INPUT_BYTES, MAX_SINGLE_CM_BYTES, MAX_OUTPUT_BYTES, shouldRunSingleCM } from '../src/lib/limits'
 import v12Fixtures from './v12-fixtures.json'
 import { compressAdaptive, decompress, evaluatePlan, decodeSpec, encodeSpec, encodeTerrainGroup, decodeTerrainGroup, singleModelSize, sampleWindow, sampleWindows, candidatesFor, inspectPeel, groupV15CandidatesSync, planTuning, ID } from '../src/lib/codec'
@@ -63,6 +64,7 @@ async function test() {
   testP178TextContexts(); await testP178Pockets(); await testP178BcjCoalesce()
   testP179TextContexts(); await testP179GroupCodecs()
 testP180Sym2bit(); testP180Sym5bit(); await testP180Planner()
+testP243VerticalColumns()
   let seed = 123456789
   const rand = () => { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return seed >>> 0 }
   // Isolated v13-based match experiment: all three modes must be symmetric;
