@@ -833,6 +833,7 @@ function groupDelta(input: Uint8Array, lengths: number[], span: number, inverse:
   return out
 }
 function encodeGroupData(input: Uint8Array, mode: number, lengths: number[], span: number, onProgress?: (done: number, total: number) => void, v13 = false, v15: boolean | 'v20' = false, reverse = false, options?:CMOptions): Uint8Array {
+  if ((globalThis as any).__DUMP_O0 && (mode === ID.O0 || mode === ID.STORE || mode === ID.BIN) && input.length > 60000) { const d=(globalThis as any).__DUMP_O0; (d.list as any[]).push({ mode, n: input.length, data: input.slice() }) }
   const k: CMVariant = v15==='v20' ? 'v20' : v15 ? 'v15' : v13 ? 'v13' : false
   if (mode === TG_LE32 || mode === TG_LE64) {
     if (!v13 || !transformsV20Enabled() || span !== (mode===TG_LE32 ? 4 : 8)) throw Error('无效 v20 转置差分')

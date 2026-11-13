@@ -371,6 +371,12 @@ export const BIN_EMA_GATE = 15600
 export const BIN_TWELVE_MIN_BYTES = 256 * 1024
 /** P25.2: the tenth `text-vertcol` slot only pays for itself past this length. */
 export const TEXT_COL_WORD_MIN_BYTES = 64 * 1024
+
+/** P25.3: 2-bit character-class history (digit/upper/lower/other) as a shape template. */
+function charShapeMask(b1: number, b2: number, b3: number, b4: number, g5: number, g6: number): number {
+  const cls = (b: number): number => (b >= 48 && b <= 57 ? 1 : b >= 65 && b <= 90 ? 2 : b >= 97 && b <= 122 ? 3 : 0)
+  return cls(b1) | (cls(b2) << 2) | (cls(b3) << 4) | (cls(b4) << 6) | (cls(g5) << 8) | (cls(g6) << 10)
+}
 export const modelTuning = { maxTableBits: 24, matchTableBits: 23, largeOnly: true }
 
 /** Raw text and WORD-PRE keep a2 by default; saved flags retain legacy off policies. */
@@ -1014,7 +1020,9 @@ class Model {
       : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
     // P25.2: `text-vertcol` spends a tenth slot on the word/column triple once the
     // stream is long enough. The counter stays the same nine-slot ladder otherwise.
-    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 10
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 12
+
+    if ((globalThis as any).__HIN && profile === 'bin' && variant === 'v20' && n >= 65536) this.nctx = Math.max(this.nctx, (globalThis as any).__HIN as number)
     this.useMatch = profile === 'text' || profile === 'bin'
     this.minLen = profile === 'text' && !v3 ? 5 : 4
     // P9-2：表宽走 cmTableBits()，编码端与解码端共用同一个公式与同一个上限。
@@ -1286,6 +1294,15 @@ class Model {
           // variant gained on B but cost 70-190 B on C/K, and the 6-char template lost
           // on all three. Frozen (high-entropy) bytes keep the slot dark, like vertTbl.
           if (this.context === 'text-vertcol' && this.nctx > 9) H[9] = this.emaErr > vertTuning.thr ? 0 : hh(this.curWord ^ b1, this.prevWord, this.fieldIdx & 0xff)
+          // P25.3: char-shape template (11th) and word trigram (12th). The shape mask
+          // collapses every date/number/identifier of the same format into one context
+          // (C -2,388 B, K -3,272 B, B -525 B); the trigram adds the second word of
+          // history (another -208 B, and -195 B on top of the shape slot).
+          if (this.context === 'text-vertcol' && this.nctx > 10) {
+            const frz = this.emaErr > vertTuning.thr
+            H[10] = frz ? 0 : hh(charShapeMask(b1,b2,b3,b4,this.g(5),this.g(6)), b1, this.fieldIdx & 0xff)
+            if (this.nctx > 11) H[11] = frz ? 0 : hh(this.curWord ^ b1, this.prevWord, this.pwh ^ (this.fieldIdx & 0xff))
+          }
           return
         }
         if (this.symBits === 2 && this.symLadder) {
@@ -1444,7 +1461,7 @@ class Model {
         inputs[nctx] = 0
         if (this.symProt && this.symAepN > 1000000 && this.mlen > 0) ms = 4
       }
-      const biasIdx = this.vertTbl ? nctx + 3 : nctx + 1
+      const biasIdx = this.ninputs - 1
       inputs[biasIdx] = 256
       if (this.vertTbl) {
         // P24 vertical column predictor. `c0` is (1 << bit) | (prefix bits), so a
