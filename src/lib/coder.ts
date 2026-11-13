@@ -12,6 +12,27 @@ export type CMVariant = boolean | 'v13' | 'v15' | 'v20'
 export const isAPMKernel = (variant: CMVariant): variant is 'v15' | 'v20' => variant === 'v15' || variant === 'v20'
 /** v20 candidates are strictly compared against retained v15 streams. */
 export const cmV20Tuning = { enabled: true, binRecovery: true }
+/**
+ * P24.4 `text-vertcol` high-entropy handling. `emaErr` is an integer EMA of the
+ * mean bit-prediction error per byte, accumulated from `(y, pr)` — the two values
+ * encoder and decoder are guaranteed to share bit for bit — so every decision
+ * below is synchronized without any wire marker.
+ */
+export const vertTuning = {
+  /** Predicted-bit error per byte above which a stream counts as high entropy. */
+  thr: 13000,
+  /** Damp the final probability toward 2048 (random bits are unpredictable). */
+  damp: true,
+  /** Freeze the row/word tracker so random bytes cannot pollute real columns. */
+  freeze: true,
+  /**
+   * Feed both previous-row predictors on every bit. The table key already
+   * contains `c0`, so prefix-match and prefix-mismatch learn separate
+   * probabilities; the digit/character-class alignment of the row above stays
+   * useful after the MSB prefix diverges.
+   */
+  ungated: true,
+}
 /** P18.0 universal low-cardinality symbol modes (symbol-agnostic). */
 export type SymContext = 'sym-2bit' | 'sym-5bit' | 'sym-5bit-gap'
 export const isSymContext = (c?: string): c is SymContext => c === 'sym-2bit' || c === 'sym-5bit' || c === 'sym-5bit-gap'
@@ -894,6 +915,9 @@ class Model {
   /** Active table indices for this bit (-1 = predictor gated off). */
   vertIdx = -1
   vertIdx2 = -1
+  /** P24.4 synchronized prediction-error EMA (identical in encoder and decoder). */
+  byteErr = 0
+  emaErr = 0
   /** Non-P7 features actually used by this stream (not the global policy). */
   requiredFlags = 0
   geometry: CMTableShape
@@ -1358,12 +1382,17 @@ class Model {
         const fPos = (this.fieldIdx << 6) | this.fieldCol
         const pf = this.fieldColBytes[fPos]
         const pl = this.lineColBytes[this.lineCol]
-        // Gated: a predictor only contributes while the byte it comes from has coded
-        // exactly the same MSB-first prefix the mixer is now predicting.
+        // The key `(previous byte, c0)` already carries the prefix-match state:
+        // c0's low `bit` bits are the prefix just coded, so `prefixOk` is a
+        // deterministic function of the key. Feeding on every bit therefore lets
+        // the table learn separate probabilities for match and mismatch, which
+        // keeps the digit/character-class alignment signal of the row above alive
+        // after the MSB prefix diverges.
         const okF = pf !== 0 && vc0 === ((1 << vbit) | (pf >>> (8 - vbit)))
         const okL = pl !== 0 && vc0 === ((1 << vbit) | (pl >>> (8 - vbit)))
-        if (okF) { const k = (pf << 8) | vc0; this.vertIdx = k; inputs[nctx + 1] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 1] = 0
-        if (okL) { const k = 65536 + ((pl << 8) | vc0); this.vertIdx2 = k; inputs[nctx + 2] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 2] = 0
+        const ung = vertTuning.ungated
+        if (pf !== 0 && (ung || okF)) { const k = (pf << 8) | vc0; this.vertIdx = k; inputs[nctx + 1] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 1] = 0
+        if (pl !== 0 && (ung || okL)) { const k = 65536 + ((pl << 8) | vc0); this.vertIdx2 = k; inputs[nctx + 2] = STRETCH_l[(this.vertTbl[k] >>> 16) >>> 4] } else inputs[nctx + 2] = 0
       }
       this.lastPrimaryMs = ms
       wbase = (bit * (this.symProt && this.symAepN > 1000000 ? 5 : this.isV20 ? 4 : 3) + ms) * N
@@ -1425,6 +1454,13 @@ class Model {
           pr = r2.pr
         }
       } else pr = upr
+    }
+    if (this.vertTbl && vertTuning.damp && this.emaErr > vertTuning.thr) {
+      // High-entropy stream: the byte error EMA is computed with identical integer
+      // math on both sides, so damping the final probability is bit-synchronized.
+      pr += (2048 - pr) >> 4
+      if (pr < 1) pr = 1
+      else if (pr > 4095) pr = 4095
     }
     if (encode) {
       // 编码端：先把概率交回调用方做区间更新，再更新模型（顺序不影响结果）。
@@ -1494,6 +1530,7 @@ class Model {
       }
     }
     if (this.vertTbl) {
+      this.byteErr += y ? (4096 - (prOverride ?? this.pr)) : (prOverride ?? this.pr)
       const target = y ? 65535 : 0
       const lim = this.limit, t = this.vertTbl
       const k1 = this.vertIdx, k2 = this.vertIdx2
@@ -1702,6 +1739,11 @@ class Model {
   symAepClean = false
   symAepCounts = new Int32Array(4)
   private byteUpdate(byte: number) {
+    if (this.vertTbl) {
+      // Identical integer math on both sides, so the gate below is synchronized.
+      this.emaErr = this.emaErr - (this.emaErr >> 5) + (this.byteErr >> 5)
+      this.byteErr = 0
+    }
     if (this.symBits < 8) {
       const r = this.byteToSym![byte]
       if (this.symDna && !this.symAepDone) {
@@ -1723,8 +1765,12 @@ class Model {
       this.symKm10 = ((this.symKm10 << 2) | r) & 0xfffff
       for (let o = 1; o <= 15; o++) this.symK[o] = ((this.symK[o] << 2) | r) & (o === 15 ? 0x3fffffff : (1 << (2 * o)) - 1)
     }
-    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || this.context === 'text-vertcol') this.updateLineCol(byte)
-    if (this.profile === 'text' && this.variant) {
+    // P24.4: on a high-entropy run the row/word tracker is fed random bytes, which
+    // only pollutes the real column statistics. `emaErr` is synchronized, so both
+    // sides freeze on exactly the same byte.
+    const frozen = this.vertTbl !== undefined && vertTuning.freeze && this.emaErr > vertTuning.thr
+    if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || (this.context === 'text-vertcol' && !frozen)) this.updateLineCol(byte)
+    if (this.profile === 'text' && this.variant && !frozen) {
       const lower = byte | 32
       const asciiLetter = lower >= 97 && lower <= 122
       if (this.context === 'wp-merge' && (asciiLetter || byte >= 128)) {

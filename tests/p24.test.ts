@@ -69,3 +69,22 @@ export function testP243VerticalColumns() {
   assert.equal(container(data, spec3, md, { context: 'text-vertcol', matchDist: true })[3], 22, 'matchDist bumps the container to version 22')
   console.log('P24.3 text-vertcol wire legality, gated vertical predictors and roundtrip PASS')
 }
+
+/** P24.4: `text-vertcol` runs an integer prediction-error EMA that the encoder
+ *  and decoder both compute from `(y, pr)`, and above `vertTuning.thr` it damps
+ *  the final probability and freezes the row/word tracker. A stream that mixes
+ *  real columnar text with an incompressible block exercises both branches; the
+ *  only thing that matters is that the two sides never disagree. */
+export function testP244SyncHighEntropy() {
+  const text = columnarText(65536)
+  const noise = new Uint8Array(8192)
+  let v = 0x9e3779b9
+  for (let i = 0; i < noise.length; i++) { v = (Math.imul(v, 1664525) + 1013904223) >>> 0; noise[i] = v >>> 24 }
+  const data = new Uint8Array(text.length + noise.length)
+  data.set(text.subarray(0, 32768)); data.set(noise, 32768); data.set(text.subarray(32768), 32768 + noise.length)
+  const payload = encodeTerrainGroup([data], spec3, undefined, undefined, undefined, [0], 'v20', { context: 'text-vertcol' })
+  const flags = payloadModelFlags(payload)
+  eq(inContainer(flags, () => decodeTerrainGroup(payload, [data.length], spec3, undefined, [0], 'v20', false, { context: 'text-vertcol' }))[0], data)
+  eq(decompress(container(data, spec3, payload, { context: 'text-vertcol' })), data)
+  console.log('P24.4 text-vertcol synchronized emaErr damping/freeze roundtrip PASS')
+}
