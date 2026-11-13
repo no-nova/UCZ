@@ -373,6 +373,17 @@ export const BIN_TWELVE_MIN_BYTES = 256 * 1024
 export const TEXT_COL_WORD_MIN_BYTES = 64 * 1024
 
 /** P25.3: 2-bit character-class history (digit/upper/lower/other) as a shape template. */
+export const BIN_QUAD_ON = true
+function shapeMask8(b1:number,b2:number,b3:number,b4:number,g5:number,g6:number,g7:number,g8:number) {
+  return charShapeMask(b1,b2,b3,b4,g5,g6) | (charClass2(g7) << 12) | (charClass2(g8) << 14)
+}
+function charClass2(x:number) { return x>=48&&x<=57 ? 1 : x>=65&&x<=90 ? 2 : x>=97&&x<=122 ? 3 : 0 }
+function fineShapeMask(b1:number,b2:number,b3:number,b4:number,g5:number,g6:number) {
+  return charClass3(b1) | (charClass3(b2) << 3) | (charClass3(b3) << 6) | (charClass3(b4) << 9) | (charClass3(g5) << 12) | (charClass3(g6) << 15)
+}
+function charClass3(x:number) {
+  return x>=48&&x<=57 ? 1 : x>=65&&x<=90 ? 2 : x>=97&&x<=122 ? 3 : (x===32||x===9) ? 4 : (x===10||x===13) ? 5 : (x===46||x===44||x===58||x===59) ? 6 : (x===45||x===43||x===47||x===95) ? 7 : 0
+}
 function charShapeMask(b1: number, b2: number, b3: number, b4: number, g5: number, g6: number): number {
   const cls = (b: number): number => (b >= 48 && b <= 57 ? 1 : b >= 65 && b <= 90 ? 2 : b >= 97 && b <= 122 ? 3 : 0)
   return cls(b1) | (cls(b2) << 2) | (cls(b3) << 4) | (cls(b4) << 6) | (cls(g5) << 8) | (cls(g6) << 10)
@@ -826,9 +837,9 @@ class Model {
   get tblFrozen(): boolean { return vertTuning.freezeTbl && this.emaErr > vertTuning.thr }
   get dampShift(): number { return this.emaErr > vertTuning.thr2 ? 3 : 4 }
   shift: number
-  hashes = new Int32Array(16)
-  idx = new Int32Array(16)
-  inputs = new Int32Array(16)
+  hashes = new Int32Array(20)
+  idx = new Int32Array(20)
+  inputs = new Int32Array(20)
   // 每个上下文一张 32 位表：高 16 位是概率，低 8 位是更新计数。
   // 原实现用 Uint16Array + Uint8Array 两张表，同一槽位要两次随机访存；
   // 合并成一次读改写后，每比特的高延迟访存次数从 2·nctx 降到 nctx。
@@ -1076,6 +1087,8 @@ class Model {
     else if (bits > 22) this.requiredFlags |= CM_FLAG_TABLE_23
     else if (bits > 21) this.requiredFlags |= CM_FLAG_BIG_TABLE
     this.shift = 32 - bits
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
+    if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
       // 初值：概率 32768（居中），计数 0。
@@ -1244,6 +1257,10 @@ class Model {
         // but lost 100-366 B on `G`/`O`): G_lane1 -111 B, H_bcj -640 B,
         // O1_lane1 -47 B, O_mid -146 B, P_seg0_lane0 0 B.
         if(this.binLadderOn) H[12]=hh(b1>>>3,b2>>>3,b3>>>3,b4>>>3)
+        // P25.4: the even-stride quad with 5-bit quantization. P25.2's exact 32-bit key
+        // gained 831 B on H_bcj but lost 114 B on G_lane1's noisy LSBs; shifting every
+        // sample by 3 removes that noise and flips G to a gain as well.
+        if(this.nctx>13) H[13]=hh(b2>>>3,b4>>>3,this.g(6)>>>3,this.g(8)>>>3)
         if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0 } }
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
@@ -1302,6 +1319,11 @@ class Model {
             const frz = this.emaErr > vertTuning.thr
             H[10] = frz ? 0 : hh(charShapeMask(b1,b2,b3,b4,this.g(5),this.g(6)), b1, this.fieldIdx & 0xff)
             if (this.nctx > 11) H[11] = frz ? 0 : hh(this.curWord ^ b1, this.prevWord, this.pwh ^ (this.fieldIdx & 0xff))
+            // P25.4: 3-bit syntax shape (13th) and 8-byte coarse shape (14th). The 3-bit
+            // classes finally separate `12.34` from `12\t34` from `12-34`, which the 2-bit
+            // mask could not; the 8-byte mask is the same idea at twice the reach.
+            if (this.nctx > 12) H[12] = frz ? 0 : hh(fineShapeMask(b1,b2,b3,b4,this.g(5),this.g(6)), (b1 << 8) | b2, this.fieldIdx & 0xff)
+            if (this.nctx > 13) H[13] = frz ? 0 : hh(shapeMask8(b1,b2,b3,b4,this.g(5),this.g(6),this.g(7),this.g(8)), this.fieldIdx & 0xff, this.fieldCol & 0xff)
           }
           return
         }
