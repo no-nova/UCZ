@@ -349,6 +349,11 @@ function a2Eligible(profile: Profile, wordTokens = false): boolean {
 export const LARGE_CM_MIN_BYTES = 512 * 1024
 export const JUMBO_CM_MIN_BYTES = 4 * 1024 * 1024
 export const HUGE_CM_MIN_BYTES = 8 * 1024 * 1024
+/** P24.6：`bin` 的第三个上下文 `H[9] = hh(b2,b4,g(6))` 是 24 位稀疏哈希，
+ * 冷启动要摊销一张新表，按 MDL 只有过半百 KiB 的流才回本。门槛是
+ * 未压缩长度的单向下界，编码端用 `raw.length`、解码端用 `outLen`，两边必然一致，
+ * 因此不新开协议位、不抬版本号，小流保持九上下文一字节不变。 */
+export const BIN_TEN_MIN_BYTES = 64 * 1024
 export const modelTuning = { maxTableBits: 24, matchTableBits: 23, largeOnly: true }
 
 /** Raw text and WORD-PRE keep a2 by default; saved flags retain legacy off policies. */
@@ -883,6 +888,8 @@ class Model {
   isV15 = false
   isV20 = false
   gapRecovery = false
+  /** v20 `bin` 且流长达到 `BIN_TEN_MIN_BYTES`：启用第十个上下文。 */
+  binTenOn = false
   lastPrimaryMs = 0
   /** 双流模式：step() 额外算一遍 v13 权重，learn() 分别更新两套权重。 */
   dualPass = false
@@ -979,7 +986,9 @@ class Model {
     this.r = Math.max(1, r)
     this.buf = contextPeer?.buf ?? new Uint8Array(n + 1)
     const v3 = variant === 'v13' || isAPMKernel(variant)
-    this.nctx = v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
+    this.binTenOn = v3 && profile === 'bin' && variant === 'v20' && n >= BIN_TEN_MIN_BYTES
+    this.nctx = this.binTenOn ? 10
+      : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
     this.useMatch = profile === 'text' || profile === 'bin'
     this.minLen = profile === 'text' && !v3 ? 5 : 4
     // P9-2：表宽走 cmTableBits()，编码端与解码端共用同一个公式与同一个上限。
@@ -1177,6 +1186,9 @@ class Model {
             ? hh((b1<<10)^(b2<<2)^(this.pos&3), b4, this.g(8))
             : hh((b1<<10)^(b2<<2)^(this.pos&3), b4, this.g(5))
         }
+        // P24.6: the tenth slot is only spent on streams long enough to amortise its
+        // cold start; `bin-stride4` keeps its own layout and never reaches here.
+        if(this.binTenOn) H[9]=hh(b2,b4,this.g(6))
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
         return

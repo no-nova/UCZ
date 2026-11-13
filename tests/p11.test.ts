@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { createHash } from 'node:crypto'
 import {
   modelTuning, cmTableShape, withCMBlockSize, withCMProbe, withContainerModel,
@@ -12,7 +13,7 @@ import { payloadModelFlags } from '../src/lib/payload-model'
 import { runParallelJobs, closePool } from '../src/lib/parallel-pool'
 import { encodeGroupForJob } from '../src/lib/codec-jobs'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 const sha = (x: Uint8Array) => createHash('sha256').update(x).digest('hex')
 const MiB = 1024 * 1024
 const part = (start: number, end: number, id: number, s = 1): PlanSegment =>
@@ -28,18 +29,18 @@ export async function testP11() {
   const saved = { hook: attribHook, model: { ...modelTuning }, threads: process.env.UCZ_THREADS, parallel: { ...parallelReport } }
   let checks = 0
   try {
-    assert.deepEqual(modelTuning, { maxTableBits: 24, matchTableBits: 23, largeOnly: true })
+    fastDeepEqual(modelTuning, { maxTableBits: 24, matchTableBits: 23, largeOnly: true })
     assert.equal(planTuning.orphanMaxCount, 64)
     const lengths = [512 * 1024 - 1, 512 * 1024, 4 * MiB - 1, 4 * MiB, 8 * MiB - 1, 8 * MiB]
     const shapes = lengths.map(n => cmTableShape(n))
-    assert.deepEqual(shapes.map(s => [s.cmBits, s.mht4Bits, s.mht8Bits]),
+    fastDeepEqual(shapes.map(s => [s.cmBits, s.mht4Bits, s.mht8Bits]),
       [[21,20,20],[22,20,21],[22,20,21],[23,20,22],[23,20,22],[24,20,23]])
     assert.equal(withCMBlockSize(8 * MiB - 1, () => cmTableShape(16 * MiB)).cmBits, 23)
     assert.equal(withCMBlockSize(8 * MiB, () => cmTableShape(0)).cmBits, 10)
     assert.equal(withContainerModel(18, 20, () => withCMBlockSize(16 * MiB, () => cmTableShape(128))).mht4Bits, 20)
     assert.equal(withContainerModel(18, 20, () => cmTableShape(16 * MiB)).cmBits, 23)
     const sao = withCMBlockSize(7251944, () => cmTableShape(258998))
-    assert.deepEqual([sao.cmBits, sao.mht4Bits, sao.mht8Bits], [23,20,22])
+    fastDeepEqual([sao.cmBits, sao.mht4Bits, sao.mht8Bits], [23,20,22])
     checks++
 
     // Probe caps override inherited group size, actual probe length and all
@@ -72,7 +73,7 @@ export async function testP11() {
     } })
     const raw = withCMBlockSize(8 * MiB, () => encodeCM(tiny, 'bin', 1, 1, undefined, 0, undefined, undefined, 'v15'))
     const rawFlags = payloadModelFlags(raw)
-    assert.deepEqual(allocation, [2 ** 24, 2 ** 20, 2 ** 23])
+    fastDeepEqual(allocation, [2 ** 24, 2 ** 20, 2 ** 23])
     assert.equal(rawFlags, V19_FLAG_TABLE_24 | V19_FLAG_MATCH_23 | V19_FLAG_MHT4_20)
     Object.assign(modelTuning, { maxTableBits: 21, matchTableBits: 20 })
     eq(withContainerModel(19, rawFlags, () => withCMBlockSize(8 * MiB,
@@ -127,7 +128,7 @@ export async function testP11() {
     assert.ok(warm.macroComparison!.baselineBytes - warm.container.length >= 1,
       'macro must still be accepted by a real byte win')
     eq(cold.container, warm.container); eq(decompress(warm.container), data)
-    assert.deepEqual(warm.blockCost, cold.blockCost)
+    fastDeepEqual(warm.blockCost, cold.blockCost)
     assert.equal(JSON.stringify(picks), before)
     checks++
 
@@ -144,7 +145,7 @@ export async function testP11() {
       return replies
     }
     const parallel = await compressGuardedPlanForProbe(data,picks,{runJobs:runner})
-    eq(parallel.container,cold.container); assert.deepEqual(parallel.blockCost,cold.blockCost)
+    eq(parallel.container,cold.container); fastDeepEqual(parallel.blockCost,cold.blockCost)
     // This plan has exactly TWO non-FILL segments but ONE merged group boundary is
     // not created: BIN_V3(28672) + BIN_V2(4096) stay two segments in ONE group, so
     // `groupJobs` emits exactly one job. `worthParallelizing` additionally requires
@@ -164,11 +165,11 @@ export async function testP11() {
     const fullJob=encodeGroupForJob([tiny],bin,[0],[tiny.length])
     const partialJob=encodeGroupForJob([tiny],bin,[0],[tiny.length],true)
     assert.equal(partialJob.bytes.length,0);assert.equal(partialJob.cost.length,0)
-    assert.deepEqual(partialJob.cand,fullJob.cand)
+    fastDeepEqual(partialJob.cand,fullJob.cand)
     checks++
 
     const failed = await compressGuardedPlanForProbe(data,picks,{runJobs:async()=>{throw Error('P11 injected failure')}})
-    eq(failed.container,cold.container);assert.deepEqual(failed.blockCost,cold.blockCost)
+    eq(failed.container,cold.container);fastDeepEqual(failed.blockCost,cold.blockCost)
     assert.ok(failed.guardStats!.workerFallbacks>0)
     Object.assign(parallelReport,saved.parallel)
     checks++

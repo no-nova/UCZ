@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { createHash } from 'node:crypto'
 import { Worker } from 'node:worker_threads'
 import fixtures from './p7-v15-fixtures.json'
@@ -24,7 +25,7 @@ function wrap(raw: Uint8Array, spec: Spec, payload: Uint8Array, version: number,
   for (const v of [raw.length, 1, 1, spec.id, spec.s, spec.r | (v15 ? 0x8000 : 0), payload.length, raw.length]) put(v)
   return Uint8Array.from([...h, ...payload])
 }
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 export async function testP9Format() {
   const keepA2 = { ...a2Tuning }, keepModel = { ...modelTuning }
@@ -105,7 +106,7 @@ export async function testP9Format() {
     let bigPayload: Uint8Array
     try { bigPayload = encodeTerrainGroup([big], bin, undefined, undefined, undefined, [large.length], 'v15') }
     finally { setAttribHook(keepHook) }
-    assert.deepEqual(dimensions, [2 ** 22, 2 ** 20, 2 ** 21], 'P10/P11.1 keep mht4 at 20 bits')
+    fastDeepEqual(dimensions, [2 ** 22, 2 ** 20, 2 ** 21], 'P10/P11.1 keep mht4 at 20 bits')
     assert.equal(payloadModelFlags(smallPayload), 0)
     assert.equal(payloadModelFlags(bigPayload), 10) // v18 table22 | mht8=21; mht4 remains20
     const h = [85, 67, 90, 18, 10]
@@ -197,7 +198,7 @@ export async function testP9Format() {
         worker.once('message', r => { clearTimeout(timer); r.error ? reject(new Error(r.error)) : resolve(r) })
         worker.postMessage({ kind: 'encodeGroup', parts: [[0, raw.length]], spec: text, positions: [0], ends })
       })
-      assert.deepEqual(result, encodeGroupForJob([raw], text, [0], ends))
+      fastDeepEqual(result, encodeGroupForJob([raw], text, [0], ends))
       checks++
     } finally { await worker.terminate() }
     console.log(`P9 format tests passed (${checks} checks; frozen P7, v17 flags, scope, worker)`)

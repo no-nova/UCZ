@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import {
   ID, planHeader, encodeTerrainGroup, decodeTerrainGroup, decompress, compressAdaptive, compressGuardedPlanForProbe,
   contextGroupCandidatesSync, contextSpecAllowed, type PlanSegment, type Spec,
@@ -9,7 +10,7 @@ import {
 } from '../src/lib/coder'
 import { V21_FLAG_CONTEXTS } from '../src/lib/context-policy'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 /** Mirrors the container decoder's own version derivation, so a payload built by
  * `encodeTerrainGroup` can be handed straight to `decodeTerrainGroup` without a

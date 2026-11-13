@@ -1,4 +1,5 @@
 import assert from 'node:assert'
+import { fastDeepEqual } from './fast-equal'
 import {
   ID, encodeTerrainGroup, decodeTerrainGroup, planHeader, decompress, compressAdaptive,
   coalesceContiguousPlanSegments, candidatesFor, contextSpecAllowed, specLabel,
@@ -8,7 +9,7 @@ import { withContainerModel } from '../src/lib/coder'
 import { payloadModelFlags } from '../src/lib/payload-model'
 import { contextCodeOf, contextFromGroupBits, GROUP_CONTEXT_EXT_BIT } from '../src/lib/context-policy'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 function versionOf(flags: number): number {
   return flags & 0x8000 ? 22 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
@@ -93,7 +94,7 @@ export async function testP177Coalesce() {
   assert.equal(merged.segs.length, 1, 'four contiguous TEXT_V3 segments must coalesce into one')
   assert.equal(merged.segs[0].rawLen, 16384)
   assert.equal(merged.segs[0].compLen, 16384)
-  assert.deepEqual(merged.groups[0].members, [0])
+  fastDeepEqual(merged.groups[0].members, [0])
   assert.ok(merged.adopted)
   // A seam inside a non-concatenation-invariant rule is not free.
   const transpose = [{ start: 0, end: 2048, cls: 'binary', spec: { id: ID.TRANSPOSE, s: 2, r: 1 }, label: 't', rawLen: 2048, compLen: 2048, trials: [] },
@@ -110,7 +111,7 @@ export async function testP177Coalesce() {
 
 /** P17.7 direction 3: `text-linecol` must be a legal, wired, and winning context. */
 export function testP177LineCol() {
-  assert.deepEqual(contextCodeOf('text-linecol'), { code: 1, ext: true })
+  fastDeepEqual(contextCodeOf('text-linecol'), { code: 1, ext: true })
   assert.equal(contextFromGroupBits(GROUP_CONTEXT_EXT_BIT | (1 << 17)), 'text-linecol')
   assert.equal(contextFromGroupBits(5 << 17), 'text-sparse5')
   assert.equal(contextSpecAllowed('text-linecol', { id: ID.TEXT_V3, s: 1, r: 1 }, false), true)

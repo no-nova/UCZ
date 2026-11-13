@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { compressAdaptive, compressMacroPlanForProbe, decompress, ID, planTuning, specLabel, type Compressed, type PlanSegment, type Spec } from '../src/lib/codec'
 import { a2Tuning, modelTuning } from '../src/lib/coder'
 
 const spec = (id: number): Spec => ({ id, s: 1, r: 1 })
 const part = (start: number, end: number, id: number): PlanSegment => ({ start, end, cls: 'binary', spec: spec(id) })
-const bytesEqual = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const bytesEqual = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 function checkResult(result: Compressed, raw: Uint8Array) {
   bytesEqual(decompress(result.container), raw)
   assert.equal(result.overhead + result.segs.reduce((n, s) => n + s.compLen, 0), result.container.length)
@@ -50,8 +51,8 @@ export async function testP9Macro(options: { quick?: boolean } = {}) {
       assert.equal(m.baselineBytes - m.baselineHeaderBytes, 4)
       assert.equal(m.accepted, false)
       bytesEqual(guarded.container, base.container)
-      assert.deepEqual(guarded.segs, base.segs)
-      assert.deepEqual(guarded.blockCost, base.blockCost)
+      fastDeepEqual(guarded.segs, base.segs)
+      fastDeepEqual(guarded.blockCost, base.blockCost)
       assert.equal(JSON.stringify(picks), before, '原计划不能被候选覆盖')
       checkResult(guarded, tiny)
       // 以更差的 RLE 为原方案，取得同一份 BIN 候选并验证其内容，不只验证回退者。
@@ -103,7 +104,7 @@ export async function testP9Macro(options: { quick?: boolean } = {}) {
     const win = await compressMacroPlanForProbe(mixed, mixedPlan, spec(ID.BIN_V3))
     assert.equal(win.macroComparison!.accepted, true)
     assert.equal(JSON.stringify(mixedPlan), original)
-    assert.deepEqual(win.segs.filter(s => s.spec.id === ID.FILL).map(s => [s.start, s.end]), [[0, 257], [2049, 2302]])
+    fastDeepEqual(win.segs.filter(s => s.spec.id === ID.FILL).map(s => [s.start, s.end]), [[0, 257], [2049, 2302]])
     checkResult(win, mixed)
     checks++
 

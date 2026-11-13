@@ -1,4 +1,5 @@
 import test from 'node:test'
+import { fastDeepEqual } from './fast-equal'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -38,24 +39,24 @@ test('two files run concurrently, a third stays unread, duplicate names keep sep
   const ids = queue.add([1, 2, 3].map(n => ({ name: 'same.bin', size: 10, read: async () => { reads.push(n); return new Uint8Array(10).fill(n) } })))
   await flush()
   assert.equal(new Set(ids).size, 3)
-  assert.deepEqual(reads, [1, 2]); assert.equal(pending.length, 2)
+  fastDeepEqual(reads, [1, 2]); assert.equal(pending.length, 2)
   pending[1].job.resolve(output(pending[1].data, 5))
   await flush()
-  assert.deepEqual(reads, [1, 2, 3]); assert.equal(pending.length, 3)
-  assert.deepEqual(queue.getSnapshot().tasks.map(t => t.status), ['running', 'done', 'running'])
+  fastDeepEqual(reads, [1, 2, 3]); assert.equal(pending.length, 3)
+  fastDeepEqual(queue.getSnapshot().tasks.map(t => t.status), ['running', 'done', 'running'])
   pending[0].job.resolve(output(pending[0].data)); pending[2].job.resolve(output(pending[2].data))
   await flush()
-  assert.deepEqual(queue.getSnapshot().tasks.map(t => t.result?.data[0]), [1, 2, 3])
-  assert.deepEqual(completedTotals(queue.getSnapshot().tasks), { count: 3, inputBytes: 30, outputBytes: 19 })
+  fastDeepEqual(queue.getSnapshot().tasks.map(t => t.result?.data[0]), [1, 2, 3])
+  fastDeepEqual(completedTotals(queue.getSnapshot().tasks), { count: 3, inputBytes: 30, outputBytes: 19 })
 })
 
 test('one read failure or failed verification does not stop other files or inflate totals', async () => {
   const queue = new CompressionQueue(async data => output(data, 4, data[0] !== 2))
   queue.add([{ ...source('bad read'), read: async () => { throw new Error('读取失败') } }, source('bad verify', 2), source('good', 3)])
   await flush()
-  assert.deepEqual(queue.getSnapshot().tasks.map(t => t.status), ['error', 'error', 'done'])
+  fastDeepEqual(queue.getSnapshot().tasks.map(t => t.status), ['error', 'error', 'done'])
   assert.equal(queue.getSnapshot().tasks[1].result, undefined)
-  assert.deepEqual(completedTotals(queue.getSnapshot().tasks), { count: 1, inputBytes: 10, outputBytes: 4 })
+  fastDeepEqual(completedTotals(queue.getSnapshot().tasks), { count: 1, inputBytes: 10, outputBytes: 4 })
 })
 
 test('zero, oversized and invalid file sizes are rejected without reading or blocking valid files', async () => {
@@ -64,7 +65,7 @@ test('zero, oversized and invalid file sizes are rejected without reading or blo
   queue.add([0, MAX_INPUT_BYTES + 1, -1, NaN].map(size => ({ name: String(size), size, read: async () => { invalidReads++; return new Uint8Array() } })))
   queue.add([source('valid')]); await flush()
   assert.equal(invalidReads, 0); assert.equal(executions, 1)
-  assert.deepEqual(queue.getSnapshot().tasks.map(t => t.status), ['error', 'error', 'error', 'error', 'done'])
+  fastDeepEqual(queue.getSnapshot().tasks.map(t => t.status), ['error', 'error', 'error', 'error', 'done'])
 })
 
 test('a read-size mismatch never reaches the codec', async () => {
@@ -80,7 +81,7 @@ test('cancel during a pending read never starts its worker; the next file can st
   const [id] = queue.add([{ name: 'slow-read', size: 10, read: () => read.promise }, source('next', 2)])
   queue.cancel(id); await flush()
   read.resolve(new Uint8Array(10).fill(1)); await flush()
-  assert.deepEqual(executed, [2]); assert.deepEqual(queue.getSnapshot().tasks.map(t => t.status), ['cancelled', 'done'])
+  fastDeepEqual(executed, [2]); fastDeepEqual(queue.getSnapshot().tasks.map(t => t.status), ['cancelled', 'done'])
 })
 
 test('cancelled queued files are not read; cancel-all preserves completed output and settles active work', async () => {
@@ -94,7 +95,7 @@ test('cancelled queued files are not read; cancel-all preserves completed output
   const ids = queue.add([source('done', 1), source('active', 2), { ...source('queued'), read: async () => { unread = false; return new Uint8Array(10) } }])
   await flush(); queue.cancel(ids[2]); queue.cancelAll(); await flush()
   assert.equal(unread, true); assert.equal(aborted, true)
-  assert.deepEqual(queue.getSnapshot().tasks.map(t => t.status), ['done', 'cancelled', 'cancelled'])
+  fastDeepEqual(queue.getSnapshot().tasks.map(t => t.status), ['done', 'cancelled', 'cancelled'])
   assert.equal(completedTotals(queue.getSnapshot().tasks).count, 1)
 })
 
@@ -104,7 +105,7 @@ test('appending after cancel-all is not overwritten by an old completion; finish
   queue.add([source('old', 1)]); await flush()
   queue.cancelAll(); queue.add([source('new', 2)]); await flush()
   old.resolve(output(new Uint8Array(10).fill(1))); await flush()
-  assert.deepEqual(queue.getSnapshot().tasks.map(t => t.status), ['cancelled', 'done'])
+  fastDeepEqual(queue.getSnapshot().tasks.map(t => t.status), ['cancelled', 'done'])
   queue.clearFinished(); assert.equal(queue.getSnapshot().tasks.length, 0)
   queue.add([source('reuse', 3)]); await flush(); assert.equal(queue.getSnapshot().tasks[0].status, 'done')
 })
@@ -160,13 +161,13 @@ test('worker client supports separate compression/restore requests, transfers on
   assert.notEqual(worker.messages[0].message.data.buffer, view.buffer)
   worker.emit({ type: 'progress', msg: 'running', pct: 10 })
   worker.emit({ type: 'done', ...output(view) })
-  assert.equal((await result).verified, true); assert.deepEqual(values, [10]); assert.equal(worker.terminated, 1)
+  assert.equal((await result).verified, true); fastDeepEqual(values, [10]); assert.equal(worker.terminated, 1)
   assert.equal(worker.onmessage, null); assert.equal(worker.onerror, null)
   controller.abort(); assert.equal(worker.terminated, 1)
   const restoreWorker = new FakeWorker()
   const restored = callCodecWorker(() => restoreWorker.asWorker(), 'restore', new Uint8Array([1]), new AbortController().signal, () => {})
   restoreWorker.emit({ type: 'restored', data: new Uint8Array([5, 6]) })
-  assert.deepEqual(await restored, new Uint8Array([5, 6])); assert.equal(restoreWorker.terminated, 1)
+  fastDeepEqual(await restored, new Uint8Array([5, 6])); assert.equal(restoreWorker.terminated, 1)
 })
 
 test('worker cancellation rejects instead of leaving an unresolved promise and ignores late messages', async () => {

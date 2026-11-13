@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { Worker } from 'node:worker_threads'
 import { groupKernelSample, clearProbeWinners, GROUP_KERNEL_MIN_BYTES, GROUP_KERNEL_PROBE_BYTES } from '../src/lib/group-policy'
 import { ID, groupV15CandidatesSync, encodeTerrainGroup, planHeader, decompress, planTuning, compressCachedPlansForProbe, compressGuardedPlanForProbe, evaluatePlan, type PlanSegment } from '../src/lib/codec'
 import { encodeGroupForJob } from '../src/lib/codec-jobs'
 import { PARALLEL_WORKER_CODE } from '../src/lib/parallel-worker-code'
-const eq=(a:Uint8Array,b:Uint8Array)=>assert.deepEqual(Buffer.from(a),Buffer.from(b))
+const eq=(a:Uint8Array,b:Uint8Array)=>fastDeepEqual(Buffer.from(a),Buffer.from(b))
 function binary(n=GROUP_KERNEL_MIN_BYTES) {
   let seed=123456789
   const d=new Uint8Array(n)
@@ -16,10 +17,10 @@ function frame(data:Uint8Array,payload:Uint8Array,apm:boolean,spec={id:ID.BIN_V3
   const c=new Uint8Array(h.length+payload.length);c.set(h);c.set(payload,h.length);eq(decompress(c),data);return c
 }
 export function testPolicy() {
-  assert.deepEqual(clearProbeWinners([100000,100151]),[0])
-  assert.deepEqual(clearProbeWinners([100000,100150]),[0,1])
-  assert.deepEqual(clearProbeWinners([100,100,null,NaN,Infinity,-1,0]),[0,1])
-  assert.deepEqual(clearProbeWinners([null,9]),[1])
+  fastDeepEqual(clearProbeWinners([100000,100151]),[0])
+  fastDeepEqual(clearProbeWinners([100000,100150]),[0,1])
+  fastDeepEqual(clearProbeWinners([100,100,null,NaN,Infinity,-1,0]),[0,1])
+  fastDeepEqual(clearProbeWinners([null,9]),[1])
   const data=Uint8Array.from({length:512*1024},(_,i)=>i%251)
   const parts=[data.subarray(0,110003),data.subarray(110003,300004),data.subarray(300004)]
   const positions=[37,2000037,9000037],sample=groupKernelSample(parts,positions,4)
@@ -31,7 +32,7 @@ export function testPolicy() {
     assert.equal(offset%4,0);assert.equal(sample.parts[i].length%4,0)
     eq(sample.parts[i],parts[pi].subarray(offset,offset+sample.parts[i].length))
   }
-  assert.deepEqual(groupKernelSample(parts,positions,4),sample)
+  fastDeepEqual(groupKernelSample(parts,positions,4),sample)
   const small=groupKernelSample([data.subarray(0,123)],[99]);assert.equal(small.bytes,123);assert.equal(small.positions[0],99)
   assert.throws(()=>groupKernelSample(parts,positions,0),/预算/)
   console.log('P13 sample budget/seams/absolute positions/alignment and 0.15% ambiguity policy PASS')
@@ -43,7 +44,7 @@ export function testScreen() {
     const c=groupV15CandidatesSync([data],spec,[0])!
     assert.equal(c.screening!.length,1)
     const s=c.screening![0];assert.equal(s.sampleBytes,GROUP_KERNEL_PROBE_BYTES)
-    assert.deepEqual(s.selected,clearProbeWinners(s.trials.map(t=>t.bytes)))
+    fastDeepEqual(s.selected,clearProbeWinners(s.trials.map(t=>t.bytes)))
     assert.equal(s.fullBytes,data.length*s.selected.length)
     assert.equal(+!!c.alt + +!!c.v20,s.selected.length)
     const base=frame(data,encodeTerrainGroup([data],spec),false)
@@ -61,7 +62,7 @@ export async function testWorkerScreen() {
   const worker=new Worker(PARALLEL_WORKER_CODE,{eval:true,workerData:{sab}})
   try {
     const reply=await new Promise<any>((resolve,reject)=>{worker.once('error',reject);worker.once('message',m=>m.error?reject(Error(m.error)):resolve(m));worker.postMessage({kind:'encodeGroup',parts:[[0,data.length]],spec,positions:[0],ends:[data.length]})})
-    assert.deepEqual(reply,local)
+    fastDeepEqual(reply,local)
   }finally{await worker.terminate()}
   console.log('P13 real worker 256KiB screen/candidate bytes/flags/cost parity PASS')
 }
@@ -75,11 +76,11 @@ export async function testBcjUpgrade() {
   const data=bcjData()
   for(const id of [ID.BCJ,ID.BCJ_V2,ID.BCJ_V3]) {
     const spec={id,s:1,r:1},c=groupV15CandidatesSync([data],spec,[0])!
-    assert.deepEqual(c.variants!.map(v=>v.kernel),['v15','v20'])
+    fastDeepEqual(c.variants!.map(v=>v.kernel),['v15','v20'])
     for(const v of c.variants!)frame(data,v.payload,true,v.spec)
     assert.ok(!groupV15CandidatesSync([data],spec,[0],{allowBcjUpgrade:false})!.variants)
     const [result]=await compressCachedPlansForProbe(data,[[{start:0,end:data.length,cls:'binary',spec}]],{serial:true})
-    assert.deepEqual(result.segs[0].spec,{id:ID.BCJ_V3,s:2,r:1})
+    fastDeepEqual(result.segs[0].spec,{id:ID.BCJ_V3,s:2,r:1})
     eq(decompress(result.container),data)
     assert.equal(evaluatePlan(data,[{start:0,end:data.length,cls:'binary',spec}],{alreadyMerged:true}).totalBytes,result.container.length)
   }
@@ -99,7 +100,7 @@ export async function testBcjCacheWorker() {
   assert.ok(serial[1].guardStats!.reusedGroups>0)
   eq(serial[0].container,serial[2].container)
   const [cold]=await compressCachedPlansForProbe(data,[plans[1]],{serial:true})
-  eq(serial[1].container,cold.container);assert.deepEqual(serial[1].blockCost,cold.blockCost)
+  eq(serial[1].container,cold.container);fastDeepEqual(serial[1].blockCost,cold.blockCost)
   const sab=new SharedArrayBuffer(data.length);new Uint8Array(sab).set(data)
   const worker=new Worker(PARALLEL_WORKER_CODE,{eval:true,workerData:{sab}})
   try {
@@ -117,7 +118,7 @@ export async function testBcjCacheWorker() {
       return replies
     }})
     assert.ok(admitted>=2&&blocked>0);assert.equal(actual[1].guardStats!.workerFallbacks,0)
-    for(let i=0;i<plans.length;i++){eq(actual[i].container,serial[i].container);eq(decompress(actual[i].container),data);assert.deepEqual(actual[i].blockCost,serial[i].blockCost)}
+    for(let i=0;i<plans.length;i++){eq(actual[i].container,serial[i].container);eq(decompress(actual[i].container),data);fastDeepEqual(actual[i].blockCost,serial[i].blockCost)}
   }finally{await worker.terminate()}
   console.log('P13 BCJ cached-alias collision/free-target re-admission and real worker admission/flags/bytes/cost restoration PASS')
 }
@@ -153,7 +154,7 @@ export async function testBcjLargeWorker() {
       return [r]
     }})
     assert.equal(actual.guardStats!.workerFallbacks,0);assert.equal(actual.segs[0].spec.s,2)
-    eq(actual.container,serial.container);eq(decompress(actual.container),data);assert.deepEqual(actual.blockCost,serial.blockCost)
+    eq(actual.container,serial.container);eq(decompress(actual.container),data);fastDeepEqual(actual.blockCost,serial.blockCost)
   }finally{await worker.terminate()}
   console.log('P13 actual 256KiB four-way BCJ sample selection + worker variant metadata + final-container parity PASS')
 }
@@ -175,7 +176,7 @@ export async function testBcjSeams() {
   ]
   const parts=[data.subarray(picks[1].start,picks[1].end),data.subarray(picks[3].start,picks[3].end)]
   const candidates=groupV15CandidatesSync(parts,spec,[picks[1].start,picks[3].start])!
-  assert.deepEqual(candidates.variants!.map(v=>v.kernel),['v15','v20'])
+  fastDeepEqual(candidates.variants!.map(v=>v.kernel),['v15','v20'])
   const plain=encodeTerrainGroup([data.subarray(0,prefix),data.subarray(prefix+cut,prefix+cut+gap),data.subarray(data.length-tail)],store)
   for(const v of candidates.variants!) {
     const chosen=picks.map((p,i)=>({...p,spec:i===1||i===3?v.spec:store}))
@@ -191,7 +192,7 @@ export async function testBcjSeams() {
       const replies=[]
       for(const job of jobs) {
         if(job.kind==='encodeGroup'&&job.spec.id===ID.BCJ_V3) {
-          assert.deepEqual(job.positions,[prefix,prefix+cut+gap])
+          fastDeepEqual(job.positions,[prefix,prefix+cut+gap])
           assert.equal(job.groupOptions!.allowBcjUpgrade,true)
         }
         replies.push(await new Promise<any>((resolve,reject)=>{
@@ -203,7 +204,7 @@ export async function testBcjSeams() {
       return replies
     }})
     assert.equal(actual.guardStats!.workerFallbacks,0)
-    eq(actual.container,serial.container);eq(decompress(actual.container),data);assert.deepEqual(actual.blockCost,serial.blockCost)
+    eq(actual.container,serial.container);eq(decompress(actual.container),data);fastDeepEqual(actual.blockCost,serial.blockCost)
   }finally{await worker.terminate()}
   console.log('P13 BCJ nonzero origins/discontiguous instruction seam: both kernels, actual worker, final bytes/flags/costs PASS')
 }
@@ -220,12 +221,12 @@ async function bcjTargetOrder(targetFirst:boolean) {
   // Warm the promoted alias, block it, then allow it again. A valid original
   // target keeps ownership regardless of its order in the segment directory.
   const results=await compressCachedPlansForProbe(data,[plan(false),plan(true),plan(false)],{serial:true})
-  assert.deepEqual(results[0].segs[bigIndex].spec,target)
-  assert.deepEqual(results[1].segs[bigIndex].spec,original)
-  assert.deepEqual(results[1].segs[smallIndex].spec,target)
+  fastDeepEqual(results[0].segs[bigIndex].spec,target)
+  fastDeepEqual(results[1].segs[bigIndex].spec,original)
+  fastDeepEqual(results[1].segs[smallIndex].spec,target)
   eq(results[0].container,results[2].container)
   const [cold]=await compressCachedPlansForProbe(data,[plan(true)],{serial:true})
-  eq(cold.container,results[1].container);assert.deepEqual(cold.blockCost,results[1].blockCost)
+  eq(cold.container,results[1].container);fastDeepEqual(cold.blockCost,results[1].blockCost)
   for(const r of results)eq(decompress(r.container),data)
   console.log(`P13 BCJ original target ${targetFirst?'before':'after'} upgrader: warm alias/block/re-admit and cold parity PASS`)
 }

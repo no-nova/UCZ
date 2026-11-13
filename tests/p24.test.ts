@@ -1,4 +1,5 @@
 import assert from 'node:assert'
+import { fastDeepEqual } from './fast-equal'
 import {
   ID, encodeTerrainGroup, decodeTerrainGroup, planHeader, decompress, contextSpecAllowed, specLabel,
 } from '../src/lib/codec'
@@ -7,7 +8,7 @@ import { withContainerModel } from '../src/lib/coder'
 import { payloadModelFlags } from '../src/lib/payload-model'
 import { contextCodeOf, contextFromGroupBits, GROUP_CONTEXT_EXT_BIT } from '../src/lib/context-policy'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 function versionOf(flags: number): number {
   return flags & 0x8000 ? 22 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
@@ -44,7 +45,7 @@ const spec3: Spec = { id: ID.TEXT_V3, s: 1, r: 1 }
  *  line column. Gating uses the MSB-first prefix the model is currently coding:
  *  a predictor only contributes while its byte has coded the same prefix. */
 export function testP243VerticalColumns() {
-  assert.deepEqual(contextCodeOf('text-vertcol'), { code: 7, ext: true })
+  fastDeepEqual(contextCodeOf('text-vertcol'), { code: 7, ext: true })
   assert.equal(contextFromGroupBits(GROUP_CONTEXT_EXT_BIT | (7 << 17)), 'text-vertcol')
   assert.equal(contextSpecAllowed('text-vertcol', spec3, false), true)
   assert.equal(contextSpecAllowed('text-vertcol', { id: ID.TEXT, s: 1, r: 1 }, false), true)

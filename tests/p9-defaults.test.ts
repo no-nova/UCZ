@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { Worker } from 'node:worker_threads'
 import { a2Tuning, modelTuning, encodeCM, cmTableBits } from '../src/lib/coder'
 import { encodeGroupForJob } from '../src/lib/codec-jobs'
@@ -13,7 +14,7 @@ import {
 const sp = (id: number): Spec => ({ id, s: 1, r: 1 })
 const part = (start: number, end: number, id: number, cls: PlanSegment['cls'] = 'binary'): PlanSegment =>
   ({ start, end, spec: sp(id), cls })
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 function wrap(raw: Uint8Array, spec: Spec, payload: Uint8Array, v15 = true, wordPre = false) {
   const flags = payloadModelFlags(payload), h = [85, 67, 90, flags > 255 ? 19 : flags ? 18 : v15 ? 15 : 13]
   if (flags > 255) h.push(flags & 255, flags >>> 8)
@@ -35,8 +36,8 @@ export async function testP9Defaults() {
   const saved = { a2: { ...a2Tuning }, model: { ...modelTuning }, plan: { ...planTuning } }
   let checks = 0
   try {
-    assert.deepEqual(modelTuning, { maxTableBits: 24, matchTableBits: 23, largeOnly: true })
-    assert.deepEqual(a2Tuning, { resOn: true, textOn: true, wordPreTextOff: false })
+    fastDeepEqual(modelTuning, { maxTableBits: 24, matchTableBits: 23, largeOnly: true })
+    fastDeepEqual(a2Tuning, { resOn: true, textOn: true, wordPreTextOff: false })
     assert.equal(planTuning.v15SinglePlain, true)
     assert.equal(planTuning.candidateTgV3, true)
     assert.equal(planTuning.dropZeroHitIds, true)
@@ -115,10 +116,10 @@ export async function testP9Defaults() {
       part(16 * MiB, 18 * MiB, ID.STORE), // exactly 2 MiB: not eligible
       part(18 * MiB, 19 * MiB, ID.RLE), part(19 * MiB, 20 * MiB, ID.O0),
       part(20 * MiB, 21 * MiB, ID.FILL)]
-    assert.deepEqual(orphanProposalForProbe(21 * MiB, boundary)!.members, [0, 2, 3])
+    fastDeepEqual(orphanProposalForProbe(21 * MiB, boundary)!.members, [0, 2, 3])
     const fifth = [part(0, 800, ID.BIN_V3), part(800, 1000, ID.STORE)]
     assert.equal(orphanProposalForProbe(1000, fifth), null, 'exactly 20% is excluded')
-    assert.deepEqual(orphanProposalForProbe(1001, [fifth[0], part(800, 999, ID.STORE), part(999, 1001, ID.FILL)])!.members, [0, 1])
+    fastDeepEqual(orphanProposalForProbe(1001, [fifth[0], part(800, 999, ID.STORE), part(999, 1001, ID.FILL)])!.members, [0, 1])
     const many = [part(0, 9000, ID.BIN_V3), ...Array.from({ length: 30 }, (_, i) =>
       ({ ...part(9000 + i * 10, 9010 + i * 10, ID.DELTA), spec: { id: ID.DELTA, s: i + 1, r: 1 } }))]
     assert.equal(orphanProposalForProbe(9300, many)!.groups, 24)
@@ -127,9 +128,9 @@ export async function testP9Defaults() {
     // <=25 MiB OR dominant terrain text bypasses screening; >25 MiB binary
     // remains eligible for the older sample screen (never for sampled adoption).
     const virtual = (n: number, cls: PlanSegment['cls']) => [part(0, Math.floor(n * 0.8), ID.BIN_V3, cls), part(Math.floor(n * 0.8), n, ID.STORE)]
-    assert.deepEqual(macroDirectSpec(25 * MiB, virtual(25 * MiB, 'binary')), bin)
+    fastDeepEqual(macroDirectSpec(25 * MiB, virtual(25 * MiB, 'binary')), bin)
     assert.equal(macroDirectSpec(25 * MiB + 1, virtual(25 * MiB + 1, 'binary')), null)
-    assert.deepEqual(macroDirectSpec(30 * MiB, virtual(30 * MiB, 'text')), text)
+    fastDeepEqual(macroDirectSpec(30 * MiB, virtual(30 * MiB, 'text')), text)
     const phrase = new TextEncoder().encode('alpha beta gamma delta: a shared model observes repeated words and changing row numbers.\n')
     const prose = Uint8Array.from({ length: 49152 }, (_, i) => phrase[i % phrase.length])
     const direct = await compressMacroPlanForProbe(prose, [part(0, 32768, ID.STORE, 'text'), part(32768, prose.length, ID.RLE, 'text')])
@@ -199,7 +200,7 @@ export async function testP9Defaults() {
         worker.once('message', r => { clearTimeout(timer); r.error ? reject(new Error(r.error)) : resolve(r) })
         worker.postMessage({ kind: 'encodeGroup', parts: [[0, prose.length]], spec: text, positions: [0], ends: [prose.length] })
       })
-      assert.deepEqual(reply, local)
+      fastDeepEqual(reply, local)
       checks++
     } finally { await worker.terminate() }
     console.log(`P9 defaults tests passed (${checks} checks; selected flags, selective a2, exact costs/orphans, direct macro, worker metadata)`)

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { createHash } from 'node:crypto'
 import e24 from './e24-v17-fixture.json'
 import {
@@ -16,7 +17,7 @@ import { V22_FLAG_MATCH_DISTANCE } from '../src/lib/coder'
 import { V21_FLAG_CONTEXTS } from '../src/lib/context-policy'
 import { runParallelJobs, closePool } from '../src/lib/parallel-pool'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 const sha = (data: Uint8Array) => createHash('sha256').update(data).digest('hex')
 const part = (start: number, end: number, id: number, s = 1): PlanSegment =>
   ({ start, end, cls: 'binary', spec: { id, s, r: 1 } })
@@ -37,10 +38,10 @@ export async function testP10() {
   try {
     assert.equal(V18_FLAG_BIG_TABLE_22, 0x02)
     assert.equal(V18_FLAG_TABLE_23, 0x04)
-    assert.deepEqual(modelTuning, { maxTableBits: 24, matchTableBits: 23, largeOnly: true })
+    fastDeepEqual(modelTuning, { maxTableBits: 24, matchTableBits: 23, largeOnly: true })
     const boundarySizes = [512 * 1024 - 1, 512 * 1024, 4 * MiB - 1, 4 * MiB]
     const boundaries = boundarySizes.map(n => cmTableShape(n))
-    assert.deepEqual(boundaries.map(g => [g.cmBits, g.mht4Bits, g.mht8Bits]),
+    fastDeepEqual(boundaries.map(g => [g.cmBits, g.mht4Bits, g.mht8Bits]),
       [[21, 20, 20], [22, 20, 21], [22, 20, 21], [23, 20, 22]])
     for (const [bytes, bits] of [[512 * 1024 - 1, 14], [512 * 1024, 22], [4 * MiB - 1, 22], [4 * MiB, 23]])
       assert.equal(withCMBlockSize(bytes, () => cmTableBits(1024)), bits)
@@ -101,7 +102,7 @@ export async function testP10() {
     })
     const payload = withCMBlockSize(4 * MiB, () => encodeCM(tiny, 'bin', 1, 1, undefined, 0, undefined, undefined, 'v15'))
     assert.equal(payloadModelFlags(payload), V18_FLAG_TABLE_23 | V18_FLAG_MATCH_22)
-    assert.deepEqual(allocation, { dimensions: [2 ** 23, 2 ** 20, 2 ** 22], sizingBytes: 4 * MiB, inputBytes: tiny.length })
+    fastDeepEqual(allocation, { dimensions: [2 ** 23, 2 ** 20, 2 ** 22], sizingBytes: 4 * MiB, inputBytes: tiny.length })
     Object.assign(modelTuning, { maxTableBits: 21, matchTableBits: 20 })
     eq(withContainerModel(18, payloadModelFlags(payload), () => withCMBlockSize(4 * MiB,
       () => decodeCM(payload, tiny.length, 'bin', 1, 1, undefined, 'v15'))), tiny)
@@ -129,7 +130,7 @@ export async function testP10() {
     assert.ok(finalKernels.length > 0, 'fixture must exercise final CM channels')
     assert.ok(finalKernels.every(Boolean), 'no redundant full base encode inside the v15 path')
     assert.ok(sampleSizes.every(n => n <= parts[0].length), 'layout probes must not inherit full-group sizing')
-    assert.deepEqual(decodeTerrainGroup(v15, parts.map(p => p.length), tg, undefined, [0, parts[0].length], 'v15'), parts)
+    fastDeepEqual(decodeTerrainGroup(v15, parts.map(p => p.length), tg, undefined, [0, parts[0].length], 'v15'), parts)
     assert.equal(payloadModelFlags(v15) & 6, 0, 'small actual group never emits table22/23')
     for (const spec of [{ id: ID.SUB_TRANSPOSE_V3, s: 4, r: 2 }, { id: ID.SUB_ANCHOR_V3, s: 10, r: 8 }]) {
       const bytes = Uint8Array.from({ length: 3072 }, (_, i) => i % 17 === 0 ? 10 : (i * 3) & 127)
@@ -157,7 +158,7 @@ export async function testP10() {
             for (const md of [false, true]) {
               const options = md ? { matchDist: true as const } : undefined
               const payload = encodeTerrainGroup(parts, spec, undefined, undefined, undefined, pos, 'v20', options)
-              assert.deepEqual(decodeTerrainGroup(payload, lens, spec, undefined, pos, 'v20', false, options), parts,
+              fastDeepEqual(decodeTerrainGroup(payload, lens, spec, undefined, pos, 'v20', false, options), parts,
                 `id=${id} frags=${frags} matchDist=${md} must round-trip`)
               // O0 runs a profile the second distance table does not cover, so the
               // option is inert there by design (legacyCmOptions); text/bin must
@@ -194,7 +195,7 @@ export async function testP10() {
                 const options = context || md ? { context, matchDist: md || undefined } as any : undefined
                 const payload = encodeTerrainGroup(parts, spec, undefined, undefined, undefined, pos, 'v20', options)
                 const back = decodeTerrainGroup(payload, lens, spec, undefined, pos, 'v20', false, options)
-                assert.deepEqual(Buffer.concat(back), Buffer.from(code),
+                fastDeepEqual(Buffer.concat(back), Buffer.from(code),
                   `BCJ id=${id} s=${s} frags=${frags} context=${context} matchDist=${md} must round-trip`)
                 if (context) assert.equal(payloadModelFlags(payload) & V21_FLAG_CONTEXTS, V21_FLAG_CONTEXTS,
                   `BCJ id=${id} context payload must advertise the v21 namespace`)
@@ -246,7 +247,7 @@ export async function testP10() {
     const warm = await compressGuardedPlanForProbe(data, picks, { runJobs: runner })
     eq(warm.container, cold.container); check(warm, data)
     assert.equal(JSON.stringify(picks), before)
-    assert.deepEqual(warm.blockCost, cold.blockCost)
+    fastDeepEqual(warm.blockCost, cold.blockCost)
     assert.equal(warm.guardStats!.orphanTrials, 1, 'three orphan groups are one complete trial')
     assert.equal(warm.guardStats!.macroTrials, 1)
     assert.equal(warm.guardStats!.macroPrefetched, 1)
@@ -323,7 +324,7 @@ export async function testP10() {
               const options = context || md ? { context, matchDist: md || undefined } as any : undefined
               const payload = encodeTerrainGroup(parts, spec, undefined, undefined, undefined, pos, 'v20', options)
               const back = decodeTerrainGroup(payload, lens, spec, undefined, pos, 'v20', false, options)
-              assert.deepEqual(Buffer.concat(back), Buffer.from(whole),
+              fastDeepEqual(Buffer.concat(back), Buffer.from(whole),
                 `id30 s=${width} frags=${frags} context=${context} matchDist=${md} must round-trip`)
               cells++
             }

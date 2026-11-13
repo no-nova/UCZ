@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { Worker } from 'node:worker_threads'
 import { encodeTerrainGroup, decodeTerrainGroup, ID, candidatesFor, orphanProposalForProbe, planTuning, compressGuardedPlanForProbe, evaluatePlan, decompress, type PlanSegment } from '../src/lib/codec'
 import { a2Tuning, encodeCM, withContainerModel, withCMBlockSize, decodeCM } from '../src/lib/coder'
@@ -10,7 +11,7 @@ import { compatibilityInputs, rawCompatibilityInput } from './p111-inputs'
 import historical from './p111-references.json'
 import words from './p111-wordpre-reference.json'
 import legacyWp from './legacy-wordpre-fixtures.json'
-const eq = (a:Uint8Array,b:Uint8Array) => assert.deepEqual(Buffer.from(a),Buffer.from(b))
+const eq = (a:Uint8Array,b:Uint8Array) => fastDeepEqual(Buffer.from(a),Buffer.from(b))
 
 export function testP120Units() {
   assert.equal(a2Tuning.wordPreTextOff,false); assert.equal(planTuning.candidateTgV3,true)
@@ -26,13 +27,13 @@ export function testP120Units() {
   const p=wordPreFwdSampled(text)!
   eq(wordPreInv(p.header,p.body,text.length),text)
   assert.ok(p.dict.length<=120 && p.dict.every(w=>w.length>=3 && w.length<=24))
-  assert.deepEqual(wordPreFwdSampled(text),p)
+  fastDeepEqual(wordPreFwdSampled(text),p)
   for (const extended of [false,true]) {
     const dict=buildTokenDict(text,120,extended), body=collapseWithDict(text,dict)!
     assert.ok(p.body.length+p.header.length<=body.length+dictHeader(dict).length)
   }
   const bcj=CM_FAMILIES.find(f=>f.name==='BCJ')!
-  assert.deepEqual(bcj,{name:'BCJ',members:[ID.BCJ,ID.BCJ_V2,ID.BCJ_V3],target:ID.BCJ_V3})
+  fastDeepEqual(bcj,{name:'BCJ',members:[ID.BCJ,ID.BCJ_V2,ID.BCJ_V3],target:ID.BCJ_V3})
   assert.ok(isFamilyCM(ID.BCJ)); assert.equal(CM_ENCODING[ID.BCJ],undefined)
   const gate=(count:number,plausible:number)=>{
     const x=new Uint8Array(4096).fill(0x50)
@@ -46,14 +47,14 @@ export function testP120Units() {
   const plan:PlanSegment[]=[{start:0,end:90000,cls:'binary',spec,compLen:40000},
     {start:90000,end:95000,cls:'smooth',spec:{id:ID.DELTA_V3,s:2,r:1},compLen:1749},
     {start:95000,end:100000,cls:'binary',spec:{id:ID.O0,s:1,r:1},compLen:3000}]
-  assert.deepEqual(orphanProposalForProbe(100000,plan)!.members,[0,2])
-  plan[1].compLen=1750;assert.deepEqual(orphanProposalForProbe(100000,plan)!.members,[0,1,2])
+  fastDeepEqual(orphanProposalForProbe(100000,plan)!.members,[0,2])
+  plan[1].compLen=1750;fastDeepEqual(orphanProposalForProbe(100000,plan)!.members,[0,1,2])
   for (const unknown of [undefined, Number.NaN, -1]) {
-    plan[1].compLen=unknown;assert.deepEqual(orphanProposalForProbe(100000,plan)!.members,[0,1,2])
+    plan[1].compLen=unknown;fastDeepEqual(orphanProposalForProbe(100000,plan)!.members,[0,1,2])
   }
   // Explicit post-encode zero allocations are legal; pre-encode placeholders
   // must be stripped by the speculative prefetch caller (worker-plan test).
-  plan[1].compLen=0;assert.deepEqual(orphanProposalForProbe(100000,plan)!.members,[0,2])
+  plan[1].compLen=0;fastDeepEqual(orphanProposalForProbe(100000,plan)!.members,[0,2])
   console.log('P12.0 units PASS: multi-part kernel, v1 token constraints/roundtrip, BCJ gate/family, TG3, measured orphan exclusion')
 }
 export function testP12HistoricalDecode() {
@@ -93,7 +94,7 @@ export async function testP12Worker() {
     const reply=await new Promise((resolve,reject)=>{
       worker.once('message',(m:any)=>m.error?reject(Error(m.error)):resolve(m));worker.once('error',reject)
       worker.postMessage({kind:'encodeGroup',parts:[[0,data.length]],spec,positions:[0],ends:[data.length]})
-    });assert.deepEqual(reply,local)
+    });fastDeepEqual(reply,local)
   } finally { await worker.terminate() }
   console.log('P12 embedded worker exact bytes/flags/cost/candidates PASS')
 }
@@ -188,7 +189,7 @@ export async function testP121Worker() {
         const onError=(e:Error)=>reject(e);worker.once('error',onError)
         worker.once('message',(m:any)=>{worker.off('error',onError);m.error?reject(Error(m.error)):resolve(m)})
         worker.postMessage({kind:'encodeGroup',parts:[[0,514],[514,1026]],spec,positions:[0,514],ends:[514,1026]})
-      });assert.deepEqual(reply,local)
+      });fastDeepEqual(reply,local)
     }
   }finally{await worker.terminate()}
   console.log('P12.1 real worker: six WIDE16 modes, BCJ s2, TG3 exact bytes/flags/candidates/cost PASS')
@@ -280,7 +281,7 @@ export async function testP122Worker() {
         const onError=(e:Error)=>reject(e);worker.once('error',onError)
         worker.once('message',(m:any)=>{worker.off('error',onError);m.error?reject(Error(m.error)):resolve(m)})
         worker.postMessage({kind:'encodeGroup',parts:[[0,514],[514,2050]],spec,positions:[0,514],ends:[514,2050],...(config?{cmV20:config}:{})})
-      });assert.deepEqual(reply,local)
+      });fastDeepEqual(reply,local)
       assert.ok(reply.cand, 'BIN3 worker returns its candidate record')
       if(config?.enabled)assert.equal(reply.cand.v20Flags,config.binRecovery?0x3000:0x1000)
       if(config?.enabled===false)assert.equal(reply.cand.v20,null)
@@ -309,7 +310,7 @@ export async function testP122WorkerPlan() {
         batches.push(jobs.length)
         const replies=[]
         for(const job of jobs) {
-          assert.deepEqual(job.cmV20,{enabled:true,binRecovery})
+          fastDeepEqual(job.cmV20,{enabled:true,binRecovery})
           const reply=await new Promise<any>((resolve,reject)=>{
             const fail=(e:Error)=>reject(e);worker.once('error',fail)
             worker.once('message',(m:any)=>{worker.off('error',fail);m.error?reject(Error(m.error)):resolve(m)})
@@ -324,7 +325,7 @@ export async function testP122WorkerPlan() {
       assert.ok(result.guardStats!.workerJobs>=2)
       assert.equal(result.guardStats!.workerFallbacks,0)
       eq(result.container,serial.container);eq(decompress(result.container),data)
-      assert.deepEqual(result.segs.map(s=>s.modelFlags),serial.segs.map(s=>s.modelFlags))
+      fastDeepEqual(result.segs.map(s=>s.modelFlags),serial.segs.map(s=>s.modelFlags))
     }
   }finally {Object.assign(cmV20Tuning,save.cm);Object.assign(planTuning,save.plan);Object.assign(parallelReport,save.parallel);await worker.terminate()}
   console.log('P12.2 real worker/main-thread restoration: mixed-rule guarded plans, recovery on/off, exact container bytes and no unknown-cost orphan prefetch PASS')
@@ -356,7 +357,7 @@ export async function testP122Collision() {
       const result=await compressGuardedPlanForProbe(data,picks,{serial:true})
       eq(decompress(result.container),data)
       assert.notEqual(result.segs[reverse?1:0].spec.id,promoted.id)
-      assert.deepEqual(result.segs[reverse?0:1].spec,promoted)
+      fastDeepEqual(result.segs[reverse?0:1].spec,promoted)
       assert.equal(evaluatePlan(data,picks,{alreadyMerged:true}).totalBytes,result.container.length)
       console.log(JSON.stringify({reverse,bytes:result.container.length,finalRules:result.segs.map(s=>s.spec)}))
     }
@@ -368,7 +369,7 @@ export async function testP122Collision() {
       {start:body.length+37,end:data.length,cls:'binary',spec:{id:ID.TRANSPOSE_GROUP_V3,s:4,r:1}}]
     const serial=await compressGuardedPlanForProbe(data,picks,{serial:true})
     eq(decompress(serial.container),data)
-    assert.deepEqual(serial.segs[0].spec,original)
+    fastDeepEqual(serial.segs[0].spec,original)
     assert.equal(serial.segs[0].compLen,legacy.length)
     assert.equal(serial.overhead+serial.segs.reduce((n,s)=>n+s.compLen,0),serial.container.length)
     assert.equal(evaluatePlan(data,picks,{alreadyMerged:true}).totalBytes,serial.container.length)
@@ -386,7 +387,7 @@ export async function testP122Collision() {
       }})
       assert.ok(parallel.guardStats!.workerJobs>=2)
       assert.equal(parallel.guardStats!.workerFallbacks,0)
-      eq(parallel.container,serial.container);assert.deepEqual(parallel.blockCost,serial.blockCost)
+      eq(parallel.container,serial.container);fastDeepEqual(parallel.blockCost,serial.blockCost)
       eq(decompress(parallel.container),data)
     }finally{await worker.terminate()}
     console.log('P12.2 collision: both group orders, occupied 2D/TG3 keys, exact legacy fallback, costs, evaluator and real-worker/container parity PASS (max 4174 B synthetic)')
@@ -428,14 +429,14 @@ export async function testP122CachedCollision() {
   ])
   try {
     const cached=await compressCachedPlansForProbe(data,plans,{serial:true})
-    assert.deepEqual(cached.map(r=>r.segs[0].spec.id),[ID.TRANSPOSE_2D,ID.TRANSPOSE_GROUP_V3,ID.TRANSPOSE_GROUP])
+    fastDeepEqual(cached.map(r=>r.segs[0].spec.id),[ID.TRANSPOSE_2D,ID.TRANSPOSE_GROUP_V3,ID.TRANSPOSE_GROUP])
     assert.equal(cached[0].guardStats!.reusedGroups,0)
     assert.ok(cached[1].guardStats!.reusedGroups>0,'unchanged FILL must still reuse a real cache entry')
     assert.ok(cached[2].guardStats!.reusedGroups>cached[1].guardStats!.reusedGroups)
     for(let i=0;i<plans.length;i++) {
       const [cold]=await compressCachedPlansForProbe(data,[plans[i]],{serial:true})
       eq(cached[i].container,cold.container);eq(decompress(cached[i].container),data)
-      assert.deepEqual(cached[i].blockCost,cold.blockCost)
+      fastDeepEqual(cached[i].blockCost,cold.blockCost)
       assert.equal(evaluatePlan(data,plans[i],{alreadyMerged:true}).totalBytes,cached[i].container.length)
       assert.equal(cached[i].overhead+cached[i].segs.reduce((n,s)=>n+s.compLen,0),cached[i].container.length)
     }
@@ -456,7 +457,7 @@ export async function testP122CachedCollision() {
       assert.equal(actual[2].guardStats!.reusedGroups,cached[2].guardStats!.reusedGroups)
       for(let i=0;i<plans.length;i++){
         eq(actual[i].container,cached[i].container);eq(decompress(actual[i].container),data)
-        assert.deepEqual(actual[i].blockCost,cached[i].blockCost)
+        fastDeepEqual(actual[i].blockCost,cached[i].blockCost)
       }
     }finally{await worker.terminate()}
     console.log('P12.2 cached alias collision: 2D then TG3 targets occupied, original-stream fallback, unaffected cache reuse, cold/evaluator/cost/real-worker parity PASS (4193 B synthetic)')

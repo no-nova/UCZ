@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import { ID, encodeTerrainGroup, decodeTerrainGroup, compressAdaptive, decompress } from '../src/lib/codec'
 import { encodeCM, decodeCM, withCMBlockSize, symAlphabetOf } from '../src/lib/coder'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 /** Quaternary buffer over an arbitrary 4-byte alphabet (not ASCII, not DNA). */
 function quat(n: number, alphabet: number[], seed = 7): Uint8Array {

@@ -1,4 +1,5 @@
 import assert from 'node:assert'
+import { fastDeepEqual } from './fast-equal'
 import {
   ID, encodeTerrainGroup, decodeTerrainGroup, planHeader, decompress, compressAdaptive,
   compressGuardedPlanForProbe, refineBcjSegments, contextSpecAllowed, specLabel,
@@ -8,7 +9,7 @@ import { withContainerModel } from '../src/lib/coder'
 import { payloadModelFlags } from '../src/lib/payload-model'
 import { contextCodeOf, contextFromGroupBits, GROUP_CONTEXT_EXT_BIT } from '../src/lib/context-policy'
 
-const eq = (a: Uint8Array, b: Uint8Array) => assert.deepEqual(Buffer.from(a), Buffer.from(b))
+const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 function versionOf(flags: number): number {
   return flags & 0x8000 ? 22 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
@@ -74,8 +75,8 @@ const spec3: Spec = { id: ID.TEXT_V3, s: 1, r: 1 }
 /** P17.8 direction 1: the extended context namespace carries the upgraded
  *  `text-linecol` and the new `text-lexcol`, and lexcol is the better generalist. */
 export function testP178TextContexts() {
-  assert.deepEqual(contextCodeOf('text-linecol'), { code: 1, ext: true })
-  assert.deepEqual(contextCodeOf('text-lexcol'), { code: 2, ext: true })
+  fastDeepEqual(contextCodeOf('text-linecol'), { code: 1, ext: true })
+  fastDeepEqual(contextCodeOf('text-lexcol'), { code: 2, ext: true })
   assert.equal(contextFromGroupBits(GROUP_CONTEXT_EXT_BIT | (2 << 17)), 'text-lexcol')
   for (const ctx of ['text-linecol', 'text-lexcol'] as const) {
     assert.equal(contextSpecAllowed(ctx, spec3, false), true)

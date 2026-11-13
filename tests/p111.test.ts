@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { fastDeepEqual } from './fast-equal'
 import {createHash} from 'node:crypto'
 import historical from './p111-references.json'
 import wordReference from './p111-wordpre-reference.json'
@@ -12,7 +13,7 @@ import {payloadModelFlags} from '../src/lib/payload-model'
 import {encodeGroupForJob} from '../src/lib/codec-jobs'
 import {runParallelJobs,closePool} from '../src/lib/parallel-pool'
 
-const eq=(a:Uint8Array,b:Uint8Array)=>assert.deepEqual(Buffer.from(a),Buffer.from(b))
+const eq=(a:Uint8Array,b:Uint8Array)=>fastDeepEqual(Buffer.from(a),Buffer.from(b))
 const sha=(x:Uint8Array)=>createHash('sha256').update(x).digest('hex')
 const MiB=1024*1024
 /** Independent historical bytes + real current serializer/worker tests.
@@ -64,7 +65,7 @@ export async function testP111(onlyCase?:string){
     // per-file lifecycle just as compressAdaptive does for the real pool.
     try {
      const parallel=await compressGuardedPlanForProbe(c.data,c.picks,{runJobs:runner})
-     eq(parallel.container,result.container);assert.deepEqual(parallel.blockCost,result.blockCost)
+     eq(parallel.container,result.container);fastDeepEqual(parallel.blockCost,result.blockCost)
      assert.equal(parallel.guardStats!.workerFallbacks,0)
     } finally { await closePool() }
    }
@@ -79,8 +80,8 @@ export async function testP111(onlyCase?:string){
   const sample=512*1024
   const smallPolicy=withCMBlockSize(16*MiB,()=>withChooseSpecPolicy(8*MiB-1,()=>cmTableShape(sample)))
   const largePolicy=withCMBlockSize(16*MiB,()=>withChooseSpecPolicy(8*MiB,()=>cmTableShape(sample)))
-  assert.deepEqual([smallPolicy.cmBits,smallPolicy.mht4Bits,smallPolicy.mht8Bits],[22,20,21])
-  assert.deepEqual([largePolicy.cmBits,largePolicy.mht4Bits,largePolicy.mht8Bits],[21,20,20])
+  fastDeepEqual([smallPolicy.cmBits,smallPolicy.mht4Bits,smallPolicy.mht8Bits],[22,20,21])
+  fastDeepEqual([largePolicy.cmBits,largePolicy.mht4Bits,largePolicy.mht8Bits],[21,20,20])
   assert.throws(()=>withChooseSpecPolicy(-1,()=>0),/输入长度/)
   assert.throws(()=>withChooseSpecPolicy(8*MiB,()=>{throw Error('restore')}),/restore/)
   assert.equal(cmTableShape(sample).cmBits,22)
@@ -91,7 +92,7 @@ export async function testP111(onlyCase?:string){
   for(const g of historical.references.p10.models){
    assert.equal(sha(tiny),g.inputSha256)
    const shape=withCMBlockSize(g.scope,()=>cmTableShape(tiny.length))
-   assert.deepEqual(shape,g.geometry)
+   fastDeepEqual(shape,g.geometry)
    const current=withCMBlockSize(g.scope,()=>encodeCM(tiny,'bin',1,1,undefined,0,undefined,undefined,'v15'))
    const expected=Buffer.from(g.base64,'base64')
    assert.equal(sha(expected),g.sha256);eq(current,expected)
@@ -105,7 +106,7 @@ export async function testP111(onlyCase?:string){
   for(const g of historical.references.p11.models){
    const expected=Buffer.from(g.base64,'base64')
    assert.equal(sha(expected),g.sha256)
-   assert.deepEqual(withContainerModel(19,g.flags,()=>withCMBlockSize(g.scope,()=>cmTableShape(tiny.length))),g.geometry)
+   fastDeepEqual(withContainerModel(19,g.flags,()=>withCMBlockSize(g.scope,()=>cmTableShape(tiny.length))),g.geometry)
    eq(withContainerModel(19,g.flags,()=>withCMBlockSize(g.scope,()=>decodeCM(expected,tiny.length,'bin',1,1,undefined,'v15'))),tiny)
    checks++
   }
@@ -124,11 +125,11 @@ export async function testP111(onlyCase?:string){
   const none=header(0);assert.equal(none[3],13)
   for(const flags of [1,2,4,8,16,32,64,128,10,20,74]){
    const h=header(flags);assert.equal(h[3],18);assert.equal(h[4],flags)
-   assert.equal(h.length,none.length+1);assert.deepEqual(h.slice(5),none.slice(4))
+   assert.equal(h.length,none.length+1);fastDeepEqual(h.slice(5),none.slice(4))
   }
   for(const flags of [0x500,0x600,0x700]){
    const h=header(flags);assert.equal(h[3],19);assert.equal(h[4]|h[5]<<8,flags)
-   assert.equal(h.length,none.length+2);assert.deepEqual(h.slice(6),none.slice(4))
+   assert.equal(h.length,none.length+2);fastDeepEqual(h.slice(6),none.slice(4))
   }
   checks++
 
