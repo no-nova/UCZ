@@ -80,9 +80,50 @@ export function bitplaneFullProof(data:Uint8Array):{q:number;proof:boolean[];cod
   const plane=packPlane(data,b,q)
   const bytes=encodePlaneBitCM(plane,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
   coded.push(bytes)
-  proof.push(bytes.length+4<q)
+  proof.push(bytes.length+4<q||!!findLag(plane,q*8))
  }
  return {q,proof,coded,ms:Date.now()-start}
+}
+
+/** P22.1: exact emergent dyadic lag. A plane whose tail is an exact copy of an
+ * earlier power-of-two prefix (possibly inverted) costs only that prefix plus two
+ * tag bytes, independent of the tail length. The lag is discovered from the data;
+ * no plane index or corpus constant is assumed. */
+function findLag(plane:Uint8Array,bits:number):{k:number;inv:number}|null {
+ for(let k=10;k<=21;k++){
+  const D=1<<k
+  if(D>=bits)break
+  let inv=-1,ok=true
+  for(let i=D;i<bits;i++){
+   const a=(plane[i>>>3]>>>(i&7))&1,b=(plane[(i-D)>>>3]>>>((i-D)&7))&1
+   if(a===b){if(inv===1){ok=false;break}}
+   else{if(inv===0){ok=false;break}inv=1}
+  }
+  if(ok)return {k,inv:inv===1?1:0}
+ }
+ return null
+}
+
+function encodeLagPlane(plane:Uint8Array,bits:number,lag:{k:number;inv:number}):Uint8Array {
+ const D=1<<lag.k,out=new Uint8Array(2+(D>>>3))
+ out[0]=lag.inv;out[1]=lag.k
+ out.set(plane.subarray(0,D>>>3),2)
+ return out
+}
+
+function decodeLagPlane(payload:Uint8Array,bits:number,length:number):Uint8Array {
+ if(length<3)throw Error('位平面周期载荷被截断')
+ const inv=payload[0],k=payload[1]
+ if(inv>1||k<10||k>21)throw Error('无效位平面周期参数')
+ const D=1<<k,need=2+(D>>>3)
+ if(D>=bits||length!==need)throw Error('无效位平面周期长度')
+ const plane=new Uint8Array((bits+7)>>>3)
+ plane.set(payload.subarray(2,need),0)
+ for(let i=D;i<bits;i++){
+  const bit=((plane[(i-D)>>>3]>>>((i-D)&7))&1)^inv
+  if(bit)plane[i>>>3]|=1<<(i&7)
+ }
+ return plane
 }
 
 /** Bit-CM payload: same mask/length layout as the legacy byte-CM payload.
@@ -90,15 +131,22 @@ export function bitplaneFullProof(data:Uint8Array):{q:number;proof:boolean[];cod
  * determines the model; a per-plane order choice would not be decodable. */
 export function encodeBitplanesBitCM(data:Uint8Array,proof:readonly boolean[],coded?:readonly Uint8Array[]):Uint8Array|null {
  if(data.length>MAX_OUTPUT_BYTES||data.length<8||proof.length!==8)throw Error('无效位平面输入')
- const q=Math.floor(data.length/8),rem=data.length%8,planes:Uint8Array[]=[],compressed:boolean[]=[]
+ const q=Math.floor(data.length/8),rem=data.length%8,planes:Uint8Array[]=[],compressed:boolean[]=[],lags:boolean[]=[]
  for(let b=0;b<8;b++){
   const p=packPlane(data,b,q)
-  let out:Uint8Array=p,used=false
+  let out:Uint8Array=p,used=false,lagged=false
   if(proof[b]){
-   const bytes=coded?.[b]??encodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
-   if(bytes.length+4<q){out=bytes;used=true}
+   const lag=findLag(p,q*8)
+   if(lag){
+    const laggedBytes=encodeLagPlane(p,q*8,lag)
+    if(laggedBytes.length+4<q){out=laggedBytes;used=true;lagged=true}
+   }
+   if(!lagged){
+    const bytes=coded?.[b]??encodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
+    if(bytes.length+4<q){out=bytes;used=true}
+   }
   }
-  planes.push(out);compressed.push(used)
+  planes.push(out);compressed.push(used);lags.push(lagged)
  }
  if(!compressed.some(Boolean))return null
  const size=1+rem+planes.reduce((n,p,i)=>n+p.length+(compressed[i]?4:0),0)
@@ -109,7 +157,7 @@ export function encodeBitplanesBitCM(data:Uint8Array,proof:readonly boolean[],co
    // Bit 31 marks the bit-CM model. Legacy byte-CM payloads (r=1) keep their exact
    // old bytes, and a model/flag mismatch is a loud decode error, not silent garbage.
    out[0]|=1<<b
-   const n=(p.length|0x80000000)>>>0
+   const n=(p.length|(lags[b]?0xc0000000:0x80000000))>>>0
    out[pos++]=n&255;out[pos++]=n>>>8&255;out[pos++]=n>>>16&255;out[pos++]=n>>>24&255
   }
   out.set(p,pos);pos+=p.length
@@ -143,20 +191,21 @@ export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLA
  if(!Number.isSafeInteger(n)||n<8||n>MAX_OUTPUT_BYTES||!payload.length)throw Error('无效位平面长度')
  if(format!==BITPLANE_BYTE_CM&&format!==BITPLANE_BIT_CM)throw Error('未知位平面模型')
  const q=Math.floor(n/8),rem=n%8,mask=payload[0];if(!mask)throw Error('空位平面压缩掩码')
- const pieces:{start:number;length:number;compressed:boolean}[]=[];let pos=1
+ const pieces:{start:number;length:number;compressed:boolean;lagged:boolean}[]=[];let pos=1
  for(let b=0;b<8;b++){
-  const compressed=!!(mask&(1<<b));let length=q
+  const compressed=!!(mask&(1<<b));let length=q,lagged=false
   if(compressed){
    if(payload.length-pos<4)throw Error('位平面长度被截断')
    const rawLength=(payload[pos]|payload[pos+1]<<8|payload[pos+2]<<16|payload[pos+3]<<24)>>>0
    pos+=4
    const bitCM=(rawLength&0x80000000)!==0
+   lagged=bitCM&&(rawLength&0x40000000)!==0
    if(bitCM!==(format===BITPLANE_BIT_CM))throw Error('位平面模型标记与分组规则不符')
-   length=bitCM?rawLength&0x7fffffff:rawLength
+   length=bitCM?(rawLength&(lagged?0x3fffffff:0x7fffffff)):rawLength
    if(!length||length+4>=q)throw Error('无效位平面压缩长度')
   }
   if(length>payload.length-pos)throw Error('位平面载荷被截断')
-  pieces.push({start:pos,length,compressed});pos+=length
+  pieces.push({start:pos,length,compressed,lagged});pos+=length
  }
  if(payload.length-pos!==rem)throw Error('位平面载荷长度错误')
  const out=new Uint8Array(n)
@@ -165,6 +214,7 @@ export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLA
   let plane:Uint8Array
   if(!entry.compressed)plane=p
   else if(format===BITPLANE_BYTE_CM)plane=decodeCM(p,q,'bin',1,1,undefined,'v20')
+  else if(entry.lagged)plane=decodeLagPlane(p,q*8,entry.length)
   else {
    plane=decodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
   }

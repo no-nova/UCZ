@@ -3792,7 +3792,15 @@ export async function compressAdaptive(
     const carved=refineNoisePockets(data,coalescedBcj)
     const upgraded=refineGroupCodecs(data,carved)
     const rec2=refineRec2(data,upgraded)
-    const bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
+    let bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
+    // P22.1: a uniform BCJ stream must keep its call-target history across tiny
+    // FILL islands. Compete the dominant BCJ_V3 spec as one whole-stream plan.
+    if(data.length>=131072 && bp.segs.length>1 && bp.segs.some(s=>s.spec.id===ID.BCJ_V3)){
+      try{
+        const whole=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'binary',spec:{id:ID.BCJ_V3,s:2,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
+        if(whole.container.length<bp.container.length)bp=whole
+      }catch{}
+    }
     // Small closed-loop text fallback: keep the legacy TEXT plan in the real
     // byte competition instead of letting the context upgrade erase it.
     if(data.length<131072 && bp.segs.length===1 && bp.segs[0].spec.id===ID.TEXT_V3){
