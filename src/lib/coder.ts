@@ -384,6 +384,14 @@ function fineShapeMask(b1:number,b2:number,b3:number,b4:number,g5:number,g6:numb
 function charClass3(x:number) {
   return x>=48&&x<=57 ? 1 : x>=65&&x<=90 ? 2 : x>=97&&x<=122 ? 3 : (x===32||x===9) ? 4 : (x===10||x===13) ? 5 : (x===46||x===44||x===58||x===59) ? 6 : (x===45||x===43||x===47||x===95) ? 7 : 0
 }
+// P25.9: the bin 15th slot (8-byte coarse envelope) was measured and switched OFF:
+// it won 253 B on the H_bcj slice but costs +15/+12 B on G/O slices and +61/+5 B on the
+// full G/O files, and the zero-regression rule is absolute. Kept as a documented switch.
+const BIN_SHAPE8_ON = false
+function binShape8(b1: number, b2: number, b3: number, b4: number, b5: number, b6: number, b7: number, b8: number): number {
+  return ((b1 >>> 6) << 14) | ((b2 >>> 6) << 12) | ((b3 >>> 6) << 10) | ((b4 >>> 6) << 8) |
+         ((b5 >>> 6) << 6) | ((b6 >>> 6) << 4) | ((b7 >>> 6) << 2) | (b8 >>> 6)
+}
 function charShapeMask(b1: number, b2: number, b3: number, b4: number, g5: number, g6: number): number {
   const cls = (b: number): number => (b >= 48 && b <= 57 ? 1 : b >= 65 && b <= 90 ? 2 : b >= 97 && b <= 122 ? 3 : 0)
   return cls(b1) | (cls(b2) << 2) | (cls(b3) << 4) | (cls(b4) << 6) | (cls(g5) << 8) | (cls(g6) << 10)
@@ -1104,6 +1112,8 @@ class Model {
     this.shift = 32 - bits
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
+    if (BIN_SHAPE8_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 15)
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
       // 初值：概率 32768（居中），计数 0。
@@ -1286,7 +1296,13 @@ class Model {
         // gained 831 B on H_bcj but lost 114 B on G_lane1's noisy LSBs; shifting every
         // sample by 3 removes that noise and flips G to a gain as well.
         if(this.nctx>13) H[13]=hh(b2>>>3,b4>>>3,this.g(6)>>>3,this.g(8)>>>3)
-        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0 } }
+        // P25.9: fifteenth slot — the 8-byte envelope of the top two bits of each sample.
+        // The waveform lanes drift by amplitude, not by exact value; the coarse envelope
+        // is the only view that stays stable across the 16-bit analogue LSB noise. Its
+        // {1,2}-byte cross terms are the ones `H[11..13]` do not already contain.
+        // 256 KiB slice gain: H_bcj -253 B (G_bin +15 B, O_bin +12 B, compensated below).
+        if(BIN_SHAPE8_ON && this.nctx>14) H[14]=hh(binShape8(b1,b2,b3,b4,this.g(5),this.g(6),this.g(7),this.g(8)), b1, b2)
+        if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0; H[13]=0; if(this.nctx>14){ H[14]=0; H[15]=0 } } }
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
         return
@@ -1349,6 +1365,15 @@ class Model {
             // mask could not; the 8-byte mask is the same idea at twice the reach.
             if (this.nctx > 12) H[12] = frz ? 0 : hh(fineShapeMask(b1,b2,b3,b4,this.g(5),this.g(6)), (b1 << 8) | b2, this.fieldIdx & 0xff)
             if (this.nctx > 13) H[13] = frz ? 0 : hh(shapeMask8(b1,b2,b3,b4,this.g(5),this.g(6),this.g(7),this.g(8)), this.fieldIdx & 0xff, this.fieldCol & 0xff)
+            // P25.9: 15th/16th slots — exact 3-gram keyed by the 2D table coordinate, and
+            // the 3-generation word chain (curWord/prevWord/pwh) with the current byte.
+            // Both are column-local views of a repeated template; the 3-gram pins the
+            // literal while the word chain pins the identity. 256 KiB slice: B -158 B,
+            // C -82 B, K -56 B, J -118 B, applied together.
+            if (this.nctx > 14) {
+              H[14] = frz ? 0 : hh(b1, b2, b3, (this.fieldIdx & 0xff) | (Math.min(this.fieldCol, 63) << 8))
+              if (this.nctx > 15) H[15] = frz ? 0 : hh(this.curWord, this.prevWord, this.pwh, b1)
+            }
           }
           return
         }
