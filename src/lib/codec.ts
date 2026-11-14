@@ -5021,6 +5021,22 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
   }
 }
 
+/** P28.0: printable-ASCII table geometry, independent of any file name. */
+export function asciiTableGroup(data:Uint8Array,segs:PlanSegment[],members:number[]):boolean {
+  let total=0,printable=0,newlines=0
+  for(const i of members){
+    const s=segs[i]
+    if(!s)return false
+    const a=data.subarray(s.start,s.end)
+    total+=a.length
+    for(let k=0;k<a.length;k++){const b=a[k];if((b>=0x20&&b<=0x7e)||b===9||b===10||b===13)printable++;if(b===10)newlines++}
+  }
+  if(total<CONTEXT_SCREEN_MIN_BYTES||printable*100<total*99)return false
+  const lines=newlines+1
+  // A table has many short rows; prose has few long ones.
+  return lines>=4 && total/lines<=512
+}
+
 /** Explicit-plan tests may call this, but are NOT adaptive chooser measurements.
  * Production calls it once, after compressAdaptiveImpl has finished. */
 export async function refineContextCandidates(data:Uint8Array,baseline:Compressed,
@@ -5034,7 +5050,18 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
     const groups=retained.map(g=>({...g,spec:{...g.spec},members:[...g.members]})),segs=baseline.segs
     const eligible=groups.flatMap((g,group)=>[...contextProposalsForGroup(g.spec,g.members.map(i=>segs[i])),
       ...(!g.wordPre && contextSpecAllowed('text-sparse5',g.spec) && g.members.reduce((n,i)=>n+segs[i].rawLen,0)>=CONTEXT_MIN_BYTES
-        ? [{spec:{...g.spec},reason:'selected-raw-text' as const,rawText:true}] : [])]
+        ? [{spec:{...g.spec},reason:'selected-raw-text' as const,rawText:true}] : []),
+      // P28.0: pure byte geometry, never a file name or a known header word. A
+      // group that is (almost) entirely printable ASCII plus whitespace with
+      // short newline-delimited rows is a text/CSV table regardless of which
+      // byte profile the segmenter picked. Such groups (`yeast.data`,
+      // `wdbc.data`, both wine CSVs) were locked into `bin`, so the column
+      // layouts were never even screened. The proposal is purely additive: the
+      // `bin` candidates stay in the tournament, so the container can only win.
+      ...(!g.wordPre && !contextSpecAllowed('text-sparse5',g.spec)
+        && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
+        && asciiTableGroup(data,segs,g.members)
+        ? [{spec:{id:ID.TEXT_V3,s:1,r:1},reason:'selected-text' as const,rawText:true}] : [])]
       // Never steal another original stream's dictionary key, even if that
       // other group later accepts a context/transform of its own.
       .filter(p=>!groups.some((other,i)=>i!==group && sameSpec(other.spec,p.spec)))
