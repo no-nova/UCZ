@@ -859,9 +859,9 @@ class Model {
   get tblFrozen(): boolean { return vertTuning.freezeTbl && this.emaErr > vertTuning.thr }
   get dampShift(): number { return this.emaErr > vertTuning.thr2 ? 3 : 4 }
   shift: number
-  hashes = new Int32Array(24)
-  idx = new Int32Array(24)
-  inputs = new Int32Array(24)
+  hashes = new Int32Array(28)
+  idx = new Int32Array(28)
+  inputs = new Int32Array(28)
   // 每个上下文一张 32 位表：高 16 位是概率，低 8 位是更新计数。
   // 原实现用 Uint16Array + Uint8Array 两张表，同一槽位要两次随机访存；
   // 合并成一次读改写后，每比特的高延迟访存次数从 2·nctx 降到 nctx。
@@ -1125,7 +1125,7 @@ class Model {
     this.shift = 32 - bits
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
-    if (this.bcjOn) this.nctx = Math.max(this.nctx, 21)
+    if (this.bcjOn) this.nctx = Math.max(this.nctx, 25)
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
@@ -1342,6 +1342,19 @@ class Model {
             if(this.nctx>18) H[18]=hh(nibbleMask6(b1,b2,b3,b4,this.g(5),this.g(6)), b1)
             if(this.nctx>19) H[19]=hh(b1,this.g(5),this.g(6),b2)
             if(this.nctx>20) H[20]=hh(b1,b2,this.g(5),this.g(6),this.g(7))
+            if(this.bcjOn) {
+              // P26.7: ModRM/SIB and immediate bridges. x86 encodings keep the opcode in
+              // `b1` but spread the operands over ModRM/SIB plus 1 or 4 displacement bytes,
+              // so the *next* instruction's opcode sits at a distance the fixed lags cannot
+              // see. `H[21]` jumps a `disp32`, `H[22]`/`H[23]` jump a single ModRM/SIB byte
+              // from either side, and `H[24]` keeps only the 5-bit register/opcode skeleton
+              // so register renaming does not split the bucket.
+              const g5=this.g(5), g6=this.g(6), g7=this.g(7), g8=this.g(8), frz=this.emaErr > BIN_EMA_GATE
+              H[21]=frz?0:hh(b1,g6,g7,g8)
+              H[22]=frz?0:hh(b1,b2,b4,g5,g6)
+              H[23]=frz?0:hh(b1,b3,b4,g5)
+              H[24]=frz?0:hh(b1,(b2>>>3)|((b3>>>3)<<5),(b4>>>3)|((g5>>>3)<<5),g6>>>3)
+            }
           }
         }
         if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0; H[13]=0; if(this.nctx>14){ H[14]=0; H[15]=0 } } }
