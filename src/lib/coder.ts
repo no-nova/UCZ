@@ -1128,6 +1128,13 @@ class Model {
     // reconstructs exactly the same table without a container-format change.
     let bits = geo.cmBits
     if (this.bcjOn && n >= 524288 && bits < 23) bits = 23
+    // P27.4: `text-vertcol` spends 16 sparse high-order contexts (word / column /
+    // shape triples) on 1-3 MB text, but container v22 carries no table-width flag,
+    // so `cmTableShape` clamped it to 21 bits and the sparse keys collided heavily.
+    // `n` and the context are both known to the decoder, so the width needs no flag:
+    // measured on the full streams 21 -> 23 bits is B -1,802, C -4,167, K -7,132 B
+    // (rt=true throughout), at 16 x 32 MiB of tables.
+    if (v3 && variant === 'v20' && profile === 'text' && options?.context === 'text-vertcol' && n >= 524288 && bits < 23) bits = 23
     const { mht4Bits: mhBits, mht8Bits: mh8Bits } = geo
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
