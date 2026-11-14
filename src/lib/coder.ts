@@ -1136,7 +1136,17 @@ class Model {
     // `n` and the context are both known to the decoder, so the width needs no flag:
     // measured on the full streams 21 -> 23 bits is B -1,802, C -4,167, K -7,132 B
     // (rt=true throughout), at 16 x 32 MiB of tables.
-    if (v3 && variant === 'v20' && profile === 'text' && options?.context === 'text-vertcol' && n >= 524288 && bits < 23) bits = 23
+    // P27.8: the 512 KiB cliff was the only reason 256-512 KiB prose and CSV files
+    // (Canterbury `plrabn12.txt` 482 KiB, `lcet10.txt` 427 KiB, UCI `winequality-white`
+    // 264 KiB) starved on 21-bit tables: `text-vertcol` is offered from 256 KiB up by
+    // `CONTEXT_SCREEN_MIN_BYTES`, but `cmTableShape` only reaches 22 bits at 512 KiB.
+    // The tier is now smooth and, crucially, only applies to the real encode: trial
+    // probes (`probeDepth`) keep their cheap 21-bit tables, which is what made the
+    // planner re-plan (and regress K/J by 5-8 KiB) whenever contexts grew.
+    if (!probeDepth && v3 && variant === 'v20' && profile === 'text' && (options?.context === 'text-vertcol' || options?.context === 'text-tabcol')) {
+      if (n >= 262144) { if (bits < 23) bits = 23 }
+      else if (n >= 65536 && bits < 22) bits = 22
+    }
     const { mht4Bits: mhBits, mht8Bits: mh8Bits } = geo
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
