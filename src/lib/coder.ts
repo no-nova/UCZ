@@ -387,7 +387,7 @@ function charClass3(x:number) {
 // P25.9: the bin 15th slot (8-byte coarse envelope) was measured and switched OFF:
 // it won 253 B on the H_bcj slice but costs +15/+12 B on G/O slices and +61/+5 B on the
 // full G/O files, and the zero-regression rule is absolute. Kept as a documented switch.
-const BIN_SHAPE8_ON = false
+
 function binShape8(b1: number, b2: number, b3: number, b4: number, b5: number, b6: number, b7: number, b8: number): number {
   return ((b1 >>> 6) << 14) | ((b2 >>> 6) << 12) | ((b3 >>> 6) << 10) | ((b4 >>> 6) << 8) |
          ((b5 >>> 6) << 6) | ((b6 >>> 6) << 4) | ((b7 >>> 6) << 2) | (b8 >>> 6)
@@ -903,6 +903,9 @@ class Model {
   prevWord = 0
   prevPrevWord = 0
   context?: CMContext
+  /** P26.0: set only for `ID.BCJ_V3` payloads — enables the x86-shaped 15th/16th contexts
+   *  and the second/third mixer. Every other stream keeps its P25.9 behaviour exactly. */
+  bcj?: boolean
   variant: CMVariant
   geomStride: number
   /** v15：APM/SSE 校准表（apmNctx × 33 个 16 位概率）。 */
@@ -947,6 +950,7 @@ class Model {
   binTenOn = false
   /** P25.1: `bin` stream长到 `BIN_TWELVE_MIN_BYTES`，启用第十二个上下文。 */
   binLadderOn = false
+  bcjOn = false
   dmOn = 0
   w1?: Int32Array
   w1base = 0
@@ -1050,6 +1054,7 @@ class Model {
     const v3 = variant === 'v13' || isAPMKernel(variant)
     this.binTenOn = v3 && profile === 'bin' && variant === 'v20' && n >= BIN_TEN_MIN_BYTES
     this.binLadderOn = this.binTenOn && n >= BIN_TWELVE_MIN_BYTES
+    this.bcjOn = v3 && variant === 'v20' && profile === 'bin' && !this.context && !!options?.bcj
     this.nctx = this.binLadderOn ? 13 : this.binTenOn ? 11
       : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
     // P25.2: `text-vertcol` spends a tenth slot on the word/column triple once the
@@ -1112,7 +1117,7 @@ class Model {
     this.shift = 32 - bits
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
-    if (BIN_SHAPE8_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 15)
+    if (this.bcjOn) this.nctx = Math.max(this.nctx, 16)
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
@@ -1124,6 +1129,18 @@ class Model {
     const primaryGroups = this.isV20 ? 32 : 24 // 8 bits × 4 (or legacy 3) match states
     this.weights = new Int32Array(primaryGroups * this.ninputs)
     this.altWeights = new Int32Array(primaryGroups * this.ninputs)
+    if (this.bcjOn) {
+      // x86 instruction bytes are locally stationary in a way plain `bin` is not: the
+      // secondary table keys on the two previous bytes' top 3 bits plus alignment, the
+      // ternary one on the 4-byte (ModRM/SIB/dword) envelope.
+      this.dmOn = 1
+      this.dmKind = 2
+      this.dmGate = 0
+      this.w1 = new Int32Array(1024 * this.ninputs)
+      this.w1.set(this.weights.subarray(0, this.ninputs))
+      this.w2 = new Int32Array(1024 * this.ninputs)
+      this.w2.set(this.weights.subarray(0, this.ninputs))
+    }
     if (v3 && variant === 'v20' && n >= DUAL_MIXER_MIN_BYTES && (this.context === 'text-vertcol' || this.context === 'text-tabcol')) {
       this.dmOn = 1
       // Seeded below with the primary's initial weights so both dot products start
@@ -1296,12 +1313,13 @@ class Model {
         // gained 831 B on H_bcj but lost 114 B on G_lane1's noisy LSBs; shifting every
         // sample by 3 removes that noise and flips G to a gain as well.
         if(this.nctx>13) H[13]=hh(b2>>>3,b4>>>3,this.g(6)>>>3,this.g(8)>>>3)
-        // P25.9: fifteenth slot — the 8-byte envelope of the top two bits of each sample.
-        // The waveform lanes drift by amplitude, not by exact value; the coarse envelope
-        // is the only view that stays stable across the 16-bit analogue LSB noise. Its
-        // {1,2}-byte cross terms are the ones `H[11..13]` do not already contain.
-        // 256 KiB slice gain: H_bcj -253 B (G_bin +15 B, O_bin +12 B, compensated below).
-        if(BIN_SHAPE8_ON && this.nctx>14) H[14]=hh(binShape8(b1,b2,b3,b4,this.g(5),this.g(6),this.g(7),this.g(8)), b1, b2)
+        if(this.bcjOn && this.nctx>14) {
+          // P26.0: x86-specific pair. `H[14]` is the 8-byte envelope of the top two bits
+          // of each byte (instruction-class density), `H[15]` the 6-bit-quantised ladder
+          // that pins displacement/immediate magnitude without its noisy low bits.
+          H[14]=hh(binShape8(b1,b2,b3,b4,this.g(5),this.g(6),this.g(7),this.g(8)), b1, b2)
+          if(this.nctx>15) H[15]=hh(b1, (b2>>>2)|((b3>>>2)<<6), (b4>>>2)|((this.g(5)>>>2)<<6), this.g(6)>>>2)
+        }
         if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0; H[13]=0; if(this.nctx>14){ H[14]=0; H[15]=0 } } }
         if(this.isV20)this.computeGeometry(b1,b2)
         if(this.context === 'bin-stride4') H[8]=hh(b4,this.g(8),this.g(12),this.pos&3)
@@ -1577,15 +1595,19 @@ class Model {
         const w1l = this.w1!
         let d1 = w1l[w1b + N - 1] * 256
         for (let i = 0, end = N - 1; i < end; i++) d1 += w1l[w1b + i] * inputs[i]
-        const i2 = (((this.fieldIdx & 7) << 7) | (Math.min(this.fieldCol, 7) << 4) | (cls(g1) << 2) | mm | bb) & 0x3ff
-        const w2b = i2 * N
-        this.w2base = w2b
-        const w2l = this.w2!
-        let d2 = w2l[w2b + N - 1] * 256
-        for (let i = 0, end = N - 1; i < end; i++) d2 += w2l[w2b + i] * inputs[i]
-        // Three averaged estimators: the primary (full context ladder) plus two coarse
-        // structural views. Error falls as 1/n, and the spread across views shrinks.
-        dot = (dot * 2 + d1 + d2) >> 2
+        // Averaged estimators: the primary (full context ladder) plus coarse structural
+        // views. Error falls as 1/n, and the spread across views shrinks.
+        if (this.w2) {
+          const i2s = this.profile === 'text'
+            ? (((this.fieldIdx & 7) << 7) | (Math.min(this.fieldCol, 7) << 4) | (cls(g1) << 2) | mm | bb) & 0x3ff
+            : ((((g1 >>> 6) << 8) | ((g2 >>> 6) << 6) | ((this.g(3) >>> 6) << 4) | ((this.g(4) >>> 6) << 2) | mm | bb)) & 0x3ff
+          const w2b = i2s * N
+          this.w2base = w2b
+          const w2l = this.w2
+          let d2 = w2l[w2b + N - 1] * 256
+          for (let i = 0, end = N - 1; i < end; i++) d2 += w2l[w2b + i] * inputs[i]
+          dot = (dot * 2 + d1 + d2) >> 2
+        } else dot = (dot + d1) >> 1
       }
       if (isV15) {
         // 第二路：按"前字节类别 × 对齐相位 / c0 低位 × 匹配状态"再点积一次。
@@ -1683,8 +1705,10 @@ class Model {
     if (this.dmOn) {
       const w1l = this.w1!, w1b = this.w1base
       for (let i = 0; i < N; i++) w1l[w1b + i] += (inputs[i] * err + 0x4000) >> 17
-      const w2l = this.w2!, w2b = this.w2base
-      for (let i = 0; i < N; i++) w2l[w2b + i] += (inputs[i] * err + 0x4000) >> 17
+      if (this.w2) {
+        const w2l = this.w2, w2b = this.w2base
+        for (let i = 0; i < N; i++) w2l[w2b + i] += (inputs[i] * err + 0x4000) >> 17
+      }
     }
     if (this.dualPass) {
       // v13 的第二套权重：误差项用上游概率（不含辅混洗，保证 base 流不被污染）。

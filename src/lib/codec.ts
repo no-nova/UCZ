@@ -1187,7 +1187,7 @@ function encodeTerrainGroupImpl(parts: Uint8Array[], sp: Spec, cost?: Float32Arr
   }
   if (v3) {
     const payload = encodeCM(joined,sp.id===ID.TEXT_V3?'text':sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD?'res2d':sp.id===ID.DELTA_V3?'res':'bin',sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD||sp.id===ID.DELTA_V3?sp.s:1,sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD?sp.r:1,cost,0,blockCost,onProgress,isAPMKernel(kernel) ? kernel :'v13',0,false,
-      options?.matchDist ? {matchDist:true} : undefined)
+      (() => { const o: any = options?.matchDist ? {matchDist:true} : {}; if (sp.id === ID.BCJ_V3 && isAPMKernel(kernel)) o.bcj = true; return o })())
     // The flag must travel with the payload it describes; planHeader refuses a group
     // whose matchDist metadata does not match what the payload actually declared.
     return options?.matchDist ? markPayloadModel(payload,payloadModelFlags(payload)|V22_FLAG_MATCH_DISTANCE) : payload
@@ -1387,7 +1387,7 @@ function decodeTerrainGroupImpl(payload: Uint8Array, lengths: number[], sp: Spec
   // P6-4：id 10 也能以 v15 内核编码（见编码端），解码必须同步用同一内核。
   if (sp.id === ID.TRANSPOSE_GROUP) return decodeGroupedTranspose(payload, lengths, sp.s, onProgress, false, kernel==='v20'?'v20':kernel==='v15')
   let joined: Uint8Array
-  if ((sp.id>=ID.TEXT_V3 && sp.id<=ID.DELTA_V3) || sp.id===ID.WIDE_GRAD) joined=decodeCM(payload,n,sp.id===ID.TEXT_V3?'text':sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD?'res2d':sp.id===ID.DELTA_V3?'res':'bin',sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD||sp.id===ID.DELTA_V3?sp.s:1,sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD?sp.r:1,onProgress,isAPMKernel(kernel) ? kernel :'v13',0,false,options)
+  if ((sp.id>=ID.TEXT_V3 && sp.id<=ID.DELTA_V3) || sp.id===ID.WIDE_GRAD) joined=decodeCM(payload,n,sp.id===ID.TEXT_V3?'text':sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD?'res2d':sp.id===ID.DELTA_V3?'res':'bin',sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD||sp.id===ID.DELTA_V3?sp.s:1,sp.id===ID.GRAD_V3||sp.id===ID.WIDE_GRAD?sp.r:1,onProgress,isAPMKernel(kernel) ? kernel :'v13',0,false,sp.id === ID.BCJ_V3 && isAPMKernel(kernel) ? { ...options, bcj: true } : options)
   else if (sp.id === ID.BCJ_V2 || sp.id === ID.BIN_V2 || sp.id === ID.TEXT_V2 || sp.id === ID.GRAD_V2)
     joined = decodeCM(payload, n, sp.id === ID.TEXT_V2 ? 'text' : sp.id === ID.GRAD_V2 ? 'res2d' : 'bin', sp.id === ID.GRAD_V2 ? sp.s : 1, sp.id === ID.GRAD_V2 ? sp.r : 1, onProgress, isAPMKernel(kernel) ? kernel : true, sp.id === ID.GRAD_V2 ? sp.r : 0, false, options)
   else if (sp.id === ID.ANCHOR_FOLD) joined = decodeCM(payload,n,sp.r&128 ? 'bin' : 'text',1,1,onProgress)
