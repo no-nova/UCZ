@@ -392,6 +392,10 @@ function binShape8(b1: number, b2: number, b3: number, b4: number, b5: number, b
   return ((b1 >>> 6) << 14) | ((b2 >>> 6) << 12) | ((b3 >>> 6) << 10) | ((b4 >>> 6) << 8) |
          ((b5 >>> 6) << 6) | ((b6 >>> 6) << 4) | ((b7 >>> 6) << 2) | (b8 >>> 6)
 }
+function nibbleMask6(b1: number, b2: number, b3: number, b4: number, b5: number, b6: number): number {
+  return ((b1 >>> 4) << 20) | ((b2 >>> 4) << 16) | ((b3 >>> 4) << 12) |
+         ((b4 >>> 4) << 8) | ((b5 >>> 4) << 4) | (b6 >>> 4)
+}
 function charShapeMask(b1: number, b2: number, b3: number, b4: number, g5: number, g6: number): number {
   const cls = (b: number): number => (b >= 48 && b <= 57 ? 1 : b >= 65 && b <= 90 ? 2 : b >= 97 && b <= 122 ? 3 : 0)
   return cls(b1) | (cls(b2) << 2) | (cls(b3) << 4) | (cls(b4) << 6) | (cls(g5) << 8) | (cls(g6) << 10)
@@ -855,9 +859,9 @@ class Model {
   get tblFrozen(): boolean { return vertTuning.freezeTbl && this.emaErr > vertTuning.thr }
   get dampShift(): number { return this.emaErr > vertTuning.thr2 ? 3 : 4 }
   shift: number
-  hashes = new Int32Array(20)
-  idx = new Int32Array(20)
-  inputs = new Int32Array(20)
+  hashes = new Int32Array(24)
+  idx = new Int32Array(24)
+  inputs = new Int32Array(24)
   // 每个上下文一张 32 位表：高 16 位是概率，低 8 位是更新计数。
   // 原实现用 Uint16Array + Uint8Array 两张表，同一槽位要两次随机访存；
   // 合并成一次读改写后，每比特的高延迟访存次数从 2·nctx 降到 nctx。
@@ -956,6 +960,8 @@ class Model {
   w1base = 0
   w2?: Int32Array
   w2base = 0
+  w3?: Int32Array
+  w3base = 0
   lastPrimaryMs = 0
   /** 双流模式：step() 额外算一遍 v13 权重，learn() 分别更新两套权重。 */
   dualPass = false
@@ -1117,7 +1123,7 @@ class Model {
     this.shift = 32 - bits
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
-    if (this.bcjOn) this.nctx = Math.max(this.nctx, 16)
+    if (this.bcjOn) this.nctx = Math.max(this.nctx, 20)
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
@@ -1140,6 +1146,8 @@ class Model {
       this.w1.set(this.weights.subarray(0, this.ninputs))
       this.w2 = new Int32Array(1024 * this.ninputs)
       this.w2.set(this.weights.subarray(0, this.ninputs))
+      this.w3 = new Int32Array(1024 * this.ninputs)
+      this.w3.set(this.weights.subarray(0, this.ninputs))
     }
     if (v3 && variant === 'v20' && n >= DUAL_MIXER_MIN_BYTES && (this.context === 'text-vertcol' || this.context === 'text-tabcol')) {
       this.dmOn = 1
@@ -1319,6 +1327,17 @@ class Model {
           // that pins displacement/immediate magnitude without its noisy low bits.
           H[14]=hh(binShape8(b1,b2,b3,b4,this.g(5),this.g(6),this.g(7),this.g(8)), b1, b2)
           if(this.nctx>15) H[15]=hh(b1, (b2>>>2)|((b3>>>2)<<6), (b4>>>2)|((this.g(5)>>>2)<<6), this.g(6)>>>2)
+          if(this.nctx>16) {
+            // P26.1: exact 5/6-gram (literal instruction+operand keys), the 6-nibble mask
+            // (same key with the low nibbles — usually immediate data — erased), and the
+            // "bridge" slot that skips one byte to read across a ModRM/SIB byte.
+            // Slice screen: 5-gram -43 B, 6-gram -16 B, nibbleMask6 -71 B, bridge -14 B;
+            // together with `W3` the full stream gains 2,631 B.
+            H[16]=hh(b1,b2,b3,b4,this.g(5))
+            if(this.nctx>17) H[17]=hh(b1,b2,b3,b4,this.g(5),this.g(6))
+            if(this.nctx>18) H[18]=hh(nibbleMask6(b1,b2,b3,b4,this.g(5),this.g(6)), b1)
+            if(this.nctx>19) H[19]=hh(b1,this.g(3),this.g(4),b2)
+          }
         }
         if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0; H[13]=0; if(this.nctx>14){ H[14]=0; H[15]=0 } } }
         if(this.isV20)this.computeGeometry(b1,b2)
@@ -1606,7 +1625,15 @@ class Model {
           const w2l = this.w2
           let d2 = w2l[w2b + N - 1] * 256
           for (let i = 0, end = N - 1; i < end; i++) d2 += w2l[w2b + i] * inputs[i]
-          dot = (dot * 2 + d1 + d2) >> 2
+          if (this.w3) {
+            const i3s = ((((g1 & 0xf0) << 2) | (g2 >>> 4) << 2) | mm | bb) & 0x3ff
+            const w3b = i3s * N
+            this.w3base = w3b
+            const w3l = this.w3
+            let d3 = w3l[w3b + N - 1] * 256
+            for (let i = 0, end = N - 1; i < end; i++) d3 += w3l[w3b + i] * inputs[i]
+            dot = (dot * 2 + d1 + d2 + d3) >> 2
+          } else dot = (dot * 2 + d1 + d2) >> 2
         } else dot = (dot + d1) >> 1
       }
       if (isV15) {
@@ -1708,6 +1735,10 @@ class Model {
       if (this.w2) {
         const w2l = this.w2, w2b = this.w2base
         for (let i = 0; i < N; i++) w2l[w2b + i] += (inputs[i] * err + 0x4000) >> 17
+      }
+      if (this.w3) {
+        const w3l = this.w3, w3b = this.w3base
+        for (let i = 0; i < N; i++) w3l[w3b + i] += (inputs[i] * err + 0x4000) >> 17
       }
     }
     if (this.dualPass) {
