@@ -954,6 +954,8 @@ class Model {
   binTenOn = false
   /** P27.7: second word of history for the word trigram. */
   prev2Word = 0
+  /** P28.5: causally detected scanline period for small `bin` blocks (0 = none). */
+  scanPeriod = 0
   /** P28.2: hash of the first <=4 letters of the current token (prefix root). */
   curStem4 = 0
   /** P28.2: prefix root of the token that just ended. */
@@ -1317,7 +1319,61 @@ class Model {
     }
   }
 
+  /**
+   * P28.5: 100% causal scanline period detector.
+   *
+   * Runs once over bytes that have already been coded (`this.buf[0..this.pos)`),
+   * so encoder and decoder derive exactly the same value with no header bits.
+   * Only *non-trivial* matches count: a match on a constant run
+   * (`buf[j] === buf[j-1]`) is ignored, otherwise a block of `0x00` fill would
+   * "prove" every period. A period is locked only when the match rate is far
+   * above chance, which leaves random or code-like data untouched.
+   */
+  private detectScanPeriod(): void {
+    const pos = this.pos
+    if (this.scanPeriod !== 0 || pos < 4096) return
+    const win = Math.min(2048, pos)
+    const from = pos - win
+    let nonFlat = 0
+    for (let j = from + 1; j < pos; j++) if (this.buf[j] !== this.buf[j - 1]) nonFlat++
+    if (nonFlat < 256) return
+    // A 1-bit bitmap is dominated by white/black runs, i.e. by whole bytes of
+    // 0x00 or 0xFF. Text, CSV and code are not, so this single statistic keeps
+    // the 2-D path off every file where it has nothing to predict (`yeast.data`,
+    // both wine CSVs regressed by 2-4 B without it).
+    let flatBytes = 0
+    for (let j = from; j < pos; j++) { const v = this.buf[j]; if (v === 0 || v === 0xff) flatBytes++ }
+    if (flatBytes * 10 < win * 3) return
+    let bestP = 0, bestN = 0
+    for (let p = 16; p <= 512 && p < from; p++) {
+      let hit = 0
+      for (let j = from; j < pos; j++) if (this.buf[j] === this.buf[j - p] && this.buf[j] !== this.buf[j - 1]) hit++
+      if (hit > bestN) { bestN = hit; bestP = p }
+    }
+    // A fax row is mostly flat runs, so only ~50% of the non-flat bytes can
+    // repeat at the true period; a third is already ~1.5x the chance rate for a
+    // 2-D-coded bitmap and leaves random data far below it.
+    if (bestN >= 96 && bestN * 3 >= nonFlat) {
+      if (bestP % 2 === 0 && bestP > 32) {
+        let half = 0
+        for (let j = pos - win; j < pos; j++) if (this.buf[j] === this.buf[j - (bestP >> 1)] && this.buf[j] !== this.buf[j - 1]) half++
+        if (half * 10 >= bestN * 9) bestP >>= 1
+      }
+      this.scanPeriod = bestP
+    }
+  }
+
   private computeContexts() {
+    // P28.5: small `bin` blocks may be 2-D bitmaps (fax rows, 1-bit BMP). The
+    // detector is causal and header-free; it runs only at power-of-two
+    // boundaries (at most a handful of times per stream) and the size band keeps
+    // the large transpose lanes (>= 512 KiB) on their tuned 1-D contexts.
+    // P28.5: small `bin` blocks may be 2-D bitmaps (fax rows, 1-bit BMP). The
+    // detector is causal and header-free; it runs only at power-of-two
+    // boundaries (a handful of times per stream) and the size band keeps the
+    // large transpose lanes (>= 512 KiB) on their tuned 1-D contexts.
+    if (this.profile === 'bin' && !this.bcjOn && this.scanPeriod === 0 && this.pos >= 4096
+      && (this.pos & (this.pos - 1)) === 0 && this.buf.length >= 16384 && this.buf.length <= 524289) this.detectScanPeriod()
     const H = this.hashes
     const b1 = this.g(1),
       b2 = this.g(2),
@@ -1340,6 +1396,16 @@ class Model {
           H[0]=p;H[1]=hh(p,b1);H[2]=hh(p,b1,b2);H[3]=hh(p,b1,b2,b3);H[4]=hh(p,b1,b2,b3,b4);H[5]=hh(p,a);H[6]=hh(p,a,a2);H[7]=hh(p,b1,a);H[8]=hh(p,b1,(b1-prev)&255,a)
         } else {
           H[0]=0;H[1]=hh(b1);H[2]=hh(b1,b2);H[3]=hh(b1,b2,b3);H[4]=this.isV20?hh(b1,this.pos&3):hh(b1,b2,b3,b4);H[5]=hh(b1,b3);H[6]=hh(b3,b4);H[7]=hh(b1,b4)
+          // P28.5: on a detected 2-D bitmap the two weakest slots (single byte,
+          // byte pair) are replaced by the scanline cross — north `g(P)`,
+          // north-west `g(P+1)`, north-east `g(P-1)` and two rows up `g(2P)`.
+          // Nothing is spent when no period was found, so the slot budget and the
+          // mixer layout stay exactly as they are for every other stream.
+          if (this.scanPeriod > 0) {
+            const np = this.scanPeriod, no = this.g(np)
+            H[1] = hh(b1, no, this.g(np + 1), this.g(np - 1))
+            H[2] = hh(no, this.g(np << 1), b1)
+          }
           // P6-3a：v15 的稀疏上下文改用"4 字节步长"（b4）与"8 字节步长"（b8）：
           // 32 位定长指令 / 定长结构体里，当前字节与 pos-4、pos-8 强列相关。
           H[8]=this.isV20 ? (this.context === 'bin-stride4' ? hh(b4,this.g(8),this.g(12),this.pos&3) : hh(b2,b4)) : this.isV15 && match3Tuning.binCtx8
@@ -1557,8 +1623,19 @@ class Model {
         break
       case 'bin':
         H[0] = 0
-        H[1] = hh(b1)
-        H[2] = hh(b1, b2)
+        if (this.scanPeriod > 0) {
+          // P28.5: 2D scanline neighbourhood. `g(P)` is the byte directly above
+          // the current one, `g(P+1)` its north-west and `g(P-1)` its north-east
+          // neighbour, `g(2P)` the row above that. A bitmap (fax, 1-bit BMP) is
+          // strongly predicted by exactly this cross, which no 1-D context can
+          // express.
+          const np = this.scanPeriod, no = this.g(np), nn = this.g(np << 1)
+          H[1] = hh(b1, no, this.g(np + 1), this.g(np - 1))
+          H[2] = hh(no, nn, b1)
+        } else {
+          H[1] = hh(b1)
+          H[2] = hh(b1, b2)
+        }
         H[3] = hh(b1, b2, b3)
         H[4] = hh(b1, b2, b3, b4)
         H[5] = hh(b2)
