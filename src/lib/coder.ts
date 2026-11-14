@@ -1143,6 +1143,11 @@ class Model {
     // The tier is now smooth and, crucially, only applies to the real encode: trial
     // probes (`probeDepth`) keep their cheap 21-bit tables, which is what made the
     // planner re-plan (and regress K/J by 5-8 KiB) whenever contexts grew.
+    // P28.4: the plain v20 `bin` manifold (transpose lanes of `10.G`/`2.O`, 0.5-1.3 MB)
+    // still ran on 22-bit tables while the BCJ stream already gets 23 bits. The
+    // lanes are the same class of residual, so the tier is granted here too; it
+    // stays final-encode only so planner trials keep their cheap tables.
+    if (!probeDepth && v3 && variant === 'v20' && profile === 'bin' && !this.context && !this.bcjOn && n >= 524288 && bits < 23) bits = 23
     if (!probeDepth && v3 && variant === 'v20' && profile === 'text' && (options?.context === 'text-vertcol' || options?.context === 'text-tabcol')) {
       if (n >= 262144) { if (bits < 23) bits = 23 }
       else if (n >= 65536 && bits < 22) bits = 22
