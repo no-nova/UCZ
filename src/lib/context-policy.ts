@@ -67,7 +67,7 @@ export interface CMOptions {
   symMap?: { k: number; bits: number; symToByte: Uint8Array; byteToSym: Uint8Array; compByte: Uint8Array }
 }
 export const CONTEXT_MIN_BYTES = 16 * 1024
-export const CONTEXT_SCREEN_MIN_BYTES = 256 * 1024
+export const CONTEXT_SCREEN_MIN_BYTES = 64 * 1024
 export const CONTEXT_PROBE_BYTES = 192 * 1024
 
 export function contextFromCode(code: number): CMContext | undefined {
