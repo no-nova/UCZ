@@ -954,6 +954,14 @@ class Model {
   binTenOn = false
   /** P27.7: second word of history for the word trigram. */
   prev2Word = 0
+  /** P28.2: hash of the first <=4 letters of the current token (prefix root). */
+  curStem4 = 0
+  /** P28.2: prefix root of the token that just ended. */
+  prevStem4 = 0
+  /** P28.2: hash of the last <=3 bytes of the token that just ended (inflection/unit tag). */
+  prevSuffix = 0
+  /** P28.2: letters seen in the current token (0 = not inside a word). */
+  stemLen = 0
   /** P25.1: `bin` stream长到 `BIN_TWELVE_MIN_BYTES`，启用第十二个上下文。 */
   binLadderOn = false
   bcjOn = false
@@ -1161,7 +1169,7 @@ class Model {
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
     if (this.bcjOn) this.nctx = Math.max(this.nctx, 31)
-    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 21)
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 22)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
       // 初值：概率 32768（居中），计数 0。
@@ -1493,6 +1501,7 @@ class Model {
                 // measured on the exact production streams at `bits = 23`.
                 H[18] = frz ? 0 : hh(this.curWord, this.prevWord, this.prev2Word, b1)
                 H[19] = frz ? 0 : hh(this.curWord, (this.fieldIdx & 0xff) | (Math.min(this.fieldCol, 63) << 8), this.prevWord)
+                if (this.nctx > 21) H[21] = frz ? 0 : hh(this.curStem4, this.prevSuffix, this.prevStem4, b1)
                 if (this.nctx > 20) H[20] = frz ? 0 : hh(b1, b2, b4, this.g(5), this.g(6))
               }
             }
@@ -2160,8 +2169,28 @@ class Model {
         if (this.context === 'wp-token3') this.prevPrevWord = this.prevWord
         this.prevWord = this.curWord
         this.curWord = Math.imul(byte + 1, 0x9e3779b1) >>> 0
-      } else if (asciiLetter) this.curWord = (Math.imul(this.curWord, 16777619) ^ lower) >>> 0
-      else if (this.curWord !== 0) { if (this.context === 'wp-token3') this.prevPrevWord = this.prevWord; this.prev2Word = this.prevWord; this.prevWord = this.curWord; this.curWord = 0 }
+      } else if (asciiLetter) {
+        // P28.2: the avalanche `curWord` destroys prefix similarity after four
+        // bytes ("walk"/"walking"/"walked"), so the prefix root is tracked
+        // separately and stops absorbing bytes once four letters are in.
+        if (this.stemLen === 0) this.curStem4 = lower
+        else if (this.stemLen < 4) this.curStem4 = (Math.imul(this.curStem4, 2654435761) ^ lower) >>> 0
+        this.stemLen++
+        this.curWord = (Math.imul(this.curWord, 16777619) ^ lower) >>> 0
+      } else if (this.curWord !== 0) {
+        if (this.context === 'wp-token3') this.prevPrevWord = this.prevWord
+        this.prev2Word = this.prevWord; this.prevWord = this.curWord; this.curWord = 0
+        // P28.2: the token just ended, so its prefix root and its terminal tag
+        // become causal state for the next token. Purely positional: no
+        // character classes beyond "ASCII letter" and no suffix table.
+        this.prevStem4 = this.curStem4
+        this.prevSuffix = hh(this.g(2) | 0x20,
+          this.stemLen >= 2 ? this.g(3) | 0x20 : 0,
+          this.stemLen >= 3 ? this.g(4) | 0x20 : 0,
+          Math.min(this.stemLen, 7))
+        this.curStem4 = 0
+        this.stemLen = 0
+      }
     }
     if (this.profile === 'text') {
       const letter = (byte >= 65 && byte <= 90) || (byte >= 97 && byte <= 122) || byte >= 128
