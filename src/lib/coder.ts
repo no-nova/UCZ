@@ -788,6 +788,7 @@ function mix32(x: number): number {
  */
 const DUAL_MIXER_MIN_BYTES = 65536
 
+
 function hh(a: number, b = 0, c = 0, d = 0, e = 0, f = 0): number {
   let h = 0x811c9dc5
   h = Math.imul(h ^ a, FNV_P)
@@ -941,6 +942,8 @@ class Model {
   dmOn = 0
   w1?: Int32Array
   w1base = 0
+  w2?: Int32Array
+  w2base = 0
   lastPrimaryMs = 0
   /** 双流模式：step() 额外算一遍 v13 权重，learn() 分别更新两套权重。 */
   dualPass = false
@@ -1117,6 +1120,7 @@ class Model {
       // identical: the average then reproduces the single-mixer prediction exactly at
       // the start, and only the learning paths diverge.
       this.w1 = new Int32Array(1024 * this.ninputs)
+      this.w2 = new Int32Array(1024 * this.ninputs)
     }
     const w0 = Math.floor((65536 * 1.2) / Math.max(this.nctx, 2))
     for (let set = 0; set < primaryGroups; set++) {
@@ -1125,6 +1129,7 @@ class Model {
     }
     this.altWeights.set(this.weights)
     if (this.w1) this.w1.set(this.weights.subarray(0, this.ninputs))
+    if (this.w2) this.w2.set(this.weights.subarray(0, this.ninputs))
     if (this.useMatch && mhBits > 21) this.requiredFlags |= CM_FLAG_MATCH_TABLE_22
     else if (this.useMatch && mhBits > 20) this.requiredFlags |= CM_FLAG_MATCH_TABLE_21
     this.mhShift = 32 - mhBits
@@ -1540,14 +1545,22 @@ class Model {
         const mm = this.mlen > 0 ? 2 : 0, bb = bit >= 4 ? 1 : 0
         const g1 = this.g(1), g2 = this.g(2)
         const i1 = (this.profile === 'text'
-          ? ((cls(g1) << 7) | (cls(g2) << 4) | (Math.min(this.fieldCol, 3) << 2) | mm | bb)
+          ? ((charClass3(g1) << 7) | (charClass3(g2) << 4) | (Math.min(this.fieldCol, 3) << 2) | mm | bb)
           : (((g1 >>> 5) << 7) | ((g2 >>> 5) << 4) | ((this.pos & 3) << 2) | mm | bb)) & 0x3ff
         const w1b = i1 * N
         this.w1base = w1b
         const w1l = this.w1!
         let d1 = w1l[w1b + N - 1] * 256
         for (let i = 0, end = N - 1; i < end; i++) d1 += w1l[w1b + i] * inputs[i]
-        dot = (dot + d1) >> 1
+        const i2 = (((this.fieldIdx & 7) << 7) | (Math.min(this.fieldCol, 7) << 4) | (cls(g1) << 2) | mm | bb) & 0x3ff
+        const w2b = i2 * N
+        this.w2base = w2b
+        const w2l = this.w2!
+        let d2 = w2l[w2b + N - 1] * 256
+        for (let i = 0, end = N - 1; i < end; i++) d2 += w2l[w2b + i] * inputs[i]
+        // Three averaged estimators: the primary (full context ladder) plus two coarse
+        // structural views. Error falls as 1/n, and the spread across views shrinks.
+        dot = (dot * 2 + d1 + d2) >> 2
       }
       if (isV15) {
         // 第二路：按"前字节类别 × 对齐相位 / c0 低位 × 匹配状态"再点积一次。
@@ -1644,7 +1657,9 @@ class Model {
     for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + (this.dmOn ? 0x4000 : 0x8000)) >> (this.dmOn ? 17 : 16)
     if (this.dmOn) {
       const w1l = this.w1!, w1b = this.w1base
-      for (let i = 0; i < N; i++) w1l[w1b + i] += (inputs[i] * err + 0x8000) >> 17
+      for (let i = 0; i < N; i++) w1l[w1b + i] += (inputs[i] * err + 0x4000) >> 17
+      const w2l = this.w2!, w2b = this.w2base
+      for (let i = 0; i < N; i++) w2l[w2b + i] += (inputs[i] * err + 0x4000) >> 17
     }
     if (this.dualPass) {
       // v13 的第二套权重：误差项用上游概率（不含辅混洗，保证 base 流不被污染）。
