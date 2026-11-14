@@ -859,9 +859,9 @@ class Model {
   get tblFrozen(): boolean { return vertTuning.freezeTbl && this.emaErr > vertTuning.thr }
   get dampShift(): number { return this.emaErr > vertTuning.thr2 ? 3 : 4 }
   shift: number
-  hashes = new Int32Array(28)
-  idx = new Int32Array(28)
-  inputs = new Int32Array(28)
+  hashes = new Int32Array(32)
+  idx = new Int32Array(32)
+  inputs = new Int32Array(32)
   // 每个上下文一张 32 位表：高 16 位是概率，低 8 位是更新计数。
   // 原实现用 Uint16Array + Uint8Array 两张表，同一槽位要两次随机访存；
   // 合并成一次读改写后，每比特的高延迟访存次数从 2·nctx 降到 nctx。
@@ -1117,7 +1117,17 @@ class Model {
       this.symAepN = n
       this.symClean = false
     }
-    const { cmBits: bits, mht4Bits: mhBits, mht8Bits: mh8Bits } = this.geometry
+    const geo = this.geometry
+    // P26.8: the BCJ stream is a single 1 MB-1.3 MB executable image whose repeat
+    // structure saturates a 22-bit table, so it gets its own width (2^23 entries x 4 B
+    // x 29 contexts = 928 MiB, which keeps the peak inside the 2.5 GiB budget; 24 bits
+    // buys 1,128 B more but doubles that to 1.86 GiB for a single segment). `this.bcjOn` is
+    // derived from `options.bcj` on BOTH sides (container v23 flag path), and
+    // `requiredFlags` writes the width into the payload model flags, so the decoder
+    // reconstructs exactly the same table without a container-format change.
+    let bits = geo.cmBits
+    if (this.bcjOn && n >= 524288 && bits < 23) bits = 23
+    const { mht4Bits: mhBits, mht8Bits: mh8Bits } = geo
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
     else if (bits > 22) this.requiredFlags |= CM_FLAG_TABLE_23
@@ -1125,7 +1135,7 @@ class Model {
     this.shift = 32 - bits
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
-    if (this.bcjOn) this.nctx = Math.max(this.nctx, 25)
+    if (this.bcjOn) this.nctx = Math.max(this.nctx, 29)
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
@@ -1354,6 +1364,14 @@ class Model {
               H[22]=frz?0:hh(b1,b2,b4,g5,g6)
               H[23]=frz?0:hh(b1,b3,b4,g5)
               H[24]=frz?0:hh(b1,(b2>>>3)|((b3>>>3)<<5),(b4>>>3)|((g5>>>3)<<5),g6>>>3)
+              // Phase-0: `disp32/imm32` bridges. The opcode that follows a 4-byte operand
+              // sits at lag 5, and in `bcjMsbFwd` the E8/E9 target's sign byte is `b4`,
+              // so both directions of the operand need their own jump.
+              H[25]=frz?0:hh(b1,g5,g6,g7)
+              H[26]=frz?0:hh(b4,g5,g6,g7)
+              // Phase-2: the same jump for a two-byte prefix (REX/0F) in front of the operand.
+              H[27]=frz?0:hh(b1,b2,this.g(7),this.g(8),this.g(9))
+              H[28]=frz?0:hh(b1,b2,g6,g7,g8)
             }
           }
         }
