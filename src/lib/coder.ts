@@ -241,7 +241,7 @@ export function setNoMht8(v: boolean) { noMht8 = v }
  */
 export interface AttribModelView {
   pos: number; mlen: number; mptr: number; nctx: number
-  idx: Int32Array; hashes: Int32Array; tables: Uint16Array[]; counts: Uint8Array[]; shift: number
+  idx: Int32Array; hashes: Int32Array; tables: Uint32Array[]; shift: number
   profile: string; isV15: boolean; geometry: CMTableShape
 }
 export let attribHook: ((m: AttribModelView, pos: number, bits: number) => void) | null = null
@@ -865,9 +865,7 @@ class Model {
   // 每个上下文一张 32 位表：高 16 位是概率，低 8 位是更新计数。
   // 原实现用 Uint16Array + Uint8Array 两张表，同一槽位要两次随机访存；
   // 合并成一次读改写后，每比特的高延迟访存次数从 2·nctx 降到 nctx。
-  tables: Uint16Array[]
-  /** P26.9: the 8-bit hit counter lives in its own array so a table entry costs 3 B, not 4. */
-  counts: Uint8Array[]
+  tables: Uint32Array[]
   limit: number
   weights: Int32Array
   wbase = 0
@@ -1129,7 +1127,7 @@ class Model {
     // `requiredFlags` writes the width into the payload model flags, so the decoder
     // reconstructs exactly the same table without a container-format change.
     let bits = geo.cmBits
-    if (this.bcjOn && n >= 524288 && bits < 24) bits = 24
+    if (this.bcjOn && n >= 524288 && bits < 23) bits = 23
     const { mht4Bits: mhBits, mht8Bits: mh8Bits } = geo
     const largeOnly = containerModel?.largeOnly ?? modelTuning.largeOnly
     if (bits > 23) this.requiredFlags |= CM_FLAG_TABLE_24
@@ -1141,11 +1139,9 @@ class Model {
     if (this.bcjOn) this.nctx = Math.max(this.nctx, 31)
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
-    this.counts = []
     for (let i = 0; i < this.nctx; i++) {
       // 初值：概率 32768（居中），计数 0。
-      this.tables.push(contextPeer && i < 8 ? contextPeer.tables[i] : new Uint16Array(1 << bits).fill(32768))
-      this.counts.push(contextPeer && i < 8 ? contextPeer.counts[i] : new Uint8Array(1 << bits))
+      this.tables.push(contextPeer && i < 8 ? contextPeer.tables[i] : new Uint32Array(1 << bits).fill(32768 << 16))
     }
     this.limit = profile === 'text' || profile === 'bin' ? 80 : 250
     this.ninputs = this.nctx + (this.vertTbl ? 4 : 2)
@@ -1587,7 +1583,7 @@ class Model {
         idx[i] = h >>> shift
       }
       for (let i = first; i < nctx; i++) {
-        inputs[i] = STRETCH_l[tables[i][idx[i]] >>> 4]
+        inputs[i] = STRETCH_l[(tables[i][idx[i]] >>> 16) >>> 4]
       }
       let ms = 0, ms2 = 0
       if (useMatch && this.mlen > 0 && ((symBits < 8 ? (byteToSym![this.mbyte] | (1 << symBits)) : (this.mbyte | 256)) >> (symBits - bit)) === c0) {
@@ -1790,7 +1786,7 @@ class Model {
   learn(y: number, prOverride?: number): void {
     const nctx = this.nctx, N = this.ninputs
     const inputs = this.inputs, idx = this.idx, weights = this.weights
-    const tables = this.tables, counts = this.counts, limit = this.limit
+    const tables = this.tables, limit = this.limit
     const err = ((y << 12) - (prOverride ?? this.pr)) * (this.symDna ? 2 : this.symProt ? (this.symAepN < 8192 ? 10 : 3) : 8)
     const wb = this.wbase
     for (let i = 0; i < N; i++) weights[wb + i] += (inputs[i] * err + (this.dmOn ? 0x4000 : 0x8000)) >> (this.dmOn ? 17 : 16)
@@ -1826,12 +1822,13 @@ class Model {
     if (this.symDna && this.bit === 1 && this.mIdx >= 0) this.symLastBitOk = this.mExpect === y ? 1 : 0
     const target = y ? 65535 : 0
     for (let i = this.contextPeer ? 8 : 0; i < nctx; i++) {
-      const t = tables[i], c = counts[i]
+      const t = tables[i]
       const k = idx[i]
-      const p = t[k]
-      const n = c[k]
-      t[k] = p + (((target - p) * DT[n]) / 65536 | 0)
-      if (n < limit) c[k] = n + 1
+      const e = t[k]
+      const p = e >>> 16
+      const n = e & 255
+      // 一次读、一次写：概率与计数打包在同一字里。
+      t[k] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < limit ? n + 1 : n)
     }
     if (this.useApm) {
       // 插值表的标准 SGD：两端各按权重向目标移动，权重和恰好等于 1。
@@ -1910,7 +1907,7 @@ class Model {
       h ^= h >>> 15
       const k = h >>> this.shift
       idx[i] = k
-      inputs[i] = STRETCH[this.tables[i][k] >>> 4]
+      inputs[i] = STRETCH[(this.tables[i][k] >>> 16) >>> 4]
     }
     let ms = 0
     this.mIdx = -1
@@ -1960,12 +1957,12 @@ class Model {
     for (let i = 0; i < N; i++) w[wb + i] += (inputs[i] * err + 0x8000) >> 16
     const target = y ? 65535 : 0
     for (let i = 0; i < nctx; i++) {
-      const t = this.tables[i], c = this.counts[i]
+      const t = this.tables[i]
       const k = idx[i]
-      const p = t[k]
-      const n = c[k]
-      t[k] = p + (((target - p) * DT[n]) / 65536 | 0)
-      if (n < this.limit) c[k] = n + 1
+      const e = t[k]
+      const p = e >>> 16
+      const n = e & 255
+      t[k] = ((p + (((target - p) * DT[n]) / 65536 | 0)) << 16) | (n < this.limit ? n + 1 : n)
     }
     if (this.mIdx >= 0) {
       const ok = this.mExpect === y ? 65535 : 0
@@ -2733,7 +2730,7 @@ export function encodeCMContextDual(data:Uint8Array, context:'bin-stride4'|'wp-t
   const profile=context==='bin-stride4'?'bin':'text',wordTokens=context==='wp-token3'
   const base=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens)
   const alt=new Model(n,profile,1,1,'v20',0,undefined,undefined,wordTokens,{context},base)
-  for(let k=0;k<8;k++)if(base.tables[k]!==alt.tables[k] || base.counts[k]!==alt.counts[k])throw Error('tables not actually shared')
+  for(let k=0;k<8;k++)if(base.tables[k]!==alt.tables[k])throw Error('tables not actually shared')
   if(base.mht!==alt.mht||base.mht8!==alt.mht8||base.msm!==alt.msm||base.buf!==alt.buf)throw Error('match/input not shared')
   if(base.apm2On!==alt.apm2On||base.weights===alt.weights||(base.weights2&&base.weights2===alt.weights2)||base.apmT===alt.apmT||(base.apm2T&&base.apm2T===alt.apm2T))throw Error('stream-specific learning must be independent')
   const bOut=new ByteWriter(),aOut=new ByteWriter()
