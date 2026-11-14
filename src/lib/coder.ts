@@ -1144,7 +1144,7 @@ class Model {
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
     if (this.bcjOn) this.nctx = Math.max(this.nctx, 31)
-    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 20)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
       // 初值：概率 32768（居中），计数 0。
@@ -1457,6 +1457,20 @@ class Model {
             if (this.nctx > 14) {
               H[14] = frz ? 0 : hh(b1, b2, b3, (this.fieldIdx & 0xff) | (Math.min(this.fieldCol, 63) << 8))
               if (this.nctx > 15) H[15] = frz ? 0 : hh(this.curWord, this.prevWord, this.pwh, b1)
+              // P27.5: the exact 5-gram/6-gram (17th/18th) and the two column-word
+              // keys (19th/20th) only became affordable once P27.4 removed the 21-bit
+              // ceiling — 20 sparse keys in 2M slots collided into noise. Measured on
+              // the exact production streams (`matchDist` on, `bits = 23`): B -1,108 B,
+              // C -872 B, applied together.
+              if (this.nctx > 17) {
+                const g5 = this.g(5), g6 = this.g(6)
+                H[16] = frz ? 0 : hh(b1, b2, b3, b4, g5)
+                H[17] = frz ? 0 : hh(b1, b2, b3, b4, g5, g6)
+              }
+              if (this.nctx > 19) {
+                H[18] = frz ? 0 : hh(this.curWord, this.prevWord, this.pwh, b1)
+                H[19] = frz ? 0 : hh(this.curWord, (this.fieldIdx & 0xff) | (Math.min(this.fieldCol, 63) << 8), this.prevWord)
+              }
             }
           }
           return
