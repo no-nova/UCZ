@@ -962,6 +962,8 @@ class Model {
   w2base = 0
   w3?: Int32Array
   w3base = 0
+  w4?: Int32Array
+  w4base = 0
   lastPrimaryMs = 0
   /** 双流模式：step() 额外算一遍 v13 权重，learn() 分别更新两套权重。 */
   dualPass = false
@@ -1123,7 +1125,7 @@ class Model {
     this.shift = 32 - bits
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
-    if (this.bcjOn) this.nctx = Math.max(this.nctx, 20)
+    if (this.bcjOn) this.nctx = Math.max(this.nctx, 21)
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 16)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
@@ -1148,6 +1150,8 @@ class Model {
       this.w2.set(this.weights.subarray(0, this.ninputs))
       this.w3 = new Int32Array(1024 * this.ninputs)
       this.w3.set(this.weights.subarray(0, this.ninputs))
+      this.w4 = new Int32Array(1024 * this.ninputs)
+      this.w4.set(this.weights.subarray(0, this.ninputs))
     }
     if (v3 && variant === 'v20' && n >= DUAL_MIXER_MIN_BYTES && (this.context === 'text-vertcol' || this.context === 'text-tabcol')) {
       this.dmOn = 1
@@ -1336,7 +1340,8 @@ class Model {
             H[16]=hh(b1,b2,b3,b4,this.g(5))
             if(this.nctx>17) H[17]=hh(b1,b2,b3,b4,this.g(5),this.g(6))
             if(this.nctx>18) H[18]=hh(nibbleMask6(b1,b2,b3,b4,this.g(5),this.g(6)), b1)
-            if(this.nctx>19) H[19]=hh(b1,this.g(3),this.g(4),b2)
+            if(this.nctx>19) H[19]=hh(b1,this.g(5),this.g(6),b2)
+            if(this.nctx>20) H[20]=hh(b1,b2,this.g(5),this.g(6),this.g(7))
           }
         }
         if(this.binTenOn && this.emaErr > BIN_EMA_GATE) { H[3]=0; H[4]=0; H[9]=0; H[10]=0; if(this.binLadderOn){ H[11]=0; H[12]=0; H[13]=0; if(this.nctx>14){ H[14]=0; H[15]=0 } } }
@@ -1625,14 +1630,30 @@ class Model {
           const w2l = this.w2
           let d2 = w2l[w2b + N - 1] * 256
           for (let i = 0, end = N - 1; i < end; i++) d2 += w2l[w2b + i] * inputs[i]
-          if (this.w3) {
+          if (this.w4) {
+            const i3s = ((((g1 & 0xf0) << 2) | (g2 >>> 4) << 2) | mm | bb) & 0x3ff
+            const w3b = i3s * N
+            this.w3base = w3b
+            const w3l = this.w3!
+            let d3 = w3l[w3b + N - 1] * 256
+            for (let i = 0, end = N - 1; i < end; i++) d3 += w3l[w3b + i] * inputs[i]
+            const i4 = (((g2 >>> 4) << 6) | ((this.g(3) >>> 4) << 2) | mm | bb) & 0x3ff
+            const w4b = i4 * N
+            this.w4base = w4b
+            const w4l = this.w4
+            let d4 = w4l[w4b + N - 1] * 256
+            for (let i = 0, end = N - 1; i < end; i++) d4 += w4l[w4b + i] * inputs[i]
+            // P26.2: five normalised estimators. The old `(dot*2+d1+d2+d3)>>2` summed to
+            // 5/4 of the average, inflating every probability table decision by 25%.
+            dot = (dot + d1 + d2 + d3 + d4) >> 2
+          } else if (this.w3) {
             const i3s = ((((g1 & 0xf0) << 2) | (g2 >>> 4) << 2) | mm | bb) & 0x3ff
             const w3b = i3s * N
             this.w3base = w3b
             const w3l = this.w3
             let d3 = w3l[w3b + N - 1] * 256
             for (let i = 0, end = N - 1; i < end; i++) d3 += w3l[w3b + i] * inputs[i]
-            dot = (dot * 2 + d1 + d2 + d3) >> 2
+            dot = (dot + d1 + d2 + d3) >> 2
           } else dot = (dot * 2 + d1 + d2) >> 2
         } else dot = (dot + d1) >> 1
       }
@@ -1739,6 +1760,10 @@ class Model {
       if (this.w3) {
         const w3l = this.w3, w3b = this.w3base
         for (let i = 0; i < N; i++) w3l[w3b + i] += (inputs[i] * err + 0x4000) >> 17
+      }
+      if (this.w4) {
+        const w4l = this.w4, w4b = this.w4base
+        for (let i = 0; i < N; i++) w4l[w4b + i] += (inputs[i] * err + 0x4000) >> 17
       }
     }
     if (this.dualPass) {
