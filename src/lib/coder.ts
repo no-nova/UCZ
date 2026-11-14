@@ -952,6 +952,8 @@ class Model {
   gapRecovery = false
   /** v20 `bin` 且流长达到 `BIN_TEN_MIN_BYTES`：启用第十个上下文。 */
   binTenOn = false
+  /** P27.7: second word of history for the word trigram. */
+  prev2Word = 0
   /** P25.1: `bin` stream长到 `BIN_TWELVE_MIN_BYTES`，启用第十二个上下文。 */
   binLadderOn = false
   bcjOn = false
@@ -1144,7 +1146,7 @@ class Model {
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 14
     if (BIN_QUAD_ON && v3 && profile === 'bin' && this.binLadderOn) this.nctx = Math.max(this.nctx, 14)
     if (this.bcjOn) this.nctx = Math.max(this.nctx, 31)
-    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 20)
+    if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = Math.max(this.nctx, 21)
     this.tables = []
     for (let i = 0; i < this.nctx; i++) {
       // 初值：概率 32768（居中），计数 0。
@@ -1468,8 +1470,15 @@ class Model {
                 H[17] = frz ? 0 : hh(b1, b2, b3, b4, g5, g6)
               }
               if (this.nctx > 19) {
-                H[18] = frz ? 0 : hh(this.curWord, this.prevWord, this.pwh, b1)
+                // P27.7: `H[18]` was P27.5's copy of the `H[15]` word bigram; the
+                // second word of history is strictly more informative than the same
+                // bigram twice (`pwh` only tracks the current word's prefix). The
+                // 21st slot is the skip-`b3` template bridge, which is the one context
+                // that paid on every 1-3 MB text file: B -859 B, C -272 B, K -290 B,
+                // measured on the exact production streams at `bits = 23`.
+                H[18] = frz ? 0 : hh(this.curWord, this.prevWord, this.prev2Word, b1)
                 H[19] = frz ? 0 : hh(this.curWord, (this.fieldIdx & 0xff) | (Math.min(this.fieldCol, 63) << 8), this.prevWord)
+                if (this.nctx > 20) H[20] = frz ? 0 : hh(b1, b2, b4, this.g(5), this.g(6))
               }
             }
           }
@@ -2137,7 +2146,7 @@ class Model {
         this.prevWord = this.curWord
         this.curWord = Math.imul(byte + 1, 0x9e3779b1) >>> 0
       } else if (asciiLetter) this.curWord = (Math.imul(this.curWord, 16777619) ^ lower) >>> 0
-      else if (this.curWord !== 0) { if (this.context === 'wp-token3') this.prevPrevWord = this.prevWord; this.prevWord = this.curWord; this.curWord = 0 }
+      else if (this.curWord !== 0) { if (this.context === 'wp-token3') this.prevPrevWord = this.prevWord; this.prev2Word = this.prevWord; this.prevWord = this.curWord; this.curWord = 0 }
     }
     if (this.profile === 'text') {
       const letter = (byte >= 65 && byte <= 90) || (byte >= 97 && byte <= 122) || byte >= 128
