@@ -302,7 +302,7 @@ export default function App() {
               <Stat label="压缩耗时" value={`${res.tComp.toFixed(0)} ms`} sub={`${res.comp.segs.length} 个区域 · ${res.comp.analysis.blocks.length} 块`} />
             </div>
 
-            {/* P17.2 诊断指标：容器版本 / 格式标志 / 吞吐 / 解码耗时 */}
+            {/* 诊断指标：容器版本 / 格式标志 / 吞吐 / 解码耗时 */}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Stat
                 label="容器格式"
@@ -584,14 +584,12 @@ export default function App() {
           </div>
         )}
 
-        {/* ===== 说明 ===== */}
-        <Explain />
       </div>
     </div>
   )
 }
 
-// ---------- P17.2 诊断指标的纯函数 ----------
+// ---------- 诊断指标的纯函数 ----------
 // 版本就是容器魔数后的第 4 个字节；flags 是 v19+ 才有的 uint16 字段。
 function containerVersion(comp: Compressed): number { return comp.container[3] ?? 0 }
 function containerFlags(comp: Compressed): number {
@@ -664,47 +662,6 @@ function Bars({ items, total, formatSize }: { items: { label: string; size: numb
           </span>
         </div>
       ))}
-    </div>
-  )
-}
-
-function Explain() {
-  const steps = [
-    ['统一为二进制', '文件、图片、音频、视频统统读成 0–255 的字节流。不信任扩展名与魔数,只看内容。'],
-    ['生成地形', '每 512 字节一块,提取 8 维特征:零阶熵、多步长差分熵、UTF-8 文本率、4-gram 重复率、字节多样性……再用希尔伯特曲线折叠到二维,熵就是海拔。'],
-    ['分区与判型', '先逐块判定(平原/沙漠/森林/缓坡/梯田/丘陵),再去抖、合并成区域。图片里夹的 XMP 文本因为“文本率高且差分后熵反而升高”,会被单独划出。'],
-    ['发现结构', '对缓坡区域检测像素步长、行跨度(把一维折回二维网格)、16 位采样与记录步长。这是“维度映射”让一维里不可见的规律浮现的地方。'],
-    ['选择规则', '候选:常量填充、游程、零阶熵、文本 CM、二进制 CM + 匹配、差分、二维 MED 梯度、16 位线性预测、原样存储。在采样上真实试编码,选最小者。'],
-    ['无损写出', '“预测模型 = 黑盒,算术编码 = 纠偏种子”:模型给出下一个比特的概率 p,只为它付 −log₂p 个比特。解码端运行同一个确定性模型,逐比特一致,因此可无损还原任意输入。'],
-  ]
-  return (
-    <div className="mt-12 space-y-6">
-      <Card title="系统是怎么工作的" sub="对应你提出的四个设想:统一二进制 → 地形图 → 分区选规则 → 维度映射保留空间关系。">
-        <ol className="grid gap-3 md:grid-cols-2">
-          {steps.map(([t, d], i) => (
-            <li key={t} className="flex gap-3 rounded-xl border border-white/10 bg-black/20 p-4">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-400/15 text-sm font-bold text-cyan-300">{i + 1}</span>
-              <div>
-                <div className="text-sm font-semibold text-white">{t}</div>
-                <p className="mt-1 text-xs leading-relaxed text-slate-400">{d}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </Card>
-      <Card title="和“黑盒 + 短种子”思想的关系">
-        <div className="space-y-3 text-sm leading-relaxed text-slate-400">
-          <p>
-            <b className="text-slate-200">无废种子</b>:概率模型把可能性集中在“有意义”的序列上,噪声序列几乎得不到概率质量,所以真实结构得到短码、随机雪花得到长码——码空间没有被浪费在废种子上。热力图的“压缩后 bit/字节”模式能直接看到码长怎样分配。
-          </p>
-          <p>
-            <b className="text-slate-200">黑盒要多个</b>:没有哪个模型对所有地形都好。这里用“地形 → 候选黑盒集 → 实测择优”取代单一黑盒,并把黑盒的选择(几个字节)也记入种子。
-          </p>
-          <p>
-            <b className="text-slate-200">诚实的边界</b>:柯尔莫哥洛夫复杂度不可计算,真随机数据不可压缩(见“随机噪声”样本,系统会放弃)。JPEG/PNG/MP4 本身已是压缩结果,在地形图上就是沙漠;要进一步压缩它们,需要先解析其内部的 Huffman/DCT/熵编码层,把“沙漠”重新还原成可预测的地形——这是下一步最值得做的方向,也可以把这里的文本 CM 换成小型神经网络预测器。
-          </p>
-        </div>
-      </Card>
     </div>
   )
 }
