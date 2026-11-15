@@ -1,12 +1,12 @@
 {
   "name": "react-vite-tailwind",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "benchmark": "node benchmark/server.mjs",
-    "build": "vite build",
+    "build": "npm run build:worker && node scripts/build-dist.mjs",
     "preview": "vite preview",
     "test:p141:bounded": "node tests/p141-implementation.test.mjs",
     "test:ui": "node tests/run-ui.mjs",
@@ -33,7 +33,8 @@
     "bench:silesia": "node scripts/run-bench.mjs --corpus .diag-data/corpus --out bench-out/silesia --baseline",
     "bench:aitdcc": "node scripts/run-bench.mjs --corpus /home/user/Downloads/AITDCC --out bench-out/aitdcc",
     "cli": "tsx src/cli.ts",
-    "inspect": "tsx src/cli.ts inspect"
+    "inspect": "tsx src/cli.ts inspect",
+    "build:web": "vite build"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -55,5 +56,11 @@
   },
   "bin": {
     "ucz": "./dist/cli.js"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js"
 }

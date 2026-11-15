@@ -151,13 +151,13 @@ export async function computeNCDMatrix(
 export function formatNCDMatrixReport(res: NCDMatrixResult): string {
   const out: string[] = []
   const w = Math.max(...res.names.map(n => n.length), 8)
-  out.push('=== UCZ 零先验 NCD 距离矩阵 ===')
+  out.push('=== UCZ Zero-Prior NCD Distance Matrix ===')
   out.push(`${''.padEnd(w)}  ${res.names.map((_, i) => String(i).padStart(7)).join(' ')}`)
   res.matrix.forEach((row, i) => {
     out.push(`${res.names[i].padEnd(w)}  ${row.map(v => (i === 0 && v === 0 ? '      ·' : v.toFixed(4).padStart(7))).join(' ')}`)
   })
   out.push('')
-  out.push('最近邻：')
+  out.push('Nearest neighbour:')
   res.names.forEach((nm, i) => {
     const nb = res.nearest[i]
     out.push(`  ${nm.padEnd(w)} → ${nb.index >= 0 ? res.names[nb.index] : '—'}  (NCD=${nb.distance.toFixed(4)})`)

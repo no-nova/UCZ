@@ -13,14 +13,22 @@ import type { CompressionLevel } from './lib/codec'
 import { formatInspectionReport, inspectContainer, inspectStream, isContainer } from './lib/inspect'
 import { computeNCD, computeNCDMatrix, formatNCDMatrixReport } from './lib/ncd'
 
-const USAGE = `ucz — 通用自适应压缩 (Universal Adaptive Compression)
+export const VERSION = '1.0.0'
 
-用法:
+const USAGE = `ucz ${VERSION} - Universal Adaptive Compression
+
+Usage:
   ucz compress <input> [output] [-1|--fast] [-2|--balanced] [-3|--max] [-f|--force]
   ucz decompress <input> [output] [-f|--force]
   ucz inspect <input> [--fast|--balanced|--max] [--no-compress] [--json]
   ucz ncd <file1> <file2> [...fileN] [--mode cm|container] [--json]
-  ucz --help
+  ucz --version | -v
+  ucz --help | -h
+
+Levels:
+  -1, --fast       fast planning (fewest probes, slightly larger output)
+  -2, --balanced   default planner level
+  -3, --max        exhaustive planning (reference output)
 `
 
 function level(argv: string[]): CompressionLevel {
@@ -30,13 +38,13 @@ function level(argv: string[]): CompressionLevel {
 }
 
 function writeOut(path: string, bytes: Uint8Array, force: boolean): void {
-  if (existsSync(path) && !force) throw new Error(`文件已存在：${path}（加 -f 覆盖）`)
+  if (existsSync(path) && !force) throw new Error(`refusing to overwrite ${path} (use -f)`)
   writeFileSync(path, bytes)
 }
 
 async function cmdCompress(argv: string[]): Promise<void> {
   const input = argv[0]
-  if (!input) throw new Error('缺少输入文件')
+  if (!input) throw new Error('missing input file')
   const output = argv[1] && !argv[1].startsWith('-') ? argv[1] : `${input}.ucz`
   const lvl = level(argv)
   const raw = new Uint8Array(readFileSync(input))
@@ -45,26 +53,28 @@ async function cmdCompress(argv: string[]): Promise<void> {
   const ms = performance.now() - t
   writeOut(output, enc.container, argv.includes('-f') || argv.includes('--force'))
   const bpb = (enc.container.length * 8) / raw.length
-  console.log(`${basename(input)} 档位=${lvl}`)
-  console.log(`  输入 ${raw.length} B → 输出 ${enc.container.length} B  (${(raw.length / enc.container.length).toFixed(3)}×, ${bpb.toFixed(3)} bpb)`)
-  console.log(`  耗时 ${ms.toFixed(0)} ms → ${output}`)
+  const ratio = enc.container.length ? raw.length / enc.container.length : 0
+  console.log(`${basename(input)}  level=${lvl}`)
+  console.log(`  input  ${raw.length} B`)
+  console.log(`  output ${enc.container.length} B  (${ratio.toFixed(3)}x, ${bpb.toFixed(3)} bpb)`)
+  console.log(`  time   ${ms.toFixed(0)} ms -> ${output}`)
 }
 
 async function cmdDecompress(argv: string[]): Promise<void> {
   const input = argv[0]
-  if (!input) throw new Error('缺少输入文件')
+  if (!input) throw new Error('missing input file')
   const output = argv[1] && !argv[1].startsWith('-') ? argv[1] : input.replace(/\.ucz$/, '') || `${input}.out`
   const container = new Uint8Array(readFileSync(input))
   const t = performance.now()
   const out = decompress(container)
   const ms = performance.now() - t
   writeOut(output, out, argv.includes('-f') || argv.includes('--force'))
-  console.log(`  输出 ${out.length} B，耗时 ${ms.toFixed(0)} ms → ${output}`)
+  console.log(`  output ${out.length} B  time ${ms.toFixed(0)} ms -> ${output}`)
 }
 
 async function cmdInspect(argv: string[]): Promise<void> {
   const input = argv[0]
-  if (!input) throw new Error('缺少输入文件')
+  if (!input) throw new Error('missing input file')
   const bytes = new Uint8Array(readFileSync(input))
   const json = argv.includes('--json')
   if (isContainer(bytes)) {
@@ -85,16 +95,20 @@ async function cmdInspect(argv: string[]): Promise<void> {
 
 async function cmdNcd(argv: string[]): Promise<void> {
   const files = argv.filter(a => !a.startsWith('-') && argv[argv.indexOf(a) - 1] !== '--mode')
-  if (files.length < 2) throw new Error('需要至少两个文件')
+  if (files.length < 2) throw new Error('need at least two files')
   const mode = argv.includes('container') ? 'container' : 'cm'
   const json = argv.includes('--json')
   const items = files.map(f => ({ name: basename(f), data: new Uint8Array(readFileSync(f)) }))
   if (items.length === 2) {
     const r = await computeNCD(items[0].data, items[1].data, { mode })
     if (json) { console.log(JSON.stringify(r, null, 2)); return }
-    console.log(`C(x)=${r.cx}  C(y)=${r.cy}  C(x||y)=${r.cxy}  C(y||x)=${r.cyx}`)
-    console.log(`C(y|x)=${r.conditionalYGivenX}  C(x|y)=${r.conditionalXGivenY}`)
-    console.log(`NCD=${r.ncd.toFixed(4)}  profile=${r.profile}  mode=${r.mode}`)
+    console.log(`C(x)     ${r.cx}`)
+    console.log(`C(y)     ${r.cy}`)
+    console.log(`C(x||y)  ${r.cxy}`)
+    console.log(`C(y||x)  ${r.cyx}`)
+    console.log(`C(y|x)   ${r.conditionalYGivenX}`)
+    console.log(`C(x|y)   ${r.conditionalXGivenY}`)
+    console.log(`NCD      ${r.ncd.toFixed(4)}  (profile=${r.profile}, mode=${r.mode})`)
     return
   }
   const res = await computeNCDMatrix(items, { mode })
@@ -103,13 +117,14 @@ async function cmdNcd(argv: string[]): Promise<void> {
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2)
+  if (argv.includes('--version') || argv.includes('-v')) { console.log(`UCZ v${VERSION}`); return }
   if (!argv.length || argv.includes('--help') || argv.includes('-h')) { console.log(USAGE); return }
   const [cmd, ...rest] = argv
   if (cmd === 'compress') return cmdCompress(rest)
   if (cmd === 'decompress') return cmdDecompress(rest)
   if (cmd === 'inspect') return cmdInspect(rest)
   if (cmd === 'ncd') return cmdNcd(rest)
-  console.error(`未知子命令：${cmd}\n`)
+  console.error(`unknown subcommand: ${cmd}\n`)
   console.log(USAGE)
   process.exitCode = 2
 }

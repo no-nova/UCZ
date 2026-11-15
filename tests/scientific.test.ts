@@ -64,7 +64,7 @@ export async function testInspectMicroscope(): Promise<void> {
   assert.ok(table.fingerprint.detectedDelimiters.comma > 100, '应识别逗号分隔符')
   assert.ok(table.fingerprint.detectedDelimiters.newline > 100, '应识别换行')
   assert.equal(table.fingerprint.inferredManifoldClass, 'tabular-ascii')
-  assert.ok(formatInspectionReport(table).includes('残余信息显微镜'))
+  assert.ok(formatInspectionReport(table).includes('Residual Information Microscope'))
 
   const raster = raster2d(113, 220)
   const rInfo = await inspectStream(raster, { compress: false })
@@ -117,7 +117,7 @@ export async function testNcdClustering(): Promise<void> {
   const intra = Math.max(res.matrix[0][1], res.matrix[2][3])
   const inter = Math.min(res.matrix[0][2], res.matrix[0][4], res.matrix[2][4])
   assert.ok(intra < inter, `族内距离(${intra.toFixed(3)}) 应小于族间距离(${inter.toFixed(3)})`)
-  assert.ok(formatNCDMatrixReport(res).includes('最近邻'))
+  assert.ok(formatNCDMatrixReport(res).includes('Nearest neighbour'))
   console.log(`[ncd] intra=${intra.toFixed(4)} inter=${inter.toFixed(4)} nn=${res.nearest.map(r => res.names[r.index]).join(',')}`)
 }
 

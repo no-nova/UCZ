@@ -5,7 +5,8 @@
  * 不依赖任何内置字典或格式先验。容器解剖部分只是把 UCZ 头部里已经写明的
  * 事实读出来（版本、组数、每组规则与载荷长度），不做任何猜测。
  */
-import { analyze, detectLagCandidates, detectRecordStride } from './analyze'
+import { detectLagCandidates, detectRecordStride } from './analyze'
+import { contextFromGroupBits, GROUP_MATCH_DIST_BIT } from './context-policy'
 import { compressAdaptive } from './codec'
 import type { CompressionLevel } from './codec'
 
@@ -54,11 +55,22 @@ export interface SegmentAnatomy {
   transformName: string
   stride: number
   rank: number
+  /** Group context from the three-bit field (+ extended namespace bit). */
   context?: string
+  /** `true` when the group word carries the v15 legacy kernel bit (`0x8000`). */
+  v15: boolean
+  /** `true` when the group word carries the WORD-PRE bit (`0x4000`). */
+  wordPre: boolean
+  /** `true` when the group word carries the v22 distance-split match bit (`0x100000`). */
+  matchDist: boolean
+  /** Compact one-line flag suffix for the report, e.g. `md wp v15`. */
+  flags: string
 }
 
 export interface ContainerAnatomy {
   containerVersion: number
+  /** Container flag word (only written for `ver >= 19`; `0` otherwise). */
+  flags: number
   totalRawBytes: number
   totalCompressedBytes: number
   headerBytes: number
@@ -197,10 +209,10 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   const n = getVar(c, st)
   const segs = getVar(c, st)
   const groups = getVar(c, st)
-  const specs: { id: number; s: number; r: number; pl: number }[] = []
+  const specs: { id: number; s: number; rRaw: number; pl: number }[] = []
   for (let i = 0; i < groups; i++) {
     const id = getVar(c, st), s = getVar(c, st), rRaw = getVar(c, st), pl = getVar(c, st)
-    specs.push({ id, s, r: rRaw & 0xffff, pl })
+    specs.push({ id, s, rRaw, pl })
   }
   const lengths: number[] = []
   let total = 0
@@ -226,17 +238,28 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   for (let gi = 0; gi < groups; gi++) {
     const sp = specs[gi]
     const rawLength = members[gi].reduce((sum, i) => sum + (lengths[i] ?? 0), 0)
+    // 上下文/标志位都在组字 `r` 里：低 16 位是 rank（+v15/wordPre），
+    // 17..19 位是上下文码，第 20 位是 matchDist，第 21 位是扩展命名空间。
+    const context = (() => {
+      try { return contextFromGroupBits(sp.rRaw) } catch { return undefined }
+    })()
+    const v15 = (sp.rRaw & 0x8000) !== 0
+    const wordPre = (sp.rRaw & 0x4000) !== 0
+    const matchDist = (sp.rRaw & GROUP_MATCH_DIST_BIT) !== 0
+    const bcj = sp.id === 25 // ID.BCJ_V3: the only group kind that runs the x86-shaped model.
+    const flags = [bcj ? 'bcj' : '', matchDist ? 'md' : '', wordPre ? 'wp' : '', v15 ? 'v15' : ''].filter(Boolean).join(' ')
     segments.push({
       index: idx++, rawOffset, rawLength, compressedBytes: sp.pl,
       bpb: rawLength ? (sp.pl * 8) / rawLength : 0,
       transformId: sp.id, transformName: transformName(sp.id),
-      stride: sp.s, rank: sp.r,
+      stride: sp.s, rank: sp.rRaw & 0x3fff,
+      context, v15, wordPre, matchDist, flags,
     })
     rawOffset += rawLength
   }
   const payloadBytes = specs.reduce((sum, sp) => sum + sp.pl, 0)
   return {
-    containerVersion: version, totalRawBytes: n, totalCompressedBytes: c.length,
+    containerVersion: version, flags, totalRawBytes: n, totalCompressedBytes: c.length,
     headerBytes, overallBpb: n ? (c.length * 8) / n : 0,
     compressionRatio: n ? c.length / n : 0, segments,
   }
@@ -260,32 +283,32 @@ export async function inspectStream(
 
 export function formatInspectionReport(info: StreamInspection): string {
   const f = info.fingerprint, out: string[] = []
-  out.push('=== UCZ 残余信息显微镜 ===')
-  out.push(`字节数            ${f.byteLength}`)
-  out.push(`H0 熵             ${f.entropyH0.toFixed(3)} bit/byte`)
-  out.push(`可打印 ASCII      ${(f.printableAsciiRatio * 100).toFixed(2)} %`)
-  out.push(`平坦字节 00/FF    ${(f.flatByteRatio * 100).toFixed(2)} %`)
-  out.push(`记录步长 s        ${f.detectedStride || '—'}`)
-  out.push(`滞后候选          ${f.detectedLags.length ? f.detectedLags.join(', ') : '—'}`)
-  out.push(`扫描周期 P        ${f.detectedScanPeriod || '—'}`)
+  out.push('=== UCZ Residual Information Microscope ===')
+  out.push(`bytes                 ${f.byteLength}`)
+  out.push(`H0 entropy            ${f.entropyH0.toFixed(3)} bit/byte`)
+  out.push(`printable ASCII       ${(f.printableAsciiRatio * 100).toFixed(2)} %`)
+  out.push(`flat bytes 00/FF      ${(f.flatByteRatio * 100).toFixed(2)} %`)
+  out.push(`record stride s       ${f.detectedStride || '-'}`)
+  out.push(`lag candidates        ${f.detectedLags.length ? f.detectedLags.join(', ') : '-'}`)
+  out.push(`scanline period P     ${f.detectedScanPeriod || '-'}`)
   const d = f.detectedDelimiters
-  out.push(`分隔符            , ${d.comma}  TAB ${d.tab}  ; ${d.semicolon}  : ${d.colon}  | ${d.pipe}  NL ${d.newline}`)
-  if (d.newline) out.push(`平均行长          ${d.meanLineBytes.toFixed(1)} B`)
-  out.push(`流形分类          ${f.inferredManifoldClass}`)
-  if (f.rationale.length) out.push(`判定依据          ${f.rationale.join(' | ')}`)
+  out.push(`delimiters            , ${d.comma}  TAB ${d.tab}  ; ${d.semicolon}  : ${d.colon}  | ${d.pipe}  NL ${d.newline}`)
+  if (d.newline) out.push(`mean line length      ${d.meanLineBytes.toFixed(1)} B`)
+  out.push(`manifold class        ${f.inferredManifoldClass}`)
+  if (f.rationale.length) out.push(`evidence              ${f.rationale.join(' | ')}`)
   if (info.container) {
     const c = info.container
     out.push('')
-    out.push(`容器版本          ${c.containerVersion}`)
-    out.push(`原始 / 压缩       ${c.totalRawBytes} → ${c.totalCompressedBytes} B（${c.compressionRatio.toFixed(4)}×，${c.overallBpb.toFixed(3)} bpb，头部 ${c.headerBytes} B）`)
+    out.push(`container version     ${c.containerVersion}${c.flags ? ` (flags 0x${c.flags.toString(16).padStart(4, '0')})` : ''}`)
+    out.push(`raw / compressed      ${c.totalRawBytes} -> ${c.totalCompressedBytes} B (${c.compressionRatio.toFixed(4)}x, ${c.overallBpb.toFixed(3)} bpb, header ${c.headerBytes} B)`)
     out.push('')
-    out.push(' idx  rawOff   rawLen   compB    bpb   transform            s   r  ctx')
-    out.push(' ---  ------  -------  ------  -----  -------------------  --  --  ---')
+    out.push(' idx   rawOff    rawLen   compB     bpb  transform            s   r  context        flags')
+    out.push(' ---  -------  --------  ------  ------  -------------------  --  --  -------------  -----')
     for (const sg of c.segments) {
-      out.push(` ${String(sg.index).padStart(3)}  ${String(sg.rawOffset).padStart(6)}  ${String(sg.rawLength).padStart(7)}  ${String(sg.compressedBytes).padStart(6)}  ${sg.bpb.toFixed(3).padStart(5)}  ${sg.transformName.padEnd(19)}  ${String(sg.stride).padStart(2)}  ${String(sg.rank).padStart(2)}  ${sg.context ?? ''}`)
+      out.push(` ${String(sg.index).padStart(3)}  ${String(sg.rawOffset).padStart(7)}  ${String(sg.rawLength).padStart(8)}  ${String(sg.compressedBytes).padStart(6)}  ${sg.bpb.toFixed(3).padStart(6)}  ${sg.transformName.padEnd(19)}  ${String(sg.stride).padStart(2)}  ${String(sg.rank).padStart(2)}  ${(sg.context ?? '-').padEnd(13)}  ${sg.flags}`)
     }
   }
   out.push('')
-  out.push(`耗时              ${info.elapsedMs.toFixed(1)} ms`)
+  out.push(`elapsed               ${info.elapsedMs.toFixed(1)} ms`)
   return out.join('\n')
 }
