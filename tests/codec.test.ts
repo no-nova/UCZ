@@ -15,6 +15,7 @@ import { testP178TextContexts, testP178Pockets, testP178BcjCoalesce } from './p1
 import { testP179TextContexts, testP179GroupCodecs } from './p179.test'
 import { testP180Sym2bit, testP180Sym5bit, testP180Planner } from './p180.test'
 import { testP243VerticalColumns, testP244SyncHighEntropy } from './p24.test'
+import { testManifoldUniversality } from './manifold.test'
 import { MAX_INPUT_BYTES, MAX_SINGLE_CM_BYTES, MAX_OUTPUT_BYTES, shouldRunSingleCM } from '../src/lib/limits'
 import v12Fixtures from './v12-fixtures.json'
 import { compressAdaptive, decompress, evaluatePlan, decodeSpec, encodeSpec, encodeTerrainGroup, decodeTerrainGroup, singleModelSize, sampleWindow, sampleWindows, candidatesFor, inspectPeel, groupV15CandidatesSync, planTuning, ID } from '../src/lib/codec'
@@ -1288,6 +1289,7 @@ testP243VerticalColumns(); testP244SyncHighEntropy()
     const dict = buildTokenDict(rand, 120)
     assert.equal(dict.length, 0, '随机数据不该选出词元')
   }
+  await testManifoldUniversality()
   console.log('codec tests passed')
 }
 test().catch(e => { console.error(e); process.exitCode = 1 })
