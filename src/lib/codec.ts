@@ -915,6 +915,15 @@ function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: 
   // 非 max 档位按「先粗后细」裁剪：`fast` 只留 1/2/4/8 四个 span 和两个候选，
   // `balanced` 留 6 个 span、三个候选。`max` 完全不受影响。
   const lvlCols = pruningLevel()
+  if (lvlCols > 0 && sample.length >= 4096) {
+    // P30.1：可打印 ASCII（表格 / CSV / 日志 / 代码）最终几乎总是被 `text-*`
+    // 列上下文拿走（yeast.data: 8,640 B 来自 text-vertcol，列布局候选全灭）。
+    // 在非 max 档位先用样本自身的可打印比例直接否决列布局搜索：
+    // 这里只读数据本身，不看文件名、尺寸或外部元信息。
+    let printable = 0
+    for (let i = 0; i < sample.length; i++) { const b = sample[i]; if ((b >= 0x20 && b <= 0x7e) || b === 9 || b === 10 || b === 13) printable++ }
+    if (printable * 20 >= sample.length * 19) return [{ start: 0, span: width, mode: ID.STORE }]
+  }
   const spans = lvlCols === 2 ? [1, 2, 4] : lvlCols === 1 ? [1, 2, 3, 4, 6, 8] : [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 64]
   for (let start = width - 1; start >= 0; start--) {
     let best = Infinity, selected: ColumnGroup[] = []
@@ -3865,7 +3874,24 @@ export async function compressAdaptive(
     }
     // Small closed-loop text fallback: keep the legacy TEXT plan in the real
     // byte competition instead of letting the context upgrade erase it.
-    if(data.length<131072 && bp.segs.length===1 && bp.segs[0].spec.id===ID.TEXT_V3){
+    // P30.1：一维扫描位图（传真 / 二值光栅）整段交给 `bin` 模型时，
+    // `detectScanPeriod` 的 2-D 上下文能跨整幅图学习；一旦被 `refineNoisePockets`
+    // 或 `refineBitplane` 切碎，每个碎片都要重新预热哈希表，反而更大
+    // （ptt5: 整段 26,935 B vs 切碎 28,275 B）。这里只对"绝大多数字节是 0x00/0xFF、
+    // 几乎不含可打印文本"的流补一个整段候选，采纳与否仍由真实容器字节数决定。
+    if(data.length>=65536 && bp.segs.length>1){
+      let zeros=0, printable=0
+      const step=Math.max(1,Math.floor(data.length/65536))
+      let seen=0
+      for(let i=0;i<data.length;i+=step){const b=data[i];seen++;if(b===0||b===255)zeros++;else if(b>=0x20&&b<=0x7e)printable++}
+      if(seen>0 && zeros*10>=seen*3 && printable*10<=seen){
+        try{
+          const whole=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'binary',spec:{id:ID.BIN_V3,s:1,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
+          if(whole.container.length<bp.container.length)bp=whole
+        }catch{}
+      }
+    }
+    if(data.length<131072 && pruningLevel()===0 && bp.segs.length===1 && bp.segs[0].spec.id===ID.TEXT_V3){
       try{
         const legacy=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'text',spec:{id:ID.TEXT,s:1,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
         if(legacy.container.length<bp.container.length)return coalesceCompressedPlan(data.length,legacy)
@@ -5027,7 +5053,9 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
         // 采纳仍由完整容器比对决定，所以这里只可能少花钱，不可能选进更差的规则。
         const baseCap=rawText&&modes.includes('text-vertcol')?5:4
         const lvl=pruningLevel()
-        const promoteCap=lvl===2?1:lvl===1?Math.min(2,baseCap):baseCap
+        // P30.1：整组 ≥256 KiB 时进一次 `probeDepth=0` 全组编码就是几秒到十几秒，
+        // 所以 `balanced` 也只在样本榜第一名上花钱（`fast` 同样只选 1 个）。
+        const promoteCap=lvl===2?1:lvl===1?(rawBytes>=262144?1:Math.min(2,baseCap)):baseCap
         for(const t of positive) {
           if(modes.length>=promoteCap) break
           if(t.bytes<=pick.bytes*1.008 && !modes.includes(t.context)) modes.push(t.context)
