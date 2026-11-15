@@ -3790,6 +3790,11 @@ function coalesceCompressedPlan(dataLen: number, cp: Compressed): Compressed {
   let w = hdr.length
   for (const g of c.groups) { container.set(g.payload, w); w += g.payload.length }
   retainedPlanGroups.set(container, c.groups)
+  // P28.7: coalescing builds a NEW container object, and the group map is keyed
+  // by identity. Without this the whole context tournament silently aborted for
+  // every coalesced plan (`wdbc.data`: "缺少实际旧容器的分组载荷"), which is why
+  // its proven 31,525 B `text-vertcol` layout never got to compete.
+  retainedContextGroups.set(container, c.groups.map(g => ({ spec: { ...g.spec }, members: [...g.members], payload: g.payload, v15: g.v15, wordPre: g.wordPre })))
   return { ...cp, container, overhead: hdr.length }
 }
 
@@ -5045,8 +5050,17 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
   const comparison:ContextComparison={baselineBytes:baseline.container.length,candidateBytes:baseline.container.length,accepted:false,workerJobs:0,workerFallbacks:0,groups:[]}
   const finish=(chosen:Compressed)=>({...chosen,contextComparison:comparison})
   try {
-    const retained=retainedContextGroups.get(baseline.container)
-    if(!retained)throw Error('缺少实际旧容器的分组载荷，拒绝猜测或替换')
+    let retained=retainedContextGroups.get(baseline.container)
+    if(!retained) {
+      // P28.7: a rebuilt container (coalescing, macro adoption, worker assembly)
+      // carries the same plan groups under the plan-group map. Deriving the
+      // context map from it is exact, not a guess: same spec, same members, same
+      // payload, same kernel. Without this fallback the whole tournament aborted.
+      const fb=retainedPlanGroups.get(baseline.container)
+      if(!fb)throw Error('缺少实际旧容器的分组载荷，拒绝猜测或替换')
+      retained=fb.map(g => ({ spec: { ...g.spec }, members: [...g.members], payload: g.payload, v15: g.v15, wordPre: g.wordPre }))
+      retainedContextGroups.set(baseline.container, retained)
+    }
     const groups=retained.map(g=>({...g,spec:{...g.spec},members:[...g.members]})),segs=baseline.segs
     const eligible=groups.flatMap((g,group)=>[...contextProposalsForGroup(g.spec,g.members.map(i=>segs[i])),
       ...(!g.wordPre && contextSpecAllowed('text-sparse5',g.spec) && g.members.reduce((n,i)=>n+segs[i].rawLen,0)>=CONTEXT_MIN_BYTES
@@ -5061,7 +5075,16 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       ...(!g.wordPre && !contextSpecAllowed('text-sparse5',g.spec)
         && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
         && asciiTableGroup(data,segs,g.members)
-        ? [{spec:{id:ID.TEXT_V3,s:1,r:1},reason:'selected-text' as const,rawText:true}] : [])]
+        ? [{spec:{id:ID.TEXT_V3,s:1,r:1},reason:'selected-text' as const,rawText:true}] : []),
+      // P28.7: WORD-PRE rewrites the alphanumeric tokens of a numeric table into
+      // dictionary ids, which destroys the column structure the layouts live on.
+      // A group that is already word-preprocessed AND is a printable ASCII table
+      // therefore also gets a raw-byte tournament (`wdbc.data` holds 34,645 B of
+      // a proven 31,525 B). The word-pre candidate stays in the race, so this is
+      // purely additive.
+      ...(!!g.wordPre && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
+        && asciiTableGroup(data,segs,g.members)
+        ? [{spec:{...g.spec},reason:'selected-raw-text' as const,rawText:true}] : [])]
       // Never steal another original stream's dictionary key, even if that
       // other group later accepts a context/transform of its own.
       .filter(p=>!groups.some((other,i)=>i!==group && sameSpec(other.spec,p.spec)))

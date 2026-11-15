@@ -1418,11 +1418,24 @@ class Model {
             // three-row vertical stroke. Measured on the four largest `ptt5`
             // segments: 29,870 -> 29,304 B versus keeping only slots 1/2, while
             // the pure diagonal variant (slot 7) was worse (29,420).
-            H[1] = hh(b1, no, nw, ne)
-            H[2] = hh(no, nn, b1)
-            H[4] = hh(b1, b2, no, ne)
-            H[5] = hh(no, nw, ne, nn)
-            H[6] = hh(b1, no, nn, nnn)
+            // P28.7: a 1-bit bitmap packs eight horizontal pixels into every
+            // byte, so a four-byte template hashes 32 pixels and misses whenever
+            // an unrelated far pixel flips. The dense `(north, west)` pair has
+            // exactly 2^16 states, and the halo/roof templates keep only the
+            // pixels that physically touch the current byte: the low 4 bits of
+            // `nw` (they touch `no`'s MSB) and the high 4 bits of `ne` (they
+            // touch `no`'s LSB). Measured on the four largest `ptt5` segments:
+            // full-byte templates 29,304 -> dense pair 27,195 -> this set 27,124.
+            const halo = (nw & 15) | ((ne >>> 4) << 4)
+            const roof = (nw & 7) | ((ne >>> 5) << 3) | ((b1 & 3) << 6)
+            // `H[1]`/`H[2]` carry the same dense pair on purpose: two copies act
+            // as a 2x weight on the strongest 2-D context, exactly like the
+            // duplicated word-bigram slot in the text model.
+            H[1] = hh(no, b1)
+            H[2] = hh(no, b1)
+            H[4] = hh(no, halo, b1)
+            H[5] = hh(no, nn, roof)
+            H[6] = hh(no, nnn, roof, b1)
           }
           // P6-3a：v15 的稀疏上下文改用"4 字节步长"（b4）与"8 字节步长"（b8）：
           // 32 位定长指令 / 定长结构体里，当前字节与 pos-4、pos-8 强列相关。
