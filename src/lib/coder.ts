@@ -1331,12 +1331,17 @@ class Model {
    */
   private detectScanPeriod(): void {
     const pos = this.pos
-    if (this.scanPeriod !== 0 || pos < 4096) return
-    const win = Math.min(2048, pos)
+    if (this.scanPeriod !== 0) return
+    // P28.6: a fax/bitmap segment pays 1-D cold start for every byte before the
+    // lock, so the first checkpoint is at 1024 bytes (~4.7 rows of `ptt5`).
+    const early = pos === 1024
+    if (!early && pos < 4096) return
+    const win = Math.min(early ? 512 : 2048, pos)
+    const maxP = early ? 256 : 512
     const from = pos - win
     let nonFlat = 0
     for (let j = from + 1; j < pos; j++) if (this.buf[j] !== this.buf[j - 1]) nonFlat++
-    if (nonFlat < 256) return
+    if (nonFlat < (early ? 64 : 256)) return
     // A 1-bit bitmap is dominated by white/black runs, i.e. by whole bytes of
     // 0x00 or 0xFF. Text, CSV and code are not, so this single statistic keeps
     // the 2-D path off every file where it has nothing to predict (`yeast.data`,
@@ -1345,7 +1350,7 @@ class Model {
     for (let j = from; j < pos; j++) { const v = this.buf[j]; if (v === 0 || v === 0xff) flatBytes++ }
     if (flatBytes * 10 < win * 3) return
     let bestP = 0, bestN = 0
-    for (let p = 16; p <= 512 && p < from; p++) {
+    for (let p = 16; p <= maxP && p < from; p++) {
       let hit = 0
       for (let j = from; j < pos; j++) if (this.buf[j] === this.buf[j - p] && this.buf[j] !== this.buf[j - 1]) hit++
       if (hit > bestN) { bestN = hit; bestP = p }
@@ -1353,7 +1358,10 @@ class Model {
     // A fax row is mostly flat runs, so only ~50% of the non-flat bytes can
     // repeat at the true period; a third is already ~1.5x the chance rate for a
     // 2-D-coded bitmap and leaves random data far below it.
-    if (bestN >= 96 && bestN * 3 >= nonFlat) {
+    // A real scanline is at least 32 bytes wide. Without this floor `sum` locks
+    // a spurious 16-byte period in its first kilobyte (0.60 match rate on
+    // code bytes) and the 2-D templates cost it +370 B.
+    if (bestP >= 32 && bestN >= (early ? 24 : 96) && bestN * 3 >= nonFlat) {
       if (bestP % 2 === 0 && bestP > 32) {
         let half = 0
         for (let j = pos - win; j < pos; j++) if (this.buf[j] === this.buf[j - (bestP >> 1)] && this.buf[j] !== this.buf[j - 1]) half++
@@ -1372,8 +1380,8 @@ class Model {
     // detector is causal and header-free; it runs only at power-of-two
     // boundaries (a handful of times per stream) and the size band keeps the
     // large transpose lanes (>= 512 KiB) on their tuned 1-D contexts.
-    if (this.profile === 'bin' && !this.bcjOn && this.scanPeriod === 0 && this.pos >= 4096
-      && (this.pos & (this.pos - 1)) === 0 && this.buf.length >= 16384 && this.buf.length <= 524289) this.detectScanPeriod()
+    if (this.profile === 'bin' && !this.bcjOn && this.scanPeriod === 0 && this.pos >= 1024
+      && (this.pos & (this.pos - 1)) === 0 && this.buf.length >= 4096 && this.buf.length <= 524289) this.detectScanPeriod()
     const H = this.hashes
     const b1 = this.g(1),
       b2 = this.g(2),
@@ -1402,9 +1410,19 @@ class Model {
           // Nothing is spent when no period was found, so the slot budget and the
           // mixer layout stay exactly as they are for every other stream.
           if (this.scanPeriod > 0) {
-            const np = this.scanPeriod, no = this.g(np)
-            H[1] = hh(b1, no, this.g(np + 1), this.g(np - 1))
-            H[2] = hh(no, this.g(np << 1), b1)
+            const np = this.scanPeriod, no = this.g(np), nw = this.g(np + 1), ne = this.g(np - 1)
+            const nn = this.g(np << 1), nnn = this.g(np * 3)
+            // P28.6: deeper JBIG-style templates. Slot 1 is the near horizon
+            // (west + north-east/north-west), slot 2 the vertical spine, slot 4
+            // the 2-D horizon, slot 5 the upper roof (three rows), slot 6 the
+            // three-row vertical stroke. Measured on the four largest `ptt5`
+            // segments: 29,870 -> 29,304 B versus keeping only slots 1/2, while
+            // the pure diagonal variant (slot 7) was worse (29,420).
+            H[1] = hh(b1, no, nw, ne)
+            H[2] = hh(no, nn, b1)
+            H[4] = hh(b1, b2, no, ne)
+            H[5] = hh(no, nw, ne, nn)
+            H[6] = hh(b1, no, nn, nnn)
           }
           // P6-3a：v15 的稀疏上下文改用"4 字节步长"（b4）与"8 字节步长"（b8）：
           // 32 位定长指令 / 定长结构体里，当前字节与 pos-4、pos-8 强列相关。
