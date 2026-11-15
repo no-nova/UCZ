@@ -910,12 +910,17 @@ function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: 
   for (const p of parts) if (p.length > largest.length) largest = p
   const sample = sampleWindow(largest, tgPlanningWindow(largest.length,width,v13 && transformsV20Enabled()), width).sample
   const costs = new Float64Array(width + 1), plans: ColumnGroup[][] = Array.from({length:width + 1}, () => [])
-  const spans = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 64]
+  // P30.0：列布局搜索是 yeast.data 那 22k 次探针的真正来源 —— 每个 start 要试
+  // 11 个 span × (reverse) × 4~6 个候选，且每个候选都是一次真实编码。
+  // 非 max 档位按「先粗后细」裁剪：`fast` 只留 1/2/4/8 四个 span 和两个候选，
+  // `balanced` 留 6 个 span、三个候选。`max` 完全不受影响。
+  const lvlCols = pruningLevel()
+  const spans = lvlCols === 2 ? [1, 2, 4] : lvlCols === 1 ? [1, 2, 3, 4, 6, 8] : [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 64]
   for (let start = width - 1; start >= 0; start--) {
     let best = Infinity, selected: ColumnGroup[] = []
     for (const span of spans) {
       if (start + span > width) continue
-      for (const reverse of (v13 && span>=2 ? [false,true] : [false])) {
+      for (const reverse of (v13 && span>=2 && lvlCols === 0 ? [false,true] : [false])) {
         const {data, lengths} = gatherGroup([sample], width, start, span, reverse)
         let size = data.length, mode: number = ID.STORE
         let uniform = data.length > 0
@@ -924,7 +929,11 @@ function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: 
         else if (data.length) {
           const rawH = entropy8(data), deltaH = entropy8(groupDelta(data, lengths, span, false))
           // Entropy sets evaluation order; actual byte lengths decide, not entropy alone.
-          const options: number[] = deltaH < rawH ? [ID.DELTA, ID.RLE, ID.O0, ID.BIN] : [ID.RLE, ID.O0, ID.BIN, ID.DELTA]
+          const options: number[] = lvlCols === 2
+            ? (deltaH < rawH ? [ID.DELTA] : [ID.O0])
+            : lvlCols === 1
+              ? (deltaH < rawH ? [ID.DELTA, ID.O0, ID.BIN] : [ID.O0, ID.BIN, ID.DELTA])
+              : deltaH < rawH ? [ID.DELTA, ID.RLE, ID.O0, ID.BIN] : [ID.RLE, ID.O0, ID.BIN, ID.DELTA]
           if (v13 && transformsV20Enabled() && (span===4 || span===8)) options.push(span===4?TG_LE32:TG_LE64)
           for (const candidate of options) {
             const n = encodeGroupData(data, candidate, lengths, span, undefined, v13, v15, reverse).length
@@ -1578,6 +1587,20 @@ const DEFAULT_WORKER_TUNING = JSON.stringify({ planTuning, modelTuning, a2Tuning
 export function workerTuningMatchesDefaults(): boolean {
   return JSON.stringify({ planTuning, modelTuning, a2Tuning, cmV20Tuning }) === DEFAULT_WORKER_TUNING
 }
+
+/**
+ * P30.0：规划器档位。
+ *
+ * `'max'` 是默认值，且必须与不带 options 的历史调用**逐字节相同**：所有剪枝分支
+ * 都以 `activeLevel !== 'max'` 为前置条件，`'max'` 走的是和 P30.0 之前一样的代码路径。
+ *
+ * `'balanced'` 与 `'fast'` 只减少**搜索**，不改变容器格式：解码端完全不知道档位存在，
+ * 任何档位产生的容器都由同一个 `decompress` 解回。
+ */
+export type CompressionLevel = 'fast' | 'balanced' | 'max'
+let activeLevel: CompressionLevel = 'max'
+export function currentCompressionLevel(): CompressionLevel { return activeLevel }
+function pruningLevel(): 0 | 1 | 2 { return activeLevel === 'fast' ? 2 : activeLevel === 'balanced' ? 1 : 0 }
 
 export function sampleBudgetForSegment(totalBytes: number, segments: number, segmentBytes: number): number {
   if (planTuning.soloSampleCap > 0 && segments <= 4 && segmentBytes >= 1024 * 1024)
@@ -3810,16 +3833,25 @@ function coalesceCompressedPlan(dataLen: number, cp: Compressed): Compressed {
 export async function compressAdaptive(
   data: Uint8Array,
   onStage?: (msg: string, pct: number) => void,
-  options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean },
+  options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel },
 ): Promise<Compressed> {
+  const previousLevel = activeLevel
+  activeLevel = options?.level ?? 'max'
   try {
     // Finish the unchanged P13.1 chooser, family/orphan/macro and WIDE guards FIRST.
     // New contexts cannot steer those heuristics or evict an old WORD-PRE winner.
     const baseline=await compressAdaptiveImpl(data,onStage,options)
-    if(options?.contextCandidates===false || !cmV20Tuning.enabled) return baseline
+    // P30.0：`fast` 档位直接返回基线计划。上下文锦标赛每组至少要一次整组真实编码
+    // （15.B 上约 11 s），而它带来的是 0.1% 量级的收益 —— 这正是"用体积换时间"的定义。
+    if(options?.contextCandidates===false || !cmV20Tuning.enabled || pruningLevel()===2) return baseline
     const chosen=await refineContextCandidates(data,baseline,{serial:!!options?.serial||!workerTuningMatchesDefaults()},onStage)
+    // P30.0: `fast` 只做"基线 + 上下文锦标赛"两步；`balanced` 再多做两项
+    // 收益最大、代价最小的结构细化（BCJ 合并、噪声凹槽切分），跳过 REC2/位平面。
+    const pr = pruningLevel()
+    if (pr >= 2) return coalesceCompressedPlan(data.length,chosen)
     const coalescedBcj=refineBcjSegments(data,chosen)
     const carved=refineNoisePockets(data,coalescedBcj)
+    if (pr === 1) return coalesceCompressedPlan(data.length,carved)
     const upgraded=refineGroupCodecs(data,carved)
     const rec2=refineRec2(data,upgraded)
     let bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
@@ -3841,7 +3873,7 @@ export async function compressAdaptive(
     }
     return coalesceCompressedPlan(data.length,bp)
   }
-  finally { await closeNodePool() }
+  finally { activeLevel = previousLevel; await closeNodePool() }
 }
 /** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
  * incompressible segments.
@@ -4445,6 +4477,22 @@ async function compressAdaptiveImpl(
   await tick()
   const analysis = analyze(data)
   const n = data.length
+  // P30.0：非 max 档位先粗化地形分段。`chooseSpec` 的成本与**区域数**成正比
+  // （每个区域 × 每个候选 × 2~3 个采样窗口各一次真实编码），而 512 B 级碎片区域
+  // 是 yeast.data 上 12,711 次探针的来源。合并相邻小区域只改变搜索粒度，
+  // 容器格式与解码端完全不受影响。
+  const lvlSeg = pruningLevel()
+  if (lvlSeg > 0) {
+    const minBytes = lvlSeg === 2 ? 32768 : 8192
+    const merged: typeof analysis.segs = []
+    for (const sg of analysis.segs) {
+      const prev = merged[merged.length - 1]
+      if (prev && sg.end - prev.start <= minBytes) prev.end = sg.end
+      else merged.push({ ...sg })
+    }
+    if (merged.length) merged[merged.length - 1].end = analysis.segs[analysis.segs.length - 1].end
+    analysis.segs = merged
+  }
   {
       const fast = lowCardinalityPlan(data, analysis, onStage)
     if (fast) return fast
@@ -4885,7 +4933,8 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // quarter of the group, so the probe cost stays a small fraction of the one full
     // encode that follows.
     if(screen && matchDistEligible && rawBytes<CONTEXT_SCREEN_MIN_BYTES && rawBytes>=CONTEXT_MIN_BYTES) {
-      const budget=Math.max(CONTEXT_MIN_BYTES,Math.min(rawBytes,Math.floor(rawBytes/4)))
+      const lvlB=pruningLevel()
+      const budget=Math.max(CONTEXT_MIN_BYTES,Math.min(rawBytes,Math.floor(rawBytes/4),lvlB===2?16384:lvlB===1?32768:Number.MAX_SAFE_INTEGER))
       const sample=groupKernelSample(parts,positions,spec.id===ID.WIDE_GRAD?spec.r:4,budget)
       if(sample.bytes>=CONTEXT_MIN_BYTES) {
         const baseBytes=price(withCMProbe(()=>encode(sample.parts,sample.positions,undefined,pre)),sample.bytes)
@@ -4974,7 +5023,11 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
         // P24: with five raw-text candidates the pool grows by one so the previous
         // winner is always still priced on the full group; the complete-container
         // gate, not the pool size, decides adoption.
-        const promoteCap=rawText&&modes.includes('text-vertcol')?5:4
+        // P30.0：非 max 档位只把样本榜前 2（balanced）/ 前 1（fast）名送进整组编码。
+        // 采纳仍由完整容器比对决定，所以这里只可能少花钱，不可能选进更差的规则。
+        const baseCap=rawText&&modes.includes('text-vertcol')?5:4
+        const lvl=pruningLevel()
+        const promoteCap=lvl===2?1:lvl===1?Math.min(2,baseCap):baseCap
         for(const t of positive) {
           if(modes.length>=promoteCap) break
           if(t.bytes<=pick.bytes*1.008 && !modes.includes(t.context)) modes.push(t.context)

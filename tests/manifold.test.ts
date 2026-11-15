@@ -157,6 +157,18 @@ export async function testManifoldUniversality() {
     console.log(`[manifold] bin-kernel W=${W} raw=${buf.length} uz=${coded.length} rt=${same}`)
     if (!same) throw new Error(`bin kernel roundtrip failed at W=${W}`)
   }
+  // P30.0：三档规划器都必须解回原文，且默认（无 options）必须与 `'max'` 逐字节相同。
+  {
+    const buf = quasiPeriodic(197, 128, 0x51ed270b)
+    const plain = await compressAdaptive(buf)
+    const maxed = await compressAdaptive(buf, undefined, { level: 'max' })
+    assert.equal(plain.container.length, maxed.container.length, "默认档位必须等同 'max'")
+    for (const level of ['fast', 'balanced', 'max'] as const) {
+      const enc = await compressAdaptive(buf, undefined, { level })
+      fastDeepEqual(decompress(enc.container), buf, `level=${level}`)
+      console.log(`[level] ${level} raw=${buf.length} uz=${enc.container.length} ver=${enc.container[3]}`)
+    }
+  }
   for (const r of rows) console.log(`[manifold] ${r.name} raw=${r.raw} H0=${r.h0} uz=${r.uz} rt=${r.rt} path=${r.path}`)
   console.log('P29.3 manifold universality PASS')
 }
