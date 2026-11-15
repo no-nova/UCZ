@@ -1088,7 +1088,6 @@ class Model {
     // stream is long enough. The counter stays the same nine-slot ladder otherwise.
     if (v3 && profile === 'text' && this.context === 'text-vertcol' && n >= TEXT_COL_WORD_MIN_BYTES) this.nctx = 12
 
-    if ((globalThis as any).__HIN && profile === 'bin' && variant === 'v20' && n >= 65536) this.nctx = Math.max(this.nctx, (globalThis as any).__HIN as number)
     this.useMatch = profile === 'text' || profile === 'bin'
     this.minLen = profile === 'text' && !v3 ? 5 : 4
     // P9-2：表宽走 cmTableBits()，编码端与解码端共用同一个公式与同一个上限。
@@ -2286,9 +2285,7 @@ class Model {
     if (this.binTenOn) {
       // P25.0: encoder and decoder run the same integer math on the same (y, pr)
       // stream, so `emaErr` is bit-identical on both sides and the gate is safe.
-      const gema = (globalThis as any).__EMA_PROBE
       this.emaErr = this.emaErr - (this.emaErr >> 5) + (this.byteErr >> 5)
-      if (gema) (gema as number[]).push(this.emaErr)
       this.byteErr = 0
     }
     if (this.vertTbl) {
@@ -3019,7 +3016,6 @@ export function encodeCMDual(
   const n = data.length
   const m = new Model(n, profile, s, r, variant, geomStride)
   m.dualPass = true
-  if ((globalThis as any).__DUAL_DEBUG) (globalThis as any).__DUAL_TRACE = true
   // 编码端缓冲：仅供诊断的 uncalibrated base，以及选定内核的可解码 alt。
   const out13 = new ByteWriter(), out15 = new ByteWriter()
   let a1 = 0, a2 = 0xffffffff  // v13 区间

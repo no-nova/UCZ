@@ -842,7 +842,6 @@ function groupDelta(input: Uint8Array, lengths: number[], span: number, inverse:
   return out
 }
 function encodeGroupData(input: Uint8Array, mode: number, lengths: number[], span: number, onProgress?: (done: number, total: number) => void, v13 = false, v15: boolean | 'v20' = false, reverse = false, options?:CMOptions): Uint8Array {
-  if ((globalThis as any).__DUMP_O0 && (mode === ID.O0 || mode === ID.STORE || mode === ID.BIN) && input.length > 60000) { const d=(globalThis as any).__DUMP_O0; (d.list as any[]).push({ mode, n: input.length, data: input.slice() }) }
   const k: CMVariant = v15==='v20' ? 'v20' : v15 ? 'v15' : v13 ? 'v13' : false
   if (mode === TG_LE32 || mode === TG_LE64) {
     if (!v13 || !transformsV20Enabled() || span !== (mode===TG_LE32 ? 4 : 8)) throw Error('无效 v20 转置差分')
@@ -2807,7 +2806,6 @@ function chooseGroupV15(parts: Uint8Array[], g: PlanGroup, positions: number[], 
     variants:cand.variants?.map(v=>({spec:v.spec,kernel:v.kernel,bytes:v.payload.length})),
     screening:cand.screening,took:chosen!==base,selectedSpec:chosenSpec,selectedFlags:payloadModelFlags(chosen),selectedBytes:chosen.length,
   })
-  if(original.id===ID.TEXT_V3&&(globalThis as any).__WP_STATS)((globalThis as any).__WP_STATS as any[]).push({raw:cand.rawLen,pre:cand.wordPre?.length??null,plain:chosen.length,took})
   if(chosen!==base){g.payload=chosen;g.spec={...chosenSpec};g.reusePayload=false}
   g.wordPre=took
   return chosenApm
@@ -3269,7 +3267,6 @@ async function tryParallelGroups(
   const jobs: JobPayload[] = [], loads: number[] = [], targets: { gi: number; key: string; base?: { bytes: Uint8Array; cost: Float32Array } }[] = []
   for (let k = 0; k < proposed.jobs.length; k++) {
     const gi = proposed.index[k], key = finalGroupKey(unique[gi], segs), saved = run?.work.get(key)
-    if((globalThis as any).__KEYDBG && run?.prefetch)console.log('LOOKUP', key, '| extra', run.prefetch.key, 'hit', !!saved)
     if (saved) {
       out[gi] = saved; run!.work.delete(key); run!.stats.macroReused++
     } else { jobs.push(proposed.jobs[k]); loads.push(proposed.loads[k]); targets.push({ gi, key, base: unique[gi].baseCost ? { bytes: unique[gi].payload, cost: unique[gi].baseCost! } : undefined }) }
@@ -3311,7 +3308,7 @@ async function tryParallelGroups(
     for (let k = 0; k < restored.length; k++) {
       const t = targets[k]
       if (t.gi >= 0) out[t.gi] = restored[k]
-      else { run!.work.set(t.key, restored[k]); run!.stats.macroPrefetched++; if((globalThis as any).__KEYDBG)console.log('PREFETCH', t.key) }
+      else { run!.work.set(t.key, restored[k]); run!.stats.macroPrefetched++ }
     }
     parallelReport.used = true; parallelReport.groups += jobs.length
     if (run) {
@@ -3398,9 +3395,6 @@ async function encodePreparedPlan(
     const g = unique[gi]
     const len = g.members.reduce((sum, i) => sum + segs[i].rawLen, 0)
     onStage?.(`编码地形 ${gi + 1}/${unique.length} · 0%`, 50 + 35 * gi / unique.length)
-    const dbg = (globalThis as any).__GRP_STATS as any[] | undefined
-    if (dbg) dbg.push({ gi, id: g.spec.id, s: g.spec.s, members: g.members.length, raw: len,
-      reuse: !!g.reusePayload, hasPayload: !!g.payload, par: !!parallelGroups?.[gi] })
     // Logical cost bins end at every segment seam or original 512-byte block edge.
     const fragments: {member:number; block:number; len:number}[] = []
     const ends: number[] = []
