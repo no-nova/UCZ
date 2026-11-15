@@ -1,12 +1,12 @@
 /// <reference lib="webworker" />
-import { compressAdaptive, decompress, singleModelSize, streamSize } from './codec'
+import { compressAdaptive, decompress, singleModelSize, streamSize, type CompressionLevel } from './codec'
 import { shouldRunSingleCM } from './limits'
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope
 // 长任务（mozilla 量级要 15 分钟以上）没有取消通道的话，用户只能关标签页。
 // 取消时立刻回一条 aborted，主线程据此结束等待并终止本 worker。
 let cancelled = false
-ctx.onmessage = async (event: MessageEvent<{ type: 'run' | 'restore' | 'cancel'; data?: Uint8Array; skipSingleCM?: boolean }>) => {
+ctx.onmessage = async (event: MessageEvent<{ type: 'run' | 'restore' | 'cancel'; data?: Uint8Array; skipSingleCM?: boolean; level?: CompressionLevel }>) => {
   if (event.data.type === 'cancel') {
     cancelled = true
     return
@@ -31,7 +31,7 @@ ctx.onmessage = async (event: MessageEvent<{ type: 'run' | 'restore' | 'cancel';
       if (now - lastProgress >= 100 || pct === 5 || pct === 15 || pct === 85) {
         lastProgress = now; ctx.postMessage({ type: 'progress', msg, pct })
       }
-    })
+    }, event.data.level ? { level: event.data.level } : undefined)
     if (cancelled) { ctx.postMessage({ type: 'aborted' }); return }
     const tComp = performance.now() - t0
     ctx.postMessage({ type: 'progress', msg: '独立解码 + 逐字节比对，验证无损…', pct: 88 })

@@ -23,7 +23,10 @@ http.createServer(async (req, res) => {
       req.on('error', reject)
       req.on('aborted', () => reject(new Error('请求中断')))
     })
-    send(200, {results: await runBenchmarks(data)})
+    // The Web GUI sends its compression tier for transparency; the external
+    // codecs are fixed-profile, so it is echoed rather than applied.
+    const level = String(req.headers['x-ucz-level'] || 'max')
+    send(200, {level, results: await runBenchmarks(data)})
   } catch (e) { if (!res.headersSent) send(e.status || 500, {error:String(e.message)}) }
   finally { busy = false }
 }).listen(port, '127.0.0.1', () => console.log(`Benchmark service listening on 127.0.0.1:${port}`))

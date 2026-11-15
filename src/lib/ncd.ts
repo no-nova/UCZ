@@ -6,7 +6,6 @@
  * 跨文件的"条件学习"就消失了。`mode: 'cm'` 因此直接构造单段连续流：
  * `C(x)`、`C(y)`、`C(x||y)`、`C(y||x)` 四次编码，四种长度都可复现。
  */
-import { gzipSync } from 'node:zlib'
 import { encodeCM } from './coder'
 import { compressAdaptive } from './codec'
 import { deltaFwd } from './transforms'
@@ -181,16 +180,6 @@ export async function computeNCD(x: Uint8Array, y: Uint8Array, options?: NcdOpti
     conditionalXGivenY: Math.max(0, cyx),
     ncd, profile, mode, alignedStride, windowBytes: ax.length,
   }
-}
-
-/** 传统 GZIP-NCD：作为对照基线（`zlib.gzipSync(level 9)`）。 */
-export function computeGzipNCD(x: Uint8Array, y: Uint8Array, maxBytes = 32768): number {
-  const wx = representative(x, maxBytes), wy = representative(y, maxBytes)
-  const cx = gzipSync(wx, { level: 9 }).length
-  const cy = gzipSync(wy, { level: 9 }).length
-  const cxy = gzipSync(concat(wx, wy), { level: 9 }).length
-  const cyx = gzipSync(concat(wy, wx), { level: 9 }).length
-  return Math.max(0, (Math.min(cxy, cyx) - Math.min(cx, cy)) / Math.max(cx, cy))
 }
 
 export async function computeNCDMatrix(

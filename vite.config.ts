@@ -1,3 +1,4 @@
+import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
@@ -21,7 +22,22 @@ export default defineConfig({
       { find: "@", replacement: path.resolve(__dirname, "src") },
     ],
   },
-  plugins: [react(), tailwindcss(), viteSingleFile()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    viteSingleFile(),
+    {
+      // The single-file bundle links to /LICENSE from the footer; ship the text too.
+      name: 'copy-license',
+      closeBundle() {
+        const from = path.resolve(__dirname, 'LICENSE')
+        if (!existsSync(from)) return
+        const to = path.resolve(__dirname, 'dist/web')
+        mkdirSync(to, { recursive: true })
+        copyFileSync(from, path.join(to, 'LICENSE'))
+      },
+    },
+  ],
   // `npm run build` writes dist/cli.js + dist/index.js; keep the Web bundle in a
   // subdirectory so a later `build:web` cannot empty the CLI/library output.
   build: { outDir: 'dist/web', emptyOutDir: true },

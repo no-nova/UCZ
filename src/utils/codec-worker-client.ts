@@ -1,10 +1,11 @@
+import type { CompressionLevel } from '../lib/codec'
 import type { CompressionOutput, ProgressCallback } from './compression-queue'
 
 export type WorkerFactory = () => Worker
 
-export function callCodecWorker(factory: WorkerFactory, type: 'run', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback): Promise<CompressionOutput>
+export function callCodecWorker(factory: WorkerFactory, type: 'run', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput>
 export function callCodecWorker(factory: WorkerFactory, type: 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback): Promise<Uint8Array>
-export function callCodecWorker(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback): Promise<CompressionOutput | Uint8Array> {
+export function callCodecWorker(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput | Uint8Array> {
   return new Promise((resolve, reject) => {
     let worker: Worker | undefined
     let settled = false
@@ -39,7 +40,7 @@ export function callCodecWorker(factory: WorkerFactory, type: 'run' | 'restore',
       worker.onmessageerror = () => finish(new Error('后台线程消息无法读取'))
       if (signal.aborted) { abort(); return }
       const owned = data.byteOffset === 0 && data.byteLength === data.buffer.byteLength ? data : data.slice()
-      worker.postMessage({ type, data: owned }, [owned.buffer as ArrayBuffer])
+      worker.postMessage({ type, data: owned, level: options?.level }, [owned.buffer as ArrayBuffer])
     } catch (error) {
       finish(error instanceof Error ? error : new Error(String(error)))
     }

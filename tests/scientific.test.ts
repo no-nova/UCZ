@@ -8,7 +8,8 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { compressAdaptive, decompress } from '../src/lib/codec'
 import { formatInspectionReport, inspectContainer, inspectStream, isContainer } from '../src/lib/inspect'
-import { computeGzipNCD, computeNCD, computeNCDMatrix, formatNCDMatrixReport } from '../src/lib/ncd'
+import { computeNCD, computeNCDMatrix, formatNCDMatrixReport } from '../src/lib/ncd'
+import { computeGzipNCD } from '../src/lib/gzip-ncd'
 import { fastDeepEqual } from './fast-equal'
 
 function xorshift(seed: number): () => number {
