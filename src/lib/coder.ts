@@ -956,6 +956,11 @@ class Model {
   prev2Word = 0
   /** P28.5: causally detected scanline period for small `bin` blocks (0 = none). */
   scanPeriod = 0
+  /** P28.8: the row above as a 10-bit window, aligned so that bit index 0..7
+   * selects the three pixels {NW, N, NE} that sit directly above it. */
+  scanUp10 = 0
+  /** Two rows above, same alignment (`nnBit` selects one pixel). */
+  scanNn = 0
   /** P28.2: hash of the first <=4 letters of the current token (prefix root). */
   curStem4 = 0
   /** P28.2: prefix root of the token that just ended. */
@@ -1436,12 +1441,27 @@ class Model {
             H[4] = hh(no, halo, b1)
             H[5] = hh(no, nn, roof)
             H[6] = hh(no, nnn, roof, b1)
+            this.scanUp10 = ((nw & 1) << 9) | (no << 1) | (ne >>> 7)
+            this.scanNn = nn
           }
           // P6-3a：v15 的稀疏上下文改用"4 字节步长"（b4）与"8 字节步长"（b8）：
           // 32 位定长指令 / 定长结构体里，当前字节与 pos-4、pos-8 强列相关。
           H[8]=this.isV20 ? (this.context === 'bin-stride4' ? hh(b4,this.g(8),this.g(12),this.pos&3) : hh(b2,b4)) : this.isV15 && match3Tuning.binCtx8
             ? hh((b1<<10)^(b2<<2)^(this.pos&3), b4, this.g(8))
             : hh((b1<<10)^(b2<<2)^(this.pos&3), b4, this.g(5))
+          // P28.8: on a detected bitmap only four of fourteen slots were 2-D and
+          // the 1-D skip-grams are near useless on a fax scanline. `H[9..13]` are
+          // assigned further down (quad/ladder) so only these three survive; the
+          // deeper variants measured identical sizes, i.e. exactly nothing.
+          // Four largest `ptt5` segments: 27,124 -> 26,699 B.
+          if (this.scanPeriod > 0) {
+            const np = this.scanPeriod, no = this.g(np), nw = this.g(np + 1), ne = this.g(np - 1)
+            const nn = this.g(np << 1), nnn = this.g(np * 3)
+            const halo = (nw & 15) | ((ne >>> 4) << 4)
+            H[3] = hh(no, halo, b1)
+            H[7] = hh(no, nn, b1 & 15)
+            H[8] = hh(no, nn, nnn)
+          }
         }
         // P24.6: the tenth slot is only spent on streams long enough to amortise its
         // cold start; `bin-stride4` keeps its own layout and never reaches here.
@@ -1729,6 +1749,7 @@ class Model {
     const w2 = this.weights2
     const isV15 = this.isV15 && w2 !== undefined
     const m2hi = this.m2hi, m2low = this.m2low, m2UsesC0 = this.m2UsesC0, m2UsesMs = this.m2UsesMs
+    const scanPer = this.scanPeriod, scanUp10 = this.scanUp10, scanNn = this.scanNn
     const mlenActive = this.mlen > 0 ? 1 : 0
     let apmBase = 0, apmW = 0, apmCtx = 0
     let apm2Base = 0, apm2W = 0
@@ -1865,6 +1886,18 @@ class Model {
         let m2 = m2hi | m2low
         if (m2UsesC0) m2 |= (c0 & 3) << 1
         if (m2UsesMs) m2 |= mlenActive
+        if (scanPer > 0) {
+          // P28.8: five-pixel JBIG neighbourhood of the current bit — the three
+          // pixels above {W, N, NE}, the pixel two rows up, and the pixel to the
+          // west. It is invariant across byte boundaries, so the secondary mixer
+          // selects one weight set per *pixel* instead of one per byte. The low
+          // bit of `c0` refines it; the match flag and the bare bit index both
+          // measured worse (26,198 / 25,946 versus 25,907 on the four segments).
+          const up3 = (scanUp10 >>> (7 - bit)) & 7
+          const nnb = (scanNn >>> (7 - bit)) & 1
+          const wpx = bit === 7 ? (this.g(1) & 1) : (c0 & 1)
+          m2 = (((((up3 << 2) | (nnb << 1) | wpx) << 1) | (c0 & 1))) & 63
+        }
         wbase2 = ((m2 << 3) | bit) * N
         const w2l = w2 as Int32Array
         let d2x = w2l[wbase2 + N - 1] * 256
