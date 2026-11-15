@@ -1,7 +1,7 @@
 {
   "name": "react-vite-tailwind",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0-beta.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -62,5 +62,6 @@
     "README.md"
   ],
   "main": "./dist/index.js",
-  "module": "./dist/index.js"
+  "module": "./dist/index.js",
+  "license": "MPL-2.0"
 }

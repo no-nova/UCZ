@@ -23,7 +23,7 @@ try {
 
   const ver = run(['--version'])
   assert.equal(ver.status, 0, `--version 失败: ${ver.stderr}`)
-  assert.equal(ver.stdout.trim(), 'UCZ v1.0.0')
+  assert.equal(ver.stdout.trim(), 'UCZ v0.1.0-beta.1')
   const help = run(['--help'])
   assert.equal(help.status, 0, `--help 失败: ${help.stderr}`)
   assert.ok(/Usage:/.test(help.stdout) && /--version/.test(help.stdout))

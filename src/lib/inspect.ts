@@ -6,6 +6,7 @@
  * 事实读出来（版本、组数、每组规则与载荷长度），不做任何猜测。
  */
 import { detectLagCandidates, detectRecordStride } from './analyze'
+import { encodeCM } from './coder'
 import { contextFromGroupBits, GROUP_MATCH_DIST_BIT } from './context-policy'
 import { compressAdaptive } from './codec'
 import type { CompressionLevel } from './codec'
@@ -79,11 +80,34 @@ export interface ContainerAnatomy {
   segments: SegmentAnatomy[]
 }
 
+export interface ResidualAnomaly {
+  offset: number
+  length: number
+  bpb: number
+  kind: 'cold-start' | 'entropy-spike' | 'regime-shift'
+}
+
+export interface ResidualProfile {
+  /** Bytes per profile bin (exactly one CM block cost bin). */
+  blockSize: number
+  /** Local conditional bits per byte, one entry per bin. */
+  binsBpb: number[]
+  minBpb: number
+  maxBpb: number
+  meanBpb: number
+  /** Unicode sparkline (one glyph per display column). */
+  sparkline: string
+  /** Bins whose bpb is a statistical outlier, in stream order. */
+  anomalies: ResidualAnomaly[]
+}
+
 export interface StreamInspection {
   fingerprint: ManifoldFingerprint
   container?: ContainerAnatomy
   /** 容器与原始流的对应关系（仅当做了压缩）。 */
   compressedBytes?: number
+  /** Local conditional-complexity profile (see `profileResidual`). */
+  residual?: ResidualProfile
   elapsedMs: number
 }
 
@@ -265,12 +289,71 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   }
 }
 
+const SPARK = ['\u2581', '\u2582', '\u2583', '\u2584', '\u2585', '\u2586', '\u2587', '\u2588']
+
+/**
+ * 局部条件复杂度 H(x_i | x_<i>) 剖面。
+ *
+ * 用 `encodeCM` 的 `blockCost`（每 512 B 一小格的精确 bit 代价）在**只看前缀**的
+ * 前提下测量——每个字节的代价只依赖它之前的字节，因此这是真正的因果残差，而不是
+ * 事后统计。为了保持 `inspect` 快，最多读前 256 KiB。
+ */
+export function profileResidual(data: Uint8Array, options?: { profile?: 'text' | 'bin'; maxBytes?: number }): ResidualProfile {
+  const cap = options?.maxBytes ?? 262144
+  const view = data.length > cap ? data.subarray(0, cap) : data
+  const blockSize = 512
+  const bins = Math.max(1, Math.ceil(view.length / blockSize))
+  const values = new Float32Array(bins)
+  const profile = options?.profile ?? (fingerprintStream(view).printableAsciiRatio >= 0.85 ? 'text' : 'bin')
+  const cmOptions = profile === 'text' ? { context: 'text-vertcol' as const, matchDist: true } : { matchDist: true }
+  encodeCM(view, profile, 1, 1, undefined, 0, { values, blockSize }, undefined, 'v20', 0, false, undefined, undefined, cmOptions)
+  const binsBpb: number[] = []
+  for (let i = 0; i < bins; i++) {
+    const len = Math.min(blockSize, view.length - i * blockSize)
+    binsBpb.push(len > 0 ? values[i] / len : 0)
+  }
+  let sum = 0, minBpb = Infinity, maxBpb = 0
+  for (const v of binsBpb) { sum += v; if (v < minBpb) minBpb = v; if (v > maxBpb) maxBpb = v }
+  const meanBpb = binsBpb.length ? sum / binsBpb.length : 0
+  let variance = 0
+  for (const v of binsBpb) variance += (v - meanBpb) ** 2
+  const sd = binsBpb.length ? Math.sqrt(variance / binsBpb.length) : 0
+
+  // 展示用抽样：不超过 32 列，每列取该区间内的**最大值**（峰值不会被平均掉）。
+  const columns = Math.min(32, binsBpb.length)
+  const sparkline = Array.from({ length: columns }, (_, c) => {
+    const from = Math.floor((c * binsBpb.length) / columns), to = Math.max(from + 1, Math.floor(((c + 1) * binsBpb.length) / columns))
+    let peak = 0
+    for (let i = from; i < to; i++) peak = Math.max(peak, binsBpb[i])
+    const idx = Math.min(7, Math.max(0, Math.round((peak / 8) * 7)))
+    return SPARK[idx]
+  }).join('')
+
+  const anomalies: ResidualAnomaly[] = []
+  for (let i = 0; i < binsBpb.length; i++) {
+    const bpb = binsBpb[i]
+    const offset = i * blockSize
+    const length = Math.min(blockSize, view.length - offset)
+    // 冷启动：模型刚开始时的代价天然高，单独标注，不与异常混为一谈。
+    if (i < 2 && bpb > meanBpb) { anomalies.push({ offset, length, bpb, kind: 'cold-start' }); continue }
+    if (sd > 0 && bpb > meanBpb + 1.5 * sd && bpb > meanBpb + 1.0) {
+      const kind = bpb > meanBpb + 3 * sd ? 'entropy-spike' : 'regime-shift'
+      anomalies.push({ offset, length, bpb, kind })
+    }
+  }
+  return {
+    blockSize, binsBpb, sparkline, anomalies,
+    minBpb: Number.isFinite(minBpb) ? minBpb : 0, maxBpb, meanBpb,
+  }
+}
+
 export async function inspectStream(
   data: Uint8Array,
   options?: { compress?: boolean; level?: CompressionLevel },
 ): Promise<StreamInspection> {
   const t0 = performance.now()
   const fingerprint = fingerprintStream(data)
+  const residual = data.length ? profileResidual(data) : undefined
   let container: ContainerAnatomy | undefined
   let compressedBytes: number | undefined
   if (options?.compress !== false && data.length > 0) {
@@ -278,7 +361,7 @@ export async function inspectStream(
     container = inspectContainer(enc.container)
     compressedBytes = enc.container.length
   }
-  return { fingerprint, container, compressedBytes, elapsedMs: performance.now() - t0 }
+  return { fingerprint, container, compressedBytes, residual, elapsedMs: performance.now() - t0 }
 }
 
 export function formatInspectionReport(info: StreamInspection): string {
@@ -296,6 +379,19 @@ export function formatInspectionReport(info: StreamInspection): string {
   if (d.newline) out.push(`mean line length      ${d.meanLineBytes.toFixed(1)} B`)
   out.push(`manifold class        ${f.inferredManifoldClass}`)
   if (f.rationale.length) out.push(`evidence              ${f.rationale.join(' | ')}`)
+  if (info.residual) {
+    const r = info.residual
+    out.push('')
+    out.push(`residual H(x|x<)     min ${r.minBpb.toFixed(3)} / mean ${r.meanBpb.toFixed(3)} / max ${r.maxBpb.toFixed(3)} bpb  (block ${r.blockSize} B)`)
+    out.push(`sparkline             ${r.sparkline}   (0 bpb${' '.repeat(1)}\u2581 -> 8 bpb \u2588)`)
+    if (r.anomalies.length) {
+      out.push(`anomalies             ${r.anomalies.length} bin(s)`)
+      for (const a of r.anomalies.slice(0, 8)) {
+        out.push(`  @${String(a.offset).padStart(9)}  len ${String(a.length).padStart(4)}  ${a.bpb.toFixed(3)} bpb  ${a.kind}`)
+      }
+      if (r.anomalies.length > 8) out.push(`  ... ${r.anomalies.length - 8} more`)
+    } else out.push('anomalies             none')
+  }
   if (info.container) {
     const c = info.container
     out.push('')
