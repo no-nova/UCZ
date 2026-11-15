@@ -205,9 +205,18 @@ const sameSpec = (a: Spec, b: Spec) => a.id === b.id && a.s === b.s && a.r === b
 // so re-cutting the header at a different boundary cannot change a single decoded
 // byte. `BCJ*` is deliberately absent: it converts E8/E9 words relative to each
 // PART's absolute position, so the boundaries are part of the bitstream contract.
+/**
+ * 只有**无状态**规则可以安全合并相邻分段：编码端把它们当作一条连续的 CM 流，
+ * 解码端切分时不施加任何逐段变换，因此分段边界怎么合并都不影响字节。
+ *
+ * DELTA/GRAD/D16/ANCHOR_FOLD 带状态（差分链、中值预测链、折叠字典），
+ * 编码端是**逐分片**作用再拼接，解码端也是逐分片求逆 —— 边界即语义。
+ * 把它们放进这个集合会在合并后丢失边界：`multiChannel(3,16384)` 的
+ * 49,152 B 流就是在此处被并成 1 段，解码端对整个 49,152 B 求一次逆变换，
+ * 从第一个边界 3,584 = 7*512 之后全错（P29.3 发现的往返缺陷，P29.4b 修复）。
+ */
 const CONCAT_INVARIANT_IDS = new Set<number>([
   ID.STORE, ID.RLE, ID.O0, ID.TEXT, ID.BIN, ID.TEXT_V2, ID.BIN_V2, ID.TEXT_V3, ID.BIN_V3,
-  ID.DELTA, ID.DELTA_V3, ID.GRAD, ID.GRAD_V2, ID.GRAD_V3, ID.WIDE_GRAD, ID.D16, ID.ANCHOR_FOLD,
 ])
 
 /**

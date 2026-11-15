@@ -1,6 +1,7 @@
 import { strict as assert } from 'node:assert'
 import { createHash } from 'node:crypto'
 import { compressAdaptive, decompress, ID } from '../src/lib/codec'
+import { encodeCM, decodeCM } from '../src/lib/coder'
 import { fastDeepEqual } from './fast-equal'
 
 // P29.3: blind manifold universality suite.
@@ -131,12 +132,31 @@ export async function testManifoldUniversality() {
   for (const P of [73, 197, 389]) rows.push(await measure(`quasi-periodic P=${P}`, quasiPeriodic(P, Math.ceil(24576 / P), 0x9e3779b9 ^ P), 24576 * 0.85))
   // 1.3 inner: prime-width 2-D rasters
   for (const W of [113, 193]) rows.push(await measure(`raster 2-D W=${W}`, raster2d(W, Math.ceil(24576 / W), 0x85ebca6b ^ W), 24576 * 0.85))
-  // 1.2: odd / multi-channel interleave. Strides 2 and 3 are deliberately NOT
-  // used here: they currently trip the multi-segment DELTA roundtrip defect
-  // documented in P29.3 (encoder resets the delta chain per segment, decoder
-  // continues it across the joined payload), which is a `src/lib` bug and out of
-  // scope for a sign-off test. 5 and 7 are prime, non power-of-two strides.
+  // 1.2: odd / multi-channel interleave, including the strides that used to break.
+  // P29.4b 之前 s=2/3 会在这里红：编码端逐分片 `deltaFwd`（每个分片重置差分链），
+  // 而 `coalesceCompressedPlan` 会把相邻同组的分片合并成一个，解码端于是对合并后
+  // 的整段求一次逆 —— 首个分片边界之后全错（3 通道 49,152 B 在 3584 = 7*512 处）。
+  // 现在两端都在整组粒度上作用残差变换，因此任意 s 与任意分片长度都对称。
   for (const S of [4, 5, 7]) rows.push(await measure(`interleave s=${S}`, multiChannel(S, Math.ceil(24576 / S), 0xc2b2ae35 ^ S), 24576 * 0.85))
+  rows.push(await measure('interleave s=2 (multi-seg)', multiChannel(2, 24576, 0x9e3779b9), 24576 * 0.85))
+  rows.push(await measure('interleave s=3 (12288 B)', multiChannel(3, 4096, 0x85ebca6b), 12288 * 0.85))
+  rows.push(await measure('interleave s=3 (16383 B)', multiChannel(3, 5461, 0xc2b2ae35), 16383 * 0.85))
+  rows.push(await measure('interleave s=3 (49152 B)', multiChannel(3, 16384, 0x27d4eb2f), 49152 * 0.85))
+  rows.push(await measure('interleave s=6', multiChannel(6, 4096, 0x165667b1), 24576 * 0.85))
+  rows.push(await measure('interleave s=8', multiChannel(8, 4096, 0x2545f491), 32768 * 0.85))
+  rows.push(await measure('interleave s=12', multiChannel(12, 4096, 0x7feb352d), 49152 * 0.85))
+  // 素数宽度栅格的**直接内核**往返：`compressAdaptive` 可能把这类流判成 text，
+  // 于是 `detectScanPeriod()`（只在 profile==='bin' 里跑）根本没被执行到。
+  // 这里绕过规划器直接走 bin 内核，确认任意素数宽度在 CM 层都是可逆的。
+  for (const W of [113, 193]) {
+    const buf = raster2d(W, Math.ceil(24576 / W), 0x27d4eb2f ^ W)
+    const coded = encodeCM(buf, 'bin', 1, 1)
+    const back = decodeCM(coded, buf.length, 'bin', 1, 1)
+    let same = back.length === buf.length
+    for (let i = 0; same && i < buf.length; i++) if (back[i] !== buf[i]) same = false
+    console.log(`[manifold] bin-kernel W=${W} raw=${buf.length} uz=${coded.length} rt=${same}`)
+    if (!same) throw new Error(`bin kernel roundtrip failed at W=${W}`)
+  }
   for (const r of rows) console.log(`[manifold] ${r.name} raw=${r.raw} H0=${r.h0} uz=${r.uz} rt=${r.rt} path=${r.path}`)
   console.log('P29.3 manifold universality PASS')
 }
