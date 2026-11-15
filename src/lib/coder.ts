@@ -1485,6 +1485,20 @@ class Model {
         // gained 831 B on H_bcj but lost 114 B on G_lane1's noisy LSBs; shifting every
         // sample by 3 removes that noise and flips G to a gain as well.
         if(this.nctx>13) H[13]=hh(b2>>>3,b4>>>3,this.g(6)>>>3,this.g(8)>>>3)
+        // P28.9: the 2-D overrides have to run AFTER the tenth/thirteenth-slot ladder,
+        // which re-assigns `H[9..13]` further down the same branch — that is why the
+        // P28.8 `H[9..13]` experiments measured exactly zero. Everything is inside
+        // `scanPeriod > 0`, so every other stream is untouched.
+        if (this.scanPeriod > 0) {
+          const np = this.scanPeriod, no = this.g(np), nw = this.g(np + 1), ne = this.g(np - 1)
+          // Reclaim the two ladder slots that exist at this size (64 KiB..256 KiB
+          // models run `nctx = 11`, so only `H[9]`/`H[10]` are live; the larger
+          // ladder slots are absent). `H[9]` alone costs 23 B, `H[10]` alone costs
+          // 1 B, but the pair is worth 136 B: they are the only two slots that see
+          // the north row *and* a horizontally adjacent run of pixels.
+          if (this.binTenOn) H[9] = hh(no, b1, nw & 15)
+          if (this.binTenOn) H[10] = hh(no, ne >>> 4, b1 & 15)
+        }
         if(this.bcjOn && this.nctx>14) {
           // P26.0: x86-specific pair. `H[14]` is the 8-byte envelope of the top two bits
           // of each byte (instruction-class density), `H[15]` the 6-bit-quantised ladder
@@ -1887,15 +1901,25 @@ class Model {
         if (m2UsesC0) m2 |= (c0 & 3) << 1
         if (m2UsesMs) m2 |= mlenActive
         if (scanPer > 0) {
+
           // P28.8: five-pixel JBIG neighbourhood of the current bit — the three
           // pixels above {W, N, NE}, the pixel two rows up, and the pixel to the
           // west. It is invariant across byte boundaries, so the secondary mixer
           // selects one weight set per *pixel* instead of one per byte. The low
           // bit of `c0` refines it; the match flag and the bare bit index both
           // measured worse (26,198 / 25,946 versus 25,907 on the four segments).
-          const up3 = (scanUp10 >>> (7 - bit)) & 7
+          // P28.9: `bit` runs 0..7 with 0 = MSB, so the pixel column of the
+          // current bit is `7 - bit`; the three pixels above it {NW,N,NE} are
+          // scanUp10 bits [6-bit .. 8-bit]. P28.8 read [7-bit .. 9-bit], i.e. one
+          // pixel too far right, and used the *last* bit index for the previous
+          // byte's neighbour instead of the first.
+          const up3 = (scanUp10 >>> (6 - bit)) & 7
           const nnb = (scanNn >>> (7 - bit)) & 1
-          const wpx = bit === 7 ? (this.g(1) & 1) : (c0 & 1)
+          const wpx = bit === 0 ? (this.g(1) & 1) : (c0 & 1)
+          // The full 6-pixel 64-state template `(up3 << 3) | (nnb << 2) | w2px`
+          // measured 26,016 versus 25,863 for this 6-bit form: on `ptt5` the two
+          // west pixels are already carried by `H[1]=hh(no,b1)`, so spending the
+          // extra w2 row slot only splits the table.
           m2 = (((((up3 << 2) | (nnb << 1) | wpx) << 1) | (c0 & 1))) & 63
         }
         wbase2 = ((m2 << 3) | bit) * N
