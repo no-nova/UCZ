@@ -31,7 +31,9 @@
     "test:p12-diagnostics": "node --test tests/p122-diagnostics.test.mjs",
     "bench:corpus": "node scripts/run-bench.mjs",
     "bench:silesia": "node scripts/run-bench.mjs --corpus .diag-data/corpus --out bench-out/silesia --baseline",
-    "bench:aitdcc": "node scripts/run-bench.mjs --corpus /home/user/Downloads/AITDCC --out bench-out/aitdcc"
+    "bench:aitdcc": "node scripts/run-bench.mjs --corpus /home/user/Downloads/AITDCC --out bench-out/aitdcc",
+    "cli": "tsx src/cli.ts",
+    "inspect": "tsx src/cli.ts inspect"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -50,5 +52,8 @@
     "typescript": "5.9.3",
     "vite": "7.3.2",
     "vite-plugin-singlefile": "2.3.0"
+  },
+  "bin": {
+    "ucz": "./dist/cli.js"
   }
 }
