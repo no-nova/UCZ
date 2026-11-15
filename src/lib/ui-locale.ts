@@ -57,3 +57,14 @@ export const CODEC_LABEL_EN: Record<number, string> = {
   12: 'Syntax anchor alignment',
   11: 'Relative jump transform',
 }
+
+/** English labels for the demo ground-truth regions (`samples.ts` keeps the Chinese). */
+export const TRUTH_LABEL_EN: Record<string, string> = {
+  'BMP 像素': 'BMP pixels',
+  'XMP 文本(藏在图片里)': 'XMP text (hidden in the image)',
+  '加密缩略图(噪声)': 'Encrypted thumbnail (noise)',
+  'PCM 音频块': 'PCM audio block',
+  '零填充': 'Zero padding',
+  '重复纹理': 'Repeating texture',
+  '日志文本': 'Log text',
+}

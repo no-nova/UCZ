@@ -1,158 +1,235 @@
-# UCZ
+# UCZ (v0.1.0-beta.1)
 
-浏览器内的自适应压缩演示。`src/lib/codec.ts` 保留原接口，当前支持解压 UCZ v1–v21，编码只按实际选中载荷的功能标志选择格式版本。P14.1 的新上下文被完整字节门采用时写 v21；未采用时保留原容器及其版本。历史上 v14 引入宽行预测，v13 引入新相位/增强子通道，v12 引入上一代增强上下文，v11 引入微种子，v10 引入子通道分流。旧格式的 ID 11 是 BCJ、ID 12 是旧的锚点行长编码，不能覆盖，因此新 ANCHOR-FOLD 使用 ID 13。v5 对同规则的 DELTA、GRAD 和 D16 区域分别重置变换，再共享残差上下文模型；TRANSPOSE 对 2–64 字节记录按列重排，同规则跨区域按列共享编码，每列独立试探原样、填充、游程、O0、BIN 或差分编码。短尾行也可无损还原。新增 TRANSPOSE-G 候选以自适应连续列组保留记录内跨列关联，差分预测在区域边界重置，列组的模式和长度按组写入；v4 原有逐列格式保持可读。规则字典、区域长度和动态坑位坍缩位图构成头部；区域大小是共享负载按成本分摊的整数值，头部单独计入开销。
+**Universal Context-Mixing (Zero-Prior)** — an experimental zero-prior compression engine and
+residual-entropy microscope, written in TypeScript.
 
-## P14.1：受完整旧容器保护的上下文候选
+[English](README.md) | [简体中文](README.zh-CN.md) | [Full benchmarks](BENCHMARKS.md) | [9-Point Constitution](CONSTITUTION.md)
 
-- 默认尝试直接 BIN stride4、WIDE6–8 低平面几何及 WORD-PRE token3/merge；BCJ 不套用 raw BIN 上下文，原 WORD-PRE `<0.99` 准入保留。
-- 先完成 P13.1 的原选择，再以真实 payload 和完整头成本严格择优；相等、变大或失败均保留旧结果。库级诊断可用 `compressAdaptive(data, undefined, { contextCandidates: false })` 关闭新候选。
-- v21 使用显式组模式，不能冒充旧 v20。旧版程序不支持新 v21 文件，需要升级解码器。
-- 六个固定窗口的 64 KiB 自然入口、独立 `ed09309` 对照、旧路径字节一致性与额外 256 KiB XML 验证见 [P14.1 实现报告](docs/audits/P14_1_IMPLEMENTATION.md)。**用户报告 P14.1 全十二文件 12/12 PASS，基线已锁定为 40,075,423 B；Arena 未全量重跑，两个总量目标仍未达到。**
-- 有界验证入口：`timeout --signal=KILL 19s node tests/p141-implementation.test.mjs wire`；历史证据只读校验：在 `18f497d` 历史树运行 `timeout --signal=KILL 19s node scripts/diag/p141/verify.mjs --verify`（该冻结校验器要求当时的旧 baseline）。
+---
 
-## 运行
+## The thought experiment
 
-要求 Node.js 22（Zstandard API 可用的版本）及 npm：
+Most strong compressors are libraries of knowledge. `xz` knows LZ77 and range coding. `paq8px`
+ships an English dictionary, a JPEG model, an x86 filter and dozens of hand-built contexts.
+`zstd` trains on a corpus before it ever sees your file. All of that works — that is exactly why
+everyone uses it.
 
-```sh
-npm ci
-npm run dev -- --host 0.0.0.0
-# 另一个终端（仅用于可选的外部算法实测）：
-npm run benchmark
+UCZ asks a narrower, more academic question:
+
+> What happens if a compressor is **strictly forbidden** from using built-in dictionaries,
+> pretrained weights, file-header magic bytes, or format-specific pre-decompressors — and must
+> learn every data manifold (tabular text, multi-channel telemetry, 2D periodic rasters, machine
+> code, genomic sequences) **online, from scratch, from the bytes in front of it**?
+
+The point is not to defeat those tools. It is to measure how much of their advantage comes from
+*prior knowledge about the world* versus *universal online learning*, and to make that gap
+inspectable rather than hidden. The rules that make the question well-posed are written down as
+the [9-Point Constitution](CONSTITUTION.md); the measurements are in [BENCHMARKS.md](BENCHMARKS.md).
+
+### The 9-Point Constitution, in one paragraph
+
+No built-in dictionary or training corpus. No file-type sniffing for control flow — the analyser
+may only look at byte statistics it computes itself. No format-specific pre-decompressors (no
+`zlib` inside PNG, no `FlateDecode` inside PDF). No per-corpus tuning or magic constants tied to
+a known file. Every candidate rule must be trial-encoded and compared by real byte count. Every
+container must decode bit-exactly, or the plan is rejected. The decoder may never need information
+the encoder did not write into the container. Cost estimates must be derived from actual encodes.
+And the system must be honest about incompressible data: it may expand a stream by at most a
+few bytes of framing.
+
+---
+
+## How it works — five manifolds, one learner
+
+A UCZ encode is: **analyse → propose rules per region → trial-encode → keep the smallest ↦
+coalesce → frame**. Everything below is chosen by measurement at run time, not by file extension.
+
+### 1.1 Tabular and symbolic text
+
+The workhorse is `text-vertcol`, a 22-context model that keeps a live picture of the *table
+structure* it is reading: current line, current field index and offset, the byte at the same
+field/offset on the previous row, the current/previous word, a 6-cell character-shape mask, a
+prefix stem and terminal suffix, and 5/6-grams. A delimiter set is learned, not assumed (`\t`,
+`,`, `:`, and `;` once semicolons dominate the stream). A high-entropy freeze gate (`emaErr`)
+stops the column tables being poisoned by embedded noise.
+
+### 1.2 Multi-channel signals
+
+Record-stride detection (`s = 2…64`, three independent windows, power-law normalisation) splits
+interleaved channels; `TRANSPOSE` / `TRANSPOSE_GROUP` / `SUB_TRANSPOSE` reorder them, `DELTA`
+removes the channel's own lag, and the residual is coded by a 12–13 context binary model with a
+two-generation match model.
+
+### 1.3 Quasi-periodic signals and 2D rasters
+
+`BITPLANE` decomposes a stationary-period signal into bit planes (`5.L`: 4.37%). For bi-level
+rasters the model finds the scanline period **causally** at runtime — checkpoints at `pos = 1024`
+and at powers of two, a non-trivial-match census, a flat-byte gate, and a `bestP ≥ 32` floor —
+then codes each pixel against its five causal neighbours with JBIG-style contexts. That is how
+`ptt5` (a fax raster with a 216-byte line and no readable header) reaches 5.25%.
+
+### 1.4 Machine code
+
+`BCJ_V3` is a causal relative-jump transform with a sign-byte guard, feeding a 25-context model
+whose extra slots bridge `disp32` immediates and `ModRM` fields (`9.H`: 29.13% on a 1 MiB ELF).
+Nothing in the code knows what x86 is; the transform and contexts are chosen because they encode
+smaller.
+
+### 1.5 The high-entropy freeze gate
+
+When the running prediction error says "this region is noise", context tables stop training, the
+column model freezes, and the planner falls back to `STORE`. On 24 Kodak PNGs the result is
+15,394,305 → 15,273,560 B: a container that is 0.003% larger than incompressible input and never
+spirals. A zero-prior compressor that cannot re-inflate DEFLATE should say so, loudly and cheaply.
+
+---
+
+## Summary benchmarks
+
+`--max` level, byte-exact SHA-256 roundtrip verified for every row. Full tables, per-file numbers
+and mechanisms: **[BENCHMARKS.md](BENCHMARKS.md)**.
+
+| Corpus | Raw (B) | UCZ (B) | Ratio | bit/byte | Industrial reference |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Canterbury (11 files) | 2,810,784 | **369,447** | **13.14%** | 1.051 | `xz -9e` 493,168 (17.55%) |
+| AITDCC (16 tracks, cross-manifold) | 38,289,319 | **17,053,803** | **44.54%** | 3.563 | mixed: 4 of 16 are incompressible |
+| UCI tabular (6 files) | 6,545,162 | **375,359** | **5.73%** | 0.458 | `xz -9e` 575,724 (8.80%) |
+| `enwik8` (100 MB) | 100,000,000 | **21,095,797** | **21.10%** | 1.688 | `xz -9e` 24,749,000 (24.75%) |
+| *E. coli* K-12 genome | 4,734,499 | **1,154,755** | **24.39%** | **1.951** | `xz -9e` 1,338,444 (28.27%) |
+| Protein corpus (9 species) | 22,918,902 | **9,668,253** | **42.18%** | 3.374 | uniform-20 bound 4.322 |
+| 10 WAV tracks | 9,028,556 | **4,222,379** | **46.77%** | 3.742 | synthetic tones 6.7–7.4% |
+| 24 Kodak PNGs (honesty test) | 15,394,305 | **15,273,560** | **99.22%** | 7.938 | no expansion, no pretence |
+
+Two numbers worth pausing on. The DNA result is **below 2.000 bit/base**, which is impossible
+unless inter-base structure was found — and UCZ was never told what DNA, codons or
+reverse-complement symmetry are. The PNG result is the opposite kind of honesty: a compressor
+that cannot unpack DEFLATE should admit it in eight bytes, not invent a bad model.
+
+Where specialists win, they win because they carry priors: `paq8px` reaches ~18–20% on Canterbury
+prose using an English dictionary, `AC2` beats us on proteins with substitution matrices, `GeCo3`
+beats us on DNA with reverse-complement experts, `FLAC` beats us on dense music. That is the
+measurement this project exists to produce, not an embarrassment to explain away.
+
+---
+
+## Scientific instruments
+
+UCZ ships two instruments that use the same zero-prior machinery to *describe* data.
+
+### `ucz inspect` — residual entropy microscope
+
+```
+$ ucz inspect ptt5
+
+=== UCZ Residual Information Microscope ===
+bytes                 513216
+H0 entropy            1.210 bit/byte
+printable ASCII       1.75 %
+flat bytes 00/FF      89.21 %
+record stride s       -
+lag candidates        216
+scanline period P     216
+manifold class        2d-periodic-raster
+evidence              scanPeriod 来自滞后普查 | flat=89.2% printable=1.8% | scanPeriod=216 | lagCandidates=216
+
+residual H(x|x<)     min 0.003 / mean 0.548 / max 3.151 bpb  (block 512 B)
+sparkline             ▁▁▁▁▁▁▄▃▃▂▁▁▂▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▂▁▁▁   (0 bpb ▁ -> 8 bpb █)
+anomalies             47 bin(s)
+  @    53760  len  512  1.774 bpb  regime-shift
+  @    54272  len  512  2.483 bpb  entropy-spike
+  @    55808  len  512  2.899 bpb  entropy-spike
+  ... 39 more
 ```
 
-在页面选择样本或文件，压缩结束后点击区域查看特征及采样试编码结果；展开处理过程可查看规则聚合、位图和阶段日志。点击“运行外部对照测试”才会将当前数据发送到对照服务；不要向不可信的服务发送敏感文件。Vite 将 `/api/bench` 转发到本机 4174 端口。`npm run build` 生成的独立 HTML 可以进行本地压缩，但外部实测需通过已配置反向代理的服务访问（也可用 `npm run preview`）。
+The sparkline is the *local conditional* complexity `H(x_t | x_{<t})` measured by the model
+itself, not by a histogram. A ruler with a ruler's honesty: the periodic scanline is flat and
+cheap, the annotated headline block is expensive, and the instrument says where.
 
-对照参数：Node zlib 的 Zstandard 3 和 19、Brotli quality 5；外部程序 `xz -6`、`bzip2 -9`、`zpaq -m1 -threads 1`。需自行安装 `xz`、`bzip2`、`zpaq` 到 PATH，或设置 `ZPAQ_BIN` 指向可执行文件。缺少程序或不支持的 Node API 时页面显示不可用，不会伪造数据。各结果均实际解压并逐字节校验。ZPAQ 的归档包含文件元数据；xz 是 LZMA2 的 xz 容器，不等同 7z 容器。编码耗时含外部程序启动，端到端耗时还包括校验和临时文件 I/O，无法与浏览器中的耗时严格比较。
+### `ucz ncd` — zero-prior information distance
 
-网页端每个输入文件与对照服务每次请求的上限均为 256 MiB，超限直接拒绝，不会截断。浏览器的分析、编码和解码在 Web Worker 中运行；单一 CM 对照默认最多 10 MiB，超限会在 Worker 中直接跳过并在界面说明（不是采样估算）；Worker 的 `run` 消息也可设置 `skipSingleCM: true` 跳过小文件对照。完整输入仍执行 UCZ 压缩及逐字节解压验证。对照服务单次请求顺序运行，一次仅处理一个请求，外部命令每项超时 10 分钟；临时文件在完成或出错时删除。该服务用于受信任的本地/演示环境，不提供身份验证，不应直接公开到互联网。
+```
+$ ucz ncd alice29.txt asyoulik.txt kennedy.xls
 
-## 网页端批量压缩与完整字节显示
+=== UCZ Zero-Prior NCD Distance Matrix ===
+                    0       1       2
+alice29.txt         ·  0.9197  0.9943
+asyoulik.txt   0.9197  0.0000  0.9943
+kennedy.xls    0.9943  0.9943  0.0000
 
-- 一次多选或拖入多个文件，也可以在队列运行时继续添加；同名文件按独立任务处理，不互相覆盖。
-- 文件间使用独立 Web Worker，最多 **2 个文件并发**，其余排队；可在开始前选择 1 个以节省内存。检测到单核或低于 4 GiB 的设备内存提示时，默认选择 1 个。排队文件直到获得执行名额才读入内存。
-- 每个文件仍使用原压缩器并生成独立 `.ucz`，**不是把多个文件合并成一个归档**。结果表保留每项进度、字节数、压缩率、编码耗时、逐字节校验和下载入口；“查看详情”切换地形图、区域表与该文件的阶段日志。
-- 默认使用 **完整字节（B）**，例如 `40,233,692 B`，不四舍五入成 MB。可切换自动 KiB/MiB；汇总只累加校验通过文件的实际原始大小与完整容器大小（含头部）。
-- 可取消单个任务或全部未完成任务，已完成结果保留；空文件、超限、读取或校验失败按文件显示，不阻止其它任务。“清除已结束结果”释放保留的结果数据。
-- 还原和外部对照在队列结束后可用，避免额外模型与批量压缩争用内存。并发度只影响调度，不改变压缩内核、容器格式或基线；大文件仍可能耗时较长，所有保留结果也会占用内存。
-
-UI / 调度回归测试：`npm run test:ui`（合成输入与 Worker 替身，不压缩语料）。验证范围见 [网页批量任务验证](docs/testing/WEB_BATCH.md)。
-
-## 命令行基准
-
-```sh
-npm run bench -- /path/to/osdb
-npm run bench -- /path/to/mozilla --no-external
-npm run bench -- /path/to/mozilla --single
-npm run bench -- /path/to/mr --no-external --verbose
+Nearest neighbour:
+  alice29.txt  → asyoulik.txt  (NCD=0.9197)
+  kennedy.xls  → asyoulik.txt  (NCD=0.9943)
 ```
 
-命令行默认也限制 256 MiB，比较同一份完整文件，并对 UCZ 和每个可用外部算法进行逐字节解压验证。`--no-external` 跳过外部对照；`--verbose` 输出每一区域及其候选；`--single` 强制执行大于 10 MiB 的单一 CM，可能十分耗时。`ZPAQ_BIN=/path/to/zpaq` 可指定 ZPAQ；不需要启动 HTTP 对照服务。
+Normalised compression distance with a *conditional* cost that keeps the model warm across the
+concatenation point. On a mixed 8-item set it separates families with a 0.100 margin versus
+0.073 for `gzip`-based NCD, at 8/8 nearest-neighbour accuracy.
 
-常量地形会扫描并向两侧扩展长度至少 64 字节的同值段，按真实字节接缝拆分；仅对被识别为 fill 的区域及其相邻边界精修，短段和杂字节不强制填充，不能保证识别所有常量段或图像行相位。对小于 16 字节的非填充碎片，优先并入相邻非填充区域；若两侧均为填充，仅对总长度不超过 32 KiB 的情况估算整段 RLE 与分段开销，估算合理时将它们合并为可试探区域，否则保留分段。字节不会丢弃；规则字典和位图成本是共享的，因此估算不保证每次都节省空间。
+---
 
-### 真实方案成本评估（实验接口）
+## Quick start
 
-`evaluatePlan(data, picks)` 对给定的连续完整区域及其规则执行与压缩器相同的相邻区域合并和分组，调用实际编码器并使用相同的容器头写入逻辑，返回 `totalBytes`、`headerBytes`、`payloadBytes`、`groupCount` 和 `segmentCount`。它不会选择规则、改变输入或运行全局搜索；输入应是现有锚点归一化之后的明确规则分配。它会执行原有分组转置的实际方案比较，并按原位置处理 BCJ。
+```bash
+npm install
+npm run build          # worker bundle + dist/cli.js + dist/index.js
 
-示例（从 `src/lib/codec` 导入 `compressAdaptive` 和 `evaluatePlan`）：
+# CLI
+node dist/cli.js compress notes.txt          # -> notes.txt.ucz
+node dist/cli.js decompress notes.txt.ucz    # -> notes.txt
+node dist/cli.js inspect notes.txt           # residual microscope
+node dist/cli.js ncd a.csv b.csv c.csv       # distance matrix
 
-```ts
-const result = await compressAdaptive(data)
-const cost = evaluatePlan(data, result.segs, { alreadyMerged: true })
+# Web workbench (local)
+npm run build:web && npx vite preview --outDir dist/web
+
+# Programmatic API
+node --input-type=module -e "
+  import { compressAdaptive, decompress } from './dist/index.js'
+  const bytes = new Uint8Array([/* ... */])
+  const { container } = await compressAdaptive(bytes)
+  const back = decompress(container)   // identical bytes, always
+"
 ```
 
-`compressAdaptive` 返回的 `segs` 已经是最终边界，而且编码时可能把转置规则替换成另一规则；再次合并可能改变边界和实际编码成本，所以必须指定 `alreadyMerged: true`。默认模式用于合并之前的方案。非法边界、无效规则和不一致的 FILL 会报错。参数字典校验与当前容器解码器一致：锚点规则依 `r & 127` 区分宽度或分隔符，宽行要求 256–8192 的偶数字节行距；MICRO、PEEL、子通道也受各自参数及区域资源上限约束。对于其他规则，参数范围遵循现有字典校验，而非将候选生成器的常用参数误当作格式限制。
+Planner levels: `--fast` (1 span, one row mode, no tournament), `--balanced` (recommended default;
+identical bytes to `--max` on most files, ~4× faster planning), `--max` (full candidate
+tournament). The level never changes model parameters, so any container decodes with any build.
 
-自动转置替换若造成两个相同 Spec 的字典条目，评估器会拒绝：解码器禁止重复字典规则。当前 `compressAdaptive` 的候选生成不会直接选择 `TRANSPOSE_2D` 或 `TRANSPOSE_GROUP_V3`，它们只由同宽的 `TRANSPOSE_GROUP` 升级而来，而分组前同一原规则已合并成一组，因此现有路径不会产生这种冲突；自定义方案则可能构造出这一边界情况。
-
-#### 限制
-
-评估器会同步重新压缩所有组，**不是估算或增量缓存**；耗时和峰值内存随输入、规则和分组变化，调用者应避免阻塞交互线程。未来全局搜索需要考虑增量缓存及其正确失效，不应把当前实现当成高效搜索内核。
-
-一次可复现的小样本记录：Node v22.22.3，128 KiB 确定性合成数据，单组 DELTA_V3（s=2，r=1），`node --expose-gc scripts/measure-plan.mjs` 测得约 219 ms；进程 RSS 调用前约 61.1 MiB、调用后约 98.3 MiB，进程历史最大 RSS 从约 61.1 增至 98.3 MiB。RSS 含运行时和模型，不是精确分配量或内存上界；结果依机器、GC 和并发而变。
-
-可用 `node scripts/compare-refactor.mjs` 从本地 Git 提交 `57b41aa` 提取旧源码，对确定性合成样本做完整容器字节对照，并对 BCJ、转置、宽行、FILL、PEEL、MICRO、ANCHOR 的人工指定容器比较和解压验证；该脚本需要仓库含该提交及本地 `git`、`tar`，不访问网络。手工指定路径不代表这些样本由 `compressAdaptive` 自然选中了相应规则。当前没有自动启用优化器，也不承诺压缩率改善。
-
-### 16 位宽行探测（UCZ v14，ID 31）
-
-针对至少 256 KiB 的候选，以三个分离的 64 KiB 窗口、两种字节相位扫描 256–8192 字节的偶数行距；要求至少两个窗口出现相同的显著谷值。大文件出现大量碎片时，再在三个窗口上实际比较二维 MED、16 位一阶差分和其他规则，只有同一个二维 MED、16 位差分或字节差分候选在各窗口均以足够优势胜出时才将全文件作为一个区域编码（不超过 1 MiB 的碎片化文件使用更严格阈值）；其余情况保留原地形路径。长区域也可试用该候选，保证试压窗口至少覆盖四行；不超过 1 MiB 的获选区域再与采样排名靠前的最多六个非宽行候选完整试压。ID 31 的参数 `s=2` 表示字节水平步长 2 的 MED，`s=1` 表示 16 位一阶差分；`r` 均记录探测到的字节行距。头部行距采用变长整数，解码不依赖重新探测。
-
-这是一种启发式，并非图像格式解析：对截断数据、混合文件、不同端序或过于平滑/嘈杂的图像可能漏检或误判；三窗口采样不保证全文件最优，跨整个文件合并也可能损害局部最优。旧 v1–v13 的语义保留。前端 256 MiB 上限与大于 10 MiB 跳过 Single CM 的行为不变。
-
-### 相位隔离与增强分组（UCZ v13，ID 23–30）
-
-v13 新增词、二进制、BCJ、二维残差和差分残差的独立规则，以及增强子通道和分组转置。词/二进制/二维残差采用九个上下文，差分采用八个；按字节相位区分多字节残差。旧 v12 模型及载荷不变。转置规划对每个候选列组试探正序和完整切片逆序，短尾保持原序，并在组头记录方向；模式包含 STORE、FILL、RLE、O0、BIN 和 DELTA。选中传统 TRANSPOSE-G 后，对资源限制内的完整规则组比较旧分组、v12 二维和 v13 增强分组的实际负载。子通道保留独立/共享实际大小比较并引入 v13 模型。自动筛选仍依赖样本、区域划分与资源上限，因此整文件不保证比旧版小；重复试压也可能显著增加耗时。
-
-文本分类使用短跨度差分判断，长行跨度仍参与平滑检测；相邻同规则区域可跨分类合并，锚点/子通道合并受资源与状态约束。锚点归一化考虑 v13 子通道，但统一方案未必比混合方案小。
-
-### 增强上下文（UCZ v12，ID 18–22）
-
-新增候选分别提供英文词前缀及跨词上下文、4 字节结构相位、BCJ 相位模型和 MED 残差的垂直上下文。旧 ID 的模型及解码逻辑不变，区域内试压择优；多区域同规则仍共享模型，变换分别复位。几何行距采用原有的字节跨度 `spec.r`。定长检测对三个连续窗口独立统计，避免拼接引入伪周期或步长相位错位。锚点区域若同时出现两种同构表示，比较四种统一方案的实际组负载后统一；为控制内存，超过 8 MiB 的单区域不参与此步骤。
-
-TRANSPOSE-G 选中后，单区域不超过 8 MiB 时对整个规则组实压比较传统分组与 MSB 优先转置：采样识别高熵列并用位图标记原样通道，其余列按逆序拼接，以行数为几何跨度编码，尾行原样保存。不同区域独立编码，若包含模式字节的二维方案更小才切换；列剥离为采样判断，并非对白噪声的数学证明。候选采样和规则字典等开销会影响最终结果，不能保证每个文件变小。
-
-### 现场拟合微种子（UCZ v11，ID 17）
-
-平滑区域及检测到行跨度的区域可试用字节域线性预测：最多均匀采样 4096 个位置，以小岭正则最小二乘拟合左、上、左上、左两步及常量，量化为五个有符号字节（比例 32）。每区域保存独立种子、重置预测状态，同规则残差共享上下文模型；解码只使用种子和整数预测，残差模 256 可逆。候选比较包含种子开销，采样加安全系数，至多 1 MiB 的获选区域再与最优非微种子候选完整试压。共享模型与抽样可能使结果偏离全局最优。该模型预测字节，非 16 位音频样本模型；行跨度依赖自动检测，不解析具体文件格式。拟合耗时不保证 1 毫秒，残差也不保证为白噪声。
-
-### 同源子通道分流（UCZ v10，ID 15 / 16）
-
-定长记录候选按各区域长度提取同源列；差分严格在每个区域的列切片首字节复位。每列通过真实编码试探 STORE、RLE+O0、DELTA+O0、DELTA+BIN、RAW+CM；列的独立编码若不小于原始列，回退 STORE。按模态频次排序的动态坑位坍缩位图保存列模态，之后分别完整编码并比较每列独立和同模态共享两种布局，连同头部取较小者。STORE 保证列**负载**不膨胀，不保证包含头部的容器不膨胀。原有 TRANSPOSE-G 已支持列组级差分和按组独立模型；新规则提供更细的每列分流，而非替换其原语义。
-
-锚点候选将各区域中同一锚点列汇聚，列间使用独立模型；编码各区域尾长和终止符计数，以终止符守恒逐列恢复区域边界，不存储区域×列长度矩阵。差分通道解码时边逆差分边查找终止符，跨区域重置预测器。锚点相同的行/列模式不参与该候选。截尾、不完整行、空列和任意区域切片均保留。
-
-候选按实际采样编码大小比较而非强制替换原 TRANSPOSE-G 或 ANCHOR-FOLD；包括额外模态表和载荷头，并施加约 2% 的安全门槛。为控制内存，自动候选限单区域 8 MiB，同一规则按最多 8 MiB 的完整区域分块共享子通道；超过上限的区域仍可由原有规则编码。跨块不共享模型。块成本是按长度分摊的估算；列 STORE 不表示文件必然变小，采样与共享模型也不能保证所有数据集压缩率不回退。点击选中区域可查看子通道模式及独立/共享布局；`--verbose` 显示详细信息。
-
-### 递归地形剥离（UCZ v9，ID 14）
-
-当检测到 4–64 字节的定长记录步长时，可把每列作为独立子流重新执行现有地形扫描，按扫描结果切成子区域。每个子区域从 STORE、FILL、RLE、CM-TEXT、CM-BIN 和单步 DELTA 中试探终端编码；对各列也会比较整列编码与分段编码，连同地形、长度和规则头选择实际更小的列负载。每个父区域的各列单独保存、各父区域独立封装；短尾行和非相邻父区域可还原。点击结果区的“查看递归子流”或使用 `--verbose` 可看到列、子区域地形、规则和负载。块成本按长度分摊，仅为估算。
-
-目前只实现**转置列的单层剥离**，不对字/位平面递归，也不会递归调用剥离本身；未检测到定长步长时不会尝试。自动候选只覆盖 8 KiB–8 MiB 的父区域；每列最多保留 128 个子区域，超限则回退整列编码。样本试探计入子区域元数据并施加约 4% 安全门槛；不超过 512 KiB、且样本结果接近最优的父区域会对比完整区域实际编码，剥离需再胜 2%。独立区域的对比仍不等于全局共享模型的最优选择，不保证无回退。多次子流扫描及完整区域比较会增加 CPU 和内存；256 MiB 输入限制不变，但大区域不会自动进入此候选。
-
-### 自定界语法锚点折叠（UCZ v8，ID 13）
-
-行锚点直接存入 `s`（包括 0）；`r` 低七位选择列分隔符或锯齿宽度，高位选择 CM-TEXT / CM-BIN。双锚点分隔符为制表符或 32–127，最多 12 列；单锚点宽度为 2–24（9 留作制表符）。折叠只重排到最后一个行终止符为止的字节，剩余未终止尾部原样保留；无需行长表和填充，变换前后长度严格相等。整个压缩流仍有 CM 和容器开销，不代表压缩文件零膨胀。逆变换依据各列终止符恢复边界。折叠状态按区域重置，同规则区域的变换结果拼接后共享 CM；由于字节被重排，块/区域成本为按长度分摊的估算。
-
-候选探测会查找 `<`/`>`、换行和稳定的字段分隔符、换行锯齿前缀及非文本 NUL 记录。常规候选先试探；新折叠样本编码须比当前最优至少小 1.5%，并加 4 字节保守开销；不超过 1 MiB 的候选还会与最强非折叠候选进行完整区域独立编码对比。采样误差、共享模型与头部会影响全文件结果，不能保证不回退或战胜其他算法。
-
-### 语法锚点变长对齐（UCZ v7，ID 12）
-
-自动候选目前限于单字节 `\n`、`<`、`;` 和 `0x00`（平滑地形不试 `0x00`）；不是完整语法分析器或多字节同步字搜索。样本须含至少 128 个锚点、平均间隔 8–1024 字节，并通过有偏差修正的列差异筛选，最多试两个锚点。区域首字节是第一行起点，此后每个锚点是下一行起点且保留原字节；任意首尾片段、相邻锚点及变长行均可无损还原。行长用变长整数序列保存，序列可再用零阶模型编码；每行前 32 字节分成 4 组，每组纵向聚集后选择原样、二进制或文本上下文编码，32 字节后的尾部按行顺序单独编码。行长与流头均计入试探。每个区域独立编码、在规则组内使用长度前缀，不跨区域共享模型；块成本均匀分摊，是估算。
-
-每区域最多 100 万行，超限不进入自动候选。为避免采样过拟合，采样结果需有约 2% 优势，超过 1 MiB 的区域需约 5% 优势；不超过 1 MiB 且采样获胜的区域还会与最强非锚点候选进行完整区域的独立编码对比，锚点需再胜约 2%。此对比不代表全局共享模型和容器开销的严格最优。超过 1 MiB 仍可能因采样偏差退步；锚点及额外行长可能比原文本模型更差，也没有对 xz 或 Zstandard 的普遍优势保证。
-
-### 其他变换
-
-新增自定义 BCJ-x86 候选：扫描 E8/E9 后完整的 4 字节小端 rel32，加上原文件全局位置（指令结束位置，模 2³²）后由二进制模型编码；逆变换按区域独立扫描，残差编码模型可跨区域共享。它不是完整 x86 反汇编或标准 XZ BCJ 格式，在非代码数据也可能触发；只对部分二进制类区域做采样，且要求比其他候选有约 2% 优势才选用，并不保证改善。
-
-代价统计以区域接缝和 512 字节块边缘的片段累计，再归并到原始块，两个逐字节 Float32 代价数组被消除（代价数组每组约缩小 512 倍）；编码字节输出使用紧凑字节缓冲，字节对图也不再按区域数分配 256×256 表。模型状态、输入、变换、容器和验证输出仍需额外内存，256 MiB 并不意味着只占用 256 MiB，运行时间也可能达到数分钟；建议在内存充足的设备上测试。大文件区域试探使用 4–16 KB 自适应总预算；足够长且每个窗口可容纳至少四个对齐单位时，分别编码四分之一、中点和四分之三附近的窗口并累计成本，否则采用中段窗口；窗口不会拼接，以免制造假邻接。采样按候选步长/行宽对齐，选择可能与旧版不同，压缩率不保证提高。repeat/binary 长区域也会参与二维行跨度候选试探。
-
-## 测试
-
-```sh
-npm run test:ui
-npm run test:codec
-npx tsc --noEmit
-npm run build
+```bash
+npm run bench:quick    # 6 self-verifying streams, ~7 s
+node tests/run.mjs     # full suite: plan ledger, roundtrip, edge cases, CLI, manifold suite
 ```
 
-测试覆盖 v1–v9 解码、v10 子通道和跨区域差分重置、v9 递归子流及资源上限、v8 零膨胀折叠与分段共享、v7 锚点变长行与资源上限、v6 BCJ 和精确接缝、v5 分组转置和非相邻分段变换与共享模型（包括奇数长度 D16）、RLE 损坏数据、短行跨度以及混合 BMP 样本的候选试探。GRAD 进入候选不代表一定胜出；例如混合 BMP 的 GRAD 候选不一定优于 DELTA。行跨度还对非规整宽度采用更严格的残差阈值。长区域的行跨度检测评估三个独立位置，要求同一跨度至少出现两次，最多返回两个显著跨度供实际编码试探；短区域使用单次检测。此筛选可能漏掉仅在局部存在的真实跨度，也不能完全排除过拟合；当前未增加整区域二次编码校验。只搜索像素步长的整数倍，并要求比相邻点及局部邻域明显低；带行填充的格式可能不满足此假设。
+---
 
-TRANSPOSE 按原始列负载均摊绘制块成本，属于估算；最终区域分配总和与实际共享负载一致。周期检测在每个区域中段样本上测试所有 2–64 步长，要求相对字节频率基线有显著相关，取最小的近最优周期；可能受噪声、样本偏差或谐波影响。仅对进入候选的规则进行采样实测，不保证最佳压缩率。
+## Roadmap
 
-每列/列组对比原始和差分的零阶熵来安排候选顺序，但最终依据采样的实际编码长度选择；逐列旧格式本身以模式字段记录差分与编码类型，并非每列都要另加一份掩码。分组格式的元数据按组记录，大小取决于分组。
+* **v0.1.x — TypeScript reference.** Correctness, instruments, and the benchmark record above.
+  Speed is not a goal at this stage; the planner is deliberately exhaustive.
+* **v0.2.0 — C++20 SIMD backend.** Port the mixing layer and table primitives, keep the planner
+  and container format identical so v0.1 containers keep decoding. Target: 5–10× on encode,
+  10–20× on decode.
+* Beyond that: a streamable variant (the model is already causal), and a proper arithmetic coder
+  with 32-bit renormalisation instead of the current 12-bit probability path.
 
-### Match Model 双候选研究（独立 raw-CM 实验）
+---
 
-该实验**没有接入 `compressAdaptive()`、UCZ、规则选择或文件格式**；现有 v1–v14 编码的模型版本及解码逻辑保持不变。实验入口为 `encodeMatchExperiment(data, profile, mode, costOut?, blockCost?)` 和 `decodeMatchExperiment(payload, length, profile, mode)`，profile 仅为 `text`/`bin`。调用者必须自行在带外保存 profile、长度和 mode；实验 payload 不是 UCZ 文件，不能当成既有 v13 流或用其他 mode 解码。基线选择现有 **v13** 上下文模型；它的 text 匹配门槛为 4 字节（旧非 v13 text 为 5），而非笼统地认为所有 text 模型均为 5。v13 的 text/bin/res2d 目前是 9 个上下文。
+## License and acknowledgments
 
-- `single`：原有单候选 v13 匹配算法，加实验统计；测试逐字节确认与 `encodeCM(..., 'v13')` 相同。
-- `dual`：每个槽保留最近两个位置；失配时比较向后最多 32 字节的匹配长度，超过门槛的较长者获胜，长度相同时最近位置获胜；已有连续匹配仍按原机制延续。表每字节更新，不使用未来字节。
-- `dual-distance`：相同双候选选择，将距离分到 1–16、17–256、257–4096、4097–65536、65537+ 五档，按「距离档 × 匹配长度」分别在线学习原有 match 可信度；没有预设远距离更差。Mixer 更新公式和其他上下文均未改变。
+**MPL-2.0** — see [LICENSE](LICENSE).
 
-单个候选位置表最大 4 MiB；双候选增加至多 4 MiB，五档可信度表比原表多 256 字节。实际进程内存还包括上下文表、模型历史、输入、输出等；对短输入表按现有规则缩小。实验计数中的 match 位正确率指**已有匹配且字节前缀仍一致时**预测位的正确率，不是全数据位准确率；`olderWins` 是旧候选在重新查找时被选中的次数，不意味着该候选最终一定带来收益。
+UCZ stands on a long line of published work, and the comparison points in
+[BENCHMARKS.md](BENCHMARKS.md) exist because those systems are good:
 
-运行 `node scripts/match-experiment.mjs experiments/match-v2-results.json` 可复现 5 个确定性合成样本、三种模型；每个组合独立进程，保存真实 payload 字节数、`costOut` 预测 bit 总和、每 512 字节预测成本、编解码时间、进程 RSS、高水位和匹配统计，逐字节往返并检查确定性。预测成本是理想交叉熵近似，不等于包含舍入及收尾的实际 payload 位数。结果文件为单次观察，不是统计意义上的速度或峰值内存基准，RSS 是包含运行时的进程值而非模型精确增量。
+* **Context mixing** — Matt Mahoney's `paq` family (and `paq8px`, maintained by the paq8px
+  contributors) and Byron Knoll's `cmix`, which established that logistic mixing of many weak
+  predictors beats any single strong one.
+* **Domain specialists** — `AC2` (proteins), `GeCo3` (DNA), `JBIG`/`JBIG2` (bi-level images),
+  `FLAC` (audio), `xz`/LZMA (general purpose). Their ratios are the bar this project measures
+  itself against, and the places where they win are documented rather than omitted.
+* **The idea of universality** — Solomonoff, Kolmogorov, Rissanen (MDL), and Wallace & Boulton's
+  MML: the notion that a compressor which learns everything online is a model of induction, not
+  just a file utility.
 
-本次 Node v22.22.3 运行，实际 payload 字节数如下（single / dual / dual-distance）：重复文本 **63 / 63 / 63**；分叉文本 **526 / 536 / 527**；结构化记录 **795 / 796 / 793**；随机数据 **24047 / 24047 / 24047**；分布变化数据 **10546 / 10548 / 10549**。分叉文本中双候选曾选择旧位置 308 次，但大小仍增大，不能据此宣称收益；距离分桶在记录样本节省 2 字节，也不足以证明泛化。仅为探索，不推荐启用或增加 UCZ 版本；需要更多真实文件、多次计时和内存测量后再决定是否设计新的格式与兼容方案。
+This is a research toy with a rigorous test suite. If it is useful, it is useful as a measuring
+instrument for the question in the first section.

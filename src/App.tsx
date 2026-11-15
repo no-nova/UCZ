@@ -3,7 +3,7 @@ import { BLOCK, CLS_NAME } from './lib/analyze'
 import { MAX_INPUT_BYTES, MAX_SINGLE_CM_BYTES } from './lib/limits'
 import CodecWorker from './lib/compress.worker?worker&inline'
 import { CODECS, type Compressed, type CompressionLevel } from './lib/codec'
-import { CLS_LABEL_EN, CODEC_LABEL_EN, SAMPLE_LABEL_EN } from './lib/ui-locale'
+import { CLS_LABEL_EN, CODEC_LABEL_EN, SAMPLE_LABEL_EN, TRUTH_LABEL_EN } from './lib/ui-locale'
 import { V20_FLAG_CM, V20_FLAG_TRANSFORMS, V22_FLAG_MATCH_DISTANCE } from './lib/coder'
 import { V21_FLAG_CONTEXTS } from './lib/context-policy'
 import { SAMPLES, type TruthRegion } from './lib/samples'
@@ -128,7 +128,7 @@ export default function App() {
       try {
         setFingerprint(fingerprintStream(res.data))
         setAnatomy(inspectContainer(res.comp.container))
-        if (withResidual) setResidual(profileResidual(res.data))
+        if (withResidual) setResidual(profileResidual(res.data, { maxBytes: 65536 }))
       } finally {
         setInspectBusy(false)
       }
@@ -185,6 +185,9 @@ export default function App() {
   )
   const clsLabel = (cls: keyof typeof CLS_LABEL_EN) => (lang === 'en' ? CLS_LABEL_EN[cls] : CLS_NAME[cls])
   const codecName = (id: number) => (lang === 'en' ? CODEC_LABEL_EN[id] ?? CODECS[id].short : CODECS[id].name)
+  const ruleLabel = (seg: { spec: { id: number; s: number } }) =>
+    lang === 'en' ? `${CODECS[seg.spec.id].short}${seg.spec.s > 1 ? ` · s=${seg.spec.s}` : ''}` : (seg as { label?: string }).label ?? CODECS[seg.spec.id].name
+  const truthLabel = (label: string) => (lang === 'en' ? TRUTH_LABEL_EN[label] ?? label : label)
   const usedCodecs = useMemo(() => (res ? [...new Set(res.comp.segs.map((s) => s.spec.id))] : []), [res])
   const doneCount = tasks.filter(task => task.status === 'done' && task.result).length
 
@@ -338,7 +341,7 @@ export default function App() {
             </div>
 
             <Card title={t.segmentsTitle} sub={t.segmentsSub}>
-              <Strip res={res} sel={sel} setSel={setSel} formatSize={fmt} clsLabel={clsLabel} />
+              <Strip res={res} sel={sel} setSel={setSel} formatSize={fmt} clsLabel={clsLabel} ruleLabel={ruleLabel} />
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
                 {usedCodecs.map((id) => (
                   <span key={id} className="flex items-center gap-1.5 text-xs text-slate-300">
@@ -354,11 +357,11 @@ export default function App() {
                     {res.truth.map((tr, i) => (
                       <div
                         key={i}
-                        title={`${tr.label} (${fmt(tr.end - tr.start)})`}
+                        title={`${truthLabel(tr.label)} (${fmt(tr.end - tr.start)})`}
                         className="flex items-center justify-center overflow-hidden border-r border-black/40 bg-white/[0.07] px-1 text-[10px] text-slate-300 last:border-r-0"
                         style={{ width: `${((tr.end - tr.start) / total) * 100}%`, minWidth: 2 }}
                       >
-                        <span className="truncate">{tr.label}</span>
+                        <span className="truncate">{truthLabel(tr.label)}</span>
                       </div>
                     ))}
                   </div>
@@ -425,7 +428,7 @@ export default function App() {
                         <td className="pr-3 text-slate-300">{clsLabel(s.cls)}</td>
                         <td className="pr-3">
                           <span className="mr-1.5 inline-block h-2 w-2 rounded-sm" style={{ background: CODECS[s.spec.id].color }} />
-                          <span className="text-white">{s.label}</span>
+                          <span className="text-white">{ruleLabel(s)}</span>
                         </td>
                         <td className="pr-3 text-right tabular-nums text-slate-300">{fmt(s.rawLen)}</td>
                         <td className="pr-3 text-right tabular-nums text-slate-300">{fmt(s.compLen)}</td>
@@ -522,7 +525,7 @@ function Stat(props: { label: string; value: string; sub?: string; accent?: bool
   )
 }
 
-function Strip({ res, sel, setSel, formatSize, clsLabel }: { res: Result; sel: number; setSel: (n: number) => void; formatSize: (bytes: number) => string; clsLabel: (cls: keyof typeof CLS_LABEL_EN) => string }) {
+function Strip({ res, sel, setSel, formatSize, clsLabel, ruleLabel }: { res: Result; sel: number; setSel: (n: number) => void; formatSize: (bytes: number) => string; clsLabel: (cls: keyof typeof CLS_LABEL_EN) => string; ruleLabel: (seg: { spec: { id: number; s: number } }) => string }) {
   const total = res.data.length
   const segs = res.comp.segs
   // Thousands of regions are summarized to bounded-size chunks to keep React responsive.
@@ -535,7 +538,7 @@ function Strip({ res, sel, setSel, formatSize, clsLabel }: { res: Result; sel: n
         const s = segs[g.first], w = (g.end - g.start) / total * 100
         const selected = sel >= g.first && sel < g.last
         return <button key={g.first} onClick={() => setSel(selected ? -1 : g.first)}
-          title={batch === 1 ? `${clsLabel(s.cls)} → ${s.label}\n${formatSize(s.rawLen)} → ${formatSize(s.compLen)}` : `${g.first + 1}–${g.last}`}
+          title={batch === 1 ? `${clsLabel(s.cls)} → ${ruleLabel(s)}\n${formatSize(s.rawLen)} → ${formatSize(s.compLen)}` : `${g.first + 1}–${g.last}`}
           className="relative flex items-center justify-center overflow-hidden border-r border-black/50 text-[10px] font-semibold text-slate-950 transition last:border-r-0"
           style={{ width: `${w}%`, minWidth: batch === 1 ? 3 : 0, background: CODECS[s.spec.id].color, opacity: sel >= 0 && !selected ? 0.25 : 1, outline: selected ? '2px solid white' : 'none', outlineOffset: -2 }}>
           {w > 7 && <span className="truncate px-1">{batch === 1 ? CODECS[s.spec.id].short : `${g.last - g.first}`}</span>}
