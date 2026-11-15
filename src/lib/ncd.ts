@@ -104,7 +104,43 @@ function commonStride(x: Uint8Array, y: Uint8Array): number {
   return sx >= 2 && sx === sy ? sx : 0
 }
 
+/** `C(y)`：单独编码 y 的精确 bit 代价（因果逐块代价之和）。 */
 function cmCost(d: Uint8Array, profile: 'text' | 'bin'): number {
+  const blocks = Math.max(1, Math.ceil(d.length / SPLIT_BLOCK))
+  const bins = new Float32Array(blocks)
+  encodeCM(d, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, undefined, undefined, cmOptions(profile))
+  return sumBins(bins, 0, blocks)
+}
+
+const SPLIT_BLOCK = 512
+
+function cmOptions(profile: 'text' | 'bin') {
+  return profile === 'text' ? { context: 'text-vertcol' as const, matchDist: true } : { matchDist: true }
+}
+
+function sumBins(bins: Float32Array, from: number, to: number): number {
+  let c = 0
+  for (let i = from; i < to; i++) c += bins[i]
+  return c
+}
+
+/**
+ * `C(y | M_x)`：把 x 截到 512 的整数倍（让 y 从块边界开始），一次性编码 `x||y`，
+ * 只累加 y 覆盖的那些块的代价。这是**精确的因果条件代价**——y 的每一块只在
+ * x 已经更新过模型之后才被编码，既没有"两次独立编码再相减"的长度失配，也不会
+ * 像整条 `C(x||y)` 那样把两半的绝对代价混在一起。
+ */
+function condCost(prefix: Uint8Array, target: Uint8Array, profile: 'text' | 'bin'): number {
+  const cut = (prefix.length >> 9) << 9
+  const x = prefix.subarray(0, cut)
+  const joined = concat(x, target)
+  const blocks = Math.max(1, Math.ceil(joined.length / SPLIT_BLOCK))
+  const bins = new Float32Array(blocks)
+  encodeCM(joined, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, undefined, undefined, cmOptions(profile))
+  return sumBins(bins, Math.ceil(cut / SPLIT_BLOCK), blocks)
+}
+
+function cmCostOld(d: Uint8Array, profile: 'text' | 'bin'): number {
   const options = profile === 'text' ? { context: 'text-vertcol' as const, matchDist: true } : { matchDist: true }
   return encodeCM(d, profile, 1, 1, undefined, 0, undefined, undefined, 'v20', 0, false, undefined, undefined, options).length
 }
@@ -139,17 +175,16 @@ export async function computeNCD(x: Uint8Array, y: Uint8Array, options?: NcdOpti
   const axy = concat(ax, ay), ayx = concat(ay, ax)
   const cx = cmCost(ax, profile)
   const cy = cmCost(ay, profile)
-  const cxy = cmCost(axy, profile)
-  const cyx = cmCost(ayx, profile)
-  // 归一化用 min(C(x||y), C(y||x)) 而不是 max(C(x), C(y))：
-  // 后者在"拼接几乎不互相帮助"时分子≈较小的一方，两个长度悬殊的流会因此
-  // 显得比同族等长流更接近（实测散文对 0.92、散文↔代码 0.99 的倒挂）。
-  const ncd = Math.max(0, (Math.min(cxy, cyx) - Math.min(cx, cy)) / Math.max(Math.min(cxy, cyx), 1))
-  void TEMP_KEY
+  const cxy = condCost(ax, ay, profile)
+  const cyx = condCost(ay, ax, profile)
+  void axy; void ayx
+  // 距离 = 两个方向上"条件代价 / 冷启动代价"的较小者，天然落在 [0, 1]：
+  // 完全无关时 y 在 x 之后并不更便宜（比值 ≈ 1），共享结构时 << 1。
+  const ncd = Math.max(0, Math.min(1, Math.min(cxy / Math.max(cy, 1), cyx / Math.max(cx, 1))))
   return {
     cx, cy, cxy, cyx,
-    conditionalYGivenX: Math.max(0, cxy - cx),
-    conditionalXGivenY: Math.max(0, cyx - cy),
+    conditionalYGivenX: Math.max(0, cxy),
+    conditionalXGivenY: Math.max(0, cyx),
     ncd, profile, mode, alignedStride, windowBytes: ax.length,
   }
 }
@@ -182,7 +217,7 @@ export async function computeNCDMatrix(
     return costs[i]
   }
   const maxBytes = options?.maxBytes ?? 32768
-  const alignManifold = options?.alignManifold !== false
+  const alignManifold = options?.alignManifold === true
   // 每对用各自最合适的模型（双方都可打印才用 text），配合有界的 f4 归一化，
   // 才不会出现"散文对因 text 模型更省、分母变小而显得更远"的倒挂。
   const pairProfile = (a: Uint8Array, b: Uint8Array): 'text' | 'bin' =>
@@ -191,18 +226,18 @@ export async function computeNCDMatrix(
       : printableRatio(a) >= 0.85 && printableRatio(b) >= 0.85 ? 'text' : 'bin'
   const pairCost = async (a: Uint8Array, b: Uint8Array, reverse: boolean): Promise<number> => {
     if (mode === 'container') return (await compressAdaptive(concat(a, b), undefined, { level: options?.level ?? 'fast' })).container.length
-    const pr = pairProfile(a, b)
     const s = alignManifold ? commonStride(a, b) : 0
     const wa = align(representative(a, maxBytes), s), wb = align(representative(b, maxBytes), s)
-    return cmCost(reverse ? concat(wb, wa) : concat(wa, wb), pr)
+    // 条件代价的比值：反向遍历即可得到 C(x|M_y)/C(x)。
+    return reverse ? condCost(wb, wa, pairProfile(a, b)) : condCost(wa, wb, pairProfile(a, b))
   }
   for (let i = 0; i < n; i++) await single(i)
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const cxy = await pairCost(items[i].data, items[j].data, false)
       const cyx = await pairCost(items[i].data, items[j].data, true)
-      const lo = Math.min(costs[i], costs[j])
-      const d = Math.max(0, (Math.min(cxy, cyx) - lo) / Math.max(Math.min(cxy, cyx), 1))
+      // cxy/cyx 已经是 C(y|M_x) 与 C(x|M_y) 的绝对 bit 代价，直接除以各自的冷启动代价。
+      const d = Math.max(0, Math.min(1, Math.min(cxy / Math.max(costs[j], 1), cyx / Math.max(costs[i], 1))))
       matrix[i][j] = d
       matrix[j][i] = d
     }

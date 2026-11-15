@@ -34,7 +34,8 @@
     "bench:aitdcc": "node scripts/run-bench.mjs --corpus /home/user/Downloads/AITDCC --out bench-out/aitdcc",
     "cli": "tsx src/cli.ts",
     "inspect": "tsx src/cli.ts inspect",
-    "build:web": "vite build"
+    "build:web": "vite build",
+    "bench:quick": "node scripts/bench-public.mjs"
   },
   "dependencies": {
     "clsx": "2.1.1",
