@@ -3,6 +3,7 @@ import { BLOCK, CLS_NAME } from './lib/analyze'
 import { MAX_INPUT_BYTES, MAX_SINGLE_CM_BYTES } from './lib/limits'
 import CodecWorker from './lib/compress.worker?worker&inline'
 import { CODECS, type Compressed, type CompressionLevel } from './lib/codec'
+import { CLS_LABEL_EN, CODEC_LABEL_EN, SAMPLE_LABEL_EN } from './lib/ui-locale'
 import { V20_FLAG_CM, V20_FLAG_TRANSFORMS, V22_FLAG_MATCH_DISTANCE } from './lib/coder'
 import { V21_FLAG_CONTEXTS } from './lib/context-policy'
 import { SAMPLES, type TruthRegion } from './lib/samples'
@@ -17,8 +18,6 @@ import { CompressionQueue, CONCURRENCY_CHOICES, isPending, type CompressionResul
 import { callCodecWorker } from './utils/codec-worker-client'
 import { formatBytes, type SizeUnit } from './utils/format-bytes'
 import { VERSION } from './version'
-
-interface BenchmarkResult { label: string; size?: number; encodeMs?: number; ms?: number; verified?: boolean; error?: string }
 
 const createCodecWorker = () => new CodecWorker()
 
@@ -64,7 +63,6 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selectedTask = tasks.find(task => task.id === selectedId && task.result) ?? tasks.find(task => task.result)
   const res = selectedTask?.result ?? null
-  const steps = selectedTask?.steps ?? []
   const busy = tasks.some(isPending)
   const [sizeUnit, setSizeUnit] = useState<SizeUnit>('bytes')
   const fmt = (bytes: number) => formatBytes(bytes, sizeUnit)
@@ -74,9 +72,6 @@ export default function App() {
   const [mode, setMode] = useState<'entropy' | 'cost'>('cost')
   const [msg, setMsg] = useState<string | null>(null)
   const [drag, setDrag] = useState(false)
-  const [bench, setBench] = useState<BenchmarkResult[]>([])
-  const [benchBusy, setBenchBusy] = useState(false)
-  const [benchError, setBenchError] = useState<string | null>(null)
   const [fingerprint, setFingerprint] = useState<ManifoldFingerprint | null>(null)
   const [anatomy, setAnatomy] = useState<ContainerAnatomy | null>(null)
   const [residual, setResidual] = useState<ResidualProfile | null>(null)
@@ -86,21 +81,19 @@ export default function App() {
   const fileRef = useRef<HTMLInputElement>(null)
   const uczRef = useRef<HTMLInputElement>(null)
   const restoreRef = useRef<AbortController | null>(null)
-  const benchRef = useRef<AbortController | null>(null)
 
   // Select the first completed file once; later completions do not steal focus.
   useEffect(() => {
     setSelectedId(selectedTask?.id ?? null)
   }, [selectedTask?.id])
   useEffect(() => {
-    setSel(-1); setTablePage(0); setBench([]); setBenchError(null)
+    setSel(-1); setTablePage(0)
     setFingerprint(null); setAnatomy(null); setResidual(null)
   }, [selectedTask?.id])
   useEffect(() => { setNcd(null) }, [tasks.length])
   useEffect(() => () => {
     queue.cancelAll()
     restoreRef.current?.abort()
-    benchRef.current?.abort()
   }, [queue])
 
   function cancelRun() {
@@ -111,36 +104,19 @@ export default function App() {
   }
 
   function run(name: string, data: Uint8Array, truth?: TruthRegion[], note?: string) {
-    if (benchBusy || restoreRef.current) { setMsg(t.waitBusy); return }
+    if (restoreRef.current) { setMsg(t.waitBusy); return }
     setMsg(null)
     queue.add([{ name, size: data.length, read: async () => data, truth, note }])
   }
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return
-    if (restoreRef.current || benchBusy) { setMsg(t.waitBusy); return }
+    if (restoreRef.current) { setMsg(t.waitBusy); return }
     setMsg(null)
     queue.add(Array.from(files, file => ({
       name: file.name, size: file.size,
       read: async () => new Uint8Array(await file.arrayBuffer()),
     })))
-  }
-
-  async function runBench() {
-    if (!res || benchBusy || busy || stage) return
-    const controller = new AbortController()
-    benchRef.current = controller
-    setBenchBusy(true); setBenchError(null); setBench([])
-    try {
-      const response = await fetch('/api/bench', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream', 'X-UCZ-Benchmark': 'yes', 'X-UCZ-Level': level }, body: res.data as unknown as BodyInit, signal: controller.signal })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const value = await response.json() as { results: BenchmarkResult[] }
-      if (!controller.signal.aborted) setBench(value.results)
-    } catch (error) {
-      if (!controller.signal.aborted) setBenchError(`${error instanceof Error ? error.message : String(error)}`)
-    } finally {
-      if (benchRef.current === controller) { benchRef.current = null; setBenchBusy(false) }
-    }
   }
 
   /** Cheap, synchronous anatomy + fingerprint; the residual profile is the expensive part. */
@@ -172,7 +148,7 @@ export default function App() {
   }
 
   async function restore(read: () => Promise<Uint8Array>, name: string) {
-    if (busy || benchBusy || restoreRef.current) return
+    if (busy || restoreRef.current) return
     const controller = new AbortController()
     restoreRef.current = controller
     setMsg(null)
@@ -207,6 +183,8 @@ export default function App() {
     () => (res ? buildMapModel(res.data, BLOCK, res.comp.blockCost, res.comp.blockSeg) : null),
     [res],
   )
+  const clsLabel = (cls: keyof typeof CLS_LABEL_EN) => (lang === 'en' ? CLS_LABEL_EN[cls] : CLS_NAME[cls])
+  const codecName = (id: number) => (lang === 'en' ? CODEC_LABEL_EN[id] ?? CODECS[id].short : CODECS[id].name)
   const usedCodecs = useMemo(() => (res ? [...new Set(res.comp.segs.map((s) => s.spec.id))] : []), [res])
   const doneCount = tasks.filter(task => task.status === 'done' && task.result).length
 
@@ -252,17 +230,18 @@ export default function App() {
         {/* ===== Input ===== */}
         <Card title={t.inputTitle}>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {SAMPLES.map((s) => (
+            {SAMPLES.map((sample) => (
               <button
-                key={s.key}
-                disabled={!!stage || benchBusy}
+                key={sample.key}
+                disabled={!!stage}
                 onClick={() => {
-                  const r = s.make()
-                  run(s.name, r.data, r.truth)
+                  const r = sample.make()
+                  const label = lang === 'en' ? SAMPLE_LABEL_EN[sample.key] ?? sample.name : sample.name
+                  run(label, r.data, r.truth)
                 }}
                 className="group rounded-xl border border-white/10 bg-white/[0.04] p-3 text-left text-sm font-medium text-white transition hover:border-cyan-300/50 hover:bg-cyan-300/[0.07] hover:text-cyan-200 disabled:opacity-40"
               >
-                {s.name}
+                {lang === 'en' ? SAMPLE_LABEL_EN[sample.key] ?? sample.name : sample.name}
               </button>
             ))}
           </div>
@@ -285,28 +264,28 @@ export default function App() {
             <p className="text-sm text-slate-300">{t.dropHere}</p>
             <div className="flex flex-wrap justify-center gap-2">
               <button
-                disabled={!!stage || benchBusy}
+                disabled={!!stage}
                 onClick={() => fileRef.current?.click()}
                 className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-300 disabled:opacity-40"
               >
                 {t.pickFiles}
               </button>
               <button
-                disabled={busy || !!stage || benchBusy}
+                disabled={busy || !!stage}
                 onClick={() => uczRef.current?.click()}
                 className="rounded-lg border border-white/20 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 disabled:opacity-40"
               >
                 {t.restoreUcz}
               </button>
             </div>
-            <p className="max-w-3xl text-xs leading-relaxed text-slate-500">{t.limits} {formatBytes(MAX_INPUT_BYTES)}.</p>
-            <input ref={fileRef} type="file" multiple aria-label={t.pickFiles} disabled={!!stage || benchBusy} hidden onChange={e => { onFiles(e.target.files); e.target.value = '' }} />
-            <input ref={uczRef} type="file" accept=".ucz" aria-label={t.restoreUcz} disabled={busy || !!stage || benchBusy} hidden onChange={e => { onRestore(e.target.files?.[0]); e.target.value = '' }} />
+            <p className="max-w-3xl text-xs leading-relaxed text-slate-500">{t.limits(formatBytes(MAX_INPUT_BYTES))}</p>
+            <input ref={fileRef} type="file" multiple aria-label={t.pickFiles} disabled={!!stage} hidden onChange={e => { onFiles(e.target.files); e.target.value = '' }} />
+            <input ref={uczRef} type="file" accept=".ucz" aria-label={t.restoreUcz} disabled={busy || !!stage} hidden onChange={e => { onRestore(e.target.files?.[0]); e.target.value = '' }} />
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-xs">
             <label className="flex items-center gap-2 text-slate-400">
               {t.concurrency}
-              <select aria-label={t.concurrency} value={concurrency} disabled={busy || !!stage || benchBusy} onChange={event => queue.setConcurrency(Number(event.target.value))} className="rounded-lg border border-white/20 bg-[#101827] px-3 py-2 text-slate-200 disabled:opacity-50">
+              <select aria-label={t.concurrency} value={concurrency} disabled={busy || !!stage} onChange={event => queue.setConcurrency(Number(event.target.value))} className="rounded-lg border border-white/20 bg-[#101827] px-3 py-2 text-slate-200 disabled:opacity-50">
                 {CONCURRENCY_CHOICES.map(n => <option key={n} value={n}>{n === 1 ? t.conc1 : t.concN(n)}</option>)}
               </select>
             </label>
@@ -318,7 +297,7 @@ export default function App() {
           {msg && <p role="status" className="mt-3 rounded-lg bg-amber-400/10 px-3 py-2 text-sm text-amber-200">{msg}</p>}
         </Card>
 
-        <BatchResults tasks={tasks} unit={sizeUnit} selectedId={selectedTask?.id} locked={benchBusy || !!stage}
+        <BatchResults lang={lang} tasks={tasks} unit={sizeUnit} selectedId={selectedTask?.id} locked={!!stage}
           onSelect={setSelectedId} onCancel={id => queue.cancel(id)} onCancelAll={() => queue.cancelAll()} onClear={() => queue.clearFinished()}
           onDownload={task => { if (task.result) download(task.result.comp.container, task.name + '.ucz') }} />
 
@@ -326,7 +305,7 @@ export default function App() {
         {stage && (
           <div className="mt-6 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.05] p-5">
             <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-              <span className="truncate text-cyan-100">{stage.msg}</span>
+              <span className="truncate text-cyan-100">{lang === 'en' ? t.working : stage.msg}</span>
               <div className="flex shrink-0 items-center gap-3">
                 <span className="tabular-nums text-cyan-300">{Math.round(stage.pct)}%</span>
                 <button onClick={cancelRun} className="rounded-md border border-rose-300/40 px-2 py-1 text-xs text-rose-200 hover:bg-rose-300/10">{t.cancel}</button>
@@ -355,16 +334,16 @@ export default function App() {
               <Stat label={t.container} value={`v${containerVersion(res.comp)}`} sub={`${res.comp.segs.length} · ${res.comp.overhead || 0} B`} />
               <Stat label={t.throughput} value={throughput(total, res.tComp)} sub={`${t.decodeMs} ${throughput(total, res.tVer)}`} />
               <Stat label={t.modelFlags} value={`0x${containerFlags(res.comp).toString(16).toUpperCase()}`} sub={flagBits(res.comp)} />
-              <Stat label={t.tier} value={level} sub={`${t.tierHint.slice(0, 42)}…`} />
+              <Stat label={t.tier} value={level} sub={lang === 'en' ? 'planner search depth' : '规划器搜索深度'} />
             </div>
 
             <Card title={t.segmentsTitle} sub={t.segmentsSub}>
-              <Strip res={res} sel={sel} setSel={setSel} formatSize={fmt} />
+              <Strip res={res} sel={sel} setSel={setSel} formatSize={fmt} clsLabel={clsLabel} />
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5">
                 {usedCodecs.map((id) => (
                   <span key={id} className="flex items-center gap-1.5 text-xs text-slate-300">
                     <i className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: CODECS[id].color }} />
-                    {CODECS[id].short} · {CODECS[id].name}
+                    {CODECS[id].short} · {codecName(id)}
                   </span>
                 ))}
               </div>
@@ -421,29 +400,6 @@ export default function App() {
                 <DigramView data={res.data} segs={res.comp.segs} colors={colors} sel={sel} />
               </Card>
 
-              <Card title={t.processTitle} sub={t.processSub}>
-                <div className="grid gap-3 text-xs text-slate-300 sm:grid-cols-1">
-                  <div className="rounded-lg bg-black/25 p-3">① {t.stage1}<br /><b className="text-white">{res.comp.analysis.blocks.length} / {res.comp.analysis.segs.length}</b><br />{BLOCK} B · {res.comp.analysis.features.length} features</div>
-                  <div className="rounded-lg bg-black/25 p-3">② {t.stage2}<br /><b className="text-white">{res.comp.segs.length}</b></div>
-                  <div className="rounded-lg bg-black/25 p-3">③ {t.stage3}<br /><b className="text-white">{fmt(res.comp.overhead)} / {fmt(csize - res.comp.overhead)}</b><br />UCZ v{res.comp.container[3]}</div>
-                </div>
-                <details className="mt-4 text-xs text-slate-300">
-                  <summary className="cursor-pointer text-cyan-200">{t.expandGroups}</summary>
-                  {(() => {
-                    const groups = new Map<string, { label: string; count: number; raw: number; packed: number }>()
-                    for (const sg of res.comp.segs) {
-                      const key = `${sg.spec.id},${sg.spec.s},${sg.spec.r}`
-                      const g = groups.get(key) ?? { label: sg.label, count: 0, raw: 0, packed: 0 }
-                      g.count++; g.raw += sg.rawLen; g.packed += sg.compLen; groups.set(key, g)
-                    }
-                    const sorted = [...groups.values()].sort((a, b) => b.count - a.count)
-                    let remaining = res.comp.segs.length, bits = 0
-                    for (let i = 0; i + 1 < sorted.length; i++) { bits += remaining; remaining -= sorted[i].count }
-                    return <div className="mt-3 space-y-2"><p>{sorted.length} · {bits} bit / {Math.ceil(bits / 8)} B</p>{sorted.map((g, i) => <p key={i}>{i + 1}. {g.label} · {g.count} · {fmt(g.raw)} · {fmt(g.packed)}</p>)}</div>
-                  })()}
-                </details>
-                <details className="mt-3 text-xs text-slate-400"><summary className="cursor-pointer text-cyan-200">{t.expandLog}</summary><div className="mt-2 max-h-52 overflow-y-auto font-mono">{steps.map((step, i) => <div key={i}>{step}</div>)}</div></details>
-              </Card>
             </div>
 
             <Card title={t.tableTitle} sub={t.tableSub}>
@@ -466,7 +422,7 @@ export default function App() {
                       return <tr key={i} onClick={() => setSel(sel === i ? -1 : i)} className={'cursor-pointer border-b border-white/5 hover:bg-white/5 ' + (sel === i ? 'bg-white/10' : '')}>
                         <td className="py-2 pr-3 text-slate-500">{i + 1}</td>
                         <td className="pr-3 tabular-nums text-slate-300">{s.start.toLocaleString()} – {s.end.toLocaleString()}</td>
-                        <td className="pr-3 text-slate-300">{CLS_NAME[s.cls]}</td>
+                        <td className="pr-3 text-slate-300">{clsLabel(s.cls)}</td>
                         <td className="pr-3">
                           <span className="mr-1.5 inline-block h-2 w-2 rounded-sm" style={{ background: CODECS[s.spec.id].color }} />
                           <span className="text-white">{s.label}</span>
@@ -486,8 +442,7 @@ export default function App() {
               </div>}
               {sel >= 0 && res.comp.segs[sel] && (
                 <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-4">
-                  <p className="mb-1 text-sm font-medium text-white">{sel + 1} · {CODECS[res.comp.segs[sel].spec.id].name}</p>
-                  <p className="mb-3 text-xs text-slate-400">{CODECS[res.comp.segs[sel].spec.id].desc}</p>
+                  <p className="mb-3 text-sm font-medium text-white">{sel + 1} · {CODECS[res.comp.segs[sel].spec.id].short} · {codecName(res.comp.segs[sel].spec.id)}</p>
                   <p className="mb-2 text-xs text-slate-500">{t.trials}</p>
                   <div className="space-y-1.5">
                     {res.comp.segs[sel].trials.map((tr, i) => (
@@ -511,21 +466,14 @@ export default function App() {
                   { label: t.rawSize, size: total, color: '#475569' },
                   ...(res.gzip != null ? [{ label: 'gzip', size: res.gzip, color: '#94a3b8' }] : []),
                   ...(res.single != null ? [{ label: 'single CM', size: res.single, color: '#fb7185' }] : []),
-                  ...bench.filter(b => b.size != null && b.verified).map(b => ({ label: b.label, size: b.size!, color: '#a78bfa' })),
                   { label: 'UCZ', size: csize, color: '#22d3ee' },
                 ]}
                 total={total}
               />
               {res.single == null && <p className="mt-3 text-xs text-amber-300">{total > MAX_SINGLE_CM_BYTES ? t.singleCmSkipped : t.singleCmSkipped}</p>}
-              <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-4 text-xs text-slate-300">
-                <p>{t.benchHint}</p>
-                <button disabled={benchBusy || busy || !!stage} onClick={runBench} className="mt-3 rounded-lg border border-violet-400/50 px-3 py-2 text-violet-200 disabled:opacity-50">{benchBusy ? t.benchRunning : t.benchRun}</button>
-                {benchError && <p className="mt-2 text-amber-300">{benchError}</p>}
-                {bench.length > 0 && <div className="mt-3 space-y-1">{bench.map(b => <p key={b.label}>{b.label}: {b.error ? `— ${b.error}` : `${fmt(b.size!)} · ${((b.size! / total) * 100).toFixed(2)}% · ${(b.encodeMs! / 1000).toFixed(3)} s`}</p>)}</div>}
-              </div>
               <div className="mt-5 flex flex-wrap gap-2">
                 <button onClick={() => download(res.comp.container, res.name + '.ucz')} className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-300">{t.downloadUcz}</button>
-                <button disabled={busy || !!stage || benchBusy} onClick={downloadRestored} className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:bg-white/10">{t.downloadRestored}</button>
+                <button disabled={busy || !!stage} onClick={downloadRestored} className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:bg-white/10">{t.downloadRestored}</button>
               </div>
               <p className="mt-3 text-xs text-slate-500">{t.containerOverhead}</p>
             </Card>
@@ -574,7 +522,7 @@ function Stat(props: { label: string; value: string; sub?: string; accent?: bool
   )
 }
 
-function Strip({ res, sel, setSel, formatSize }: { res: Result; sel: number; setSel: (n: number) => void; formatSize: (bytes: number) => string }) {
+function Strip({ res, sel, setSel, formatSize, clsLabel }: { res: Result; sel: number; setSel: (n: number) => void; formatSize: (bytes: number) => string; clsLabel: (cls: keyof typeof CLS_LABEL_EN) => string }) {
   const total = res.data.length
   const segs = res.comp.segs
   // Thousands of regions are summarized to bounded-size chunks to keep React responsive.
@@ -587,7 +535,7 @@ function Strip({ res, sel, setSel, formatSize }: { res: Result; sel: number; set
         const s = segs[g.first], w = (g.end - g.start) / total * 100
         const selected = sel >= g.first && sel < g.last
         return <button key={g.first} onClick={() => setSel(selected ? -1 : g.first)}
-          title={batch === 1 ? `${CLS_NAME[s.cls]} → ${s.label}\n${formatSize(s.rawLen)} → ${formatSize(s.compLen)}` : `${g.first + 1}–${g.last}`}
+          title={batch === 1 ? `${clsLabel(s.cls)} → ${s.label}\n${formatSize(s.rawLen)} → ${formatSize(s.compLen)}` : `${g.first + 1}–${g.last}`}
           className="relative flex items-center justify-center overflow-hidden border-r border-black/50 text-[10px] font-semibold text-slate-950 transition last:border-r-0"
           style={{ width: `${w}%`, minWidth: batch === 1 ? 3 : 0, background: CODECS[s.spec.id].color, opacity: sel >= 0 && !selected ? 0.25 : 1, outline: selected ? '2px solid white' : 'none', outlineOffset: -2 }}>
           {w > 7 && <span className="truncate px-1">{batch === 1 ? CODECS[s.spec.id].short : `${g.last - g.first}`}</span>}

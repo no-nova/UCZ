@@ -17,7 +17,7 @@ export interface Dict {
   dropHere: string
   pickFiles: string
   restoreUcz: string
-  limits: string
+  limits: (max: string) => string
   concurrency: string
   conc1: string
   concN: (n: number) => string
@@ -93,6 +93,7 @@ export interface Dict {
   ncdNearest: string
   ncdNote: string
   singleCmSkipped: string
+  working: string
 }
 
 const en: Dict = {
@@ -107,7 +108,7 @@ const en: Dict = {
   dropHere: 'Drop one or more files here',
   pickFiles: 'Choose files & compress',
   restoreUcz: 'Restore .ucz',
-  limits: 'Up to 256 MiB per file. Files are read only when their turn starts; large inputs can hold hundreds of MiB of model state, so low-memory devices should keep concurrency at 1.',
+  limits: max => `Up to 256 MiB per file (${max}). Files are read only when their turn starts; large inputs can hold hundreds of MiB of model state, so low-memory devices should keep concurrency at 1.`,
   concurrency: 'Concurrency',
   conc1: '1 file · low memory',
   concN: n => (n <= 8 ? `${n} files · parallel` : n <= 16 ? `${n} files · multi-core` : `${n} files · high memory`),
@@ -183,6 +184,7 @@ const en: Dict = {
   ncdNearest: 'Nearest neighbour',
   ncdNote: 'Each file contributes one 32 KiB window; distances are symmetric conditional costs, not byte diffs.',
   singleCmSkipped: 'Single-CM comparison skipped.',
+  working: 'Working…',
 }
 
 const zh: Dict = {
@@ -198,7 +200,7 @@ const zh: Dict = {
   dropHere: '把一个或多个文件拖到这里',
   pickFiles: '选择多个文件并压缩',
   restoreUcz: '还原 .ucz 文件',
-  limits: '每个文件最多 256 MiB。文件在轮到时才读取；大文件模型可能占用数百 MiB 内存，低内存设备建议并发设为 1。',
+  limits: max => `每个文件最多 256 MiB（${max}）。文件在轮到时才读取；大文件模型可能占用数百 MiB 内存，低内存设备建议并发设为 1。`,
   concurrency: '同时处理',
   conc1: '1 个文件 · 节省内存',
   concN: n => (n <= 8 ? `${n} 个文件 · 并行压缩` : n <= 16 ? `${n} 个文件 · 多核并行` : `${n} 个文件 · 高并发（内存占用高）`),
@@ -274,6 +276,7 @@ const zh: Dict = {
   ncdNearest: '最近邻',
   ncdNote: '每个文件取 32 KiB 窗口；距离是对称条件代价，不是逐字节比较。',
   singleCmSkipped: '已跳过 Single CM 对照。',
+  working: '处理中…',
 }
 
 export const DICT: Record<Lang, Dict> = { en, zh }
