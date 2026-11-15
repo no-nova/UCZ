@@ -1,4 +1,4 @@
-# TerraZip / UCZ 诊断报告
+# UCZ 诊断报告
 
 日期：2026-11-06 · 环境：Node v22.22.3、npm 10.9.8、2 vCPU / 3.9 GiB、Linux x64
 被测提交：`6e6ebc1`（Add isolated dual-candidate match model experiments）

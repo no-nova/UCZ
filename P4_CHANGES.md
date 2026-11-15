@@ -1,4 +1,4 @@
-# TerraZip / UCZ P4 报告：v15 校准内核与 WORD-PRE 预坍缩落地
+# UCZ P4 报告：v15 校准内核与 WORD-PRE 预坍缩落地
 
 日期：2026-11-07 · 环境：Linux x64、Node v22.22.3、**2 vCPU / 3.9 GiB**（云端沙箱）
 基线：P3 交付（`b686532`），Silesia 全量 **43,743,048 B / 20.64%**

@@ -1,4 +1,4 @@
-# TerraZip / UCZ P0 改进实施报告
+# UCZ P0 改进实施报告
 
 日期：2026-11-06 · 环境：Node v22.22.3、2 vCPU / 3.9 GiB、Linux x64
 基线提交：`6e6ebc1`（诊断报告见 `DIAGNOSIS.md`）

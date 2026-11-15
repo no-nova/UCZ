@@ -21,7 +21,7 @@ async function makeProject(path) {
   await symlink(join(project, 'node_modules'), join(path, 'node_modules'), 'dir')
   await mkdir(join(path, '.diag-data/corpus'), { recursive: true })
   for (const name of ['smoke-a', 'smoke-b', 'smoke-c', 'smoke-failure']) {
-    await writeFile(join(path, '.diag-data/corpus', name), Buffer.from('TerraZip recovery test: deterministic small fixture.\n'.repeat(100)))
+    await writeFile(join(path, '.diag-data/corpus', name), Buffer.from('UCZ recovery test: deterministic small fixture.\n'.repeat(100)))
   }
 }
 function run(args = [], env = {}, root = fixture) {

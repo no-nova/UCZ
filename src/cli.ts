@@ -13,7 +13,8 @@ import type { CompressionLevel } from './lib/codec'
 import { formatInspectionReport, inspectContainer, inspectStream, isContainer } from './lib/inspect'
 import { computeNCD, computeNCDMatrix, formatNCDMatrixReport } from './lib/ncd'
 
-export const VERSION = '0.1.0-beta.1'
+export { VERSION } from './version'
+import { VERSION } from './version'
 
 const USAGE = `ucz ${VERSION} - Universal Adaptive Compression
 

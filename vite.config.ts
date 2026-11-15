@@ -22,6 +22,9 @@ export default defineConfig({
     ],
   },
   plugins: [react(), tailwindcss(), viteSingleFile()],
+  // `npm run build` writes dist/cli.js + dist/index.js; keep the Web bundle in a
+  // subdirectory so a later `build:web` cannot empty the CLI/library output.
+  build: { outDir: 'dist/web', emptyOutDir: true },
   // 浏览器构建里关掉并行池（浏览器没有 worker_threads）：常量分支会被摇掉，
   // 于是 node:os / node:worker_threads 不会进入浏览器包。
   define: { __UCZ_NO_WORKERS__: 'true' },

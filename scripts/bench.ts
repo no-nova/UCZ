@@ -19,7 +19,7 @@ async function main() {
   const t2 = performance.now(), back = decompress(comp.container)
   const verified = data.equals(Buffer.from(back.buffer, back.byteOffset, back.byteLength))
   const decodeMs = performance.now() - t2
-  console.log(`TerraZip: ${comp.container.length} B, ${(comp.container.length / Math.max(1, data.length) * 100).toFixed(2)}%, 压缩 ${(encodeMs / 1000).toFixed(2)}s, 解码 ${(decodeMs / 1000).toFixed(2)}s, 校验 ${verified ? '通过' : '失败'}, 区域 ${comp.segs.length}, 头部 ${comp.overhead} B`)
+  console.log(`UCZ: ${comp.container.length} B, ${(comp.container.length / Math.max(1, data.length) * 100).toFixed(2)}%, 压缩 ${(encodeMs / 1000).toFixed(2)}s, 解码 ${(decodeMs / 1000).toFixed(2)}s, 校验 ${verified ? '通过' : '失败'}, 区域 ${comp.segs.length}, 头部 ${comp.overhead} B`)
   if (!verified) throw new Error('无损校验失败')
   if (comp.segs.length <= 20 || args.includes('--verbose')) for (const [i, sg] of comp.segs.entries()) {
     console.log(`  区域 ${i + 1}: ${sg.start}..${sg.end} → ${sg.label}, ${sg.compLen} B`)

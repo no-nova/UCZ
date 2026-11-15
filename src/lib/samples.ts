@@ -102,7 +102,7 @@ function xmp(seed: number): Uint8Array {
   s += `<dc:title>地形压缩实验 · 样张 · Terrain sample</dc:title>\n<dc:description>图片文件内部夹带的文本元数据:它不是像素,不该被当作像素处理。</dc:description>\n`
   for (let i = 0; i < 22; i++) {
     const id = Math.floor(r() * 1e8).toString(16)
-    s += `<xmpMM:History action='saved' instanceID='xmp.iid:${id}' when='2026-01-${String(1 + (i % 28)).padStart(2, '0')}T${String(8 + (i % 12)).padStart(2, '0')}:${String(Math.floor(r() * 60)).padStart(2, '0')}:00+08:00' softwareAgent='TerrainZip 1.${i % 4}' changed='/metadata'/>\n`
+    s += `<xmpMM:History action='saved' instanceID='xmp.iid:${id}' when='2026-01-${String(1 + (i % 28)).padStart(2, '0')}T${String(8 + (i % 12)).padStart(2, '0')}:${String(Math.floor(r() * 60)).padStart(2, '0')}:00+08:00' softwareAgent='UCZ 1.${i % 4}' changed='/metadata'/>\n`
   }
   s += `</rdf:Description>\n</rdf:RDF>\n</x:xmpmeta>\n<?xpacket end='w'?>\n`
   return text(s)

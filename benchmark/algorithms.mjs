@@ -18,7 +18,7 @@ const jobs = [
 ]
 async function pipeTool(cmd, encArgs, decArgs, data) {
   // execFile does not accept stdin; a private temp file avoids shell interpolation.
-  const dir = await mkdtemp(join(tmpdir(), 'terrazip-bench-'))
+  const dir = await mkdtemp(join(tmpdir(), 'ucz-bench-'))
   try {
     const input = join(dir, 'input'), packed = join(dir, 'packed')
     await writeFile(input, data)
@@ -32,7 +32,7 @@ async function pipeTool(cmd, encArgs, decArgs, data) {
   } finally { await rm(dir, {recursive:true, force:true}) }
 }
 async function zpaq(data) {
-  const dir = await mkdtemp(join(tmpdir(), 'terrazip-zpaq-'))
+  const dir = await mkdtemp(join(tmpdir(), 'ucz-zpaq-'))
   try {
     const opts = {cwd:dir, maxBuffer:1_000_000, timeout:600_000}
     await writeFile(join(dir,'input.bin'), data)

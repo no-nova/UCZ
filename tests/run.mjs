@@ -3,7 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
-const dir = await mkdtemp(join(tmpdir(), 'terrazip-test-'))
+const dir = await mkdtemp(join(tmpdir(), 'ucz-test-'))
 try {
   const file = join(dir, 'test.cjs')
   await build({entryPoints:['tests/codec.test.ts'], bundle:true, platform:'node', format:'cjs', outfile:file, logLevel:'silent'})

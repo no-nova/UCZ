@@ -29,7 +29,7 @@ if (corpusMode) {
   if (r.error) throw r.error
   process.exitCode = r.status ?? 1
 } else {
-  const dir = await mkdtemp(join(tmpdir(), 'terrazip-bench-cli-'))
+  const dir = await mkdtemp(join(tmpdir(), 'ucz-bench-cli-'))
   try {
     const file = join(dir, 'bench.mjs')
     await build({ entryPoints: ['scripts/bench.ts'], bundle: true, platform: 'node', format: 'esm', outfile: file, logLevel: 'silent' })

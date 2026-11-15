@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Worker } from 'node:worker_threads'
 import assert from 'node:assert/strict'
-const dir = await mkdtemp(join(tmpdir(), 'terrazip-worker-test-'))
+const dir = await mkdtemp(join(tmpdir(), 'ucz-worker-test-'))
 try {
   const script = join(dir, 'worker.cjs'), bootstrap = join(dir, 'bootstrap.cjs')
   await build({entryPoints:['src/lib/compress.worker.ts'],bundle:true,platform:'node',format:'cjs',outfile:script,logLevel:'silent'})

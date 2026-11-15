@@ -6,7 +6,7 @@ const port = Number(process.env.BENCH_PORT || 4174)
 let busy = false
 http.createServer(async (req, res) => {
   const send = (status, value) => { res.writeHead(status, {'Content-Type':'application/json', 'Cache-Control':'no-store'}); res.end(JSON.stringify(value)) }
-  if (req.method !== 'POST' || req.url !== '/api/bench' || req.headers['x-terrazip-benchmark'] !== 'yes') return send(404, {error:'Not found'})
+  if (req.method !== 'POST' || req.url !== '/api/bench' || req.headers['x-ucz-benchmark'] !== 'yes') return send(404, {error:'Not found'})
   if (busy) return send(429, {error:'已有对照测试运行中，请稍后重试'})
   if (Number(req.headers['content-length']) > limit) { req.resume(); return send(413, {error:'数据超过 256 MiB 限制'}) }
   busy = true

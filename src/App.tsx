@@ -12,6 +12,7 @@ import { BatchResults } from './components/BatchResults'
 import { CompressionQueue, CONCURRENCY_CHOICES, isPending, type CompressionResult as Result } from './utils/compression-queue'
 import { callCodecWorker } from './utils/codec-worker-client'
 import { formatBytes, type SizeUnit } from './utils/format-bytes'
+import { VERSION } from './version'
 
 interface BenchmarkResult { label: string; size?: number; encodeMs?: number; ms?: number; verified?: boolean; error?: string }
 
@@ -111,7 +112,7 @@ export default function App() {
     benchRef.current = controller
     setBenchBusy(true); setBenchError(null); setBench([])
     try {
-      const response = await fetch('/api/bench', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream', 'X-TerraZip-Benchmark': 'yes' }, body: res.data as unknown as BodyInit, signal: controller.signal })
+      const response = await fetch('/api/bench', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream', 'X-UCZ-Benchmark': 'yes' }, body: res.data as unknown as BodyInit, signal: controller.signal })
       if (!response.ok) throw new Error(`服务返回 HTTP ${response.status}`)
       const value = await response.json() as { results: BenchmarkResult[] }
       if (!controller.signal.aborted) setBench(value.results)
@@ -176,7 +177,7 @@ export default function App() {
             通用 · 自适应 · 无损
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
-            TerraZip <span className="bg-gradient-to-r from-cyan-300 via-amber-200 to-rose-300 bg-clip-text text-transparent">地形压缩器</span>
+            UCZ <span className="bg-gradient-to-r from-cyan-300 via-amber-200 to-rose-300 bg-clip-text text-transparent">Universal Adaptive Compression</span>
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-400 sm:text-base">
             不问“这是什么文件”,只问“这一段字节长什么样”。任何输入先变成字节流,折叠成一张<b className="text-slate-200">数据地形图</b>,
@@ -584,6 +585,11 @@ export default function App() {
           </div>
         )}
 
+
+        <footer className="mt-12 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-xs text-slate-500">
+          <span>UCZ v{VERSION} · Universal Adaptive Compression</span>
+          <a href="/LICENSE" className="underline decoration-dotted hover:text-slate-300">MPL-2.0</a>
+        </footer>
       </div>
     </div>
   )
