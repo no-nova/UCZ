@@ -281,7 +281,6 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
     })
     rawOffset += rawLength
   }
-  const payloadBytes = specs.reduce((sum, sp) => sum + sp.pl, 0)
   return {
     containerVersion: version, flags, totalRawBytes: n, totalCompressedBytes: c.length,
     headerBytes, overallBpb: n ? (c.length * 8) / n : 0,
@@ -306,7 +305,7 @@ export function profileResidual(data: Uint8Array, options?: { profile?: 'text' |
   const values = new Float32Array(bins)
   const profile = options?.profile ?? (fingerprintStream(view).printableAsciiRatio >= 0.85 ? 'text' : 'bin')
   const cmOptions = profile === 'text' ? { context: 'text-vertcol' as const, matchDist: true } : { matchDist: true }
-  encodeCM(view, profile, 1, 1, undefined, 0, { values, blockSize }, undefined, 'v20', 0, false, undefined, undefined, cmOptions)
+  encodeCM(view, profile, 1, 1, undefined, 0, { values, blockSize }, undefined, 'v20', 0, false, cmOptions)
   const binsBpb: number[] = []
   for (let i = 0; i < bins; i++) {
     const len = Math.min(blockSize, view.length - i * blockSize)

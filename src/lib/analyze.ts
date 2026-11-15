@@ -118,7 +118,6 @@ export function analyze(d: Uint8Array): Analysis {
     const b = Math.min(n, a + BLOCK)
     const len = b - a
     hist.fill(0)
-    let hi = 0
     for (let i = a; i < b; i++) {
       hist[d[i]]++
     }
@@ -207,7 +206,7 @@ export function analyze(d: Uint8Array): Analysis {
   }
   if (n === 0) segs.length = 0
   const refined = cleanTinySeams(d, refineFillSeams(d, segs))
-  return { blocks, segs: refined, pca: { x: [], y: [], block: 0 }, features: FEATURE_NAMES }
+  return { blocks, segs: refined, pca: [], features: FEATURE_NAMES }
 }
 
 // Refine only regions classified as fill. Long constant runs are extended across
@@ -365,56 +364,6 @@ export function mergeShortRuns(labels: Cls[], minBlocks: number): void {
 
 const FEATURE_NAMES = ['零阶熵', '差分熵', '文本率', '重复率', '字节多样性', '高位占比', '零字节占比', '平均差分']
 
-function pca(blocks: BlockFeat[]): { x: number; y: number; block: number }[] {
-  const nb = blocks.length
-  if (nb < 3) return blocks.map((_, i) => ({ x: 0.5, y: 0.5, block: i }))
-  const step = Math.max(1, Math.ceil(nb / 3000))
-  const ids: number[] = []
-  for (let i = 0; i < nb; i += step) ids.push(i)
-  const D = FEATURE_NAMES.length
-  const X = ids.map((i) => {
-    const f = blocks[i]
-    return [f.h0 / 8, f.hd / 8, f.text, f.rep, f.uniq, f.hi, f.zero, f.mad]
-  })
-  const m = X.length
-  const mean = new Array(D).fill(0)
-  for (const row of X) for (let j = 0; j < D; j++) mean[j] += row[j] / m
-  const sd = new Array(D).fill(0)
-  for (const row of X) for (let j = 0; j < D; j++) sd[j] += ((row[j] - mean[j]) ** 2) / m
-  for (let j = 0; j < D; j++) sd[j] = Math.sqrt(sd[j]) || 1
-  for (const row of X) for (let j = 0; j < D; j++) row[j] = (row[j] - mean[j]) / sd[j]
-  const cov: number[][] = Array.from({ length: D }, () => new Array(D).fill(0))
-  for (const row of X) for (let a = 0; a < D; a++) for (let b = 0; b < D; b++) cov[a][b] += (row[a] * row[b]) / m
-  const vecs: number[][] = []
-  for (let k = 0; k < 2; k++) {
-    let v = Array.from({ length: D }, (_, j) => Math.sin(j * 1.7 + k + 1))
-    for (let it = 0; it < 80; it++) {
-      const w = new Array(D).fill(0)
-      for (let a = 0; a < D; a++) for (let b = 0; b < D; b++) w[a] += cov[a][b] * v[b]
-      const nrm = Math.sqrt(w.reduce((s, x) => s + x * x, 0)) || 1
-      v = w.map((x) => x / nrm)
-    }
-    vecs.push(v)
-    const lam = (() => {
-      let s = 0
-      for (let a = 0; a < D; a++) for (let b = 0; b < D; b++) s += v[a] * cov[a][b] * v[b]
-      return s
-    })()
-    for (let a = 0; a < D; a++) for (let b = 0; b < D; b++) cov[a][b] -= lam * v[a] * v[b]
-  }
-  const pts = X.map((row, i) => ({
-    x: row.reduce((s, x, j) => s + x * vecs[0][j], 0),
-    y: row.reduce((s, x, j) => s + x * vecs[1][j], 0),
-    block: ids[i],
-  }))
-  const xs = pts.map((p) => p.x)
-  const ys = pts.map((p) => p.y)
-  const x0 = Math.min(...xs),
-    x1 = Math.max(...xs),
-    y0 = Math.min(...ys),
-    y1 = Math.max(...ys)
-  return pts.map((p) => ({ x: (p.x - x0) / (x1 - x0 || 1), y: (p.y - y0) / (y1 - y0 || 1), block: p.block }))
-}
 
 // Sampled region-level fixed-record detection, including every stride 2..64.
 // Compare equality at each lag to the shuffled-byte baseline; prefer the smallest

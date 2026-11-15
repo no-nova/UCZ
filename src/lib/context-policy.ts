@@ -63,6 +63,11 @@ export interface CMOptions {
    * to lose (mr-mid +7 B).
    */
   matchDist?: boolean
+  /**
+   * x86 executable modelling for the `bcj` kernel (`ID.BCJ_V3` streams only).
+   * Encoder and decoder derive it from the same group spec, so it needs no flag.
+   */
+  bcj?: boolean
   /** P18.0: rank alphabet for the universal low-cardinality symbol modes. */
   symMap?: { k: number; bits: number; symToByte: Uint8Array; byteToSym: Uint8Array; compByte: Uint8Array }
 }

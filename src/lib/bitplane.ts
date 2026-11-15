@@ -105,7 +105,7 @@ function findLag(plane:Uint8Array,bits:number):{k:number;inv:number}|null {
  return null
 }
 
-function encodeLagPlane(plane:Uint8Array,bits:number,lag:{k:number;inv:number}):Uint8Array {
+function encodeLagPlane(plane:Uint8Array,lag:{k:number;inv:number}):Uint8Array {
  const D=1<<lag.k,out=new Uint8Array(2+(D>>>3))
  out[0]=lag.inv;out[1]=lag.k
  out.set(plane.subarray(0,D>>>3),2)
@@ -139,7 +139,7 @@ export function encodeBitplanesBitCM(data:Uint8Array,proof:readonly boolean[],co
   if(proof[b]){
    const lag=findLag(p,q*8)
    if(lag){
-    const laggedBytes=encodeLagPlane(p,q*8,lag)
+    const laggedBytes=encodeLagPlane(p,lag)
     if(laggedBytes.length+4<q){out=laggedBytes;used=true;lagged=true}
    }
    if(!lagged){

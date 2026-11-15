@@ -63,7 +63,6 @@ function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
   return out
 }
 
-const TEMP_KEY = 'ncd-临时流'
 
 function printableRatio(d: Uint8Array): number {
   if (!d.length) return 0
@@ -108,7 +107,7 @@ function commonStride(x: Uint8Array, y: Uint8Array): number {
 function cmCost(d: Uint8Array, profile: 'text' | 'bin'): number {
   const blocks = Math.max(1, Math.ceil(d.length / SPLIT_BLOCK))
   const bins = new Float32Array(blocks)
-  encodeCM(d, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, undefined, undefined, cmOptions(profile))
+  encodeCM(d, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, cmOptions(profile))
   return sumBins(bins, 0, blocks)
 }
 
@@ -136,13 +135,8 @@ function condCost(prefix: Uint8Array, target: Uint8Array, profile: 'text' | 'bin
   const joined = concat(x, target)
   const blocks = Math.max(1, Math.ceil(joined.length / SPLIT_BLOCK))
   const bins = new Float32Array(blocks)
-  encodeCM(joined, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, undefined, undefined, cmOptions(profile))
+  encodeCM(joined, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, cmOptions(profile))
   return sumBins(bins, Math.ceil(cut / SPLIT_BLOCK), blocks)
-}
-
-function cmCostOld(d: Uint8Array, profile: 'text' | 'bin'): number {
-  const options = profile === 'text' ? { context: 'text-vertcol' as const, matchDist: true } : { matchDist: true }
-  return encodeCM(d, profile, 1, 1, undefined, 0, undefined, undefined, 'v20', 0, false, undefined, undefined, options).length
 }
 
 export async function computeNCD(x: Uint8Array, y: Uint8Array, options?: NcdOptions): Promise<NcdPairResult> {

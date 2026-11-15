@@ -973,6 +973,12 @@ class Model {
   binLadderOn = false
   bcjOn = false
   dmOn = 0
+  /** Secondary-mixer flavour chosen by `computeContexts` (0 = off, 2 = bin, 3 = bcj). */
+  dmKind = 0
+  /** Legacy gate flag of the 3-way mixer; 0 means "always on". */
+  dmGate = 0
+  /** Probe-only freeze hook of the vertcol experiments; false on every release path. */
+  probeFreeze = false
   w1?: Int32Array
   w1base = 0
   w2?: Int32Array
@@ -1657,9 +1663,9 @@ class Model {
             const bs = b2s
             H[9] = 0
             H[10] = this.symAepN > 262144
-              ? hh(0x165667B1, b1, bs[this.g(2)] >> 2, bs[this.g(3)] >> 2, bs[this.g(4)] >> 2, bs[this.g(5)] >> 2, bs[this.g(6)] >> 2) : 0
+              ? hh(0x165667B1, b1, bs[this.g(2)] >> 2, bs[this.g(3)] >> 2, bs[this.g(4)] >> 2, bs[this.g(5)] >> 2) : 0
             if (this.nctx > 11) H[11] = this.symAepN > 2000000
-              ? hh(0x9E3779B1, b1, bs[this.g(2)] >> 3, bs[this.g(3)] >> 3, bs[this.g(4)] >> 3, bs[this.g(5)] >> 3, bs[this.g(6)] >> 3, bs[this.g(7)] >> 3) : 0
+              ? hh(0x9E3779B1, b1, bs[this.g(2)] >> 3, bs[this.g(3)] >> 3, bs[this.g(4)] >> 3, bs[this.g(5)] >> 3) : 0
           }
           return
         }
