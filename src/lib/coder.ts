@@ -1023,6 +1023,8 @@ class Model {
   /** P24.4 synchronized prediction-error EMA (identical in encoder and decoder). */
   byteErr = 0
   emaErr = 0
+  /** P29.2: running count of ';' bytes, used to recognise semicolon tables. */
+  semiCount = 0
   /** Non-P7 features actually used by this stream (not the global policy). */
   requiredFlags = 0
   geometry: CMTableShape
@@ -2211,12 +2213,13 @@ class Model {
     const fPos = (this.fieldIdx << 6) | this.fieldCol
     const matchedLine = byte === this.lineColBytes[this.lineCol] ? 1 : 0
     const matchedField = byte === this.fieldColBytes[fPos] ? 1 : 0
+    if (byte === 59) this.semiCount++
     this.lineColBytes[this.lineCol] = byte
     this.fieldColBytes[fPos] = byte
     if (byte === 10) {
       this.lineCol = 0; this.fieldIdx = 0; this.fieldCol = 0
       this.lineEqMask = 0xff; this.fieldEqMask = 0xff
-    } else if (byte === 58 || byte === 9 || byte === 44) {
+    } else if (byte === 58 || byte === 9 || byte === 44 || (byte === 59 && this.semiCount * 8 >= this.pos + 1)) {
       this.lineCol = (this.lineCol + 1) & 0xff
       this.lineEqMask = ((this.lineEqMask << 1) | matchedLine) & 0xff
       this.fieldIdx = Math.min(7, this.fieldIdx + 1)
