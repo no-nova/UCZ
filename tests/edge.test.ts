@@ -227,10 +227,11 @@ export async function testEdgeInspectContainerBounds(): Promise<void> {
   const emptyFill = Uint8Array.from([0x55, 0x43, 0x5a, 1, 4, 1, ID.FILL, 4, 0])
   mustThrow(() => decompress(emptyFill), 'v1 FILL 空载荷', /FILL/)
 
-  // D4: 版本上界与 `decompress` 对齐（22）。
+  // D4: 版本上界与 `decompress` 对齐（23，含 v23 严格零先验档）。
   const good = (await compressAdaptive(new TextEncoder().encode('bounds check payload\n'.repeat(30)), undefined, { level: 'fast' })).container
-  const v23 = Uint8Array.from(good); v23[3] = 23
-  mustThrow(() => inspectContainer(v23), 'inspect 拒绝 v23', /version|版本/)
+  const v24 = Uint8Array.from(good); v24[3] = 24
+  // `isContainer` 与 `inspectContainer` 共用 1..23 的上界，24 在门禁处被拒。
+  mustThrow(() => inspectContainer(v24), 'inspect 拒绝 v24', /Not a UCZ container|version|版本/)
 
   // D7: 未知识别符。
   const badId = Uint8Array.from(good)

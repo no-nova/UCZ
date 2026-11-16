@@ -19,6 +19,49 @@ prior about the shape of computation, not a corpus prior about the content — e
 运行时从输入字节里在线选择；这是关于"计算形状"的设计先验，不是关于"内容"的语料先验。本仓库
 一切"零先验"表述都以本条为准。
 
+## Strict-profile invariance / 严格档的不变性定理
+
+A byte relabelling is any bijection π on `0..255`, applied pointwise to the input X.
+Two different notions must be kept apart, because only one of them holds today.
+
+**(I) Decision-input invariance (holds, enforced).** Under `--strict-zero-prior`
+(container version 23) the planner may consult only: raw byte lags, positional
+structure, equality between previously seen bytes, the input length, and measured
+encoded sizes. It may not consult byte-value categories, arithmetic on byte values,
+value-keyed headers, or content classifiers. This is enforced by
+`STRICT_FORBIDDEN_SPECS` / `strictAllowsSpec()` (`src/lib/codec.ts`), the opaque-region
+classifier override, the raw-lag-only context branch, and the disabled scanline,
+BCJ, REC2 and bit-plane stages. `tests/invariance.test.ts` asserts that no strict
+plan ever contains a forbidden rule and that `decompress(compress_π-strict(π(X))) = π(X)`.
+
+**(II) Size invariance (does NOT hold).** `C(π(X)) = C(X)` is false in this codec, and
+the strict profile does not make it true. Three mechanisms survive every gate: the
+fixed hash map `hh()` maps value tuples to table slots, so a relabelling changes which
+contexts collide; the model still carries byte-value features inside the
+APM / secondary-mixer indices (`charClass*`, `magClass`, `binClass4`, `QV[]`
+quantisation, `b >>> n` lags); and rule choice is decided by *measured* size, so
+near-tied candidates can swap under π.
+
+Measured drift (deterministic π, 128 KiB slices of the reference corpus, strict mode):
+worst per-file **+12.8 %** (`adult.data`), aggregate over eight files **+3.4 %**; at
+fixed profile the model alone drifts up to **+64 %** on a high-entropy structured
+binary (`kennedy.xls` slice, where quantised APM indices dominate). The test suite
+therefore asserts a regression *bound*, not equality: per file ≤ 70 %, aggregate ≤ 50 %.
+
+This is why every "zero-prior" claim in this repository is a claim about **what the
+planner is allowed to look at**, not a claim that the coder is invariant to relabelling
+of the alphabet. Making (II) true would require a value-free model variant (no
+quantisation tables, no character or magnitude classes, collision-stable hashing) and
+is not claimed here.
+
+对字节表做任意置换 π 时，本编解码器**不**满足 `C(π(X)) = C(X)`，严格档也不满足——
+三重原因：固定哈希把值元组映射到桶位（置换即改变碰撞），模型内仍有 `QV[]` 量化、
+字符/量级类与 `b>>>n` 位移等字节值特征，且规则选择按实测大小决定，近似并列的候选
+会在 π 下互换。因此本仓库的"零先验"只主张**规划器被允许看什么**，不主张对字母表
+重标号不变；`--strict-zero-prior`（容器版本 23）把规划输入限制为原始字节滞后、
+位置、相等结构与长度，并由 `tests/invariance.test.ts` 以实测误差上界（单文件 ≤70%、
+合计 ≤50%；参考语料实测最差 +12.8%、合计 +3.4%）作为回归闸门。
+
 ## Founding Articles / 九条根本原则
 
 1. **Zero Dictionary Systems.** No static word lists, phrase books, dictionaries,

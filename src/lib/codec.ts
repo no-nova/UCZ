@@ -10,7 +10,7 @@ import { fitMicroSeed, microFwd, microInv, microWeights, MICRO_SEED_BYTES } from
 import { encodePeeledTranspose, decodePeeledTranspose, encodePeeledAnchor, decodePeeledAnchor, inspectPeeledTranspose, inspectPeeledAnchor, type SubPeelInfo, type AnchorSubInfo } from './sub-peel'
 import { encodeAnchor, decodeAnchor, anchorRowCount, anchorPotential, MAX_ANCHOR_ROWS } from './anchor'
 import { analyze, detectAnchors, detectLagCandidates, detectRecordStride, detectWide16Lag, BLOCK, type Analysis, type Cls } from './analyze'
-import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, type CostBins, type CMVariant, type Profile } from './coder'
+import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, setStrictPriors, strictPriorsOn, type CostBins, type CMVariant, type Profile } from './coder'
 import { wordPreFwdSampled, wordPreInv, dictHeaderLen, collapseWithDict, type WordPreResult } from './wordpre'
 const ENABLE_WORDPRE = true
 import { deltaFwd, deltaInv, medFwd, medInv, d16Fwd, d16Inv, bcjFwd, bcjInv, bcjMsbFwd, bcjMsbInv, wide16Fwd, wide16Inv, wordRowDelta, anchorFoldFwd, anchorFoldInv } from './transforms'
@@ -917,7 +917,7 @@ function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: 
   // 非 max 档位按「先粗后细」裁剪：`fast` 只留 1/2/4/8 四个 span 和两个候选，
   // `balanced` 留 6 个 span、三个候选。`max` 完全不受影响。
   const lvlCols = pruningLevel()
-  if (lvlCols > 0 && sample.length >= 4096) {
+  if (lvlCols > 0 && sample.length >= 4096 && !strictPriorsOn()) {
     // P30.1：可打印 ASCII（表格 / CSV / 日志 / 代码）最终几乎总是被 `text-*`
     // 列上下文拿走（小表格的收益全部来自 text-vertcol，列布局候选全灭）。
     // 在非 max 档位先用样本自身的可打印比例直接否决列布局搜索：
@@ -1759,16 +1759,38 @@ function blockMinEntropy(data: Uint8Array, start: number, end: number): number {
   return best
 }
 
+/** P37.2：严格零先验模式禁止一切**字节值算术**候选。
+ *
+ * 取模 256 的差分、梯度、线性预测、位平面拆分都不是双射不变的：
+ * 把字节值做一次 S256 置换，`(a-b)&255` 会变成完全不同的数，规模也随之改变，
+ * 于是 `C(π(X)) = C(X)` 不可能成立。严格档只保留**顺序/相等结构**相关的候选
+ * （转置、锚点、CM 滞后上下文），换来的是一句可被机器验证的保证。
+ * 见 PRIOR_REGISTRY.md §1.3。 */
+export const STRICT_FORBIDDEN_SPECS = new Set<number>([
+  ID.DELTA, ID.DELTA_V3, ID.GRAD, ID.GRAD_V2, ID.GRAD_V3, ID.WIDE_GRAD,
+  ID.REC2, ID.BITPLANE, ID.MICRO,
+  // 锚点族把**字节值**写进头部（`r = anchor + 1`，且 r 的编码还受范围约束），
+  // 置换后同一个结构可能根本不可编码 —— 这是格式层面的值依赖，必须一起禁掉。
+  ID.ANCHOR, ID.ANCHOR_FOLD, ID.SUB_ANCHOR, ID.SUB_ANCHOR_V3,
+])
+
+export function strictAllowsSpec(id: number): boolean {
+  return !strictPriorsOn() || !STRICT_FORBIDDEN_SPECS.has(id)
+}
+
 export function candidatesFor(seg: Uint8Array, cls: Cls, bestS: number, lagSample: Uint8Array): Spec[] {
   const c: Spec[] = []
   const add = (id: number, s = 1, r = 1) => {
+    if (!strictAllowsSpec(id)) return
     if (!c.some(sp => sp.id === id && sp.s === s && sp.r === r)) c.push({ id, s, r })
   }
   let uniform = seg.length > 0
   for (let i = 1; i < seg.length && uniform; i++) if (seg[i] !== seg[0]) uniform = false
   if (uniform) return [{ id: ID.FILL, s: 1, r: 1 }]
   // Cheap gate only; the actual trial must beat the other candidates by 2%.
-  if (cls === 'binary' || cls === 'repeat' || cls === 'noise') {
+  // Prior registry §1: the E8/E9 relative-call transform is an x86 prior. The
+  // strict profile never proposes it, so no BCJ id can enter a v23 container.
+  if (!strictPriorsOn() && (cls === 'binary' || cls === 'repeat' || cls === 'noise')) {
     let calls = 0, plausible = 0
     for (let i = 0; i + 4 < lagSample.length; i++) if (lagSample[i] === 0xe8 || lagSample[i] === 0xe9) {
       calls++; if (lagSample[i + 4] === 0 || lagSample[i + 4] === 255) plausible++
@@ -1779,7 +1801,18 @@ export function candidatesFor(seg: Uint8Array, cls: Cls, bestS: number, lagSampl
   // Candidate gates are cheap and bounded; actual sample encoding includes row
   // lengths and stream headers. The whole region must fit the row-count cap.
   if (seg.length >= 8192 && (cls === 'text' || cls === 'binary' || cls === 'repeat' || cls === 'smooth')) {
-    const choices = (cls === 'smooth' ? [10, 60, 59] : [10, 60, 59, 0]).map(anchor => {
+    // P37.2：锚点是"分隔符候选"，严格档不能写死 `\n`/`;`/`,`/`\0` 这些 ASCII 值。
+    // 改为按出现频次排序取前 2 个**不同字节值**（同频按首次出现位置定序），
+    // 这样置换后选择的锚点集合与结构完全相同。
+    const anchorsStrict: number[] = (() => {
+      const freq = new Int32Array(256), first = new Int32Array(256).fill(-1)
+      for (let i = 0; i < lagSample.length; i++) { const b = lagSample[i]; if (freq[b]++ === 0) first[b] = i }
+      const act: number[] = []
+      for (let b = 0; b < 256; b++) if (freq[b] > 0) act.push(b)
+      act.sort((a, b) => freq[b] - freq[a] || first[a] - first[b])
+      return act.slice(0, 3)
+    })()
+    const choices = (strictPriorsOn() ? anchorsStrict : cls === 'smooth' ? [10, 60, 59] : [10, 60, 59, 0]).map(anchor => {
       let count=0
       for (const b of lagSample) if (b===anchor) count++
       return {anchor,count, score: count >= 128 ? anchorPotential(lagSample,anchor) : 0}
@@ -3028,7 +3061,7 @@ export function planHeader(n:number,segs:readonly PlanSegment[],groups:readonly 
   }
   const hasV15 = groups.some(g => g.v15)
   const flags = groups.reduce((f, g) => f | (g.modelFlags ?? payloadModelFlags(g.payload)) | (v20Spec(g.spec) ? V20_FLAG_TRANSFORMS : 0), 0)
-  const ver:number = flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
+  const ver:number = strictPriorsOn() ? 23 : flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
     :hasV15?15:groups.some(g=>g.spec.id===ID.WIDE_GRAD)?14:groups.some(g=>g.spec.id>=ID.TEXT_V3)?13:groups.some(g=>g.spec.id>=ID.TEXT_V2)?12:groups.some(g=>g.spec.id===ID.MICRO)?11:groups.some(g=>g.spec.id===ID.SUB_TRANSPOSE||g.spec.id===ID.SUB_ANCHOR)?10:groups.some(g=>g.spec.id===ID.PEEL)?9:groups.some(g=>g.spec.id===ID.ANCHOR_FOLD)?8:7
   const hdr:number[]=[0x55,0x43,0x5a,ver]
   if (ver >= 19) hdr.push(flags & 255, flags >>> 8)
@@ -3217,7 +3250,7 @@ async function tryParallelChoose(
 ): Promise<{ spec: Spec; trials: Trial[] }[] | null> {
   if (!parallelReport.ok) return null
   const jobs: JobPayload[] = segs.map((sg, i) => ({
-    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: activeLevel, start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
+    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: activeLevel, strictPrior: strictPriorsOn(), start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
     bestS: sg.bestS, sampleLimit: sampleLimits[i], base: sg.start,
   }))
   const loads = segs.map(sg => sg.end - sg.start)
@@ -3277,7 +3310,7 @@ function groupJobs(
     const parts = g.members.map(i => [segs[i].start, segs[i].end] as [number, number])
     const positions = g.members.map(i => segs[i].start)
     const ends = logicalGroupEnds(g, segs)
-    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: activeLevel, groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
+    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: activeLevel, strictPrior: strictPriorsOn(), groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
     index.push(gi)
     loads.push(g.members.reduce((a, i) => a + segs[i].rawLen, 0))
   }
@@ -3863,10 +3896,13 @@ function coalesceCompressedPlan(dataLen: number, cp: Compressed): Compressed {
 export async function compressAdaptive(
   data: Uint8Array,
   onStage?: (msg: string, pct: number) => void,
-  options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel },
+  options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel; strictZeroPrior?: boolean },
 ): Promise<Compressed> {
   const previousLevel = activeLevel
   activeLevel = options?.level ?? 'max'
+  // v23 strict profile: every prior listed in PRIOR_REGISTRY.md is switched off
+  // and the container version records it, so the decoder disables the same ones.
+  const restoreStrict = setStrictPriors(!!options?.strictZeroPrior)
   try {
     // Finish the unchanged P13.1 chooser, family/orphan/macro and WIDE guards FIRST.
     // New contexts cannot steer those heuristics or evict an old WORD-PRE winner.
@@ -3883,8 +3919,9 @@ export async function compressAdaptive(
     const carved=refineNoisePockets(data,coalescedBcj)
     if (pr === 1) return coalesceCompressedPlan(data.length,carved)
     const upgraded=refineGroupCodecs(data,carved)
-    const rec2=refineRec2(data,upgraded)
-    let bp=rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2)
+    // P37.2：严格档跳过递归残差与位平面——两者都按字节值做算术/位拆分。
+    const rec2=strictPriorsOn()?upgraded:refineRec2(data,upgraded)
+    let bp=strictPriorsOn()?rec2:(rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2))
     // P22.1: a uniform BCJ stream must keep its call-target history across tiny
     // FILL islands. Compete the dominant BCJ_V3 spec as one whole-stream plan.
     if(data.length>=131072 && bp.segs.length>1 && bp.segs.some(s=>s.spec.id===ID.BCJ_V3)){
@@ -3900,7 +3937,7 @@ export async function compressAdaptive(
     // 或 `refineBitplane` 切碎，每个碎片都要重新预热哈希表，反而更大
     // （整段 26,935 B vs 切碎 28,275 B）。这里只对"绝大多数字节是 0x00/0xFF、
     // 几乎不含可打印文本"的流补一个整段候选，采纳与否仍由真实容器字节数决定。
-    if(data.length>=65536 && bp.segs.length>1){
+    if(!strictPriorsOn() && data.length>=65536 && bp.segs.length>1){
       let zeros=0, printable=0
       const step=Math.max(1,Math.floor(data.length/65536))
       let seen=0
@@ -3920,7 +3957,7 @@ export async function compressAdaptive(
     }
     return coalesceCompressedPlan(data.length,bp)
   }
-  finally { activeLevel = previousLevel; await closeNodePool() }
+  finally { restoreStrict(); activeLevel = previousLevel; await closeNodePool() }
 }
 /** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
  * incompressible segments.
@@ -3960,6 +3997,7 @@ export function refineBcjSegments(data: Uint8Array, baseline: Compressed): Compr
     accepted: false, seams: 0,
   }
   try {
+    if (strictPriorsOn()) return { ...baseline, bcjComparison: comparison }
     const groups = retainedPlanGroups.get(baseline.container)
     if (!groups) return { ...baseline, bcjComparison: comparison }
     const owner = new Int32Array(baseline.segs.length).fill(-1)
@@ -4524,6 +4562,16 @@ async function compressAdaptiveImpl(
   await tick()
   const analysis = analyze(data)
   const n = data.length
+  // P37.2：严格零先验模式下，分类器的输出本身就是一个内容先验
+  // （`cls` 由可打印率/ASCII 字符类决定）。把它固定成单一不透明区域后，
+  // 规则搜索只剩测量驱动的结构候选，`C(π(X)) = C(X)` 才可被强制验证。
+  // 见 PRIOR_REGISTRY.md §5。
+  if (strictPriorsOn()) {
+    analysis.segs = n > 0
+      ? [{ start: 0, end: n, cls: 'binary', b0: 0, b1: analysis.blocks.length, bestS: 1 }]
+      : []
+    analysis.features = []
+  }
   // P30.0：非 max 档位先粗化地形分段。`chooseSpec` 的成本与**区域数**成正比
   // （每个区域 × 每个候选 × 2~3 个采样窗口各一次真实编码），而 512 B 级碎片区域
   // 是小文件上上万次探针的来源。合并相邻小区域只改变搜索粒度，
@@ -4666,7 +4714,7 @@ async function compressAdaptiveImpl(
 }
 
 export function decompress(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 22)
+  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 23)
     throw new Error('不是有效的 UCZ 容器（不支持的格式版本）')
   if (c[3] >= 17 && c.length < (c[3] >= 19 ? 6 : 5)) throw new Error(`v${c[3]} 配置字段被截断`)
   // Strict version dispatch: v19 uint16 + tiered mht4; v17/v18 keep old widths.
@@ -4675,7 +4723,7 @@ export function decompress(c: Uint8Array, onProgress?: (done: number, total: num
 }
 
 function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22)) throw new Error('不是有效的 UCZ 容器')
+  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23)) throw new Error('不是有效的 UCZ 容器')
   const st = { p: c[3] >= 19 ? 6 : c[3] >= 17 ? 5 : 4 }, n = getVar(c, st), cnt = getVar(c, st)
   if (!Number.isSafeInteger(n) || !Number.isSafeInteger(cnt) || cnt > n) throw new Error('无效的容器长度')
   // The output size comes from the (untrusted) header; refuse to allocate a
@@ -4718,7 +4766,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // 次高位：该组载荷被 WORD-PRE 封装过（P4-2，独立于 v15 标记）。
     const wp = c[3] >= 15 && (rRaw & 0x4000) !== 0
     const contextCode=(rRaw & GROUP_CONTEXT_MASK) >>> GROUP_CONTEXT_SHIFT
-    if(contextCode && c[3]!==21 && c[3]!==22)throw Error('旧容器包含 v21 组标记')
+    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23)throw Error('旧容器包含 v21 组标记')
     const matchDist = !!(rRaw & GROUP_MATCH_DIST_BIT)
     // v22 owns bit 20; P17.7 adds the extended-context namespace bit at 21. Every
     // earlier version (and every pre-P17.7 v22 stream) has bit 21 clear, so the
@@ -4729,7 +4777,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // reinterpret the group's r as a larger value. Bit 21 is the P17.7 extended
     // context namespace, so it is legal from v21 on (and rejected below v21).
     if(c[3]===21 && (rRaw>0x3fffff || (rRaw&GROUP_MATCH_DIST_BIT)!==0 || ((rRaw&0x10000)!==0 && !v15)))throw Error('未知组标志位或缺少 APM 内核')
-    if(matchDist && c[3]!==22)throw Error('旧容器包含 v22 组匹配模型标记')
+    if(matchDist && c[3]!==22 && c[3]!==23)throw Error('旧容器包含 v22 组匹配模型标记')
     if(c[3]>=22 && rRaw>0x3fffff)throw Error('未知组标志位')
     const context=contextFromGroupBits(rRaw)
     const r = v15 || wp || context || matchDist ? rRaw & 0x3fff : rRaw
@@ -4743,7 +4791,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // CM profile constrain this bit.
     if(matchDist && (!cm20 || !((c[4]|(c[5]<<8))&V22_FLAG_MATCH_DISTANCE) || !matchDistProfileAllowed(id,context)))
       throw Error('v22 组匹配模型标记与规则不兼容')
-    if((id===ID.REC2||id===ID.BITPLANE) && (c[3]!==21 || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
+    if((id===ID.REC2||id===ID.BITPLANE) && ((c[3]!==21 && c[3]!==23) || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
     gContext.push(context)
     gMatchDist.push(matchDist)
     g20.push(cm20)
@@ -4916,7 +4964,11 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
-    let modes:CMContext[]=rawText && contextSpecAllowed('text-linecol',spec)?['text-linecol','text-lexcol','text-tabcol','wp-token3']
+    // Prior registry §2/§3: every `text-*` layout keys on ASCII character classes
+    // and delimiter bytes, and `wp-*` keys on whitespace tokenisation. The strict
+    // profile offers no context layout at all, so such a group falls back to its
+    // generic byte model.
+    let modes:CMContext[]=strictPriorsOn()?[]:rawText && contextSpecAllowed('text-linecol',spec)?['text-linecol','text-lexcol','text-tabcol','wp-token3']
       :rawText?[]:contextSpecAllowed('xform-bin',spec)?['xform-bin','xform-bin-stride4']:contextSpecAllowed('bin-stride4',spec)?['bin-stride4']
       :contextSpecAllowed('wide-geom',spec)?['wide-geom']:wordPre?['wp-token3','wp-merge']:[]
     // P24: the vertical-predictor layout (`text-vertcol`) is the same nine-context
@@ -5182,7 +5234,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // byte profile the segmenter picked. Such groups (small tabular files) were locked into `bin`, so the column
       // layouts were never even screened. The proposal is purely additive: the
       // `bin` candidates stay in the tournament, so the container can only win.
-      ...(!g.wordPre && !contextSpecAllowed('text-sparse5',g.spec)
+      ...(!strictPriorsOn() && !g.wordPre && !contextSpecAllowed('text-sparse5',g.spec)
         && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
         && asciiTableGroup(data,segs,g.members)
         ? [{spec:{id:ID.TEXT_V3,s:1,r:1},reason:'selected-text' as const,rawText:true}] : []),
@@ -5192,14 +5244,14 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // therefore also gets a raw-byte tournament (a numeric table holds 34,645 B of
       // a proven 31,525 B). The word-pre candidate stays in the race, so this is
       // purely additive.
-      ...(!!g.wordPre && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
+      ...(!strictPriorsOn() && !!g.wordPre && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
         && asciiTableGroup(data,segs,g.members)
         ? [{spec:{...g.spec},reason:'selected-raw-text' as const,rawText:true}] : [])]
       // Never steal another original stream's dictionary key, even if that
       // other group later accepts a context/transform of its own.
       .filter(p=>!groups.some((other,i)=>i!==group && sameSpec(other.spec,p.spec)))
       .map(proposal=>({g,group,proposal,rawBytes:g.members.reduce((n,i)=>n+segs[i].rawLen,0)})))
-    const jobs:JobPayload[]=eligible.map(({g,proposal})=>({kind:'contextGroup',cmV20:{...cmV20Tuning},level:activeLevel,spec:{...proposal.spec},
+    const jobs:JobPayload[]=eligible.map(({g,proposal})=>({kind:'contextGroup',cmV20:{...cmV20Tuning},level:activeLevel,strictPrior:strictPriorsOn(),spec:{...proposal.spec},
       parts:g.members.map(i=>[segs[i].start,segs[i].end] as [number,number]),positions:g.members.map(i=>segs[i].start),rawText:proposal.rawText,
       retained:sameSpec(g.spec,proposal.spec)?{payload:g.payload,flags:payloadModelFlags(g.payload),wordPre:!!g.wordPre}:undefined}))
     let replies:JobReply[]|null=null

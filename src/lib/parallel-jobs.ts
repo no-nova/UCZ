@@ -7,7 +7,7 @@ import { contextGroupCandidatesSync } from './codec'
 // 其它未序列化的非默认诊断旋钮由主线程门禁退回串行。
 import { chooseSpecForJob, encodeGroupForJob, encodeSpecsForJob } from './codec-jobs'
 import type { JobPayload, JobReply } from './parallel'
-import { cmV20Tuning } from './coder'
+import { cmV20Tuning, setStrictPriors } from './coder'
 import { setActiveCompressionLevel } from './codec'
 
 /** 执行一个任务。返回结构化克隆安全的纯数据。 */
@@ -20,7 +20,10 @@ export async function runJob(payload: JobPayload, data: Uint8Array): Promise<Job
   // 规划档位必须在 worker 里也生效，否则 `fast`/`balanced` 的裁剪只发生在主线程，
   // 工作线程仍按 `max` 逐候选试探（结果不会错，但会白花几分钟）。
   const restoreLevel = setActiveCompressionLevel(payload.level)
-  try { return runJobSync(payload,data) } finally {restoreLevel();Object.assign(cmV20Tuning,saved)}
+  // v23 严格零先验同样必须在 worker 里生效：否则主线程按 strict 选规格、写 ver 23，
+  // 而 worker 仍按带先验的模型编码 payload，解码端就会不一致。
+  const restoreStrict = setStrictPriors(!!payload.strictPrior)
+  try { return runJobSync(payload,data) } finally {restoreStrict();restoreLevel();Object.assign(cmV20Tuning,saved)}
 }
 function runJobSync(payload:JobPayload,data:Uint8Array):JobReply {
   switch (payload.kind) {

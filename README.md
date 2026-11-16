@@ -222,6 +222,17 @@ concatenation point. On a mixed 8-item set it separates families with a 0.100 ma
 
 ---
 
+## Zero-prior ablation (`--strict-zero-prior`)
+
+The default engine holds a finite, hand-designed family of *content* priors — an x86
+`E8/E9` transform, ASCII column/word contexts, a bitmap scanline detector. They are
+worth 8.08 % on Canterbury+UCI (744,806 → 804,966 B) and up to +62.5 % on a fax bitmap,
+so they are measured, not assumed. `--strict-zero-prior` disables every one of them and
+restricts the planner to raw byte lags, position, equality and length, marked by
+container version 23. `PRIOR_REGISTRY.md` lists each component, its ablated cost and
+whether strict mode removes it; `CONSTITUTION.md` §"Strict-profile invariance" states
+exactly what the flag does and does not guarantee.
+
 ## Quick start
 
 ```bash

@@ -16,7 +16,7 @@ import type { ContextCandidates, CompressionLevel } from './codec'
 import type { KernelScreen, KernelVariant, GroupCandidateOptions } from './group-policy'
 
 /** 任务载荷：只有偏移、标量与纯数据，不含任何外部引用（可结构化克隆）。 */
-export type JobPayload = ({ cmV20?: { enabled:boolean; binRecovery:boolean }; level?: CompressionLevel } & (
+export type JobPayload = ({ cmV20?: { enabled:boolean; binRecovery:boolean }; level?: CompressionLevel; strictPrior?: boolean } & (
   | { kind: 'chooseSpec'; start: number; end: number; cls: number; bestS: number; sampleLimit: number; base: number }
   | { kind: 'encodeGroup'; parts: [number, number][]; spec: SpecData; positions: number[]; ends: number[]; skipBase?: boolean; groupOptions?: GroupCandidateOptions }
   | { kind: 'contextGroup'; parts: [number,number][]; spec:SpecData; positions:number[]; rawText?:boolean; retained?:{payload:Uint8Array;flags:number;wordPre:boolean} }

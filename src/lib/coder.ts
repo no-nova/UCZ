@@ -465,16 +465,30 @@ export interface ContainerModel {
   binRecovery: boolean
   /** v22: distance-split match state + second-generation 4-gram slot. */
   matchDistance: boolean
+  /** v23: strict zero-prior profile — no bitmap scanline prior is inferred. */
+  strictPriors: boolean
 }
 const LEGACY_CONTAINER_MODEL: Readonly<ContainerModel> = Object.freeze({
   maxTableBits: 21, matchTableBits: 20, textOn: true, resOn: true,
-  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false,
+  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false,
 })
 const V16_EXPERIMENTAL_MODEL: Readonly<ContainerModel> = Object.freeze({
   maxTableBits: 22, matchTableBits: 20, textOn: false, resOn: true,
-  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false,
+  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false,
 })
 let containerModel: Readonly<ContainerModel> | null = null
+/**
+ * v23 strict zero-prior scope. The encoder sets this from the caller's option; the
+ * decoder derives it from the container version, so both sides disable the same
+ * priors. Everything the flag turns off is listed in PRIOR_REGISTRY.md.
+ */
+let strictPriorsFlag = false
+export function setStrictPriors(on: boolean): () => void {
+  const prev = strictPriorsFlag
+  strictPriorsFlag = on
+  return () => { strictPriorsFlag = prev }
+}
+export function strictPriorsOn(): boolean { return strictPriorsFlag || (containerModel?.strictPriors ?? false) }
 /** New encoders may try v20 transforms; old-container scopes may never decode them. */
 export function transformsV20Enabled(): boolean { return containerModel?.transformsV20 ?? true }
 let groupModelBytes = 0
@@ -508,7 +522,7 @@ export function encodingModelFlags(): number {
 
 /** Hard version split: v17 keeps its OWN old bit definitions and stream sizing. */
 export function withContainerModel<T>(version: number, flags: number, fn: () => T): T {
-  if (!Number.isInteger(version) || version < 1 || version > 22) throw Error('不支持的 UCZ 格式版本')
+  if (!Number.isInteger(version) || version < 1 || version > 23) throw Error('不支持的 UCZ 格式版本')
   if ((version >= 17) && (!Number.isInteger(flags) || flags < 0
     || flags > (version === 17 ? 63 : version === 18 ? 255 : version === 19 ? 0x7ff : version === 20 ? CM_FLAGS_MASK : version === 21 ? CM_FLAGS_MASK | V21_FLAG_CONTEXTS : V22_FLAGS_MASK)
     || (version === 21 && (!(flags & V21_FLAG_CONTEXTS) || !(flags & V20_FLAG_CM)))
@@ -528,12 +542,13 @@ export function withContainerModel<T>(version: number, flags: number, fn: () => 
     contextsV21: version >= 21 && !!(flags & V21_FLAG_CONTEXTS),
     matchDistance: version >= 22 && !!(flags & V22_FLAG_MATCH_DISTANCE),
     binRecovery: version >= 20 && !!(flags & V20_FLAG_BIN_RECOVERY),
+    strictPriors: version >= 23,
     fixedMht4: version === 18 || version >= 20 || !!(flags & V19_FLAG_MHT4_20),
   } : version === 17 ? {
     maxTableBits: flags & 0x01 ? 22 : 21,
     matchTableBits: flags & 0x04 ? 21 : 20,
     textOn: !(flags & 0x02), resOn: !(flags & 0x08),
-    wordPreTextOff: !!(flags & 0x10), largeOnly: !!(flags & 0x20), groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false,
+    wordPreTextOff: !!(flags & 0x10), largeOnly: !!(flags & 0x20), groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false,
   } : version === 16 ? V16_EXPERIMENTAL_MODEL : LEGACY_CONTAINER_MODEL
   const prev = containerModel, prevGroup = groupModelBytes, prevProbe = probeDepth
   containerModel = model; groupModelBytes = 0; probeDepth = 0
@@ -952,6 +967,8 @@ class Model {
   gapRecovery = false
   /** v20 `bin` 且流长达到 `BIN_TEN_MIN_BYTES`：启用第十个上下文。 */
   binTenOn = false
+  /** v23: no bitmap scanline prior (see PRIOR_REGISTRY.md). */
+  strictPriors = false
   /** P27.7: second word of history for the word trigram. */
   prev2Word = 0
   /** P28.5: causally detected scanline period for small `bin` blocks (0 = none). */
@@ -1086,7 +1103,12 @@ class Model {
     this.buf = contextPeer?.buf ?? new Uint8Array(n + 1)
     const v3 = variant === 'v13' || isAPMKernel(variant)
     this.binTenOn = v3 && profile === 'bin' && variant === 'v20' && n >= BIN_TEN_MIN_BYTES
+    // v23 strict zero-prior scope: no scanline period is inferred at all.
+    this.strictPriors = strictPriorsOn()
     this.binLadderOn = this.binTenOn && n >= BIN_TWELVE_MIN_BYTES
+    // P37.2：严格档只保留"原始字节滞后"上下文。H[10..13] 用 `b>>>2` / `b>>>3`
+    // 做模拟量量化——那是在假设字节值的数值大小有意义，S256 置换后不再成立。
+    if (this.strictPriors) { this.binTenOn = false; this.binLadderOn = false }
     this.bcjOn = v3 && variant === 'v20' && profile === 'bin' && !this.context && !!options?.bcj
     this.nctx = this.binLadderOn ? 13 : this.binTenOn ? 11
       : v3 ? (profile === 'res' ? 8 : profile === 'text' || profile === 'bin' || profile === 'res2d' ? 9 : NCTX[profile]) : variant && profile === 'text' ? 8 : NCTX[profile]
@@ -1344,6 +1366,10 @@ class Model {
   private detectScanPeriod(): void {
     const pos = this.pos
     if (this.scanPeriod !== 0) return
+    // v23: the 2-D scanline family is a registered prior (PRIOR_REGISTRY.md §4);
+    // the strict profile never infers it, and both sides agree because the flag is
+    // carried by the container version.
+    if (this.strictPriors) return
     // P28.6: a fax/bitmap segment pays 1-D cold start for every byte before the
     // lock, so the first checkpoint is at 1024 bytes (~4.7 scanlines of a 216-byte-wide fax bitmap).
     const early = pos === 1024
@@ -1681,6 +1707,13 @@ class Model {
         H[1] = hh(b1)
         break
       case 'text':
+        if (this.strictPriors) {
+          // P37.2：文本档的 H[6]/H[7] 用 `wh`/`pwh`（按字符类累加的单词哈希），
+          // 那是 ASCII 字符类先验。严格档只留原始滞后上下文。
+          H[0] = 0
+          for (let i = 1; i < this.nctx; i++) H[i] = hh(b1, b2, b3, this.g(3 + i))
+          break
+        }
         H[0] = 0
         H[1] = hh(b1)
         H[2] = hh(b1, b2)
