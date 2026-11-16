@@ -533,7 +533,7 @@ export function encodingModelFlags(): number {
 
 /** Hard version split: v17 keeps its OWN old bit definitions and stream sizing. */
 export function withContainerModel<T>(version: number, flags: number, fn: () => T): T {
-  if (!Number.isInteger(version) || version < 1 || version > 24) throw Error('不支持的 UCZ 格式版本')
+  if (!Number.isInteger(version) || version < 1 || version > 25) throw Error('不支持的 UCZ 格式版本')
   if ((version >= 17) && (!Number.isInteger(flags) || flags < 0
     || flags > (version === 17 ? 63 : version === 18 ? 255 : version === 19 ? 0x7ff : version === 20 ? CM_FLAGS_MASK : version === 21 ? CM_FLAGS_MASK | V21_FLAG_CONTEXTS : V22_FLAGS_MASK)
     || (version === 21 && (!(flags & V21_FLAG_CONTEXTS) || !(flags & V20_FLAG_CM)))
@@ -553,7 +553,7 @@ export function withContainerModel<T>(version: number, flags: number, fn: () => 
     contextsV21: version >= 21 && !!(flags & V21_FLAG_CONTEXTS),
     matchDistance: version >= 22 && !!(flags & V22_FLAG_MATCH_DISTANCE),
     binRecovery: version >= 20 && !!(flags & V20_FLAG_BIN_RECOVERY),
-    strictPriors: version >= 23,
+    strictPriors: version === 23 || version === 24,
     checksum: version >= 24,
     fixedMht4: version === 18 || version >= 20 || !!(flags & V19_FLAG_MHT4_20),
   } : version === 17 ? {

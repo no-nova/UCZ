@@ -203,9 +203,10 @@ table rows at 22 contexts, i.e. ~8 µs per byte on the way back.
   low-cardinality table: the column model (`fieldIdx`, `fieldCol`, previous-row byte) plus the
   `;`/`,`-density delimiter detector does the work.
 * `wdbc.data` (25.42%) is the counter-example — 30 float columns with ~5 significant digits.
-  A numeric table is not a symbol table; UCZ finds `text-vertcol` here and beats `gzip`, but
-  `xz` is 3× ahead because it has a literal coder tuned for repetitive decimal digits. Below the
-  specialist threshold, honestly reported.
+  A numeric table is not a symbol table; UCZ finds `text-vertcol` here but still loses to
+  **every** general-purpose tool on this file (`gzip -9` 23,161 B is 36% smaller, `xz -9e`
+  14,120 B more than twice as small) because decimal digits are what a literal coder is built
+  for. Below the specialist threshold, honestly reported.
 * `winequality-*` (14–16%) is the best case for the column model: 11 columns, invariant header,
   semicolon delimiters.
 

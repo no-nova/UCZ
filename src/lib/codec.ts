@@ -3062,7 +3062,10 @@ export function planHeader(n:number,segs:readonly PlanSegment[],groups:readonly 
   }
   const hasV15 = groups.some(g => g.v15)
   const flags = groups.reduce((f, g) => f | (g.modelFlags ?? payloadModelFlags(g.payload)) | (v20Spec(g.spec) ? V20_FLAG_TRANSFORMS : 0), 0)
-  const ver:number = containerChecksumOn() ? 24 : strictPriorsOn() ? 23 : flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
+  // v23 = strict only, v24 = strict + checksum, v25 = default priors + checksum.
+  // Encoding a checksummed container with default priors as v24 would make the
+  // decoder build the strict model, so the two axes get distinct versions.
+  const ver:number = containerChecksumOn() ? (strictPriorsOn() ? 24 : 25) : strictPriorsOn() ? 23 : flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
     :hasV15?15:groups.some(g=>g.spec.id===ID.WIDE_GRAD)?14:groups.some(g=>g.spec.id>=ID.TEXT_V3)?13:groups.some(g=>g.spec.id>=ID.TEXT_V2)?12:groups.some(g=>g.spec.id===ID.MICRO)?11:groups.some(g=>g.spec.id===ID.SUB_TRANSPOSE||g.spec.id===ID.SUB_ANCHOR)?10:groups.some(g=>g.spec.id===ID.PEEL)?9:groups.some(g=>g.spec.id===ID.ANCHOR_FOLD)?8:7
   const hdr:number[]=[0x55,0x43,0x5a,ver]
   if (ver >= 19) hdr.push(flags & 255, flags >>> 8)
@@ -3904,11 +3907,31 @@ function sealChecksum(comp: Compressed, raw: Uint8Array): Compressed {
   return { ...comp, container: out, overhead: comp.overhead + 4 }
 }
 
+/** Serialises concurrent `compressAdaptive` calls.
+ *
+ *  The planner keeps per-call state in module-level singletons (`activeLevel`,
+ *  `strictPriorsFlag`, `checksumFlag`, the worker `level`/`strictPrior` payloads)
+ *  and awaits between stages, so two overlapping calls would observe each other's
+ *  options — a `strictZeroPrior` call could pick up a `max` level, or a v24 header
+ *  could be written while another call has already switched the flags. The library
+ *  entry point therefore runs one encode at a time; a queue costs nothing for the
+ *  single-call case and removes a whole class of silent corruption.
+ */
+let encodeChain: Promise<void> = Promise.resolve()
+async function withEncodeLock<T>(run: () => Promise<T>): Promise<T> {
+  const previous = encodeChain
+  let release!: () => void
+  encodeChain = new Promise<void>(resolve => { release = resolve })
+  await previous
+  try { return await run() } finally { release() }
+}
+
 export async function compressAdaptive(
   data: Uint8Array,
   onStage?: (msg: string, pct: number) => void,
   options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel; strictZeroPrior?: boolean; checksum?: boolean; timeBudgetMs?: number; maxOutputBytes?: number },
 ): Promise<Compressed> {
+  return withEncodeLock(async () => {
   const previousLevel = activeLevel
   activeLevel = options?.level ?? 'max'
   // v23 strict profile: every prior listed in PRIOR_REGISTRY.md is switched off
@@ -3943,9 +3966,12 @@ export async function compressAdaptive(
     if (deadline && Date.now() >= deadline) return seal(coalesceCompressedPlan(data.length,chosen))
     if (pr >= 2) return seal(coalesceCompressedPlan(data.length,chosen))
     const coalescedBcj=refineBcjSegments(data,chosen)
-    const carved=refineNoisePockets(data,coalescedBcj)
+    // P37.7：严格档跳过这两遍后处理——它们的候选集含 DELTA/DELTA_V3/TRANSPOSE_GROUP，
+    // 会在严格容器里重新引入模 256 差分（P37.2 的 STRICT_FORBIDDEN_SPECS 只能约束
+    // 主候选，管不到这里）。
+    const carved=strictPriorsOn()?coalescedBcj:refineNoisePockets(data,coalescedBcj)
     if (pr === 1) return seal(coalesceCompressedPlan(data.length,carved))
-    const upgraded=refineGroupCodecs(data,carved)
+    const upgraded=strictPriorsOn()?carved:refineGroupCodecs(data,carved)
     // P37.2：严格档跳过递归残差与位平面——两者都按字节值做算术/位拆分。
     const rec2=strictPriorsOn()?upgraded:refineRec2(data,upgraded)
     let bp=strictPriorsOn()?rec2:(rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2))
@@ -3985,6 +4011,7 @@ export async function compressAdaptive(
     return seal(coalesceCompressedPlan(data.length,bp))
   }
   finally { restoreChecksum(); restoreStrict(); activeLevel = previousLevel; await closeNodePool() }
+  })
 }
 /** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
  * incompressible segments.
@@ -4741,7 +4768,7 @@ async function compressAdaptiveImpl(
 }
 
 export function decompress(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 24)
+  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 25)
     throw new Error('不是有效的 UCZ 容器（不支持的格式版本）')
   if (c[3] >= 17 && c.length < (c[3] >= 19 ? 6 : 5)) throw new Error(`v${c[3]} 配置字段被截断`)
   // Strict version dispatch: v19 uint16 + tiered mht4; v17/v18 keep old widths.
@@ -4750,7 +4777,7 @@ export function decompress(c: Uint8Array, onProgress?: (done: number, total: num
 }
 
 function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23 && c[3] !== 24)) throw new Error('不是有效的 UCZ 容器')
+  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23 && c[3] !== 24 && c[3] !== 25)) throw new Error('不是有效的 UCZ 容器')
   const st = { p: c[3] >= 19 ? 6 : c[3] >= 17 ? 5 : 4 }, n = getVar(c, st), cnt = getVar(c, st)
   // v24 appends a 4-byte CRC-32C of the decompressed payload; everything below
   // reads up to `bodyEnd` and the trailer is verified once the output exists.
@@ -4814,7 +4841,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // 次高位：该组载荷被 WORD-PRE 封装过（P4-2，独立于 v15 标记）。
     const wp = c[3] >= 15 && (rRaw & 0x4000) !== 0
     const contextCode=(rRaw & GROUP_CONTEXT_MASK) >>> GROUP_CONTEXT_SHIFT
-    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23 && c[3]!==24)throw Error('旧容器包含 v21 组标记')
+    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23 && c[3]!==24 && c[3]!==25)throw Error('旧容器包含 v21 组标记')
     const matchDist = !!(rRaw & GROUP_MATCH_DIST_BIT)
     // v22 owns bit 20; P17.7 adds the extended-context namespace bit at 21. Every
     // earlier version (and every pre-P17.7 v22 stream) has bit 21 clear, so the
@@ -4825,7 +4852,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // reinterpret the group's r as a larger value. Bit 21 is the P17.7 extended
     // context namespace, so it is legal from v21 on (and rejected below v21).
     if(c[3]===21 && (rRaw>0x3fffff || (rRaw&GROUP_MATCH_DIST_BIT)!==0 || ((rRaw&0x10000)!==0 && !v15)))throw Error('未知组标志位或缺少 APM 内核')
-    if(matchDist && c[3]!==22 && c[3]!==23 && c[3]!==24)throw Error('旧容器包含 v22 组匹配模型标记')
+    if(matchDist && c[3]!==22 && c[3]!==23 && c[3]!==24 && c[3]!==25)throw Error('旧容器包含 v22 组匹配模型标记')
     if(c[3]>=22 && rRaw>0x3fffff)throw Error('未知组标志位')
     const context=contextFromGroupBits(rRaw)
     const r = v15 || wp || context || matchDist ? rRaw & 0x3fff : rRaw
@@ -4839,7 +4866,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // CM profile constrain this bit.
     if(matchDist && (!cm20 || !((c[4]|(c[5]<<8))&V22_FLAG_MATCH_DISTANCE) || !matchDistProfileAllowed(id,context)))
       throw Error('v22 组匹配模型标记与规则不兼容')
-    if((id===ID.REC2||id===ID.BITPLANE) && ((c[3]!==21 && c[3]!==23 && c[3]!==24) || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
+    if((id===ID.REC2||id===ID.BITPLANE) && ((c[3]!==21 && c[3]!==23 && c[3]!==24 && c[3]!==25) || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
     gContext.push(context)
     gMatchDist.push(matchDist)
     g20.push(cm20)

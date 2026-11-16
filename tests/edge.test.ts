@@ -119,7 +119,10 @@ export async function testEdgeChecksumTrailer(): Promise<void> {
   for (let i = 0; i < data.length; i++) data[i] = (i * 37 + (i >> 2)) & 0xff
   const plain = await compressAdaptive(data, undefined, { level: 'fast' })
   const sealed = await compressAdaptive(data, undefined, { level: 'fast', checksum: true })
-  assert.equal(sealed.container[3], 24, 'checksummed containers must be v24')
+  assert.equal(sealed.container[3], 25, 'checksummed containers with default priors are v25')
+  const sealedStrict = await compressAdaptive(data, undefined, { level: 'fast', checksum: true, strictZeroPrior: true })
+  assert.equal(sealedStrict.container[3], 24, 'checksummed containers with strict priors are v24')
+  fastDeepEqual(decompress(sealedStrict.container), data)
   assert.ok(sealed.container.length >= plain.container.length + 4)
   fastDeepEqual(decompress(sealed.container), data)
   // Container-level structure is untouched by the trailer flag.
@@ -295,11 +298,11 @@ export async function testEdgeInspectContainerBounds(): Promise<void> {
   const emptyFill = Uint8Array.from([0x55, 0x43, 0x5a, 1, 4, 1, ID.FILL, 4, 0])
   mustThrow(() => decompress(emptyFill), 'v1 FILL 空载荷', /FILL/)
 
-  // D4: 版本上界与 `decompress` 对齐（24，含 v23 严格零先验档与 v24 CRC 尾部）。
+  // D4: 版本上界与 `decompress` 对齐（25：v23 严格、v24 严格+CRC、v25 默认+CRC）。
   const good = (await compressAdaptive(new TextEncoder().encode('bounds check payload\n'.repeat(30)), undefined, { level: 'fast' })).container
-  const v25 = Uint8Array.from(good); v25[3] = 25
-  // `isContainer` 与 `inspectContainer` 共用 1..24 的上界，25 在门禁处被拒。
-  mustThrow(() => inspectContainer(v25), 'inspect 拒绝 v25', /Not a UCZ container|version|版本/)
+  const v26 = Uint8Array.from(good); v26[3] = 26
+  // `isContainer` 与 `inspectContainer` 共用 1..25 的上界，26 在门禁处被拒。
+  mustThrow(() => inspectContainer(v26), 'inspect 拒绝 v26', /Not a UCZ container|version|版本/)
 
   // D7: 未知识别符。
   const badId = Uint8Array.from(good)

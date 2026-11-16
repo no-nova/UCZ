@@ -17,6 +17,7 @@ import { testP180Sym2bit, testP180Sym5bit, testP180Planner } from './p180.test'
 import { testP243VerticalColumns, testP244SyncHighEntropy } from './p24.test'
 import { testManifoldUniversality } from './manifold.test'
 import { testDefaultProfileSurvivesPermutation, testStrictProfileInvariance } from './invariance.test'
+import { testConcurrencyAndChecksum } from './concurrency.test'
 import { testScientificInstruments } from './scientific.test'
 import { testEdgeCases } from './edge.test'
 import { MAX_INPUT_BYTES, MAX_SINGLE_CM_BYTES, MAX_OUTPUT_BYTES, shouldRunSingleCM } from '../src/lib/limits'
@@ -1294,6 +1295,7 @@ testP243VerticalColumns(); testP244SyncHighEntropy()
   }
   await testManifoldUniversality()
   await testStrictProfileInvariance()
+  await testConcurrencyAndChecksum()
   await testDefaultProfileSurvivesPermutation(); await testScientificInstruments(); await testEdgeCases()
   console.log('codec tests passed')
 }

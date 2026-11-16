@@ -247,7 +247,7 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   const version = c[3]
   // D4: `decompress` 只接受 1..22；解剖器过去接受任意版本，会把伪造的头当成
   // 正常容器渲染出来。
-  if (version < 1 || version > 24) throw new Error(`Unsupported container version ${version} (expected 1..24)`)
+  if (version < 1 || version > 25) throw new Error(`Unsupported container version ${version} (expected 1..25)`)
   const st = { p: 4 }
   let flags = 0
   // D6: 与 codec.ts:4646 对齐——v17/v18 只有 1 字节配置，v19+ 才是 uint16。

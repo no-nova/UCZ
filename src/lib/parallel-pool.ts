@@ -41,6 +41,10 @@ const JOB_TIMEOUT_MS = 10 * 60 * 1000
 
 let pool: Worker[] | null = null
 let shared: SharedArrayBuffer | null = null
+// Workers bind `workerData.sab` exactly once, so a pool is only reusable while the
+// SharedArrayBuffer it was spawned with is still the live one. Without this, a
+// second job with a different byteLength silently reads the previous job's data.
+let poolSab: SharedArrayBuffer | null = null
 // 未触发的看门狗定时器必须能被 `closePool()` 统一清掉，否则 10 分钟的定时器
 // 会一直把事件循环撑开（`--input-type=module -e` 这类一次性调用会挂住不退出）。
 const timers = new Set<ReturnType<typeof setTimeout>>()
@@ -130,9 +134,10 @@ export async function runParallelJobs(
   if (threads <= 1) return null
 
   share(data)
-  if (!pool || pool.length !== threads) {
+  if (!pool || pool.length !== threads || poolSab !== shared) {
     pool?.forEach(w => void w.terminate())
     pool = spawn(threads)
+    poolSab = shared
   }
   const buckets = lptAssign(loads, threads)
   const replies = new Array<JobReply>(jobs.length)
@@ -155,6 +160,7 @@ export async function closePool(): Promise<void> {
   const p = pool
   pool = null
   shared = null
+  poolSab = null
   for (const t of timers) clearTimeout(t)
   timers.clear()
   await Promise.all((p ?? []).map(w => w.terminate()))
