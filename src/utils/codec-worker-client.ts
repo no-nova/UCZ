@@ -1,14 +1,14 @@
 import type { CompressionLevel } from '../lib/codec'
 import type { CompressionOutput, ProgressCallback } from './compression-queue'
+import { restoreDirect, runDirect } from './codec-direct'
 
 export type WorkerFactory = () => Worker
 
-export function callCodecWorker(factory: WorkerFactory, type: 'run', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput>
-export function callCodecWorker(factory: WorkerFactory, type: 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback): Promise<Uint8Array>
-export function callCodecWorker(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput | Uint8Array> {
+function inWorker(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, level?: CompressionLevel): Promise<CompressionOutput | Uint8Array> {
   return new Promise((resolve, reject) => {
     let worker: Worker | undefined
     let settled = false
+    let gotProgress = false
     const finish = (error?: Error, output?: CompressionOutput | Uint8Array) => {
       if (settled) return
       settled = true
@@ -30,19 +30,53 @@ export function callCodecWorker(factory: WorkerFactory, type: 'run' | 'restore',
       worker.onmessage = event => {
         const value = event.data
         if (settled) return
-        if (value.type === 'progress') progress(value.msg, value.pct)
+        if (value.type === 'progress') { gotProgress = true; progress(value.msg, value.pct) }
         else if (type === 'run' && value.type === 'done') finish(undefined, value)
         else if (type === 'restore' && value.type === 'restored') finish(undefined, value.data)
         else if (value.type === 'aborted') abort()
         else if (value.type === 'error') finish(new Error(value.message || '后台线程失败'))
       }
-      worker.onerror = event => { event.preventDefault(); finish(new Error(event.message || '后台线程失败')) }
-      worker.onmessageerror = () => finish(new Error('后台线程消息无法读取'))
+      // A Blob/module Worker can fail to start at all (file://, strict CSP, no
+      // module-worker support). That surfaces as `onerror` with no message — the
+      // caller must not see "failed / skipped", it must get a real result.
+      worker.onerror = event => {
+        event.preventDefault()
+        const failure = new Error(gotProgress ? (event.message || '后台线程失败') : 'worker-unavailable')
+        ;(failure as Error & { workerUnavailable?: boolean }).workerUnavailable = !gotProgress
+        finish(failure)
+      }
+      worker.onmessageerror = () => finish(new Error(gotProgress ? '后台线程消息无法读取' : 'worker-unavailable'))
       if (signal.aborted) { abort(); return }
       const owned = data.byteOffset === 0 && data.byteLength === data.buffer.byteLength ? data : data.slice()
-      worker.postMessage({ type, data: owned, level: options?.level }, [owned.buffer as ArrayBuffer])
+      worker.postMessage({ type, data: owned, level }, [owned.buffer as ArrayBuffer])
     } catch (error) {
-      finish(error instanceof Error ? error : new Error(String(error)))
+      const e = error instanceof Error ? error : new Error(String(error))
+      // 构造 Worker 就抛错 = 这个环境根本没有 Worker 可用（file://、CSP）。
+      ;(e as Error & { workerUnavailable?: boolean }).workerUnavailable = true
+      finish(e)
     }
+  })
+}
+
+export function callCodecWorker(factory: WorkerFactory, type: 'run', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput>
+export function callCodecWorker(factory: WorkerFactory, type: 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback): Promise<Uint8Array>
+export function callCodecWorker(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput | Uint8Array> {
+  return inWorker(factory, type, data, signal, progress, options?.level)
+}
+
+/**
+ * 单文件 HTML 用入口：Worker 起不来时（file://、严格 CSP、不支持 module worker）
+ * 在主线程跑同一套代码，产物逐字节一致；真实的编解码错误仍然照原样抛出。
+ */
+export function callCodecWithFallback(factory: WorkerFactory, type: 'run', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput>
+export function callCodecWithFallback(factory: WorkerFactory, type: 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback): Promise<Uint8Array>
+export function callCodecWithFallback(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Array, signal: AbortSignal, progress: ProgressCallback, options?: { level?: CompressionLevel }): Promise<CompressionOutput | Uint8Array> {
+  const level = options?.level
+  const attempt = inWorker(factory, type, data, signal, progress, level) as Promise<CompressionOutput | Uint8Array>
+  return attempt.catch((error: unknown): CompressionOutput | Uint8Array | Promise<CompressionOutput> => {
+    if (signal.aborted) throw error
+    const unavailable = !!(error as { workerUnavailable?: boolean } | undefined)?.workerUnavailable
+    if (!unavailable) throw error
+    return type === 'run' ? runDirect(data, signal, progress, level) : restoreDirect(data)
   })
 }

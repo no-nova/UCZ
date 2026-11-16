@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { CompressionQueue, MAX_CONCURRENCY, completedTotals, type CompressionOutput, type CompressionSource } from '../src/utils/compression-queue'
-import { callCodecWorker } from '../src/utils/codec-worker-client'
+import { callCodecWithFallback, callCodecWorker } from '../src/utils/codec-worker-client'
 import { formatBytes } from '../src/utils/format-bytes'
 import { BatchResults } from '../src/components/BatchResults'
 import { MAX_INPUT_BYTES } from '../src/lib/limits'
@@ -168,6 +168,16 @@ test('worker client supports separate compression/restore requests, transfers on
   const restored = callCodecWorker(() => restoreWorker.asWorker(), 'restore', new Uint8Array([1]), new AbortController().signal, () => {})
   restoreWorker.emit({ type: 'restored', data: new Uint8Array([5, 6]) })
   fastDeepEqual(await restored, new Uint8Array([5, 6])); assert.equal(restoreWorker.terminated, 1)
+})
+
+test('main-thread fallback still compresses when no Worker can start (single-file builds)', async () => {
+  const data = new Uint8Array(8192)
+  for (let i = 0; i < data.length; i++) data[i] = (i * 31 + (i >> 4)) & 0xff
+  const out = await callCodecWithFallback(() => { throw new Error('construction failed') }, 'run', data, new AbortController().signal, () => {}, { level: 'fast' })
+  assert.equal(out.verified, true)
+  assert.ok(out.comp.container.length < data.length)
+  const back = await callCodecWithFallback(() => { throw new Error('construction failed') }, 'restore', out.comp.container, new AbortController().signal, () => {})
+  fastDeepEqual(back, data)
 })
 
 test('worker cancellation rejects instead of leaving an unresolved promise and ignores late messages', async () => {

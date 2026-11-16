@@ -113,7 +113,7 @@ export function BatchResults({ tasks, unit, selectedId, locked, onSelect, onCanc
               {isPending(task) && <div role="progressbar" aria-label={text.progress(task.name)} aria-valuenow={Math.round(task.progress)} aria-valuemin={0} aria-valuemax={100} className="mt-2 h-1 overflow-hidden rounded bg-white/10">
                 <div className="h-full bg-cyan-300 transition-all" style={{ width: `${task.progress}%` }} />
               </div>}
-              {lang === 'zh' && <p className="mt-1 break-words leading-relaxed text-slate-500">{task.message}</p>}
+              {task.message && <p className={`mt-1 break-words leading-relaxed ${task.status === 'error' ? 'text-rose-300' : 'text-slate-500'}`}>{task.message}</p>}
             </td>
             <td className="whitespace-nowrap px-3 py-4 text-right align-top tabular-nums">{output ? `${Math.round(output.tComp)} ms` : '—'}</td>
             <td className="py-4 pl-3 align-top">

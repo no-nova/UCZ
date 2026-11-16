@@ -15,7 +15,7 @@ import { DigramView, HilbertView, IsoView } from './components/Views'
 import { NcdPanel, ResidualPanel } from './components/Inspect'
 import { BatchResults } from './components/BatchResults'
 import { CompressionQueue, CONCURRENCY_CHOICES, isPending, type CompressionResult as Result } from './utils/compression-queue'
-import { callCodecWorker } from './utils/codec-worker-client'
+import { callCodecWithFallback } from './utils/codec-worker-client'
 import { formatBytes, type SizeUnit } from './utils/format-bytes'
 import { VERSION } from './version'
 
@@ -59,7 +59,7 @@ export default function App() {
   useEffect(() => { document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en' }, [lang])
   levelRef.current = level
   const [queue] = useState(() => new CompressionQueue(
-    (data, signal, progress) => callCodecWorker(createCodecWorker, 'run', data, signal, progress, { level: levelRef.current })
+    (data, signal, progress) => callCodecWithFallback(createCodecWorker, 'run', data, signal, progress, { level: levelRef.current })
         .then(out => ({ ...out, level: levelRef.current })),
     initialConcurrency(),
   ))
@@ -159,7 +159,7 @@ export default function App() {
     setStage({ msg: '…', pct: 0 })
     try {
       const data = await read()
-      const out = await callCodecWorker(createCodecWorker, 'restore', data, controller.signal,
+      const out = await callCodecWithFallback(createCodecWorker, 'restore', data, controller.signal,
         (msg, pct) => { if (!controller.signal.aborted) setStage({ msg, pct }) })
       if (!controller.signal.aborted) download(out, name)
     } catch (error) {

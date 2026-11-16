@@ -24,7 +24,7 @@ try {
 
   const ver = run(['--version'])
   assert.equal(ver.status, 0, `--version 失败: ${ver.stderr}`)
-  assert.equal(ver.stdout.trim(), 'UCZ v0.1.0-beta.2')
+  assert.equal(ver.stdout.trim(), 'UCZ v0.1.0-beta.3')
   const help = run(['--help'])
   assert.equal(help.status, 0, `--help 失败: ${help.stderr}`)
   assert.ok(/Usage:/.test(help.stdout) && /--version/.test(help.stdout))
@@ -72,7 +72,7 @@ try {
   symlinkSync(cli, link)
   const viaLink = spawnSync(process.execPath, [link, '--version'], { encoding: 'utf8' })
   assert.equal(viaLink.status, 0, `symlink --version 失败: ${viaLink.stderr}`)
-  assert.equal(viaLink.stdout.trim(), 'UCZ v0.1.0-beta.2', `symlink 入口未命中: ${JSON.stringify(viaLink.stdout)}`)
+  assert.equal(viaLink.stdout.trim(), 'UCZ v0.1.0-beta.3', `symlink 入口未命中: ${JSON.stringify(viaLink.stdout)}`)
 
   // 标志可以出现在任意位置。
   assert.equal(run(['compress', '-1', src, join(dir, 'flag-first.ucz')]).status, 0, '前置 -1 失败')
