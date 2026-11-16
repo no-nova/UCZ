@@ -4767,23 +4767,34 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
   // (specs, strides, bitmap, segment lengths) before a single output byte is
   // allocated.
   if (c[3] === 1) {
-    const out = new Uint8Array(n)
-    let w = 0
+    // Two passes: a descriptor is at least 2 bytes, so a header promising more
+    // records than there is room for is rejected before anything is allocated.
+    if (cnt > bodyEnd - st.p) throw new Error('容器数据被截断')
+    const ids: number[] = [], ss: number[] = [], rs: number[] = [], raws: number[] = [], pls: number[] = [], offs: number[] = []
+    let total = 0
     for (let k = 0; k < cnt; k++) {
-      if (st.p >= c.length) throw new Error('容器数据被截断')
+      if (st.p >= bodyEnd) throw new Error('容器数据被截断')
       const id = c[st.p++]
       if (id > ID.D16) throw new Error('旧容器包含未知编码器')
       let s = 1, r = 1
       if (id >= ID.DELTA) { s = getVar(c, st); r = getVar(c, st) }
       const rawLen = getVar(c, st), pl = getVar(c, st)
-      if (rawLen > n - w || pl > c.length - st.p) throw new Error('容器长度越界')
+      if (rawLen > n - total || pl > bodyEnd - st.p) throw new Error('容器长度越界')
       // P7-0：旧 v1 容器的 STORE 段必须原样拷贝——载荷长度与声明长度不符就是被
       // 截短/拼接过的数据，直接拒绝，别让 decodeSpec 悄悄补零。
       if (id === ID.STORE && pl !== rawLen) throw new Error('corrupt v1 store payload')
-      out.set(decodeSpec(c.subarray(st.p, st.p + pl), rawLen, { id, s, r }), w)
-      st.p += pl; w += rawLen
+      ids.push(id); ss.push(s); rs.push(r); raws.push(rawLen); pls.push(pl); offs.push(st.p)
+      total += rawLen
+      st.p += pl
     }
-    if (w !== n || st.p !== bodyEnd) throw new Error('长度校验失败')
+    if (total !== n || st.p !== bodyEnd) throw new Error('长度校验失败')
+    const out = new Uint8Array(n)
+    let w = 0
+    for (let k = 0; k < ids.length; k++) {
+      const off = offs[k]
+      out.set(decodeSpec(c.subarray(off, off + pls[k]), raws[k], { id: ids[k], s: ss[k], r: rs[k] }), w)
+      w += raws[k]
+    }
     if (tail) verifyCrc(c, bodyEnd, out)
     return out
   }

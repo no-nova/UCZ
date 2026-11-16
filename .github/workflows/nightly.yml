@@ -17,10 +17,10 @@ jobs:
       # matters most for a compressor, so it runs on a schedule even when no PR
       # touches the codec.
       - name: Historical container fixtures
-        run: npx tsx tests/p12.test.ts
+        run: node tests/run-module.mjs tests/p12.test.ts
       - name: Full suite with a single thread (serial/parallel equality)
         run: node tests/run.mjs
         env:
           UCZ_THREADS: '1'
       - name: Corrupted input + random input
-        run: npx tsx tests/edge.test.ts
+        run: node tests/run-module.mjs tests/edge.test.ts

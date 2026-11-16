@@ -206,8 +206,11 @@ async function cmdDecompress(args: ParsedArgs): Promise<void> {
   if (output === input) throw new Error('refusing to decompress in place (pass an explicit output path)')
   guardOverwrite(output, forceOf(args.flags))
   const container = new Uint8Array(readFileSync(input))
+  // `--max-output` bounds the *decompressed* size too — a container may legitimately
+  // be small and expand a lot, so the decode path needs the same ceiling.
+  const cap = applyBudgets(args).maxOutputBytes
   const t = performance.now()
-  const out = decompress(container)
+  const out = cap === undefined ? decompress(container) : decompress(container, undefined, cap)
   const ms = performance.now() - t
   writeOut(output, out)
   console.log(`  output ${out.length} B  time ${ms.toFixed(0)} ms -> ${output}`)

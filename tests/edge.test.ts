@@ -150,6 +150,33 @@ export async function testEdgeChecksumTrailer(): Promise<void> {
   await Promise.resolve()
 }
 
+
+/** Decoder budget + pre-allocation validation: a tiny malformed container must be
+ *  rejected before anything is allocated, and `maxOutput` must bound the decode. */
+export async function testEdgeDecodeBudgets(): Promise<void> {
+  const varint = (v: number): number[] => {
+    const o: number[] = []
+    while (v >= 0x80) { o.push((v & 0x7f) | 0x80); v >>>= 7 }
+    o.push(v)
+    return o
+  }
+  const ok = (await compressAdaptive(new TextEncoder().encode('budget check\n'.repeat(64)), undefined, { level: 'fast' })).container
+  mustThrow(() => decompress(ok, undefined, 1), '解压上限必须生效', /超过上限/)
+  fastDeepEqual(decompress(ok, undefined, ok.length * 8 + 4096), decompress(ok))
+
+  // v1 header claiming 64 MiB with a zero-length STORE payload: the descriptor
+  // table is validated first, so this throws in well under a millisecond.
+  const bogus = Uint8Array.from([0x55, 0x43, 0x5a, 1, ...varint(67108864), ...varint(1), 0, ...varint(67108864), ...varint(0)])
+  const t = performance.now()
+  mustThrow(() => decompress(bogus), '畸形容器必须被拒绝', /corrupt v1 store payload|长度/)
+  const ms = performance.now() - t
+  assert.ok(ms < 50, `pre-allocation validation took ${ms.toFixed(1)} ms (expected < 50 ms)`)
+
+  // A header promising more records than the body can hold is rejected up front.
+  const tooMany = Uint8Array.from([0x55, 0x43, 0x5a, 1, ...varint(1024), ...varint(1000), 0, 1, 1])
+  mustThrow(() => decompress(tooMany), '记录数越界必须被拒绝', /截断|长度/)
+}
+
 export async function testEdgeCases(): Promise<void> {
   await testEdgeTinyInputs()
   await testEdgeConstantAndNoise()
@@ -159,6 +186,7 @@ export async function testEdgeCases(): Promise<void> {
   await testEdgeWordPreBodyLenDos()
   await testEdgeInspectContainerBounds()
   await testEdgeChecksumTrailer()
+  await testEdgeDecodeBudgets()
 }
 
 /**
