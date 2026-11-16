@@ -1,0 +1,26 @@
+name: Nightly robustness
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  robustness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      # Historical formats must keep decoding: the fixture set is the asset that
+      # matters most for a compressor, so it runs on a schedule even when no PR
+      # touches the codec.
+      - name: Historical container fixtures
+        run: npx tsx tests/p12.test.ts
+      - name: Full suite with a single thread (serial/parallel equality)
+        run: node tests/run.mjs
+        env:
+          UCZ_THREADS: '1'
+      - name: Corrupted input + random input
+        run: npx tsx tests/edge.test.ts

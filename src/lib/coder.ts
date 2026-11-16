@@ -467,14 +467,16 @@ export interface ContainerModel {
   matchDistance: boolean
   /** v23: strict zero-prior profile — no bitmap scanline prior is inferred. */
   strictPriors: boolean
+  /** v24: the container ends with a CRC-32C of the decompressed payload. */
+  checksum: boolean
 }
 const LEGACY_CONTAINER_MODEL: Readonly<ContainerModel> = Object.freeze({
   maxTableBits: 21, matchTableBits: 20, textOn: true, resOn: true,
-  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false,
+  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false, checksum: false,
 })
 const V16_EXPERIMENTAL_MODEL: Readonly<ContainerModel> = Object.freeze({
   maxTableBits: 22, matchTableBits: 20, textOn: false, resOn: true,
-  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false,
+  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false, checksum: false,
 })
 let containerModel: Readonly<ContainerModel> | null = null
 /**
@@ -489,6 +491,15 @@ export function setStrictPriors(on: boolean): () => void {
   return () => { strictPriorsFlag = prev }
 }
 export function strictPriorsOn(): boolean { return strictPriorsFlag || (containerModel?.strictPriors ?? false) }
+
+let checksumFlag = false
+/** v24 integrity trailer: enabled per operation, recorded as container version 24. */
+export function setContainerChecksum(on: boolean): () => void {
+  const prev = checksumFlag
+  checksumFlag = on
+  return () => { checksumFlag = prev }
+}
+export function containerChecksumOn(): boolean { return checksumFlag || (containerModel?.checksum ?? false) }
 /** New encoders may try v20 transforms; old-container scopes may never decode them. */
 export function transformsV20Enabled(): boolean { return containerModel?.transformsV20 ?? true }
 let groupModelBytes = 0
@@ -522,7 +533,7 @@ export function encodingModelFlags(): number {
 
 /** Hard version split: v17 keeps its OWN old bit definitions and stream sizing. */
 export function withContainerModel<T>(version: number, flags: number, fn: () => T): T {
-  if (!Number.isInteger(version) || version < 1 || version > 23) throw Error('不支持的 UCZ 格式版本')
+  if (!Number.isInteger(version) || version < 1 || version > 24) throw Error('不支持的 UCZ 格式版本')
   if ((version >= 17) && (!Number.isInteger(flags) || flags < 0
     || flags > (version === 17 ? 63 : version === 18 ? 255 : version === 19 ? 0x7ff : version === 20 ? CM_FLAGS_MASK : version === 21 ? CM_FLAGS_MASK | V21_FLAG_CONTEXTS : V22_FLAGS_MASK)
     || (version === 21 && (!(flags & V21_FLAG_CONTEXTS) || !(flags & V20_FLAG_CM)))
@@ -543,12 +554,13 @@ export function withContainerModel<T>(version: number, flags: number, fn: () => 
     matchDistance: version >= 22 && !!(flags & V22_FLAG_MATCH_DISTANCE),
     binRecovery: version >= 20 && !!(flags & V20_FLAG_BIN_RECOVERY),
     strictPriors: version >= 23,
+    checksum: version >= 24,
     fixedMht4: version === 18 || version >= 20 || !!(flags & V19_FLAG_MHT4_20),
   } : version === 17 ? {
     maxTableBits: flags & 0x01 ? 22 : 21,
     matchTableBits: flags & 0x04 ? 21 : 20,
     textOn: !(flags & 0x02), resOn: !(flags & 0x08),
-    wordPreTextOff: !!(flags & 0x10), largeOnly: !!(flags & 0x20), groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false,
+    wordPreTextOff: !!(flags & 0x10), largeOnly: !!(flags & 0x20), groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false, checksum: false,
   } : version === 16 ? V16_EXPERIMENTAL_MODEL : LEGACY_CONTAINER_MODEL
   const prev = containerModel, prevGroup = groupModelBytes, prevProbe = probeDepth
   containerModel = model; groupModelBytes = 0; probeDepth = 0

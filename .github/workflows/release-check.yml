@@ -1,0 +1,35 @@
+name: Release check
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - name: Typecheck, worker, CLI, single-file HTML
+        run: |
+          npx tsc --noEmit
+          npm run check:worker
+          npm run build
+          npm run release:html
+      - name: Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ucz-single-html
+          path: |
+            dist/ucz-*.html
+            dist/ucz-*.html.sha256
+      - name: Install from the packed tarball
+        run: |
+          npm pack --silent
+          mkdir -p /tmp/install-check && cd /tmp/install-check
+          npm init -y >/dev/null
+          npm install "$GITHUB_WORKSPACE"/ucz-*.tgz --silent
+          node -e "const u=require('ucz'); if(!u.compressAdaptive) throw new Error('missing export')"

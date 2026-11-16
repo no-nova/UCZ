@@ -13,6 +13,33 @@ input stream itself. The only thing it is told is that the input is a sequence o
 
 ---
 
+
+### Integrity, budgets and determinism
+
+```bash
+ucz compress big.bin big.ucz --checksum          # v24: 4-byte CRC-32C of the payload
+ucz compress data.csv out.ucz --strict-zero-prior  # v23: no byte-class priors at all
+ucz decompress big.ucz --max-output 2000000000   # refuse to allocate more than this
+ucz compress big.bin out.ucz --time-budget 30 --threads 4 --memory-limit 4096
+```
+
+* **`--checksum`** appends a CRC-32C of the *decompressed* payload and tags the container
+  `v24`. Decoding verifies it and fails with `container content check failed (CRC-32C)`.
+  This detects **accidental corruption** (bit rot, truncated writes, bad transfers).
+  It is **not authentication**: an attacker can recompute the checksum after editing the
+  payload, and containers written without the flag (v1..v23) carry no content checksum at
+  all — the decoder cannot tell a tampered old container from a valid one.
+* **`--strict-zero-prior`** disables every prior that depends on byte *categories*
+  (ASCII/printable tables, x86 call detection, gradient/bit-plane/anchor candidates,
+  2-D scanline period). It is an ablation mode, not the default: on the reference corpora
+  it costs between +1.6 % and +62 % bytes for the same file.
+* **`--time-budget SECONDS`** returns the best plan found when the budget expires and marks
+  the result `budgetTruncated`; the container is still valid and still decodes.
+  **`--threads` / `--memory-limit`** cap workers (each 24-bit context table is ~640 MiB, so a
+  limit below 800 MiB is rejected). **`--max-output BYTES`** refuses an oversized container
+  (in the library: `maxOutputBytes`), and the decoder validates the whole header before it
+  allocates the output buffer.
+
 ## The thought experiment
 
 Most strong compressors are libraries of knowledge. `xz` knows LZ77 and range coding. `paq8px`

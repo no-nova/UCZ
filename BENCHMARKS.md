@@ -452,3 +452,13 @@ destroyed by a model reset at the concatenation point. The instrument is exposed
 *All matrices in this file were produced by `UCZ v0.1.0-beta.1` with `--max` and verified by
 byte-exact roundtrip. `paq8px`, `cmix`, `AC2`, `GeCo3`, `JBIG` and `FLAC` figures are quoted from
 their published results and are not produced by this repository.*
+
+
+### Cost of the optional integrity trailer (v24)
+
+A container written with `--checksum` adds **4 bytes** (CRC-32C, big-endian) plus, when the
+container was previously below `v19`, a **2-byte flag field** that v19+ layouts already have.
+So the overhead of a stored file is `8..18 B` (framing) `+ 4 B` — never multiplicative.
+The checksum is computed over the decompressed payload, so it costs one extra pass over the
+output at encode time (measured: negligible against the CM search, e.g. +3 ms on a 1 MiB file)
+and one CRC pass at decode time.

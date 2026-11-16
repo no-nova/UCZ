@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck-build:
+    name: typecheck + worker + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Worker bundle is in sync with src/lib/coder.ts
+        run: npm run check:worker
+      - name: CLI + library dist
+        run: npm run build
+      - name: Single-file Web build
+        run: npm run build:web
+
+  unit:
+    name: codec + CLI + UI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - name: UI tests
+        run: node tests/run-ui.mjs
+      - name: Codec suite (roundtrip, golden fixtures, edge cases, invariance)
+        run: node tests/run.mjs
+        env:
+          UCZ_THREADS: '2'
+      - name: Quick public benchmark (regression tripwire)
+        run: npm run bench:quick

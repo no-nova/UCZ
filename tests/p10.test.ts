@@ -68,9 +68,10 @@ export async function testP10() {
     // equally correct rejection. Keep one assertion per concern: an unsupported
     // VERSION must be rejected for being a version, and a missing v21 flag must be
     // rejected for being a flag configuration.
-    // v22 is supported since P17.1 (group match-distance bit) and v23 since P37.2
-    // (strict zero-prior profile), so the representative unsupported version is v24.
-    assert.throws(() => withContainerModel(24, 0, () => {}), /版本/)
+    // v22 is supported since P17.1 (group match-distance bit), v23 since P37.2 (strict
+    // zero-prior profile) and v24 since P37.5 (CRC-32C trailer), so the representative
+    // unsupported version is v25.
+    assert.throws(() => withContainerModel(25, 0, () => {}), /版本/)
     assert.throws(() => withContainerModel(21, 0, () => {}), /无效的 v21 模型配置/)
     assert.throws(() => withContainerModel(18, 0x84, () => {}), /v18/)
     assert.throws(() => withCMBlockSize(4 * MiB, () => { throw Error('scope restore') }), /scope restore/)
@@ -84,8 +85,8 @@ export async function testP10() {
     const original = Uint8Array.from({ length: e24.n }, (_, i) => pattern[i % pattern.length])
     assert.equal(sha(decompress(old)), e24.rawSha256)
     eq(decompress(old), original)
-    // v23 is the strict zero-prior profile (supported since P37.2); v24 tops out.
-    assert.throws(() => decompress(Uint8Array.of(85, 67, 90, 24, 0)), /版本/)
+    // v24 adds the CRC-32C trailer (supported since P37.5); v25 tops out.
+    assert.throws(() => decompress(Uint8Array.of(85, 67, 90, 25, 0)), /版本/)
     checks++
 
     // Actual large tables, but only 128 bytes are encoded. Explicit raw-model

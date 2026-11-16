@@ -10,7 +10,8 @@ import { fitMicroSeed, microFwd, microInv, microWeights, MICRO_SEED_BYTES } from
 import { encodePeeledTranspose, decodePeeledTranspose, encodePeeledAnchor, decodePeeledAnchor, inspectPeeledTranspose, inspectPeeledAnchor, type SubPeelInfo, type AnchorSubInfo } from './sub-peel'
 import { encodeAnchor, decodeAnchor, anchorRowCount, anchorPotential, MAX_ANCHOR_ROWS } from './anchor'
 import { analyze, detectAnchors, detectLagCandidates, detectRecordStride, detectWide16Lag, BLOCK, type Analysis, type Cls } from './analyze'
-import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, setStrictPriors, strictPriorsOn, type CostBins, type CMVariant, type Profile } from './coder'
+import { crc32c, crcTrailer, readCrcTrailer } from './container/crc32c'
+import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, setStrictPriors, strictPriorsOn, setContainerChecksum, containerChecksumOn, type CostBins, type CMVariant, type Profile } from './coder'
 import { wordPreFwdSampled, wordPreInv, dictHeaderLen, collapseWithDict, type WordPreResult } from './wordpre'
 const ENABLE_WORDPRE = true
 import { deltaFwd, deltaInv, medFwd, medInv, d16Fwd, d16Inv, bcjFwd, bcjInv, bcjMsbFwd, bcjMsbInv, wide16Fwd, wide16Inv, wordRowDelta, anchorFoldFwd, anchorFoldInv } from './transforms'
@@ -3061,7 +3062,7 @@ export function planHeader(n:number,segs:readonly PlanSegment[],groups:readonly 
   }
   const hasV15 = groups.some(g => g.v15)
   const flags = groups.reduce((f, g) => f | (g.modelFlags ?? payloadModelFlags(g.payload)) | (v20Spec(g.spec) ? V20_FLAG_TRANSFORMS : 0), 0)
-  const ver:number = strictPriorsOn() ? 23 : flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
+  const ver:number = containerChecksumOn() ? 24 : strictPriorsOn() ? 23 : flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
     :hasV15?15:groups.some(g=>g.spec.id===ID.WIDE_GRAD)?14:groups.some(g=>g.spec.id>=ID.TEXT_V3)?13:groups.some(g=>g.spec.id>=ID.TEXT_V2)?12:groups.some(g=>g.spec.id===ID.MICRO)?11:groups.some(g=>g.spec.id===ID.SUB_TRANSPOSE||g.spec.id===ID.SUB_ANCHOR)?10:groups.some(g=>g.spec.id===ID.PEEL)?9:groups.some(g=>g.spec.id===ID.ANCHOR_FOLD)?8:7
   const hdr:number[]=[0x55,0x43,0x5a,ver]
   if (ver >= 19) hdr.push(flags & 255, flags >>> 8)
@@ -3893,31 +3894,57 @@ function coalesceCompressedPlan(dataLen: number, cp: Compressed): Compressed {
   return { ...cp, container, overhead: hdr.length }
 }
 
+/** Append the v24 CRC-32C trailer of the *decompressed* payload. */
+function sealChecksum(comp: Compressed, raw: Uint8Array): Compressed {
+  const out = new Uint8Array(comp.container.length + 4)
+  out.set(comp.container)
+  out.set(crcTrailer(crc32c(raw)), comp.container.length)
+  const groups = retainedPlanGroups.get(comp.container)
+  if (groups) retainedPlanGroups.set(out, groups)
+  return { ...comp, container: out, overhead: comp.overhead + 4 }
+}
+
 export async function compressAdaptive(
   data: Uint8Array,
   onStage?: (msg: string, pct: number) => void,
-  options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel; strictZeroPrior?: boolean },
+  options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel; strictZeroPrior?: boolean; checksum?: boolean; timeBudgetMs?: number; maxOutputBytes?: number },
 ): Promise<Compressed> {
   const previousLevel = activeLevel
   activeLevel = options?.level ?? 'max'
   // v23 strict profile: every prior listed in PRIOR_REGISTRY.md is switched off
   // and the container version records it, so the decoder disables the same ones.
   const restoreStrict = setStrictPriors(!!options?.strictZeroPrior)
+  // v24：可选的内容完整性尾部（CRC-32C over the decompressed bytes）。默认关闭，
+  // 因此现有容器的字节序列完全不变；打开时版本号升到 24，解码端据此校验。
+  const restoreChecksum = setContainerChecksum(!!options?.checksum)
+  // Time budget: a cooperative deadline checked between planner stages. When it
+  // fires we keep the best plan produced so far and flag it, because "best within
+  // the budget" is not the same claim as "best of all candidates".
+  const deadline = options?.timeBudgetMs && options.timeBudgetMs > 0 ? Date.now() + options.timeBudgetMs : 0
+  const seal = (r: Compressed): Compressed => {
+    if (deadline && Date.now() >= deadline) (r as Compressed & { budgetTruncated?: boolean }).budgetTruncated = true
+    const out = containerChecksumOn() ? sealChecksum(r, data) : r
+    if (options?.maxOutputBytes !== undefined && out.container.length > options.maxOutputBytes) {
+      throw new Error(`输出 ${out.container.length} B 超过上限 ${options.maxOutputBytes} B`)
+    }
+    return out
+  }
   try {
     // Finish the unchanged P13.1 chooser, family/orphan/macro and WIDE guards FIRST.
     // New contexts cannot steer those heuristics or evict an old WORD-PRE winner.
     const baseline=await compressAdaptiveImpl(data,onStage,options)
     // P30.0：`fast` 档位直接返回基线计划。上下文锦标赛每组至少要一次整组真实编码
     // （15.B 上约 11 s），而它带来的是 0.1% 量级的收益 —— 这正是"用体积换时间"的定义。
-    if(options?.contextCandidates===false || !cmV20Tuning.enabled || pruningLevel()===2) return baseline
+    if(options?.contextCandidates===false || !cmV20Tuning.enabled || pruningLevel()===2) return seal(baseline)
     const chosen=await refineContextCandidates(data,baseline,{serial:!!options?.serial||!workerTuningMatchesDefaults()},onStage)
     // P30.0: `fast` 只做"基线 + 上下文锦标赛"两步；`balanced` 再多做两项
     // 收益最大、代价最小的结构细化（BCJ 合并、噪声凹槽切分），跳过 REC2/位平面。
     const pr = pruningLevel()
-    if (pr >= 2) return coalesceCompressedPlan(data.length,chosen)
+    if (deadline && Date.now() >= deadline) return seal(coalesceCompressedPlan(data.length,chosen))
+    if (pr >= 2) return seal(coalesceCompressedPlan(data.length,chosen))
     const coalescedBcj=refineBcjSegments(data,chosen)
     const carved=refineNoisePockets(data,coalescedBcj)
-    if (pr === 1) return coalesceCompressedPlan(data.length,carved)
+    if (pr === 1) return seal(coalesceCompressedPlan(data.length,carved))
     const upgraded=refineGroupCodecs(data,carved)
     // P37.2：严格档跳过递归残差与位平面——两者都按字节值做算术/位拆分。
     const rec2=strictPriorsOn()?upgraded:refineRec2(data,upgraded)
@@ -3952,12 +3979,12 @@ export async function compressAdaptive(
     if(data.length<131072 && pruningLevel()===0 && bp.segs.length===1 && bp.segs[0].spec.id===ID.TEXT_V3){
       try{
         const legacy=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'text',spec:{id:ID.TEXT,s:1,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
-        if(legacy.container.length<bp.container.length)return coalesceCompressedPlan(data.length,legacy)
+        if(legacy.container.length<bp.container.length)return seal(coalesceCompressedPlan(data.length,legacy))
       }catch{}
     }
-    return coalesceCompressedPlan(data.length,bp)
+    return seal(coalesceCompressedPlan(data.length,bp))
   }
-  finally { restoreStrict(); activeLevel = previousLevel; await closeNodePool() }
+  finally { restoreChecksum(); restoreStrict(); activeLevel = previousLevel; await closeNodePool() }
 }
 /** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
  * incompressible segments.
@@ -4714,7 +4741,7 @@ async function compressAdaptiveImpl(
 }
 
 export function decompress(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 23)
+  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 24)
     throw new Error('不是有效的 UCZ 容器（不支持的格式版本）')
   if (c[3] >= 17 && c.length < (c[3] >= 19 ? 6 : 5)) throw new Error(`v${c[3]} 配置字段被截断`)
   // Strict version dispatch: v19 uint16 + tiered mht4; v17/v18 keep old widths.
@@ -4723,15 +4750,24 @@ export function decompress(c: Uint8Array, onProgress?: (done: number, total: num
 }
 
 function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23)) throw new Error('不是有效的 UCZ 容器')
+  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23 && c[3] !== 24)) throw new Error('不是有效的 UCZ 容器')
   const st = { p: c[3] >= 19 ? 6 : c[3] >= 17 ? 5 : 4 }, n = getVar(c, st), cnt = getVar(c, st)
+  // v24 appends a 4-byte CRC-32C of the decompressed payload; everything below
+  // reads up to `bodyEnd` and the trailer is verified once the output exists.
+  const tail = c[3] >= 24 ? 4 : 0
+  const bodyEnd = c.length - tail
+  if (tail && c.length < tail + 6) throw new Error('容器被截断（缺少校验尾部）')
   if (!Number.isSafeInteger(n) || !Number.isSafeInteger(cnt) || cnt > n) throw new Error('无效的容器长度')
   // The output size comes from the (untrusted) header; refuse to allocate a
   // buffer larger than the caller allows before touching any payload bytes.
   if (!Number.isSafeInteger(maxOutput) || maxOutput < 0) throw new Error('无效的解压上限')
   if (n > maxOutput) throw new Error(`解压后长度 ${n} 超过上限 ${maxOutput} 字节`)
-  const out = new Uint8Array(n)
+  // Validation first, allocation second: the v1 body validates each record
+  // against the header as it goes, the v2+ body validates the whole group table
+  // (specs, strides, bitmap, segment lengths) before a single output byte is
+  // allocated.
   if (c[3] === 1) {
+    const out = new Uint8Array(n)
     let w = 0
     for (let k = 0; k < cnt; k++) {
       if (st.p >= c.length) throw new Error('容器数据被截断')
@@ -4747,7 +4783,8 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
       out.set(decodeSpec(c.subarray(st.p, st.p + pl), rawLen, { id, s, r }), w)
       st.p += pl; w += rawLen
     }
-    if (w !== n || st.p !== c.length) throw new Error('长度校验失败')
+    if (w !== n || st.p !== bodyEnd) throw new Error('长度校验失败')
+    if (tail) verifyCrc(c, bodyEnd, out)
     return out
   }
   const count = getVar(c, st)
@@ -4766,7 +4803,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // 次高位：该组载荷被 WORD-PRE 封装过（P4-2，独立于 v15 标记）。
     const wp = c[3] >= 15 && (rRaw & 0x4000) !== 0
     const contextCode=(rRaw & GROUP_CONTEXT_MASK) >>> GROUP_CONTEXT_SHIFT
-    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23)throw Error('旧容器包含 v21 组标记')
+    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23 && c[3]!==24)throw Error('旧容器包含 v21 组标记')
     const matchDist = !!(rRaw & GROUP_MATCH_DIST_BIT)
     // v22 owns bit 20; P17.7 adds the extended-context namespace bit at 21. Every
     // earlier version (and every pre-P17.7 v22 stream) has bit 21 clear, so the
@@ -4777,7 +4814,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // reinterpret the group's r as a larger value. Bit 21 is the P17.7 extended
     // context namespace, so it is legal from v21 on (and rejected below v21).
     if(c[3]===21 && (rRaw>0x3fffff || (rRaw&GROUP_MATCH_DIST_BIT)!==0 || ((rRaw&0x10000)!==0 && !v15)))throw Error('未知组标志位或缺少 APM 内核')
-    if(matchDist && c[3]!==22 && c[3]!==23)throw Error('旧容器包含 v22 组匹配模型标记')
+    if(matchDist && c[3]!==22 && c[3]!==23 && c[3]!==24)throw Error('旧容器包含 v22 组匹配模型标记')
     if(c[3]>=22 && rRaw>0x3fffff)throw Error('未知组标志位')
     const context=contextFromGroupBits(rRaw)
     const r = v15 || wp || context || matchDist ? rRaw & 0x3fff : rRaw
@@ -4791,7 +4828,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // CM profile constrain this bit.
     if(matchDist && (!cm20 || !((c[4]|(c[5]<<8))&V22_FLAG_MATCH_DISTANCE) || !matchDistProfileAllowed(id,context)))
       throw Error('v22 组匹配模型标记与规则不兼容')
-    if((id===ID.REC2||id===ID.BITPLANE) && ((c[3]!==21 && c[3]!==23) || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
+    if((id===ID.REC2||id===ID.BITPLANE) && ((c[3]!==21 && c[3]!==23 && c[3]!==24) || !cm20 || wp || context || !((c[4]|c[5]<<8)&V20_FLAG_TRANSFORMS) || s!==1 || (id===ID.REC2 ? r!==1 : (r!==BITPLANE_BYTE_CM && r!==BITPLANE_BIT_CM && r!==BITPLANE_PERIOD_CM))))throw Error('无效 REC2 组标记')
     gContext.push(context)
     gMatchDist.push(matchDist)
     g20.push(cm20)
@@ -4826,6 +4863,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
   }
   if (count) { if (!pending.length) throw new Error('空规则'); members[count - 1] = pending }
   st.p += Math.ceil(bit / 8)
+  const out = new Uint8Array(n)
   let completed = 0
   for (let gi = 0; gi < count; gi++) {
     const pl = payloadLens[gi]
@@ -4852,8 +4890,13 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     completed += indices.reduce((sum, i) => sum + lengths[i], 0)
     onProgress?.(completed, n)
   }
-  if (st.p !== c.length) throw new Error('容器尾部存在多余数据')
+  if (st.p !== bodyEnd) throw new Error('容器尾部存在多余数据')
+  if (tail) verifyCrc(c, bodyEnd, out)
   return out
+}
+
+function verifyCrc(c: Uint8Array, bodyEnd: number, out: Uint8Array): void {
+  if (readCrcTrailer(c, bodyEnd) !== crc32c(out)) throw new Error('容器内容校验失败（CRC-32C 不匹配）')
 }
 
 // ---------- 对照基线 ----------

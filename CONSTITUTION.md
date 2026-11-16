@@ -119,3 +119,14 @@ An amendment requires: (a) a written first-principles justification, (b) full-fi
 evidence on the standard corpus, (c) permutation and lossless verification, and
 (d) an explicit statement of any article that is being narrowed. Silent exceptions
 are unconstitutional.
+
+
+## Integrity is not authentication
+
+`--checksum` (container `v24`) stores a CRC-32C of the decompressed payload. Its purpose is
+to catch **accidental** damage and to make "silent wrong output" impossible for new
+containers. It provides **no** authenticity: a CRC is linear and unkeyed, so anyone who
+modifies the payload can recompute it. Containers written before `v24` carry no content
+checksum, and the decoder must keep accepting them — that gap is documented, not hidden.
+Anything that needs real tamper resistance belongs on top of UCZ (a signed envelope), not
+inside the format.

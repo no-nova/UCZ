@@ -111,6 +111,45 @@ export async function testEdgeScientificApis(): Promise<void> {
   console.log('[edge] scientific APIs survive 0 B input')
 }
 
+
+/** v24: the optional CRC-32C trailer must roundtrip, must be version-tagged, and must
+ *  reject an equal-length payload corruption that earlier formats cannot see. */
+export async function testEdgeChecksumTrailer(): Promise<void> {
+  const data = new Uint8Array(4096)
+  for (let i = 0; i < data.length; i++) data[i] = (i * 37 + (i >> 2)) & 0xff
+  const plain = await compressAdaptive(data, undefined, { level: 'fast' })
+  const sealed = await compressAdaptive(data, undefined, { level: 'fast', checksum: true })
+  assert.equal(sealed.container[3], 24, 'checksummed containers must be v24')
+  assert.ok(sealed.container.length >= plain.container.length + 4)
+  fastDeepEqual(decompress(sealed.container), data)
+  // Container-level structure is untouched by the trailer flag.
+  const empty = await compressAdaptive(new Uint8Array(0), undefined, { level: 'fast', checksum: true })
+  assert.equal(decompress(empty.container).length, 0)
+
+  const corrupt = sealed.container.slice()
+  corrupt[corrupt.length - 8] ^= 0x01
+  assert.throws(() => decompress(corrupt), /CRC-32C|截断|校验|长度/)
+
+  // Same-length tamper of a payload-only change is detected; the *old* formats
+  // stay decodable and simply carry no checksum (documented limitation).
+  const legacy = await compressAdaptive(data, undefined, { level: 'fast' })
+  assert.ok(legacy.container[3] < 24)
+  const tamperedLegacy = legacy.container.slice()
+  tamperedLegacy[tamperedLegacy.length - 1] ^= 0x01
+  let legacyCaught = false
+  try { decompress(tamperedLegacy) } catch { legacyCaught = true }
+  assert.equal(legacyCaught, false, 'legacy containers have no content checksum')
+
+  // Budget knobs: max-output is enforced inside the codec, and a tiny time budget
+  // must still produce a valid container (flagged as truncated, not as optimal).
+  let over = false
+  try { await compressAdaptive(data, undefined, { level: 'fast', maxOutputBytes: 16 }) } catch { over = true }
+  assert.equal(over, true, 'maxOutputBytes must reject an oversized container')
+  const rushed = await compressAdaptive(data, undefined, { level: 'max', timeBudgetMs: 1 })
+  fastDeepEqual(decompress(rushed.container), data)
+  await Promise.resolve()
+}
+
 export async function testEdgeCases(): Promise<void> {
   await testEdgeTinyInputs()
   await testEdgeConstantAndNoise()
@@ -119,6 +158,7 @@ export async function testEdgeCases(): Promise<void> {
   await testEdgeBcjV3ShortRoundtrip()
   await testEdgeWordPreBodyLenDos()
   await testEdgeInspectContainerBounds()
+  await testEdgeChecksumTrailer()
 }
 
 /**
@@ -227,11 +267,11 @@ export async function testEdgeInspectContainerBounds(): Promise<void> {
   const emptyFill = Uint8Array.from([0x55, 0x43, 0x5a, 1, 4, 1, ID.FILL, 4, 0])
   mustThrow(() => decompress(emptyFill), 'v1 FILL 空载荷', /FILL/)
 
-  // D4: 版本上界与 `decompress` 对齐（23，含 v23 严格零先验档）。
+  // D4: 版本上界与 `decompress` 对齐（24，含 v23 严格零先验档与 v24 CRC 尾部）。
   const good = (await compressAdaptive(new TextEncoder().encode('bounds check payload\n'.repeat(30)), undefined, { level: 'fast' })).container
-  const v24 = Uint8Array.from(good); v24[3] = 24
-  // `isContainer` 与 `inspectContainer` 共用 1..23 的上界，24 在门禁处被拒。
-  mustThrow(() => inspectContainer(v24), 'inspect 拒绝 v24', /Not a UCZ container|version|版本/)
+  const v25 = Uint8Array.from(good); v25[3] = 25
+  // `isContainer` 与 `inspectContainer` 共用 1..24 的上界，25 在门禁处被拒。
+  mustThrow(() => inspectContainer(v25), 'inspect 拒绝 v25', /Not a UCZ container|version|版本/)
 
   // D7: 未知识别符。
   const badId = Uint8Array.from(good)

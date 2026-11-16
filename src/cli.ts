@@ -60,10 +60,11 @@ function english(message: string): string {
 interface ParsedArgs {
   flags: Set<string>
   positionals: string[]
+  values: Map<string, string>
   mode?: string
 }
 
-const VALUE_FLAGS = new Set(['--mode'])
+const VALUE_FLAGS = new Set(['--mode', '--threads', '--memory-limit', '--time-budget', '--max-output'])
 
 /**
  * Parse flags in any position: `ucz compress -1 in.txt`, `ucz inspect --json a`,
@@ -74,6 +75,7 @@ const VALUE_FLAGS = new Set(['--mode'])
 function parseArgs(argv: string[]): ParsedArgs {
   const flags = new Set<string>()
   const positionals: string[] = []
+  const values = new Map<string, string>()
   let mode: string | undefined
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
@@ -86,11 +88,23 @@ function parseArgs(argv: string[]): ParsedArgs {
       continue
     }
     if (a.startsWith('--mode=')) { mode = a.slice('--mode='.length); continue }
-    if (VALUE_FLAGS.has(a)) continue
+    if (VALUE_FLAGS.has(a)) {
+      const v = argv[i + 1]
+      if (v === undefined || v.startsWith('-')) throw new Error(`${a} needs a value`)
+      values.set(a, v)
+      i++
+      continue
+    }
+    if ([...VALUE_FLAGS].some(f => a.startsWith(`${f}=`))) {
+      const f = [...VALUE_FLAGS].find(x => a.startsWith(`${x}=`))!
+      values.set(f, a.slice(f.length + 1))
+      continue
+    }
     if (a.startsWith('-') && a !== '-') {
       if (a === '-1' || a === '-2' || a === '-3' || a === '-f' || a === '-v' || a === '-h'
         || a === '--fast' || a === '--balanced' || a === '--max' || a === '--force'
-        || a === '--json' || a === '--no-compress' || a === '--version' || a === '--help') {
+        || a === '--json' || a === '--no-compress' || a === '--version' || a === '--help'
+        || a === '--checksum' || a === '--strict-zero-prior') {
         flags.add(a)
         continue
       }
@@ -101,7 +115,40 @@ function parseArgs(argv: string[]): ParsedArgs {
   if (mode !== undefined && mode !== 'cm' && mode !== 'container') {
     throw new Error(`invalid --mode '${mode}' (expected cm or container)`)
   }
-  return { flags, positionals, mode }
+  if (mode !== undefined && values.has('--mode')) mode = values.get('--mode')
+  if (values.has('--mode') && values.get('--mode') !== 'cm' && values.get('--mode') !== 'container') {
+    throw new Error(`invalid --mode '${values.get('--mode')}' (expected cm or container)`)
+  }
+  return { flags, positionals, values, mode }
+}
+
+function intValue(args: ParsedArgs, flag: string): number | undefined {
+  const raw = args.values.get(flag)
+  if (raw === undefined) return undefined
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < 0 || !Number.isInteger(n)) throw new Error(`${flag} needs a non-negative integer (got '${raw}')`)
+  return n
+}
+
+/**
+ * Budget knobs. They never change the format: they only bound how much search
+ * the planner is allowed to do, plus which inputs we refuse outright. When the
+ * time budget cuts the search short the result is "best within budget", not
+ * "best of all candidates" — the CLI says so on stdout.
+ */
+function applyBudgets(args: ParsedArgs): { timeBudgetMs?: number; maxOutputBytes?: number } {
+  const threads = intValue(args, '--threads')
+  const memMiB = intValue(args, '--memory-limit')
+  const timeSec = intValue(args, '--time-budget')
+  const maxOut = intValue(args, '--max-output')
+  if (memMiB !== undefined && memMiB < 800) throw new Error('--memory-limit must be at least 800 MiB (a single 24-bit model is ~640 MiB)')
+  let budgetThreads = threads
+  if (memMiB !== undefined) {
+    const byMemory = Math.max(1, Math.floor(memMiB / 640))
+    budgetThreads = budgetThreads === undefined ? byMemory : Math.min(budgetThreads, byMemory)
+  }
+  if (budgetThreads !== undefined) process.env.UCZ_THREADS = String(Math.max(1, budgetThreads))
+  return { timeBudgetMs: timeSec === undefined ? undefined : Math.round(timeSec * 1000), maxOutputBytes: maxOut }
 }
 
 function levelOf(flags: Set<string>): CompressionLevel {
@@ -129,10 +176,19 @@ async function cmdCompress(args: ParsedArgs): Promise<void> {
   const lvl = levelOf(args.flags)
   // Fail before spending minutes on a compression we would refuse to write.
   guardOverwrite(output, forceOf(args.flags))
+  const budgets = applyBudgets(args)
   const raw = new Uint8Array(readFileSync(input))
   const t = performance.now()
-  const enc = await compressAdaptive(raw, undefined, { level: lvl })
+  const enc = await compressAdaptive(raw, undefined, {
+    level: lvl,
+    checksum: args.flags.has('--checksum'),
+    strictZeroPrior: args.flags.has('--strict-zero-prior'),
+    ...budgets,
+  })
   const ms = performance.now() - t
+  if (budgets.maxOutputBytes !== undefined && enc.container.length > budgets.maxOutputBytes) {
+    throw new Error(`output ${enc.container.length} B exceeds --max-output ${budgets.maxOutputBytes} B`)
+  }
   writeOut(output, enc.container)
   const ratio = raw.length === 0 ? 1 : raw.length / enc.container.length
   const bpb = raw.length === 0 ? 0 : (enc.container.length * 8) / raw.length
