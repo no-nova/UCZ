@@ -237,6 +237,9 @@ node dist/cli.js ncd a.csv b.csv c.csv       # distance matrix
 # Web workbench (local)
 npm run build:web && npx vite preview --outDir dist/web
 
+# Release artifact: one self-contained HTML file (no server, no sibling files)
+npm run release:html   # -> dist/ucz-v0.1.0-beta.1.html + .sha256
+
 # Programmatic API
 node --input-type=module -e "
   import { compressAdaptive, decompress } from './dist/index.js'

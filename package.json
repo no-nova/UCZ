@@ -34,6 +34,7 @@
     "cli": "node dist/cli.js",
     "inspect": "node dist/cli.js inspect",
     "build:web": "vite build",
+    "release:html": "npm run build:web && node scripts/package-release.mjs",
     "bench:quick": "node scripts/bench-public.mjs",
     "prepack": "npm run build"
   },

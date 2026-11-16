@@ -214,6 +214,9 @@ node dist/cli.js ncd a.csv b.csv c.csv       # 距离矩阵
 # 网页工作台（本地）
 npm run build:web && npx vite preview --outDir dist/web
 
+# 发布产物：单个自包含 HTML 文件（无需服务器、无同级文件依赖）
+npm run release:html   # -> dist/ucz-v0.1.0-beta.1.html + .sha256
+
 # 作为库调用
 node --input-type=module -e "
   import { compressAdaptive, decompress } from './dist/index.js'
