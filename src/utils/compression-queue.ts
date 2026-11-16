@@ -5,6 +5,8 @@ import { formatBytes } from './format-bytes'
 
 export interface CompressionOutput {
   data: Uint8Array
+  /** 产生这份结果的规划档位（Web GUI 的详情卡片要显示"实际用的档位"）。 */
+  level?: 'fast' | 'balanced' | 'max'
   comp: Compressed
   verified: boolean
   tComp: number

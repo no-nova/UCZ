@@ -41,6 +41,9 @@ const JOB_TIMEOUT_MS = 10 * 60 * 1000
 
 let pool: Worker[] | null = null
 let shared: SharedArrayBuffer | null = null
+// 未触发的看门狗定时器必须能被 `closePool()` 统一清掉，否则 10 分钟的定时器
+// 会一直把事件循环撑开（`--input-type=module -e` 这类一次性调用会挂住不退出）。
+const timers = new Set<ReturnType<typeof setTimeout>>()
 
 function share(data: Uint8Array): SharedArrayBuffer {
   if (!shared || shared.byteLength !== data.byteLength) {
@@ -54,7 +57,10 @@ function spawn(count: number): Worker[] {
   const sab = shared!
   const workers: Worker[] = []
   for (let i = 0; i < count; i++) {
-    workers.push(new Worker(workerCode, { eval: true, workerData: { sab } }))
+    // `execArgv: []`：worker 会继承主进程的 `process.execArgv`，当调用方用
+    // `node --input-type=module -e ...` 启动时，CJS worker 包会因为
+    // `--input-type=module` 而崩在 `require is not defined`。
+    workers.push(new Worker(workerCode, { eval: true, execArgv: [], workerData: { sab } }))
   }
   return workers
 }
@@ -66,15 +72,19 @@ function runBatch(worker: Worker, batch: JobPayload[]): Promise<JobReply[]> {
     let i = 0
     let timer: ReturnType<typeof setTimeout> | null = null
     const cleanup = () => {
-      worker.off('message', onMsg); worker.off('error', onErr)
-      if (timer) { clearTimeout(timer); timer = null }
+      worker.off('message', onMsg); worker.off('error', onErr); worker.off('exit', onExit)
+      if (timer) { clearTimeout(timer); timers.delete(timer); timer = null }
     }
     const fail = (e: Error) => { cleanup(); reject(e) }
     // 每个任务都有独立的看门狗：worker 崩溃或在极端输入上卡住时，
     // 批不会永远悬挂（悬挂会让整个压缩停在等 Promise 上）。
     const armWatchdog = (payload: JobPayload) => {
-      if (timer) clearTimeout(timer)
+      if (timer) { clearTimeout(timer); timers.delete(timer) }
       timer = setTimeout(() => fail(new Error(`并行任务超时（${payload.kind}）`)), JOB_TIMEOUT_MS)
+      // 不让看门狗单独把进程钉住：真正的超时仍然生效，但没有挂起任务时它不该
+      // 阻止 Node 退出（10 分钟的空等就是这里来的）。
+      timer.unref?.()
+      timers.add(timer)
     }
     const dispatch = () => {
       if (i >= batch.length) { cleanup(); resolve(out); return }
@@ -83,16 +93,20 @@ function runBatch(worker: Worker, batch: JobPayload[]): Promise<JobReply[]> {
       worker.postMessage(payload)
     }
     const onMsg = (reply: JobReply & { error?: string }) => {
-      if (timer) { clearTimeout(timer); timer = null }
+      if (timer) { clearTimeout(timer); timers.delete(timer); timer = null }
       if (reply && reply.error) { fail(new Error(reply.error)); return }
       out.push(reply); i++
       dispatch()
     }
     const onErr = (e: Error) => fail(e)
+    // worker 正常退出（例如被 closePool 或外部 kill 掉）时不能把批悬挂在
+    // 一个永远等不到回复的 Promise 上。
+    const onExit = (code: number) => { if (i < batch.length) fail(new Error(`并行 worker 提前退出（code=${code}）`)) }
     // 先挂监听再派发第一条：反过来的话，worker 回复可能在监听注册前就到达，
     // 消息会丢失并让批永远等待（这正是之前 xml 卡住十几分钟的原因）。
     worker.on('message', onMsg)
     worker.on('error', onErr)
+    worker.on('exit', onExit)
     dispatch()
   })
 }
@@ -141,5 +155,7 @@ export async function closePool(): Promise<void> {
   const p = pool
   pool = null
   shared = null
+  for (const t of timers) clearTimeout(t)
+  timers.clear()
   await Promise.all((p ?? []).map(w => w.terminate()))
 }

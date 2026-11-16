@@ -14,7 +14,6 @@
     "bench": "node scripts/run-bench.mjs",
     "diag:p9": "node scripts/diag/run-p9.mjs",
     "test:p9-recovery": "node --test tests/p9-recovery.test.mjs",
-    "prebuild": "node scripts/build-worker-code.mjs --check",
     "pretest:codec": "node scripts/build-worker-code.mjs --check",
     "test:p9-format": "node tests/run-p9-format.mjs",
     "test:p9-macro": "node tests/run-p9-macro.mjs",
@@ -31,16 +30,14 @@
     "test:p12-diagnostics": "node --test tests/p122-diagnostics.test.mjs",
     "bench:corpus": "node scripts/run-bench.mjs",
     "bench:silesia": "node scripts/run-bench.mjs --corpus .diag-data/corpus --out bench-out/silesia --baseline",
-    "bench:aitdcc": "node scripts/run-bench.mjs --corpus /home/user/Downloads/AITDCC --out bench-out/aitdcc",
-    "cli": "tsx src/cli.ts",
-    "inspect": "tsx src/cli.ts inspect",
+    "bench:aitdcc": "node scripts/run-bench.mjs --corpus \"${UCZ_CORPUS:-../corpus/text}\" --out bench-out/aitdcc",
+    "cli": "node dist/cli.js",
+    "inspect": "node dist/cli.js inspect",
     "build:web": "vite build",
-    "bench:quick": "node scripts/bench-public.mjs"
+    "bench:quick": "node scripts/bench-public.mjs",
+    "prepack": "npm run build"
   },
-  "dependencies": {
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@tailwindcss/vite": "4.1.17",
     "@types/node": "22.19.17",
@@ -48,6 +45,8 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
     "esbuild": "0.27.7",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
     "vite": "7.3.2",
@@ -57,10 +56,28 @@
     "ucz": "./dist/cli.js"
   },
   "files": [
-    "dist",
-    "README.md"
+    "dist/cli.js",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/types",
+    "LICENSE",
+    "README.md",
+    "README.zh-CN.md",
+    "BENCHMARKS.md",
+    "CONSTITUTION.md"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "license": "MPL-2.0"
+  "license": "MPL-2.0",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

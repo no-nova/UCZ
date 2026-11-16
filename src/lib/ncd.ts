@@ -62,6 +62,16 @@ function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
   return out
 }
 
+/** Byte-exact identity: `d(x, x) = 0` must hold for the metric axioms. */
+function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
+  return true
+}
+
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v))
+}
 
 function printableRatio(d: Uint8Array): number {
   if (!d.length) return 0
@@ -146,7 +156,17 @@ export async function computeNCD(x: Uint8Array, y: Uint8Array, options?: NcdOpti
   if (options?.mode === 'container') {
     const level = options?.level ?? 'fast'
     const enc = async (d: Uint8Array) => (await compressAdaptive(d, undefined, { level })).container.length
-    const cx = await enc(x), cy = await enc(y), cxy = await enc(concat(x, y)), cyx = await enc(concat(y, x))
+    const cx = await enc(x), cy = await enc(y)
+    // 同一性在容器模式下也必须是精确的 0：否则 `C(x||x) - C(x)` 里的头部
+    // 开销会把 d(x, x) 抬到 0.003 这类"看似很小但违反度量公理"的值。
+    if (sameBytes(x, y)) {
+      return {
+        cx, cy, cxy: cx, cyx: cx,
+        conditionalYGivenX: 0, conditionalXGivenY: 0,
+        ncd: 0, profile, mode, alignedStride: 0, windowBytes: Math.max(x.length, y.length),
+      }
+    }
+    const cxy = await enc(concat(x, y)), cyx = await enc(concat(y, x))
     const ncd = Math.max(0, (Math.min(cxy, cyx) - Math.min(cx, cy)) / Math.max(cx, cy))
     return {
       cx, cy, cxy, cyx,
@@ -168,16 +188,32 @@ export async function computeNCD(x: Uint8Array, y: Uint8Array, options?: NcdOpti
   const axy = concat(ax, ay), ayx = concat(ay, ax)
   const cx = cmCost(ax, profile)
   const cy = cmCost(ay, profile)
+  void axy; void ayx
+  // Exact identity is a metric axiom, not an estimate: identical inputs carry no
+  // information about each other beyond themselves.
+  if (sameBytes(ax, ay)) {
+    return {
+      cx, cy, cxy: 0, cyx: 0,
+      conditionalYGivenX: 0, conditionalXGivenY: 0,
+      ncd: 0, profile, mode, alignedStride, windowBytes: ax.length,
+    }
+  }
   const cxy = condCost(ax, ay, profile)
   const cyx = condCost(ay, ax, profile)
-  void axy; void ayx
-  // 距离 = 两个方向上"条件代价 / 冷启动代价"的较小者，天然落在 [0, 1]：
-  // 完全无关时 y 在 x 之后并不更便宜（比值 ≈ 1），共享结构时 << 1。
-  const ncd = Math.max(0, Math.min(1, Math.min(cxy / Math.max(cy, 1), cyx / Math.max(cx, 1))))
+  // 距离 = 两个方向上"条件代价 / 冷启动代价"的较小者。
+  // 冷启动代价里含一个**自我更新下限**（同一段字节再喂一遍仍然要花 r_self · C），
+  // 直接拿比值当距离会把 r_self ≈ 0.06–0.18 加成"最小距离"，因此用两份自身的
+  // 条件比值作为基线扣掉：完全无关 ≈ 1，共享结构 << 1，自身 = 0。
+  const selfX = condCost(ax, ax, profile) / Math.max(cx, 1)
+  const selfY = condCost(ay, ay, profile) / Math.max(cy, 1)
+  const floor = Math.max(0, Math.min(selfX, selfY, 0.9))
+  const r = Math.min(cxy / Math.max(cy, 1), cyx / Math.max(cx, 1))
+  const ncd = clamp01((r - floor) / Math.max(1 - floor, 1e-6))
   return {
     cx, cy, cxy, cyx,
-    conditionalYGivenX: Math.max(0, cxy),
-    conditionalXGivenY: Math.max(0, cyx),
+    // 统一用字节报告：CM 代价按 bit 累加，容器代价本身就是字节。
+    conditionalYGivenX: Math.max(0, cxy / 8),
+    conditionalXGivenY: Math.max(0, cyx / 8),
     ncd, profile, mode, alignedStride, windowBytes: ax.length,
   }
 }
@@ -191,12 +227,19 @@ export async function computeNCDMatrix(
   const matrix: number[][] = Array.from({ length: n }, () => new Array(n).fill(0))
   const costs = new Array(n).fill(0)
   // 单项成本只算一次：C(x) 与 C(y) 就是单项编码长度。
+  const floors = new Array(n).fill(0)
   const single = async (i: number): Promise<number> => {
     if (costs[i]) return costs[i]
     const d = items[i].data
-    costs[i] = mode === 'container'
-      ? (await compressAdaptive(d, undefined, { level: options?.level ?? 'fast' })).container.length
-      : cmCost(representative(d, maxBytes), pairProfile(d, d))
+    if (mode === 'container') {
+      costs[i] = (await compressAdaptive(d, undefined, { level: options?.level ?? 'fast' })).container.length
+      return costs[i]
+    }
+    const w = representative(d, maxBytes)
+    const prof = pairProfile(d, d)
+    costs[i] = cmCost(w, prof)
+    // 每项自身的"重复学习下限"，用于扣掉冷启动基线（见 computeNCD）。
+    floors[i] = condCost(w, w, prof) / Math.max(costs[i], 1)
     return costs[i]
   }
   const maxBytes = options?.maxBytes ?? 32768
@@ -208,7 +251,11 @@ export async function computeNCDMatrix(
       ? options.profile
       : printableRatio(a) >= 0.85 && printableRatio(b) >= 0.85 ? 'text' : 'bin'
   const pairCost = async (a: Uint8Array, b: Uint8Array, reverse: boolean): Promise<number> => {
-    if (mode === 'container') return (await compressAdaptive(concat(a, b), undefined, { level: options?.level ?? 'fast' })).container.length
+    if (mode === 'container') {
+      // `reverse` 必须生效：C(b||a) 与 C(a||b) 是两个不同的量。
+      const joined = reverse ? concat(b, a) : concat(a, b)
+      return (await compressAdaptive(joined, undefined, { level: options?.level ?? 'fast' })).container.length
+    }
     const s = alignManifold ? commonStride(a, b) : 0
     const wa = align(representative(a, maxBytes), s), wb = align(representative(b, maxBytes), s)
     // 条件代价的比值：反向遍历即可得到 C(x|M_y)/C(x)。
@@ -217,10 +264,23 @@ export async function computeNCDMatrix(
   for (let i = 0; i < n; i++) await single(i)
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      const cxy = await pairCost(items[i].data, items[j].data, false)
-      const cyx = await pairCost(items[i].data, items[j].data, true)
-      // cxy/cyx 已经是 C(y|M_x) 与 C(x|M_y) 的绝对 bit 代价，直接除以各自的冷启动代价。
-      const d = Math.max(0, Math.min(1, Math.min(cxy / Math.max(costs[j], 1), cyx / Math.max(costs[i], 1))))
+      const a = items[i].data, b = items[j].data
+      if (sameBytes(representative(a, maxBytes), representative(b, maxBytes))) {
+        matrix[i][j] = 0; matrix[j][i] = 0
+        continue
+      }
+      const cxy = await pairCost(a, b, false)
+      const cyx = await pairCost(a, b, true)
+      let d: number
+      if (mode === 'container') {
+        // 容器长度是绝对值，不是条件代价：用两个方向的拼接长度与单项长度做
+        // 标准 NCD，否则两个完全相同的文件会因为 cxy/cy ≈ 2 而报 1.0000。
+        d = clamp01((Math.min(cxy, cyx) - Math.min(costs[i], costs[j])) / Math.max(costs[i], costs[j], 1))
+      } else {
+        const raw = Math.min(cxy / Math.max(costs[j], 1), cyx / Math.max(costs[i], 1))
+        const floor = Math.max(0, Math.min(floors[i] || 0, floors[j] || 0, 0.9))
+        d = clamp01((raw - floor) / Math.max(1 - floor, 1e-6))
+      }
       matrix[i][j] = d
       matrix[j][i] = d
     }
@@ -239,7 +299,7 @@ export function formatNCDMatrixReport(res: NCDMatrixResult): string {
   out.push('=== UCZ Zero-Prior NCD Distance Matrix ===')
   out.push(`${''.padEnd(w)}  ${res.names.map((_, i) => String(i).padStart(7)).join(' ')}`)
   res.matrix.forEach((row, i) => {
-    out.push(`${res.names[i].padEnd(w)}  ${row.map(v => (i === 0 && v === 0 ? '      ·' : v.toFixed(4).padStart(7))).join(' ')}`)
+    out.push(`${res.names[i].padEnd(w)}  ${row.map((v, j) => (i === j ? ' 0.0000' : v.toFixed(4).padStart(7))).join(' ')}`)
   })
   out.push('')
   out.push('Nearest neighbour:')

@@ -54,9 +54,13 @@ export default function App() {
   const [level, setLevel] = useState<CompressionLevel>('max')
   // The queue is created once, so the executor reads the tier through a ref.
   const levelRef = useRef<CompressionLevel>('max')
+  // The document language must follow the UI language so screen readers and
+  // hyphenation do not stay on the initial zh-CN.
+  useEffect(() => { document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en' }, [lang])
   levelRef.current = level
   const [queue] = useState(() => new CompressionQueue(
-    (data, signal, progress) => callCodecWorker(createCodecWorker, 'run', data, signal, progress, { level: levelRef.current }),
+    (data, signal, progress) => callCodecWorker(createCodecWorker, 'run', data, signal, progress, { level: levelRef.current })
+        .then(out => ({ ...out, level: levelRef.current })),
     initialConcurrency(),
   ))
   const { tasks, concurrency } = useSyncExternalStore(queue.subscribe, queue.getSnapshot)
@@ -337,7 +341,7 @@ export default function App() {
               <Stat label={t.container} value={`v${containerVersion(res.comp)}`} sub={`${res.comp.segs.length} · ${res.comp.overhead || 0} B`} />
               <Stat label={t.throughput} value={throughput(total, res.tComp)} sub={`${t.decodeMs} ${throughput(total, res.tVer)}`} />
               <Stat label={t.modelFlags} value={`0x${containerFlags(res.comp).toString(16).toUpperCase()}`} sub={flagBits(res.comp)} />
-              <Stat label={t.tier} value={level} sub={lang === 'en' ? 'planner search depth' : '规划器搜索深度'} />
+              <Stat label={t.tier} value={res.level ?? level} sub={lang === 'en' ? 'planner search depth used for this result' : '本次结果使用的规划深度'} />
             </div>
 
             <Card title={t.segmentsTitle} sub={t.segmentsSub}>
@@ -370,11 +374,6 @@ export default function App() {
             </Card>
 
             <ResidualPanel t={t} profile={residual} busy={inspectBusy} onRun={() => inspect(true)} fingerprint={fingerprint} anatomy={anatomy} />
-            {!fingerprint && (
-              <button onClick={() => inspect(false)} className="text-xs text-cyan-200 underline decoration-dotted">
-                {t.inspect}
-              </button>
-            )}
 
             <div className="grid gap-6 lg:grid-cols-2">
               <Card title={t.terrainTitle} sub={t.terrainSub}>
@@ -383,7 +382,7 @@ export default function App() {
                     <button key={k} onClick={() => setMode(k)} className={'rounded-md px-3 py-1.5 ' + (mode === k ? 'bg-cyan-400 font-semibold text-slate-900' : 'bg-white/10 text-slate-300 hover:bg-white/15')}>{l}</button>
                   ))}
                 </div>
-                <HilbertView
+                <HilbertView lang={lang}
                   model={mode === 'entropy' ? mapEntropy : mapCost}
                   colors={colors}
                   sel={sel}
@@ -486,8 +485,8 @@ export default function App() {
         <NcdPanel t={t} result={ncd} busy={ncdBusy} count={doneCount} onRun={() => void runNcd()} />
 
         <footer className="mt-12 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4 text-xs text-slate-500">
-          <span>UCZ v{VERSION} · Universal Adaptive Compression</span>
-          <a href="/LICENSE" className="underline decoration-dotted hover:text-slate-300">MPL-2.0</a>
+          <span>UCZ v{VERSION} · {t.tagline}</span>
+          <a href="./LICENSE" className="underline decoration-dotted hover:text-slate-300">MPL-2.0</a>
         </footer>
       </div>
     </div>

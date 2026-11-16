@@ -8,6 +8,7 @@ import { contextGroupCandidatesSync } from './codec'
 import { chooseSpecForJob, encodeGroupForJob, encodeSpecsForJob } from './codec-jobs'
 import type { JobPayload, JobReply } from './parallel'
 import { cmV20Tuning } from './coder'
+import { setActiveCompressionLevel } from './codec'
 
 /** 执行一个任务。返回结构化克隆安全的纯数据。 */
 export async function runJob(payload: JobPayload, data: Uint8Array): Promise<JobReply> {
@@ -16,7 +17,10 @@ export async function runJob(payload: JobPayload, data: Uint8Array): Promise<Job
     if(typeof payload.cmV20.enabled!=='boolean' || typeof payload.cmV20.binRecovery!=='boolean')throw Error('无效 v20 worker 配置')
     Object.assign(cmV20Tuning,payload.cmV20)
   }
-  try { return runJobSync(payload,data) } finally {Object.assign(cmV20Tuning,saved)}
+  // 规划档位必须在 worker 里也生效，否则 `fast`/`balanced` 的裁剪只发生在主线程，
+  // 工作线程仍按 `max` 逐候选试探（结果不会错，但会白花几分钟）。
+  const restoreLevel = setActiveCompressionLevel(payload.level)
+  try { return runJobSync(payload,data) } finally {restoreLevel();Object.assign(cmV20Tuning,saved)}
 }
 function runJobSync(payload:JobPayload,data:Uint8Array):JobReply {
   switch (payload.kind) {

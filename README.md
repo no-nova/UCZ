@@ -3,6 +3,12 @@
 **Universal Context-Mixing (Zero-Prior)** — an experimental zero-prior compression engine and
 residual-entropy microscope, written in TypeScript.
 
+What "zero-prior" means here, precisely: **zero external dictionaries, zero pretrained corpus
+weights, zero filename or magic-byte sniffing, and zero format-specific pre-decompressors** (no
+built-in zlib/PNG decoder, no tar/zip reader). UCZ operates through a finite, hand-designed family
+of general structural transforms and context-mixing predictors that are selected online from the
+input stream itself. The only thing it is told is that the input is a sequence of bytes.
+
 [English](README.md) | [简体中文](README.zh-CN.md) | [Full benchmarks](BENCHMARKS.md) | [9-Point Constitution](CONSTITUTION.md)
 
 ---
@@ -95,12 +101,14 @@ and mechanisms: **[BENCHMARKS.md](BENCHMARKS.md)**.
 | AITDCC (16 tracks, cross-manifold) | 38,289,319 | **17,053,803** | **44.54%** | 3.563 | mixed: 4 of 16 are incompressible |
 | UCI tabular (6 files) | 6,545,162 | **375,359** | **5.73%** | 0.458 | `xz -9e` 575,724 (8.80%) |
 | `enwik8` (100 MB) | 100,000,000 | **21,095,797** | **21.10%** | 1.688 | `xz -9e` 24,749,000 (24.75%) |
-| *E. coli* K-12 genome | 4,734,499 | **1,154,755** | **24.39%** | **1.951** | `xz -9e` 1,338,444 (28.27%) |
+| *E. coli* K-12 genome | 4,734,499 | **1,154,755** | **24.39%** | **1.951** (≈1.990/base) | `xz -9e` 1,338,444 (28.27%) |
 | Protein corpus (9 species) | 22,918,902 | **9,668,253** | **42.18%** | 3.374 | uniform-20 bound 4.322 |
 | 10 WAV tracks | 9,028,556 | **4,222,379** | **46.77%** | 3.742 | synthetic tones 6.7–7.4% |
 | 24 Kodak PNGs (honesty test) | 15,394,305 | **15,273,560** | **99.22%** | 7.938 | no expansion, no pretence |
 
-Two numbers worth pausing on. The DNA result is **below 2.000 bit/base**, which is impossible
+Two numbers worth pausing on. The DNA row is **1.951 bit per input byte**, i.e. **~1.990 bit per
+nucleotide base** once the FASTA header and line breaks are excluded from the denominator — still
+**below 2.000 bit/base**, which is impossible
 unless inter-base structure was found — and UCZ was never told what DNA, codons or
 reverse-complement symmetry are. The PNG result is the opposite kind of honesty: a compressor
 that cannot unpack DEFLATE should admit it in eight bytes, not invent a bad model.
@@ -130,7 +138,7 @@ record stride s       -
 lag candidates        216
 scanline period P     216
 manifold class        2d-periodic-raster
-evidence              scanPeriod 来自滞后普查 | flat=89.2% printable=1.8% | scanPeriod=216 | lagCandidates=216
+evidence              scanPeriod confirmed by lag census | flat=89.2% text=1.8% | scanPeriod=216 | lagCandidates=216
 
 residual H(x|x<)     min 0.003 / mean 0.548 / max 3.151 bpb  (block 512 B)
 sparkline             ▁▁▁▁▁▁▄▃▃▂▁▁▂▂▂▂▂▂▂▂▂▂▃▃▃▃▃▃▂▁▁▁   (0 bpb ▁ -> 8 bpb █)
@@ -141,18 +149,24 @@ anomalies             47 bin(s)
   ... 39 more
 ```
 
-The sparkline is the *local conditional* complexity `H(x_t | x_{<t})` measured by the model
-itself, not by a histogram. A ruler with a ruler's honesty: the periodic scanline is flat and
+The sparkline is the *prequential predictive code cost* `-log2 P(x_t | x_{<t})` measured by the
+model itself, not by a histogram: each bin is what the model actually paid for those bytes given
+only the bytes before them. A ruler with a ruler's honesty: the periodic scanline is flat and
 cheap, the annotated headline block is expensive, and the instrument says where.
 
 ### `ucz ncd` — zero-prior information distance
+
+`ucz ncd` reports a **bounded, symmetrised conditional-complexity dissimilarity**: each direction
+is the prequential cost of one input given the other, divided by the cost of the input alone, with
+the self-renewal floor subtracted and the result clamped to `[0, 1]`. It is not a metric in the
+strict sense, and it is not a distance between "formats" — it is measured on bytes.
 
 ```
 $ ucz ncd alice29.txt asyoulik.txt kennedy.xls
 
 === UCZ Zero-Prior NCD Distance Matrix ===
                     0       1       2
-alice29.txt         ·  0.9197  0.9943
+alice29.txt    0.0000  0.9197  0.9943
 asyoulik.txt   0.9197  0.0000  0.9943
 kennedy.xls    0.9943  0.9943  0.0000
 

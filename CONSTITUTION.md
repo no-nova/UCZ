@@ -5,6 +5,20 @@
 > Solomonoff-induction / test-time-adaptation kernel. It learns only from the input
 > bytes in front of it; it never carries a domain, language, format, or corpus prior.
 
+## Scope of the "zero-prior" claim / "零先验"的确切范围
+
+Zero external dictionaries, zero pretrained corpus weights, zero filename or magic-byte sniffing,
+and zero format-specific pre-decompressors (no built-in zlib/PNG decoder, no archive reader).
+The engine may hold a finite, **hand-designed** family of general structural transforms and
+context-mixing predictors and choose among them online from the input bytes. That is a design
+prior about the shape of computation, not a corpus prior about the content — every claim of
+"zero prior" in this repository must be read against this definition.
+
+零外部字典、零预训练语料权重、零文件名/魔数嗅探、零格式专用预解压器（不内置 zlib/PNG 解码器，
+不解析归档格式）。引擎可以持有一族有限的、**手工设计**的通用结构变换与上下文混合预测器，并在
+运行时从输入字节里在线选择；这是关于"计算形状"的设计先验，不是关于"内容"的语料先验。本仓库
+一切"零先验"表述都以本条为准。
+
 ## Founding Articles / 九条根本原则
 
 1. **Zero Dictionary Systems.** No static word lists, phrase books, dictionaries,

@@ -36,11 +36,15 @@ const file = `// 由 scripts/build-worker-code.mjs 生成，请勿手改。
 export const PARALLEL_WORKER_CODE = ${JSON.stringify(source)}
 `
 
+// 宪法第 9 条：固化后的 worker 源码必须 <= 512 KiB（主包与单文件 Web 构建的硬上限）。
+const SIZE_LIMIT = 512 * 1024
 if (process.argv.includes('--check')) {
   let current = ''
   try { current = await readFile(target, 'utf8') } catch { /* 缺失即不一致 */ }
   if (current !== file) { console.error('parallel-worker-code.ts 与源码不一致，请运行 node scripts/build-worker-code.mjs'); process.exit(1) }
-  console.log('parallel-worker-code.ts 是最新的')
+  const bytes = Buffer.byteLength(current, 'utf8')
+  if (bytes > SIZE_LIMIT) { console.error(`parallel-worker-code.ts 超过 ${SIZE_LIMIT} B 上限（当前 ${bytes} B）`); process.exit(1) }
+  console.log(`parallel-worker-code.ts 是最新的（${(bytes / 1024).toFixed(1)} KB <= 512 KB）`)
 } else {
   await writeFile(target, file)
   console.log(`已生成 ${target}（${(source.length / 1024).toFixed(1)} KB）`)

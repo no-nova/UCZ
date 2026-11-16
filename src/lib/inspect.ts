@@ -36,6 +36,8 @@ export interface ManifoldFingerprint {
   byteLength: number
   entropyH0: number
   printableAsciiRatio: number
+  /** 合法 UTF-8 多字节序列覆盖的字节比例（CJK 文本 > 0）。 */
+  utf8MultiByteRatio: number
   flatByteRatio: number
   detectedStride: number
   detectedLags: number[]
@@ -165,10 +167,18 @@ function causalScanPeriod(d: Uint8Array): number {
 export function fingerprintStream(data: Uint8Array): ManifoldFingerprint {
   const n = data.length
   const delims: DelimiterCensus = { comma: 0, tab: 0, semicolon: 0, colon: 0, pipe: 0, newline: 0, meanLineBytes: 0 }
-  let printable = 0, flat = 0
+  let printable = 0, flat = 0, utf8 = 0
   for (let i = 0; i < n; i++) {
     const b = data[i]
     if ((b >= 0x20 && b <= 0x7e) || b === 9 || b === 10 || b === 13) printable++
+    // 合法 UTF-8 多字节码点（CJK 文本、引号等）同样是自然语言的证据。
+    // 只看结构：首字节 0xC2..0xF4，后随 1..3 个 0x80..0xBF 续字节。
+    else if (b >= 0xc2 && b <= 0xf4) {
+      const need = b < 0xe0 ? 1 : b < 0xf0 ? 2 : 3
+      let ok = i + need < n
+      for (let k = 1; ok && k <= need; k++) if ((data[i + k] & 0xc0) !== 0x80) ok = false
+      if (ok) { utf8 += 1 + need; i += need }
+    }
     if (b === 0 || b === 255) flat++
     if (b === 44) delims.comma++
     else if (b === 9) delims.tab++
@@ -179,6 +189,9 @@ export function fingerprintStream(data: Uint8Array): ManifoldFingerprint {
   }
   if (delims.newline) delims.meanLineBytes = n / delims.newline
   const printableRatio = n ? printable / n : 0
+  const utf8Ratio = n ? utf8 / n : 0
+  // 文本证据 = 7-bit 可打印 + 合法 UTF-8 多字节；纯 ASCII 文本时二者相同。
+  const textRatio = Math.min(1, printableRatio + utf8Ratio)
   const flatRatio = n ? flat / n : 0
   const stride = n >= 4096 ? detectRecordStride(data) : 0
   const lags = n >= 4096 ? detectLagCandidates(data, Math.max(1, stride)) : []
@@ -187,21 +200,21 @@ export function fingerprintStream(data: Uint8Array): ManifoldFingerprint {
   // 纯白边距（整行 0x00）会让所有步长的匹配数单调递减，因果检测因此给不出周期。
   // 这种情况下退回到滞后普查：平坦主导的流里 `detectLagCandidates` 的极值点就是
   // 行距本身（ptt5: 216）。仍然只读输入字节。
-  if (flatRatio >= 0.3 && lags.length) { scan = lags[0]; rationale.push('scanPeriod 来自滞后普查') }
+  if (flatRatio >= 0.3 && lags.length) { scan = lags[0]; rationale.push('scanPeriod confirmed by lag census') }
   const h0 = entropy0(data)
   const strip = delims.comma + delims.semicolon + delims.tab + delims.pipe
   let cls: ManifoldClass = 'structured-binary'
   if (!n) cls = 'empty'
   else if (flatRatio >= 0.3 && printableRatio <= 0.1) { cls = '2d-periodic-raster'; rationale.push(`flat=${(flatRatio * 100).toFixed(1)}% printable=${(printableRatio * 100).toFixed(1)}%`) }
-  else if (printableRatio >= 0.9 && delims.newline >= 4 && strip * 40 >= n) { cls = 'tabular-ascii'; rationale.push(`printable=${(printableRatio * 100).toFixed(1)}% delimiters=${strip}`) }
-  else if (printableRatio >= 0.9) { cls = 'natural-text'; rationale.push(`printable=${(printableRatio * 100).toFixed(1)}%`) }
+  else if (textRatio >= 0.9 && delims.newline >= 4 && strip * 40 >= n) { cls = 'tabular-ascii'; rationale.push(`text=${(textRatio * 100).toFixed(1)}% delimiters=${strip}`) }
+  else if (textRatio >= 0.9) { cls = 'natural-text'; rationale.push(`text=${(textRatio * 100).toFixed(1)}%${utf8 ? ` utf8=${(utf8Ratio * 100).toFixed(1)}%` : ''}`) }
   else if (stride >= 2 && stride <= 64) { cls = 'multi-channel-signal'; rationale.push(`stride=${stride}`) }
   else if (lags.length) { cls = 'quasi-periodic'; rationale.push(`lags=${lags.join(',')}`) }
   else if (h0 >= 7.4) { cls = 'high-entropy-or-noise'; rationale.push(`H0=${h0.toFixed(3)}`) }
   if (scan) rationale.push(`scanPeriod=${scan}`)
   if (lags.length) rationale.push(`lagCandidates=${lags.join(',')}`)
   return {
-    byteLength: n, entropyH0: h0, printableAsciiRatio: printableRatio, flatByteRatio: flatRatio,
+    byteLength: n, entropyH0: h0, printableAsciiRatio: printableRatio, utf8MultiByteRatio: utf8Ratio, flatByteRatio: flatRatio,
     detectedStride: stride, detectedLags: lags, detectedScanPeriod: scan,
     detectedDelimiters: delims, inferredManifoldClass: cls, rationale,
   }
@@ -241,8 +254,8 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   const lengths: number[] = []
   let total = 0
   for (let i = 0; i < segs; i++) { const len = getVar(c, st); lengths.push(len); total += len }
-  const headerBytes = st.p
   const members: number[][] = Array.from({ length: groups }, () => [])
+  let headerBytes = st.p
   if (groups) {
     let pending = lengths.map((_, i) => i), bit = 0
     for (let gi = 0; gi + 1 < groups; gi++) {
@@ -256,6 +269,8 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
       pending = next
     }
     members[groups - 1] = pending
+    // 组归属位图紧跟在分段长度之后：从 `groups > 1` 开始，每项 1 bit。
+    if (groups > 1) { st.p += Math.ceil(bit / 8); headerBytes = st.p }
   }
   const segments: SegmentAnatomy[] = []
   let rawOffset = 0, idx = 0

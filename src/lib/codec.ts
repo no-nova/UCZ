@@ -909,14 +909,14 @@ function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: 
   for (const p of parts) if (p.length > largest.length) largest = p
   const sample = sampleWindow(largest, tgPlanningWindow(largest.length,width,v13 && transformsV20Enabled()), width).sample
   const costs = new Float64Array(width + 1), plans: ColumnGroup[][] = Array.from({length:width + 1}, () => [])
-  // P30.0：列布局搜索是 yeast.data 那 22k 次探针的真正来源 —— 每个 start 要试
+  // P30.0：列布局搜索是小表格文件上两万余次探针的真正来源 —— 每个 start 要试
   // 11 个 span × (reverse) × 4~6 个候选，且每个候选都是一次真实编码。
   // 非 max 档位按「先粗后细」裁剪：`fast` 只留 1/2/4/8 四个 span 和两个候选，
   // `balanced` 留 6 个 span、三个候选。`max` 完全不受影响。
   const lvlCols = pruningLevel()
   if (lvlCols > 0 && sample.length >= 4096) {
     // P30.1：可打印 ASCII（表格 / CSV / 日志 / 代码）最终几乎总是被 `text-*`
-    // 列上下文拿走（yeast.data: 8,640 B 来自 text-vertcol，列布局候选全灭）。
+    // 列上下文拿走（小表格的收益全部来自 text-vertcol，列布局候选全灭）。
     // 在非 max 档位先用样本自身的可打印比例直接否决列布局搜索：
     // 这里只读数据本身，不看文件名、尺寸或外部元信息。
     let printable = 0
@@ -1608,6 +1608,12 @@ export function workerTuningMatchesDefaults(): boolean {
 export type CompressionLevel = 'fast' | 'balanced' | 'max'
 let activeLevel: CompressionLevel = 'max'
 export function currentCompressionLevel(): CompressionLevel { return activeLevel }
+/** 在 worker / 临时作用域内切换档位，返回恢复函数。 */
+export function setActiveCompressionLevel(level?: CompressionLevel): () => void {
+  const previous = activeLevel
+  if (level === 'fast' || level === 'balanced' || level === 'max') activeLevel = level
+  return () => { activeLevel = previous }
+}
 function pruningLevel(): 0 | 1 | 2 { return activeLevel === 'fast' ? 2 : activeLevel === 'balanced' ? 1 : 0 }
 
 export function sampleBudgetForSegment(totalBytes: number, segments: number, segmentBytes: number): number {
@@ -3190,7 +3196,7 @@ async function tryParallelChoose(
 ): Promise<{ spec: Spec; trials: Trial[] }[] | null> {
   if (!parallelReport.ok) return null
   const jobs: JobPayload[] = segs.map((sg, i) => ({
-    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
+    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: activeLevel, start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
     bestS: sg.bestS, sampleLimit: sampleLimits[i], base: sg.start,
   }))
   const loads = segs.map(sg => sg.end - sg.start)
@@ -3250,7 +3256,7 @@ function groupJobs(
     const parts = g.members.map(i => [segs[i].start, segs[i].end] as [number, number])
     const positions = g.members.map(i => segs[i].start)
     const ends = logicalGroupEnds(g, segs)
-    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
+    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: activeLevel, groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
     index.push(gi)
     loads.push(g.members.reduce((a, i) => a + segs[i].rawLen, 0))
   }
@@ -3827,7 +3833,7 @@ function coalesceCompressedPlan(dataLen: number, cp: Compressed): Compressed {
   retainedPlanGroups.set(container, c.groups)
   // P28.7: coalescing builds a NEW container object, and the group map is keyed
   // by identity. Without this the whole context tournament silently aborted for
-  // every coalesced plan (`wdbc.data`: "缺少实际旧容器的分组载荷"), which is why
+  // every coalesced plan (a numeric table hit "缺少实际旧容器的分组载荷"), which is why
   // its proven 31,525 B `text-vertcol` layout never got to compete.
   retainedContextGroups.set(container, c.groups.map(g => ({ spec: { ...g.spec }, members: [...g.members], payload: g.payload, v15: g.v15, wordPre: g.wordPre })))
   return { ...cp, container, overhead: hdr.length }
@@ -3871,7 +3877,7 @@ export async function compressAdaptive(
     // P30.1：一维扫描位图（传真 / 二值光栅）整段交给 `bin` 模型时，
     // `detectScanPeriod` 的 2-D 上下文能跨整幅图学习；一旦被 `refineNoisePockets`
     // 或 `refineBitplane` 切碎，每个碎片都要重新预热哈希表，反而更大
-    // （ptt5: 整段 26,935 B vs 切碎 28,275 B）。这里只对"绝大多数字节是 0x00/0xFF、
+    // （整段 26,935 B vs 切碎 28,275 B）。这里只对"绝大多数字节是 0x00/0xFF、
     // 几乎不含可打印文本"的流补一个整段候选，采纳与否仍由真实容器字节数决定。
     if(data.length>=65536 && bp.segs.length>1){
       let zeros=0, printable=0
@@ -4499,7 +4505,7 @@ async function compressAdaptiveImpl(
   const n = data.length
   // P30.0：非 max 档位先粗化地形分段。`chooseSpec` 的成本与**区域数**成正比
   // （每个区域 × 每个候选 × 2~3 个采样窗口各一次真实编码），而 512 B 级碎片区域
-  // 是 yeast.data 上 12,711 次探针的来源。合并相邻小区域只改变搜索粒度，
+  // 是小文件上上万次探针的来源。合并相邻小区域只改变搜索粒度，
   // 容器格式与解码端完全不受影响。
   const lvlSeg = pruningLevel()
   if (lvlSeg > 0) {
@@ -5152,8 +5158,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // P28.0: pure byte geometry, never a file name or a known header word. A
       // group that is (almost) entirely printable ASCII plus whitespace with
       // short newline-delimited rows is a text/CSV table regardless of which
-      // byte profile the segmenter picked. Such groups (`yeast.data`,
-      // `wdbc.data`, both wine CSVs) were locked into `bin`, so the column
+      // byte profile the segmenter picked. Such groups (small tabular files) were locked into `bin`, so the column
       // layouts were never even screened. The proposal is purely additive: the
       // `bin` candidates stay in the tournament, so the container can only win.
       ...(!g.wordPre && !contextSpecAllowed('text-sparse5',g.spec)
@@ -5163,7 +5168,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // P28.7: WORD-PRE rewrites the alphanumeric tokens of a numeric table into
       // dictionary ids, which destroys the column structure the layouts live on.
       // A group that is already word-preprocessed AND is a printable ASCII table
-      // therefore also gets a raw-byte tournament (`wdbc.data` holds 34,645 B of
+      // therefore also gets a raw-byte tournament (a numeric table holds 34,645 B of
       // a proven 31,525 B). The word-pre candidate stays in the race, so this is
       // purely additive.
       ...(!!g.wordPre && g.spec.id!==ID.ANCHOR && g.spec.id!==ID.ANCHOR_FOLD && g.spec.id!==ID.SUB_ANCHOR
@@ -5173,7 +5178,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // other group later accepts a context/transform of its own.
       .filter(p=>!groups.some((other,i)=>i!==group && sameSpec(other.spec,p.spec)))
       .map(proposal=>({g,group,proposal,rawBytes:g.members.reduce((n,i)=>n+segs[i].rawLen,0)})))
-    const jobs:JobPayload[]=eligible.map(({g,proposal})=>({kind:'contextGroup',cmV20:{...cmV20Tuning},spec:{...proposal.spec},
+    const jobs:JobPayload[]=eligible.map(({g,proposal})=>({kind:'contextGroup',cmV20:{...cmV20Tuning},level:activeLevel,spec:{...proposal.spec},
       parts:g.members.map(i=>[segs[i].start,segs[i].end] as [number,number]),positions:g.members.map(i=>segs[i].start),rawText:proposal.rawText,
       retained:sameSpec(g.spec,proposal.spec)?{payload:g.payload,flags:payloadModelFlags(g.payload),wordPre:!!g.wordPre}:undefined}))
     let replies:JobReply[]|null=null

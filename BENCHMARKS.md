@@ -195,7 +195,9 @@ a word model buys.
 
 ### 5.2 Genomics — complete *E. coli* K-12 genome (`GCF_000005845.2.fa`, 4,734,499 B)
 
-**1,154,755 B (24.39%, 1.951 bit/byte)**, `rt = true`.
+**1,154,755 B (24.39%)** = **1.951 bit per input byte** and **~1.990 bit per nucleotide base**, `rt = true`.
+The FASTA file is 4,734,499 B of which 4,641,652 are nucleotide bases; the rest is the header and
+line breaks, so the two bit-rates differ by the sequence/texture of the framing.
 
 | Compressor | Size (B) | Ratio | bit/base |
 | --- | ---: | ---: | ---: |
@@ -211,21 +213,21 @@ roughly 1.6–1.7 bit/base on the same class of data, so the gap here is ~0.3 bi
 
 ### 5.3 Proteomics — 9-species protein corpus (22,918,902 B)
 
-**9,668,253 B (42.18%, 3.374 bit/byte)**, all files `rt = true`.
+**9,668,253 B (42.18%, 3.375 bit/byte)**, all files `rt = true`; the nine raw sizes sum to 22,918,902 B and the nine compressed sizes to 9,668,253 B.
 
 The theoretical floor for a uniform 20-symbol alphabet is `log2(20) = 4.322 bit` (54.02%).
 
 | Species | Raw (B) | UCZ (B) | Ratio |
 | --- | ---: | ---: | ---: |
-| `BT` | 2,437,275 | 908,940 | 37.29% |
-| `EC` | 2,789,116 | 1,393,842 | 49.97% |
-| `EP` | 2,316,180 | 1,227,392 | 52.99% |
-| `LC` | 2,463,310 | 1,240,277 | 50.35% |
-| `SA` | 2,608,271 | 1,309,749 | 50.21% |
-| `SC` | 2,684,333 | 1,290,138 | 48.06% |
-| `MJ` | 2,689,507 | 1,337,036 | 49.72% |
-| `HS` | 2,116,990 | 987,208 | 46.63% |
-| `HI` | 2,813,920 | 1,373,671 | 51.11% |
+| `1.BT` | 12,845,466 | 4,790,166 | 37.29% |
+| `2.EC` | 1,308,765 | 654,037 | 49.97% |
+| `3.EP` | 4,184 | 2,217 | 52.99% |
+| `4.LC` | 809,301 | 407,507 | 50.35% |
+| `5.SA` | 796,785 | 400,053 | 50.21% |
+| `6.SC` | 2,900,352 | 1,394,027 | 48.06% |
+| `7.MJ` | 448,779 | 223,121 | 49.72% |
+| `8.HS` | 3,295,751 | 1,536,700 | 46.63% |
+| `9.HI` | 509,519 | 260,425 | 51.11% |
 | **Total** | **22,918,902** | **9,668,253** | **42.18%** |
 
 `AC2` (specialised, with substitution matrices and profile HMMs) is reported in the literature at
@@ -238,34 +240,36 @@ amino-acid substitution statistics; UCZ has to learn the alphabet from byte freq
 
 | Track | Raw (B) | UCZ (B) | Ratio |
 | --- | ---: | ---: | ---: |
-| `06-synth` | 882,000 | 646,933 | 73.35% |
-| `bigsine` | 352,844 | 23,545 | **6.67%** |
-| `sine` | 264,644 | 19,514 | **7.37%** |
-| `overdrive` | 705,644 | 51,019 | 7.23% |
-| `03-guitar` | 1,058,444 | 559,785 | 52.88% |
-| `04-voice` | 882,044 | 471,984 | 53.51% |
-| `05-piano` | 1,234,244 | 634,102 | 51.38% |
-| `01-drums` | 1,058,444 | 605,864 | 57.25% |
-| `00a-01sample` | 1,411,244 | 728,412 | 51.62% |
-| `07-mix` | 1,179,044 | 481,221 | 40.81% |
+| `track-01` | 1,013,302 | 784,738 | 77.44% |
+| `track-02` | 475,180 | 272,025 | 57.25% |
+| `track-03` | 2,497,332 | 1,588,433 | 63.61% |
+| `track-04` | 2,834,476 | 1,498,831 | 52.88% |
+| `track-05` | 96,044 | 7,079 | 7.37% |
+| `track-06` | 960,044 | 64,069 | 6.67% |
+| `track-07` | 96,044 | 6,790 | 7.07% |
+| `track-08` | 960,044 | 283 | 0.03% |
+| `track-09` | 96,044 | 86 | 0.09% |
+| `track-10` | 46 | 45 | 97.83% |
 | **Total** | **9,028,556** | **4,222,379** | **46.77%** |
 
-Periodic/harmonic tones drop to 6.7–7.4% because the byte manifold is a smooth function of
+Periodic/harmonic tones drop to 0.1–7.4% because the byte manifold is a smooth function of
 position; studio material stays near 50% because the residual is genuinely noise-like at 16 bit.
 `FLAC` (specialised, with linear prediction and Rice coding) is typically 50–60% on the same
 material, i.e. UCZ is ahead on synthetic tones and behind on dense music — the expected shape.
 
 ### 5.5 Pre-compressed containers — 24 Kodak `.png` images (15,394,305 B)
 
-**15,273,560 B (99.22%)**, all files `rt = true`; aggregate overhead 0.78% across 24 files,
-worst single file +0.9%.
+**15,273,560 B (99.22%)**, all files `rt = true`. The corpus shrinks by **0.78%** overall
+(15,394,305 -> 15,273,560 B) because 9 of the 24 PNGs carry compressible metadata/chunk
+structure; the remaining 15 incompressible ones are stored via `STORE` with only **+8 to +18 B**
+of container header (`+0.002%` per file), never more.
 
 This is the honesty test. A `.png` payload is a DEFLATE stream: high entropy, no exploitable
 structure. The 9-Point Constitution forbids a built-in `zlib` re-compressor, so UCZ cannot
 unpack it. What it *can* do is notice: the `emaErr` tracker crosses its gate, the context tables
-freeze, and the planner emits `STORE`. The result is a container that is ~0.003% larger than the
-input and decodes bit-exactly — no expansion spiral, no pretending. A production deployment would
-re-wrap PNGs or refuse them; UCZ reports the truth instead.
+freeze, and the planner emits `STORE`. A stored file comes back exactly its own size plus the
+container header, and decodes bit-exactly — no expansion spiral, no pretending. A production
+deployment would re-wrap PNGs or refuse them; UCZ reports the truth instead.
 
 ---
 

@@ -53,6 +53,9 @@ export interface Dict {
   digramSub: string
   residualTitle: string
   residualSub: string
+  contextLabel: string
+  residualStats: (bins: number, block: number, mean: string, min: string, max: string) => string
+  anomalyKind: Record<'cold-start' | 'entropy-spike' | 'regime-shift', string>
   inspect: string
   inspecting: string
   manifold: string
@@ -143,7 +146,10 @@ const en: Dict = {
   digramTitle: 'Neighbour-byte plane',
   digramSub: 'x = byte i, y = byte i+1. Correlations invisible in one dimension become clusters here.',
   residualTitle: '④ Residual microscope · H(xᵢ | x₍ᵢ₎)',
-  residualSub: 'Local conditional cost per 512-byte bin, measured by encoding the first 256 KiB with one continuous model. High bars are the regions the model finds hard.',
+  contextLabel: 'Context',
+  residualStats: (bins, block, mean, min, max) => `${bins} × ${block} B · mean ${mean} · min ${min} · max ${max} bit/B`,
+  anomalyKind: { 'cold-start': 'cold start', 'entropy-spike': 'entropy spike', 'regime-shift': 'regime shift' },
+  residualSub: 'Prequential predictive code cost per 512-byte bin: the first 64 KiB are encoded with one continuous causal model, so every bar only depends on the bytes before it. High bars are where the model pays the most.',
   inspect: 'Inspect residual profile',
   inspecting: 'Measuring…',
   manifold: 'Manifold',
@@ -170,7 +176,7 @@ const en: Dict = {
   page: (a, b, n) => `page ${a} / ${b} · ${n} regions`,
   trials: 'Trial encodes (sampled windows; merged regions show the first part):',
   benchTitle: '⑦ Measured against fixed algorithms',
-  benchSub: 'Same input, including format framing. The external comparison needs the optional bench service; single-CM comparison is limited to 10 MiB.',
+  benchSub: 'Same input including format framing. Numbers are measured on this machine with the same build.',
   benchRun: 'Run external comparison',
   benchRunning: 'Measuring (high levels can be slow)…',
   benchHint: 'Optional: zstd 3/19, brotli 5, xz/LZMA2 6, bzip2 9, zpaq m1. The current input is sent to the comparison service only when you click.',
@@ -235,7 +241,10 @@ const zh: Dict = {
   digramTitle: '相邻字节对平面',
   digramSub: '横轴 = 第 i 个字节，纵轴 = 第 i+1 个字节。一维序列里看不出的相关性在这里成形。',
   residualTitle: '④ 残差显微镜 · H(xᵢ | x₍ᵢ₎)',
-  residualSub: '每 512 字节的局部条件代价：用单一连续模型编码前 256 KiB 实测。高柱即模型觉得难的地方。',
+  contextLabel: '上下文',
+  residualStats: (bins, block, mean, min, max) => `${bins} × ${block} B · 均值 ${mean} · 最小 ${min} · 最大 ${max} bit/B`,
+  anomalyKind: { 'cold-start': '冷启动', 'entropy-spike': '熵尖峰', 'regime-shift': '分布切换' },
+  residualSub: '每 512 字节的前序预测码代价：用单一因果模型编码前 64 KiB 实测，每根柱子只依赖它之前的字节。高柱即模型付出代价最大的地方。',
   inspect: '测量残差曲线',
   inspecting: '测量中…',
   manifold: '流形分类',
@@ -262,7 +271,7 @@ const zh: Dict = {
   page: (a, b, n) => `第 ${a} / ${b} 页 · 共 ${n} 个区域`,
   trials: '候选规则试编码结果（采样窗口；合并区域显示首个原始区域）：',
   benchTitle: '⑦ 压缩算法实测对照',
-  benchSub: '同一份输入、包含各格式封装开销。外部算法需手动启动对照服务；单一 CM 对照限 10 MiB。',
+  benchSub: '同一份输入、包含各格式封装开销。数值在本机用同一份构建测得。',
   benchRun: '运行外部对照测试',
   benchRunning: '正在实测（高等级可能较慢）…',
   benchHint: '可选：zstd 3/19、brotli 5、xz/LZMA2 6、bzip2 9、zpaq m1。点击后才会把当前输入发送到对照服务。',

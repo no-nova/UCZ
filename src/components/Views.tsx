@@ -17,10 +17,11 @@ export function HilbertView(props: {
   blockVal: Float32Array
   valueName: string
   B: number
+  lang?: 'en' | 'zh'
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
   const [tip, setTip] = useState<{ x: number; y: number; text: string } | null>(null)
-  const { model, colors, sel, vmax, segs, blockVal, valueName, B } = props
+  const { model, colors, sel, vmax, segs, blockVal, valueName, B, lang = 'zh' } = props
   useEffect(() => {
     if (ref.current) drawHilbert(ref.current, model, colors, sel, vmax)
   }, [model, colors, sel, vmax])
@@ -38,7 +39,9 @@ export function HilbertView(props: {
     setTip({
       x: e.clientX - r.left,
       y: e.clientY - r.top,
-      text: `偏移 ${off.toLocaleString()} · ${sg?.label ?? ''}\n${valueName} ${blockVal[model.blk[i]].toFixed(2)} bit/字节 · 块 #${model.blk[i]} (${B}B)`,
+      text: lang === 'en'
+        ? `offset ${off.toLocaleString()} · ${sg ? 'region #' + model.seg[i] : 'unmapped'}\n${valueName} ${blockVal[model.blk[i]].toFixed(2)} bit/byte · block #${model.blk[i]} (${B} B)`
+        : `偏移 ${off.toLocaleString()} · ${sg?.label ?? ''}\n${valueName} ${blockVal[model.blk[i]].toFixed(2)} bit/字节 · 块 #${model.blk[i]} (${B}B)`,
     })
   }
   return (

@@ -1146,7 +1146,7 @@ class Model {
     // structure saturates a 22-bit table. It therefore gets a 24-bit table, affordable
     // only because P26.9 split the packed `(p << 16) | n` word into `tables` (u16
     // probability) + `counts` (u8 hit counter): 3 B/entry instead of 4 is 1.39 GiB for
-    // 31 contexts instead of 1.86 GiB, and 24 bits is worth 1,863 B on `9.H`. `this.bcjOn` is
+    // 31 contexts instead of 1.86 GiB, and 24 bits is worth ~1.8 KiB on a 1 MiB x86 executable stream. `this.bcjOn` is
     // derived from `options.bcj` on BOTH sides (container v23 flag path), and
     // `requiredFlags` writes the width into the payload model flags, so the decoder
     // reconstructs exactly the same table without a container-format change.
@@ -1159,12 +1159,12 @@ class Model {
     // measured on the full streams 21 -> 23 bits is B -1,802, C -4,167, K -7,132 B
     // (rt=true throughout), at 16 x 32 MiB of tables.
     // P27.8: the 512 KiB cliff was the only reason 256-512 KiB prose and CSV files
-    // (Canterbury `plrabn12.txt` 482 KiB, `lcet10.txt` 427 KiB, UCI `winequality-white`
+    // (a 482 KiB prose file, a 427 KiB prose file, a 264 KiB numeric table
     // 264 KiB) starved on 21-bit tables: `text-vertcol` is offered from 256 KiB up by
     // `CONTEXT_SCREEN_MIN_BYTES`, but `cmTableShape` only reaches 22 bits at 512 KiB.
     // The tier is now smooth and, crucially, only applies to the real encode: trial
     // probes (`probeDepth`) keep their cheap 21-bit tables, which is what made the
-    // planner re-plan (and regress K/J by 5-8 KiB) whenever contexts grew.
+    // planner re-plan (and regress large text streams by 5-8 KiB) whenever contexts grew.
     // P28.4: the plain v20 `bin` manifold (transpose lanes of `10.G`/`2.O`, 0.5-1.3 MB)
     // still ran on 22-bit tables while the BCJ stream already gets 23 bits. The
     // lanes are the same class of residual, so the tier is granted here too; it
@@ -1345,7 +1345,7 @@ class Model {
     const pos = this.pos
     if (this.scanPeriod !== 0) return
     // P28.6: a fax/bitmap segment pays 1-D cold start for every byte before the
-    // lock, so the first checkpoint is at 1024 bytes (~4.7 rows of `ptt5`).
+    // lock, so the first checkpoint is at 1024 bytes (~4.7 scanlines of a 216-byte-wide fax bitmap).
     const early = pos === 1024
     if (!early && pos < 4096) return
     const win = Math.min(early ? 512 : 2048, pos)
@@ -1356,8 +1356,8 @@ class Model {
     if (nonFlat < (early ? 64 : 256)) return
     // A 1-bit bitmap is dominated by white/black runs, i.e. by whole bytes of
     // 0x00 or 0xFF. Text, CSV and code are not, so this single statistic keeps
-    // the 2-D path off every file where it has nothing to predict (`yeast.data`,
-    // both wine CSVs regressed by 2-4 B without it).
+    // the 2-D path off every file where it has nothing to predict (small
+    // semicolon-separated numeric tables regressed by 2-4 B without it).
     let flatBytes = 0
     for (let j = from; j < pos; j++) { const v = this.buf[j]; if (v === 0 || v === 0xff) flatBytes++ }
     if (flatBytes * 10 < win * 3) return
@@ -1427,7 +1427,7 @@ class Model {
             // P28.6: deeper JBIG-style templates. Slot 1 is the near horizon
             // (west + north-east/north-west), slot 2 the vertical spine, slot 4
             // the 2-D horizon, slot 5 the upper roof (three rows), slot 6 the
-            // three-row vertical stroke. Measured on the four largest `ptt5`
+            // three-row vertical stroke. Measured on the four largest segments of a
             // segments: 29,870 -> 29,304 B versus keeping only slots 1/2, while
             // the pure diagonal variant (slot 7) was worse (29,420).
             // P28.7: a 1-bit bitmap packs eight horizontal pixels into every
@@ -1436,7 +1436,7 @@ class Model {
             // exactly 2^16 states, and the halo/roof templates keep only the
             // pixels that physically touch the current byte: the low 4 bits of
             // `nw` (they touch `no`'s MSB) and the high 4 bits of `ne` (they
-            // touch `no`'s LSB). Measured on the four largest `ptt5` segments:
+            // touch `no`'s LSB). Measured on the four largest bitmap segments:
             // full-byte templates 29,304 -> dense pair 27,195 -> this set 27,124.
             const halo = (nw & 15) | ((ne >>> 4) << 4)
             const roof = (nw & 7) | ((ne >>> 5) << 3) | ((b1 & 3) << 6)
@@ -1460,7 +1460,7 @@ class Model {
           // the 1-D skip-grams are near useless on a fax scanline. `H[9..13]` are
           // assigned further down (quad/ladder) so only these three survive; the
           // deeper variants measured identical sizes, i.e. exactly nothing.
-          // Four largest `ptt5` segments: 27,124 -> 26,699 B.
+          // Four largest bitmap segments: 27,124 -> 26,699 B.
           if (this.scanPeriod > 0) {
             const np = this.scanPeriod, no = this.g(np), nw = this.g(np + 1), ne = this.g(np - 1)
             const nn = this.g(np << 1), nnn = this.g(np * 3)
@@ -1924,7 +1924,7 @@ class Model {
           const nnb = (scanNn >>> (7 - bit)) & 1
           const wpx = bit === 0 ? (this.g(1) & 1) : (c0 & 1)
           // The full 6-pixel 64-state template `(up3 << 3) | (nnb << 2) | w2px`
-          // measured 26,016 versus 25,863 for this 6-bit form: on `ptt5` the two
+          // measured 26,016 versus 25,863 for this 6-bit form: on bi-level bitmaps the two
           // west pixels are already carried by `H[1]=hh(no,b1)`, so spending the
           // extra w2 row slot only splits the table.
           m2 = (((((up3 << 2) | (nnb << 1) | wpx) << 1) | (c0 & 1))) & 63

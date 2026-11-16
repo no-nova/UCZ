@@ -1,4 +1,4 @@
-import type { ContextCandidates } from './codec'
+import type { ContextCandidates, CompressionLevel } from './codec'
 // 确定性并行编码引擎。
 //
 // 硬性约束：并行结果必须与单线程**逐字节一致**。因此这里只并行"互相独立、
@@ -16,7 +16,7 @@ import type { ContextCandidates } from './codec'
 import type { KernelScreen, KernelVariant, GroupCandidateOptions } from './group-policy'
 
 /** 任务载荷：只有偏移、标量与纯数据，不含任何外部引用（可结构化克隆）。 */
-export type JobPayload = ({ cmV20?: { enabled:boolean; binRecovery:boolean } } & (
+export type JobPayload = ({ cmV20?: { enabled:boolean; binRecovery:boolean }; level?: CompressionLevel } & (
   | { kind: 'chooseSpec'; start: number; end: number; cls: number; bestS: number; sampleLimit: number; base: number }
   | { kind: 'encodeGroup'; parts: [number, number][]; spec: SpecData; positions: number[]; ends: number[]; skipBase?: boolean; groupOptions?: GroupCandidateOptions }
   | { kind: 'contextGroup'; parts: [number,number][]; spec:SpecData; positions:number[]; rawText?:boolean; retained?:{payload:Uint8Array;flags:number;wordPre:boolean} }

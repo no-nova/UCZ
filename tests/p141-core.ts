@@ -52,7 +52,11 @@ function wire() {
  assert.throws(()=>withContainerModel(20,V21_FLAG_CONTEXTS|V20_FLAG_CM,()=>0),/配置/)
  assert.throws(()=>withContainerModel(21,V20_FLAG_CM,()=>0),/配置/)
  assert.throws(()=>encodeCM(data,'bin',1,1,undefined,0,undefined,undefined,'v15',0,false,{context:'bin-stride4'}),/上下文/)
- assert.throws(()=>encodeTerrainGroup([data],{id:ID.BCJ_V3,s:2,r:1},undefined,undefined,undefined,[0],'v20',{context:'bin-stride4'}),/规则/)
+ // BCJ_V3 s=2 现在是合法规则（9.H 的实际编码路径），不再抛异常：
+ // 用真实分组做一次端到端框架校验，顺带保证 v20 的 BCJ 上下文可解码。
+ const bcjSpec={id:ID.BCJ_V3,s:2,r:1}
+ const bcjPayload=encodeTerrainGroup([data],bcjSpec,undefined,undefined,undefined,[0],'v20',{context:'bin-stride4'})
+ frame(data,bcjPayload,bcjSpec,'bin-stride4')
  assert.equal(contextSpecAllowed('bin-stride4',{id:ID.STORE,s:1,r:1}),false)
  for(const id of [ID.BIN,ID.BIN_V2,ID.BIN_V3]) {
   const bin={id,s:1,r:1};assert.equal(contextSpecAllowed('bin-stride4',bin),true)

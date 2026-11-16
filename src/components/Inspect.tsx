@@ -41,7 +41,7 @@ export function ResidualPanel(props: {
           <Field label={t.scanPeriod} value={fingerprint.detectedScanPeriod > 1 ? String(fingerprint.detectedScanPeriod) : '—'} />
           {anatomy && <Field label={t.container} value={`v${anatomy.containerVersion} · ${formatBytes(anatomy.totalCompressedBytes)}`} />}
           {main && <Field label={t.rule} value={`${main.transformName}${main.stride > 1 ? ` s=${main.stride}` : ''}`} />}
-          {main?.context && <Field label="Context" value={main.context} />}
+          {main?.context && <Field label={t.contextLabel} value={main.context} />}
           {main && <Field label={t.flags} value={main.flags || '—'} />}
         </dl>
       )}
@@ -64,7 +64,7 @@ export function ResidualPanel(props: {
           </div>
           <p className="mt-2 font-mono text-sm tracking-tight text-cyan-200">{profile.sparkline}</p>
           <p className="mt-1 text-xs text-slate-500">
-            {bars.length} × {profile.blockSize} B · mean {profile.meanBpb.toFixed(2)} · min {profile.minBpb.toFixed(2)} · max {profile.maxBpb.toFixed(2)} bit/B
+            {t.residualStats(bars.length, profile.blockSize, profile.meanBpb.toFixed(2), profile.minBpb.toFixed(2), profile.maxBpb.toFixed(2))}
           </p>
           <div className="mt-3 text-xs text-slate-300">
             <span className="text-slate-400">{t.anomalies}: </span>
@@ -74,7 +74,7 @@ export function ResidualPanel(props: {
               <span className="space-x-3">
                 {profile.anomalies.slice(0, 8).map((a, i) => (
                   <span key={i} className="tabular-nums">
-                    <b className="text-amber-200">{a.offset.toLocaleString()}</b> ({formatBytes(a.length)}, {a.bpb.toFixed(2)} bit/B, {a.kind})
+                    <b className="text-amber-200">{a.offset.toLocaleString()}</b> ({formatBytes(a.length)}, {a.bpb.toFixed(2)} bit/B, {t.anomalyKind[a.kind]})
                   </span>
                 ))}
               </span>

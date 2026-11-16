@@ -1,6 +1,7 @@
 // P32.0: `npm run build` -> dist/cli.js (executable bundle) + dist/index.js (ESM library).
 import { build } from 'esbuild'
 import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 await mkdir('dist', { recursive: true })
 // Single version source: `src/version.ts` feeds the CLI, the library, the Web GUI and this banner.
@@ -32,3 +33,21 @@ await build({
   external: ['esbuild'],
 })
 console.log('built dist/cli.js and dist/index.js')
+
+// `dist/index.d.ts`：包类型声明。`src/lib/*` 的声明原样保留在 `dist/types/`
+// （所以 `files` 里也要带上它），入口 d.ts 只做再导出，因此与运行时入口一一对应。
+import { spawnSync } from 'node:child_process'
+import { rmSync } from 'node:fs'
+
+rmSync('dist/types', { recursive: true, force: true })
+const tsc = spawnSync(process.execPath, [
+  join('node_modules', 'typescript', 'bin', 'tsc'),
+  '-p', 'tsconfig.json',
+  '--noEmit', 'false',
+  '--declaration', 'true',
+  '--emitDeclarationOnly', 'true',
+  '--outDir', 'dist/types',
+], { stdio: 'inherit' })
+if (tsc.status !== 0) throw new Error('declaration emit failed')
+await writeFile('dist/index.d.ts', "export * from './types/src/index'\n")
+console.log('built dist/index.d.ts (+ dist/types)')
