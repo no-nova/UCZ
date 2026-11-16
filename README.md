@@ -85,8 +85,9 @@ smaller.
 
 When the running prediction error says "this region is noise", context tables stop training, the
 column model freezes, and the planner falls back to `STORE`. On 24 Kodak PNGs the result is
-15,394,305 → 15,273,560 B: a container that is 0.003% larger than incompressible input and never
-spirals. A zero-prior compressor that cannot re-inflate DEFLATE should say so, loudly and cheaply.
+15,394,305 → 15,273,560 B (99.22% overall; on the 15 purely incompressible images, `STORE` adds
+only 8–18 bytes / ~0.002% of framing and never spirals). A zero-prior compressor that cannot
+re-inflate DEFLATE should say so, loudly and cheaply.
 
 ---
 
