@@ -170,6 +170,32 @@ test('worker client supports separate compression/restore requests, transfers on
   fastDeepEqual(await restored, new Uint8Array([5, 6])); assert.equal(restoreWorker.terminated, 1)
 })
 
+test('inputs are copied, never transferred: a worker that dies after postMessage still leaves the input intact', async () => {
+  const data = new Uint8Array(4096)
+  for (let i = 0; i < data.length; i++) data[i] = (i * 17 + (i >> 3)) & 0xff
+  const view = data.subarray(0, data.length)   // full view: the old code transferred this buffer
+  let transferred = 0
+  const fake = {
+    onmessage: null as ((event: { data: unknown }) => void) | null,
+    onerror: null as ((event: { message: string; preventDefault(): void }) => void) | null,
+    onmessageerror: null as (() => void) | null,
+    postMessage(message: { data: Uint8Array }) {
+      // Real transferable semantics: this detaches the sender's buffer.
+      structuredClone(message.data, { transfer: [message.data.buffer] })
+      transferred++
+    },
+    terminate() {},
+  }
+  const promise = callCodecWithFallback(() => fake as unknown as Worker, 'run', view, new AbortController().signal, () => {}, { level: 'fast' })
+  fake.onerror?.({ message: 'worker-unavailable', preventDefault() {} })
+  const out = await promise
+  assert.equal(transferred, 1)
+  assert.equal(view.length, data.length, 'caller buffer must not be detached')
+  assert.equal(data.length, 4096)
+  assert.equal(out.verified, true)
+  fastDeepEqual(data, new Uint8Array([...data]))
+})
+
 test('main-thread fallback still compresses when no Worker can start (single-file builds)', async () => {
   const data = new Uint8Array(8192)
   for (let i = 0; i < data.length; i++) data[i] = (i * 31 + (i >> 4)) & 0xff

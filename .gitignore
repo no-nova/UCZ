@@ -1,0 +1,21 @@
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+*.tsbuildinfo
+*.local
+.DS_Store
+npm-debug.log*
+
+# 可重建的本地状态与临时产物
+.diag-data/
+.diag-state/
+bench-out/
+*.tgz
+probe-tmp.*
+bench-tmp.*
+golden-check-tmp.*
+
+# 生成但已跟踪的 Worker 内联源码（src/lib/parallel-worker-code.ts）仍然入库：
+# 它由 `npm run build:worker` 生成，`npm run check:worker` 保证与源码一致，不要忽略。

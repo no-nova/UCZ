@@ -45,9 +45,19 @@ function inWorker(factory: WorkerFactory, type: 'run' | 'restore', data: Uint8Ar
         ;(failure as Error & { workerUnavailable?: boolean }).workerUnavailable = !gotProgress
         finish(failure)
       }
-      worker.onmessageerror = () => finish(new Error(gotProgress ? '后台线程消息无法读取' : 'worker-unavailable'))
+      worker.onmessageerror = () => {
+        const failure = new Error(gotProgress ? '后台线程消息无法读取' : 'worker-unavailable')
+        ;(failure as Error & { workerUnavailable?: boolean }).workerUnavailable = !gotProgress
+        finish(failure)
+      }
       if (signal.aborted) { abort(); return }
-      const owned = data.byteOffset === 0 && data.byteLength === data.buffer.byteLength ? data : data.slice()
+      // Ownership contract: the caller's `data` buffer is NEVER transferred.
+      // The worker gets a private copy, so a failure after `postMessage`
+      // (module worker refused by CSP, `file://`, worker crash before the first
+      // progress tick) can still be retried on the main thread with intact input.
+      // A view that only covers part of its buffer is copied anyway, and copying
+      // unconditionally keeps the two cases identical.
+      const owned = data.slice()
       worker.postMessage({ type, data: owned, level }, [owned.buffer as ArrayBuffer])
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error))
