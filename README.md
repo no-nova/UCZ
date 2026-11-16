@@ -95,30 +95,70 @@ spirals. A zero-prior compressor that cannot re-inflate DEFLATE should say so, l
 `--max` level, byte-exact SHA-256 roundtrip verified for every row. Full tables, per-file numbers
 and mechanisms: **[BENCHMARKS.md](BENCHMARKS.md)**.
 
-| Corpus | Raw (B) | UCZ (B) | Ratio | bit/byte | Industrial reference |
-| --- | ---: | ---: | ---: | ---: | --- |
-| Canterbury (11 files) | 2,810,784 | **369,447** | **13.14%** | 1.051 | `xz -9e` 493,168 (17.55%) |
-| AITDCC (16 tracks, cross-manifold) | 38,289,319 | **17,053,803** | **44.54%** | 3.563 | mixed: 4 of 16 are incompressible |
-| UCI tabular (6 files) | 6,545,162 | **375,359** | **5.73%** | 0.458 | `xz -9e` 575,724 (8.80%) |
-| `enwik8` (100 MB) | 100,000,000 | **21,095,797** | **21.10%** | 1.688 | `xz -9e` 24,749,000 (24.75%) |
-| *E. coli* K-12 genome | 4,734,499 | **1,154,755** | **24.39%** | **1.951** (≈1.990/base) | `xz -9e` 1,338,444 (28.27%) |
-| Protein corpus (9 species) | 22,918,902 | **9,668,253** | **42.18%** | 3.374 | uniform-20 bound 4.322 |
-| 10 WAV tracks | 9,028,556 | **4,222,379** | **46.77%** | 3.742 | synthetic tones 6.7–7.4% |
-| 24 Kodak PNGs (honesty test) | 15,394,305 | **15,273,560** | **99.22%** | 7.938 | no expansion, no pretence |
+A context-mixing ratio without its cost is advertising. Every row below therefore carries encode
+time, decode time and peak memory, measured on one machine with one protocol: AMD Ryzen 9 9955HX
+(16 cores / 32 threads), 14 GiB RAM, Linux, Node 26.13, `UCZ_THREADS=6`, files compressed one at a
+time (never as a solid archive), peak RSS from `VmHWM`, `gzip 1.15`, `bzip2 1.0.8`,
+`zstd 1.5.7`, `xz 5.8.4`.
 
-Two numbers worth pausing on. The DNA row is **1.951 bit per input byte**, i.e. **~1.990 bit per
-nucleotide base** once the FASTA header and line breaks are excluded from the denominator — still
-**below 2.000 bit/base**, which is impossible
-unless inter-base structure was found — and UCZ was never told what DNA, codons or
-reverse-complement symmetry are. The PNG result is the opposite kind of honesty: a compressor
-that cannot unpack DEFLATE should admit it in eight bytes, not invent a bad model.
+### Ratio (% of the raw bytes — lower is better)
 
-Where specialists win, they win because they carry priors: `paq8px` reaches ~18–20% on Canterbury
-prose using an English dictionary, `AC2` beats us on proteins with substitution matrices, `GeCo3`
-beats us on DNA with reverse-complement experts, `FLAC` beats us on dense music. That is the
-measurement this project exists to produce, not an embarrassment to explain away.
+| Corpus | Raw (B) | `gzip -9` | `bzip2 -9` | `zstd -19` | `zstd --ultra -22` | `xz -9e` | **UCZ `--max`** |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Canterbury (11 files) | 2,810,784 | 26.00% | 19.31% | 18.37% | 18.37% | 17.54% | **13.14%** |
+| UCI tabular (6 files) | 6,545,162 | 11.76% | 7.30% | 9.18% | 9.18% | 8.80% | **5.73%** |
+| AITDCC (16 tracks, cross-manifold) | 38,289,319 | 66.43% | 62.56% | 63.45% | 63.45% | 61.74% | **44.54%** |
+| Amino Acids Corpus (9 species) | 22,918,902 | 57.14% | 53.37% | 45.46% | 44.93% | 44.98% | **42.18%** |
+| *E. coli* K-12 genome | 4,734,499 | 31.39% | 29.54% | 28.53% | 28.53% | 28.27% | **24.39%** |
+| 24 Kodak PNGs (honesty test) | 15,394,305 | 99.97% | 100.19% | 99.99% | 99.99% | 99.84% | **99.22%** |
+| `enwik8`, first 8 MiB | 8,388,608 | 36.84% | 29.18% | 28.20% | 28.20% | 27.46% | **22.45%** |
+| `enwik8`, first 16 MiB | 16,777,216 | 36.87% | 29.27% | 27.58% | 27.37% | 26.71% | **22.04%** |
 
----
+### Cost of that ratio (same machine, same files)
+
+| Corpus | UCZ encode | UCZ decode | UCZ peak RSS | `xz -9e` encode | `zstd -22` encode | `zstd -22` peak RSS |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Canterbury | 105.4 s | 15.6 s | 1,916 MiB | 0.97 s | 0.85 s | 25 MiB |
+| UCI tabular | 116.6 s | 52.9 s | 355 MiB | 1.49 s | 1.51 s | 76 MiB |
+| AITDCC | 719.8 s | 168.9 s | 2,642 MiB | 7.88 s | 5.08 s | 78 MiB |
+| Amino Acids Corpus | 383.9 s | 85.5 s | 2,138 MiB | 9.35 s | 11.29 s | 282 MiB |
+| *E. coli* K-12 | 97.7 s | 13.9 s | 1,586 MiB | 1.92 s | 1.60 s | 142 MiB |
+| 24 Kodak PNGs | 119.2 s | 15.5 s | 1,114 MiB | 3.16 s | 0.76 s | 25 MiB |
+| `enwik8` 8 MiB | 103.1 s | 20.8 s | 2,549 MiB | 2.33 s | 2.69 s | 146 MiB |
+| `enwik8` 16 MiB | 184.9 s | 40.2 s | 2,679 MiB | 5.54 s | 4.96 s | 284 MiB |
+
+Read the two tables together. On Canterbury UCZ is 13.14% at **105 s encode** while `xz -9e` is
+17.54% at **0.97 s**: xz is ~108× faster, UCZ is 25% smaller. That trade is the whole product.
+Per byte on `enwik8`, UCZ is roughly 27× faster than `paq8px -12L` and 59× faster than `cmix v21`
+while landing 6.2 and 7.4 percentage points above them — that is the speed/ratio frontier this
+project occupies. Full `enwik8` (100 MB) lands at 21,095,797 B (21.10%); its wall-clock is *not*
+quoted here — the 8/16 MiB slices above measure ~11 µs/byte, which linearly predicts ~18 minutes
+for 100 MB, but the full runs we attempted exceeded two hours on a contended machine. The slices
+are the measurement; the extrapolation is labelled as one.
+
+### Position in the CM family (published figures, not measured here)
+
+| Compressor | Version / parameters | Corpus | Size (B) | Ratio | Encode time | Peak RAM | Source |
+| --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| **UCZ** | `0.1.0-beta.1`, `--max`, 6 threads | Canterbury (11 files, per-file) | 369,447 | **13.14%** | 105 s | 1.9 GiB | this repo, measured above |
+| **UCZ** | same | `enwik8` first 16 MiB | 3,698,245 | **22.04%** | 185 s | 2.6 GiB | this repo, measured above |
+| `paq8px` | v206fix1 `-12L` | `enwik8` (100 MB) | 15,849,084 | 15.85% | 29,916 s (8.3 h) | 28,151 MB | LTCB entry, encode.su |
+| `paq8px` | v208 `-8` | `ptt5` (513,216 B) | 21,233 | 4.14% | 5.05 s | 1,434 MB | encode.su (v208-teaser) |
+| `paq8px` | v206 `-8lrta` (solid archive) | Canterbury, 11 files | 285,365 | 10.15% | not published | not published | encode.su |
+| `cmix` | v21 `-t` | `enwik8` (100 MB) | 14,623,723 | 14.62% | 65,155 s (18.1 h) | ~20 GiB | byronknoll.com/cmix.html |
+| `cmix` | v21 `-t` | `calgary.tar` (3,152,896 B) | 534,512 | 16.95% | 2,757 s | ~18.5 GiB | byronknoll.com/cmix.html |
+
+Caveats, stated rather than buried: the `paq8px` and `cmix` rows were produced by other people on
+other hardware, `paq8px -8lrta` is a *solid* archive (one model over all files) so it is not
+comparable to per-file totals, and both carry priors the Constitution forbids here (English
+dictionary, format models, hand-written image/x86 detectors). The gap they open on text —
+15.8% vs 22.0% on enwik8 — is what a dictionary plus 28 GB of tables buys; the cost is 2–3 orders
+of magnitude in time and 10× in memory.
+
+Where specialists win, they win because they carry priors: `paq8px` reaches ~15–18% on English text
+with a dictionary, `AC2` beats us on proteins with substitution matrices, `GeCo3` beats us on DNA
+with reverse-complement experts, `FLAC` beats us on dense music. That is the measurement this
+project exists to produce, not an embarrassment to explain away.
 
 ## Scientific instruments
 
