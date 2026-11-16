@@ -8,8 +8,13 @@
 import { detectLagCandidates, detectRecordStride } from './analyze'
 import { encodeCM } from './coder'
 import { contextFromGroupBits, GROUP_MATCH_DIST_BIT } from './context-policy'
-import { compressAdaptive } from './codec'
+import { compressAdaptive, ID } from './codec'
 import type { CompressionLevel } from './codec'
+
+/** 与 `decompress` 完全一致的上限；头部是不可信输入，越界一律拒绝。 */
+const MAX_HEADER_BYTES = 512 * 1024 * 1024
+/** `decompress` 认识的编码器 id 集合（v1 只到 D16，v2+ 到 BITPLANE）。 */
+const KNOWN_TRANSFORMS = new Set<number>(Object.values(ID))
 
 export type ManifoldClass =
   | 'empty'
@@ -238,69 +243,130 @@ export function isContainer(c: Uint8Array): boolean {
 
 /** 解析 UCZ 头部：组规则与载荷长度。只读头部已写明的字段。 */
 export function inspectContainer(c: Uint8Array): ContainerAnatomy {
-  if (!isContainer(c)) throw new Error('不是 UCZ 容器')
+  if (!isContainer(c)) throw new Error('Not a UCZ container')
   const version = c[3]
+  // D4: `decompress` 只接受 1..22；解剖器过去接受任意版本，会把伪造的头当成
+  // 正常容器渲染出来。
+  if (version < 1 || version > 22) throw new Error(`Unsupported container version ${version} (expected 1..22)`)
   const st = { p: 4 }
   let flags = 0
+  // D6: 与 codec.ts:4646 对齐——v17/v18 只有 1 字节配置，v19+ 才是 uint16。
   if (version >= 19) { flags = c[st.p] | (c[st.p + 1] << 8); st.p += 2 }
+  else if (version >= 17) { flags = c[st.p]; st.p += 1 }
   const n = getVar(c, st)
-  const segs = getVar(c, st)
+  const segCount = getVar(c, st)
+  if (!Number.isSafeInteger(n) || !Number.isSafeInteger(segCount) || n < 0 || segCount < 0)
+    throw new Error('Invalid container length field')
+  if (n > MAX_HEADER_BYTES) throw new Error(`Declared raw length ${n} exceeds the ${MAX_HEADER_BYTES} byte limit`)
+  if (segCount > n) throw new Error('Segment count exceeds the declared raw length')
+
+  // D5: v1 是"每段自带 id/s/r/length"的扁平布局，没有组表也没有归属位图。
+  if (version === 1) {
+    const segments: SegmentAnatomy[] = []
+    let rawOffset = 0, w = 0
+    for (let i = 0; i < segCount; i++) {
+      if (st.p >= c.length) throw new Error('Container data is truncated')
+      const id = c[st.p++]
+      if (!KNOWN_TRANSFORMS.has(id) || id > ID.D16) throw new Error(`Unknown transform id ${id} in v1 segment`)
+      let sp0 = 1, sr = 1
+      if (id >= ID.DELTA) { sp0 = getVar(c, st); sr = getVar(c, st) }
+      const rawLen = getVar(c, st), pl = getVar(c, st)
+      if (rawLen > n - w) throw new Error('Segment raw length exceeds the declared total')
+      segments.push({
+        index: i, rawOffset, rawLength: rawLen, compressedBytes: pl,
+        bpb: rawLen ? (pl * 8) / rawLen : 0,
+        transformId: id, transformName: transformName(id),
+        stride: sp0, rank: sr, context: undefined, v15: false, wordPre: false, matchDist: false, flags: '',
+      })
+      rawOffset += rawLen; w += rawLen; st.p += pl
+      if (st.p > c.length) throw new Error('Segment payload exceeds the container')
+    }
+    if (w !== n) throw new Error('Segment lengths do not sum to the declared raw length')
+    return {
+      containerVersion: version, flags, totalRawBytes: n, totalCompressedBytes: c.length,
+      headerBytes: 4 + countVarBytes(n) + countVarBytes(segCount), overallBpb: n ? (c.length * 8) / n : 0,
+      compressionRatio: n ? c.length / n : 0, segments,
+    }
+  }
+
   const groups = getVar(c, st)
+  if (!Number.isSafeInteger(groups) || groups < 0) throw new Error('Invalid group count')
   const specs: { id: number; s: number; rRaw: number; pl: number }[] = []
   for (let i = 0; i < groups; i++) {
     const id = getVar(c, st), s = getVar(c, st), rRaw = getVar(c, st), pl = getVar(c, st)
+    // D7: 未知识别符/非法步长/超界载荷都必须在解剖阶段就拒绝。
+    if (!KNOWN_TRANSFORMS.has(id)) throw new Error(`Unknown transform id ${id}`)
+    if (!Number.isSafeInteger(s) || s < 1 || !Number.isSafeInteger(rRaw) || !Number.isSafeInteger(pl) || pl < 0)
+      throw new Error('Invalid group descriptor')
     specs.push({ id, s, rRaw, pl })
   }
   const lengths: number[] = []
   let total = 0
-  for (let i = 0; i < segs; i++) { const len = getVar(c, st); lengths.push(len); total += len }
+  for (let i = 0; i < segCount; i++) {
+    const len = getVar(c, st)
+    if (!Number.isSafeInteger(len) || len < 0) throw new Error('Invalid segment length')
+    lengths.push(len); total += len
+  }
+  if (total !== n) throw new Error('Segment lengths do not sum to the declared raw length')
   const members: number[][] = Array.from({ length: groups }, () => [])
   let headerBytes = st.p
+  let bitmapBytes = 0
   if (groups) {
     let pending = lengths.map((_, i) => i), bit = 0
     for (let gi = 0; gi + 1 < groups; gi++) {
       const next: number[] = []
       for (const i of pending) {
         const pos = st.p + Math.floor(bit / 8)
-        if (pos < c.length && ((c[pos] >>> (bit % 8)) & 1)) members[gi].push(i)
+        if (pos >= c.length) throw new Error('Group membership bitmap is truncated')
+        if ((c[pos] >>> (bit % 8)) & 1) members[gi].push(i)
         else next.push(i)
         bit++
       }
       pending = next
     }
     members[groups - 1] = pending
-    // 组归属位图紧跟在分段长度之后：从 `groups > 1` 开始，每项 1 bit。
-    if (groups > 1) { st.p += Math.ceil(bit / 8); headerBytes = st.p }
+    bitmapBytes = Math.ceil(bit / 8)
+    headerBytes = st.p + bitmapBytes
   }
   const segments: SegmentAnatomy[] = []
   let rawOffset = 0, idx = 0
   for (let gi = 0; gi < groups; gi++) {
     const sp = specs[gi]
     const rawLength = members[gi].reduce((sum, i) => sum + (lengths[i] ?? 0), 0)
-    // 上下文/标志位都在组字 `r` 里：低 16 位是 rank（+v15/wordPre），
-    // 17..19 位是上下文码，第 20 位是 matchDist，第 21 位是扩展命名空间。
     const context = (() => {
       try { return contextFromGroupBits(sp.rRaw) } catch { return undefined }
     })()
     const v15 = (sp.rRaw & 0x8000) !== 0
     const wordPre = (sp.rRaw & 0x4000) !== 0
     const matchDist = (sp.rRaw & GROUP_MATCH_DIST_BIT) !== 0
-    const bcj = sp.id === 25 // ID.BCJ_V3: the only group kind that runs the x86-shaped model.
-    const flags = [bcj ? 'bcj' : '', matchDist ? 'md' : '', wordPre ? 'wp' : '', v15 ? 'v15' : ''].filter(Boolean).join(' ')
+    const bcj = sp.id === ID.BCJ_V3
+    const segFlags = [bcj ? 'bcj' : '', matchDist ? 'md' : '', wordPre ? 'wp' : '', v15 ? 'v15' : ''].filter(Boolean).join(' ')
     segments.push({
       index: idx++, rawOffset, rawLength, compressedBytes: sp.pl,
       bpb: rawLength ? (sp.pl * 8) / rawLength : 0,
       transformId: sp.id, transformName: transformName(sp.id),
       stride: sp.s, rank: sp.rRaw & 0x3fff,
-      context, v15, wordPre, matchDist, flags,
+      context, v15, wordPre, matchDist, flags: segFlags,
     })
     rawOffset += rawLength
   }
+  // 载荷必须整段落在容器里：`headerBytes + Σpl <= c.length`。
+  const payloadBytes = specs.reduce((sum, sp) => sum + sp.pl, 0)
+  if (headerBytes + payloadBytes > c.length)
+    throw new Error(`Group payloads (${payloadBytes} B) plus the ${headerBytes} B header exceed the container`)
   return {
     containerVersion: version, flags, totalRawBytes: n, totalCompressedBytes: c.length,
     headerBytes, overallBpb: n ? (c.length * 8) / n : 0,
     compressionRatio: n ? c.length / n : 0, segments,
   }
+}
+
+/** 变长整数的字节数（只为 v1 的 headerBytes 报告服务）。 */
+function countVarBytes(v: number): number {
+  let k = 1
+  let x = v >>> 7
+  while (x > 0) { k++; x >>>= 7 }
+  return k
 }
 
 const SPARK = ['\u2581', '\u2582', '\u2583', '\u2584', '\u2585', '\u2586', '\u2587', '\u2588']

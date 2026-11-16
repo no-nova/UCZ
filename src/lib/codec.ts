@@ -417,7 +417,10 @@ function decodeSpecImpl(p: Uint8Array, n: number, sp: Spec, position = 0): Uint8
       if (p.length !== n) throw new Error('STORE 载荷长度与声明长度不符')
       return p.slice(0, n)
     case ID.FILL:
-      return new Uint8Array(n).fill(p[0])
+      // 空载荷 + 非零长度过去会静默返回全 0（p[0] === undefined），把"坏容器"
+      // 伪装成"解压成功"。v1 的 FILL 至少要有 1 个字节的填充值。
+      if (n > 0 && p.length === 0) throw new Error('Invalid FILL payload')
+      return new Uint8Array(n).fill(p[0] ?? 0)
     case ID.RLE:
       return rleDec(p, n)
     case ID.O0:
@@ -1311,6 +1314,13 @@ function decodeTerrainGroupWordPre(payload: Uint8Array, n: number, lengths: numb
   if (payload.length < 4) throw new Error('词元分组载荷被截断')
   const bodyLen = (payload[0] | (payload[1] << 8) | (payload[2] << 16) | (payload[3] << 24)) >>> 0
   if (bodyLen < 1 || bodyLen > MAX_OUTPUT_BYTES) throw new Error('词元流长度非法')
+  // `wordPreFwd` 对 n 字节的输入最多产生 2n + 65536 字节的词元体，所以声明长度
+  // 超过这个上界一定是伪造的头。没有这条校验时，一个 19 字节的容器可以声明
+  // 512 MiB 让算术解码器空转十几分钟（Red-Team D1）。
+  let totalRaw = 0
+  for (const len of lengths) totalRaw += len
+  if (bodyLen > totalRaw * 2 + 65536) throw new Error('词元流长度超出该分组的上界')
+  if (totalRaw > 0 && bodyLen === 0) throw new Error('词元流长度为空')
   const body = decodeCM(payload.subarray(4), bodyLen, 'text', 1, 1, onProgress, kernel==='v20'?'v20':'v15', 0, true, options)
   const hl = dictHeaderLen(body)
   if (hl < 0 || hl > body.length) throw new Error('词元词典头非法')
@@ -2842,8 +2852,19 @@ function encodeGroupDual(parts: Uint8Array[], sp: Spec, positions: number[]): Ui
 function encodeGroupV15(parts: Uint8Array[], sp: Spec, positions: number[], kernel:'v15'|'v20'='v15'): Uint8Array | null {
   const joined = joinForSpec(parts, sp, positions), prof = dualProfile(sp)
   if (!joined || !prof) return null
+  // `BCJ_V3` 的 v20 内核在模型里启用 x86 专用上下文（`bcjOn`），解码端在
+  // `decodeTerrainGroup`（src/lib/codec.ts:1416）无条件按同一个谓词打开它。
+  // `s = 1`（< 32 KiB 的 x86 流在升级到 `s = 2` 之前）走的正是这条候选编码
+  // 路径，因此这里必须传入完全相同的选项，否则编码器用 14 个上下文、解码器
+  // 用 25 个，逐字节必然发散。
+  const opts = sp.id === ID.BCJ_V3 && isAPMKernel(kernel) ? { bcj: true } as const : undefined
   return withCMBlockSize(joined.data.length, () => withRowA2Off(sp,
-    () => encodeCM(joined.data, prof.profile, prof.s, prof.r, undefined, 0, undefined, undefined, kernel, 0)))
+    () => encodeCM(joined.data, prof.profile, prof.s, prof.r, undefined, 0, undefined, undefined, kernel, 0, false, opts)))
+}
+
+/** 供回归测试：候选编码路径必须与地形编码路径对同一 spec/内核产出相同比特流。 */
+export function encodeGroupCandidateForProbe(parts: Uint8Array[], sp: Spec, positions: number[], kernel: 'v15' | 'v20'): Uint8Array | null {
+  return encodeGroupV15(parts, sp, positions, kernel)
 }
 
 /** 供探针交叉验证：直接调用真实的分组双流入门（含 dualProfile 判定）。 */

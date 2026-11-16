@@ -6,7 +6,7 @@
  * descriptive `Error` instead of hanging or allocating gigabytes.
  */
 import assert from 'node:assert/strict'
-import { compressAdaptive, decompress } from '../src/lib/codec'
+import { compressAdaptive, decompress, encodeGroupCandidateForProbe, encodeTerrainGroup, ID, planHeader } from '../src/lib/codec'
 import { inspectContainer, inspectStream, isContainer } from '../src/lib/inspect'
 import { computeNCD } from '../src/lib/ncd'
 import { fastDeepEqual } from './fast-equal'
@@ -116,4 +116,136 @@ export async function testEdgeCases(): Promise<void> {
   await testEdgeConstantAndNoise()
   await testEdgeCorruptedContainers()
   await testEdgeScientificApis()
+  await testEdgeBcjV3ShortRoundtrip()
+  await testEdgeWordPreBodyLenDos()
+  await testEdgeInspectContainerBounds()
+}
+
+/**
+ * P36.2 / F1：`< 32 KiB` 的 x86 类流在升级到 `s = 2` 之前会出现 `BCJ_V3 s=1`，
+ * 而 v20 内核的编码器（`encodeGroupV15`）过去不带 `{ bcj: true }`，解码器却带上，
+ * 于是 14 个上下文对 25 个上下文、逐字节发散。
+ */
+function x86Like(n: number, seed: number): Uint8Array {
+  const r = xorshift(seed), out = new Uint8Array(n)
+  const ops = [0x48, 0x8b, 0x89, 0x0f, 0x85, 0x55, 0x53, 0x57, 0x31, 0xc0, 0xc3, 0x4c, 0x8d, 0xff, 0x90]
+  let i = 0
+  while (i < n) {
+    const op = ops[r() % ops.length]
+    out[i++] = op
+    if ((op === 0xe8 || op === 0xe9) && i + 4 <= n) {
+      // 真实的 32 位相对位移，指向流内某个"函数"起点，这样 BCJ 才会改写它。
+      const target = (r() % Math.max(1, n - 8)) + 4
+      const rel = (target - (i + 4)) | 0
+      out[i++] = rel & 0xff; out[i++] = (rel >>> 8) & 0xff
+      out[i++] = (rel >>> 16) & 0xff; out[i++] = (rel >>> 24) & 0xff
+      continue
+    }
+    const operands = 1 + (r() % 4)
+    for (let k = 0; k < operands && i < n; k++) out[i++] = (r() >>> 13) & 0xff
+    if (i + 5 <= n && r() % 7 === 0) {
+      const target = (r() % Math.max(1, n - 8)) + 4
+      const rel = (target - (i + 5)) | 0
+      out[i++] = 0xe8; out[i++] = rel & 0xff; out[i++] = (rel >>> 8) & 0xff
+      out[i++] = (rel >>> 16) & 0xff; out[i++] = (rel >>> 24) & 0xff
+    }
+  }
+  return out
+}
+
+function concatBytes(a: ArrayLike<number>, b: Uint8Array): Uint8Array {
+  const out = new Uint8Array(a.length + b.length)
+  out.set(a as ArrayLike<number> as number[], 0); out.set(b, a.length)
+  return out
+}
+
+export async function testEdgeBcjV3ShortRoundtrip(): Promise<void> {
+  // 1) 定向验证：直接按 `BCJ_V3 s=1` 编码三种内核，容器必须逐字节还原。
+  for (const [n, seed] of [[28000, 195], [31999, 139], [12000, 298]] as const) {
+    const data = x86Like(n, seed)
+    const spec = { id: ID.BCJ_V3, s: 1, r: 1 }
+    for (const kernel of ['v15', 'v20'] as const) {
+      // 候选编码路径（refineGroupCodecs / `encodeGroupV15`）与地形编码路径必须
+      // 产出完全相同的比特流；修复前 v20 内核下 25,266 B vs 25,381 B。
+      const cand = encodeGroupCandidateForProbe([data], spec, [0], kernel)
+      const terr = encodeTerrainGroup([data], spec, undefined, undefined, undefined, [0], kernel)
+      assert.ok(cand && cand.length === terr.length, `BCJ_V3 s=1 n=${n} kernel=${kernel} 候选/地形长度不一致 ${cand?.length} vs ${terr.length}`)
+      fastDeepEqual(cand!, terr, `BCJ_V3 s=1 n=${n} kernel=${kernel} 候选/地形比特流不一致`)
+    }
+    for (const kernel of ['v13', 'v15', 'v20'] as const) {
+      const payload = encodeTerrainGroup([data], spec, undefined, undefined, undefined, [0], kernel)
+      const header = planHeader(data.length, [{ start: 0, end: data.length, cls: 'binary', spec }],
+        [{ spec, members: [0], payload, v15: kernel !== 'v13', wordPre: false }])
+      const container = concatBytes(header, payload)
+      fastDeepEqual(decompress(container), data, `BCJ_V3 s=1 n=${n} seed=${seed} kernel=${kernel} 往返失败`)
+    }
+    // 2) 端到端：规划器在这三种流上选出的容器也必须可逆（三种档位）。
+    for (const level of LEVELS) {
+      const enc = await compressAdaptive(data, undefined, { level })
+      fastDeepEqual(decompress(enc.container), data, `x86-like n=${n} seed=${seed} @ ${level} 往返失败`)
+    }
+  }
+}
+
+/**
+ * P36.2 / D1：19 字节的 `wordPre` 头 + `bodyLen = 512 MiB` 曾让算术解码器空转
+ * 12 分钟。现在必须被"该分组原始长度的上界"立刻拒绝。
+ */
+export async function testEdgeWordPreBodyLenDos(): Promise<void> {
+  const data = new TextEncoder().encode('word pre body length bound\n')
+  const spec = { id: ID.TEXT_V3, s: 1, r: 1 }
+  const huge = new Uint8Array(8)
+  new DataView(huge.buffer).setUint32(0, 512 * 1024 * 1024, true)
+  // `v15: false` 会让该规则走别的容器布局（ver 13）而被更早的字典校验拦下，
+  // 所以这里用 v15 组，确保真正走到 `decodeTerrainGroupWordPre` 的长度校验。
+  const header = planHeader(data.length, [{ start: 0, end: data.length, cls: 'text', spec }],
+    [{ spec, members: [0], payload: huge, v15: true, wordPre: true }])
+  const container = concatBytes(header, huge)
+  assert.ok(container.length < 64, `PoC 容器应很小，实际 ${container.length} B`)
+  const t = performance.now()
+  mustThrow(() => decompress(container, undefined, 1024), 'wordPre bodyLen DoS', /词元流长度|上限/)
+  const ms = performance.now() - t
+  assert.ok(ms < 50, `DoS 拒绝应在 50 ms 内完成，实际 ${ms.toFixed(1)} ms`)
+}
+
+/**
+ * P36.2 / D4–D8：`inspectContainer` 必须和 `decompress` 用同一套边界。
+ */
+export async function testEdgeInspectContainerBounds(): Promise<void> {
+  // 合法的 v1 容器：两个扁平段（STORE + FILL）。
+  const v1 = Uint8Array.from([
+    0x55, 0x43, 0x5a, 1, 6, 2, // magic, ver=1, n=6, cnt=2
+    ID.STORE, 2, 2, 0x41, 0x42, // STORE rawLen=2 pl=2
+    ID.FILL, 4, 1, 0x5a, // FILL rawLen=4 pl=1
+  ])
+  const anatomy = inspectContainer(v1)
+  assert.equal(anatomy.segments.length, 2, 'v1 解剖应看到 2 段')
+  assert.equal(anatomy.totalRawBytes, 6, 'v1 总长度')
+  fastDeepEqual(decompress(v1), Uint8Array.from([0x41, 0x42, 0x5a, 0x5a, 0x5a, 0x5a]), 'v1 容器应可解')
+
+  // D8: v1 FILL 的空载荷不能再被当成"全 0"。
+  const emptyFill = Uint8Array.from([0x55, 0x43, 0x5a, 1, 4, 1, ID.FILL, 4, 0])
+  mustThrow(() => decompress(emptyFill), 'v1 FILL 空载荷', /FILL/)
+
+  // D4: 版本上界与 `decompress` 对齐（22）。
+  const good = (await compressAdaptive(new TextEncoder().encode('bounds check payload\n'.repeat(30)), undefined, { level: 'fast' })).container
+  const v23 = Uint8Array.from(good); v23[3] = 23
+  mustThrow(() => inspectContainer(v23), 'inspect 拒绝 v23', /version|版本/)
+
+  // D7: 未知识别符。
+  const badId = Uint8Array.from(good)
+  // 组表紧跟 (magic, version, flags[ver>=19], n, cnt, groups) 之后；直接定位第一个组 id。
+  let p = 4 + (badId[3] >= 19 ? 2 : badId[3] >= 17 ? 1 : 0)
+  const skipVar = () => { while (badId[p++] & 0x80) { /* continue */ } }
+  skipVar(); skipVar(); skipVar()
+  badId[p] = 200
+  mustThrow(() => inspectContainer(badId), 'inspect 拒绝未知 transform id', /Unknown transform/)
+
+  // D7: 段长之和与声明总长不符。
+  const mismatched = Uint8Array.from(v1); mismatched[4] = 7
+  mustThrow(() => inspectContainer(mismatched), 'inspect 拒绝长度不符', /sum|长度/)
+
+  // D7: 载荷越界（header 声称的 pl 超出容器剩余字节）。
+  const overrun = Uint8Array.from([0x55, 0x43, 0x5a, 1, 2, 1, ID.STORE, 2, 99, 0x41])
+  mustThrow(() => inspectContainer(overrun), 'inspect 拒绝载荷越界', /payload|exceed/)
 }
