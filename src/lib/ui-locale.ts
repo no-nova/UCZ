@@ -68,3 +68,40 @@ export const TRUTH_LABEL_EN: Record<string, string> = {
   '重复纹理': 'Repeating texture',
   '日志文本': 'Log text',
 }
+
+/**
+ * English rendering of a Chinese progress/stage string.
+ *
+ * The stage strings are produced deep inside the planner, where a translation table
+ * would have to be threaded through every callback; instead the few message *shapes*
+ * are recognised here, and anything unrecognised falls back to the raw text rather
+ * than to a lie. Called only when the UI language is English.
+ */
+export function translateLabel(label: string): string {
+  return label
+    .replace(/步长/g, 'stride ')
+    .replace(/声道/g, 'ch ')
+    .replace(/记录/g, 'records')
+    .replace(/文本/g, 'text')
+    .replace(/残余/g, 'residual')
+    .replace(/合并/g, 'merged')
+    .replace(/预置/g, 'preset')
+}
+
+export function translateProgress(message: string): string {
+  const msg = message.trim()
+  let m = /^并行试探 (\d+) 个区域（(\d+) 线程）…$/.exec(msg)
+  if (m) return `Parallel probing of ${m[1]} regions (${m[2]} threads)…`
+  if (msg === '探测跨区域 16 位宽行结构…') return 'Probing a 16-bit wide-row structure across regions…'
+  if (msg === '启动后台工作线程…') return 'Starting the background worker…'
+  if (msg === '排队中…') return 'Queued…'
+  if (msg === '读取中…') return 'Reading…'
+  if (msg === '校验中…') return 'Verifying…'
+  m = /^区域 (\d+)\/(\d+) · 试探 (.+)$/.exec(msg)
+  if (m) return `Region ${m[1]}/${m[2]} · trying ${translateLabel(m[3])}`
+  m = /^区域 (\d+)\/(\d+) → (.+)$/.exec(msg)
+  if (m) return `Region ${m[1]}/${m[2]} → ${translateLabel(m[3])}`
+  m = /^试探开始 (\d+) 区域 \/ (\d+) 线程$/.exec(msg)
+  if (m) return `Probing ${m[1]} regions on ${m[2]} threads`
+  return msg
+}

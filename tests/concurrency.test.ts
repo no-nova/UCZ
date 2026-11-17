@@ -26,8 +26,10 @@ export async function testChecksumWithoutStrictRoundtrip(): Promise<void> {
   for (const [name, buf] of [['prose', prose], ['structured-bin', mk(7, 65536)]] as const) {
     const r = await compressAdaptive(buf, undefined, { checksum: true })
     assert.notEqual(r.container[3], 24, `${name}: default priors must not use the strict v24 tag`)
-    assert.ok(r.container[3] === 25, `${name}: checksummed default containers are v25, got v${r.container[3]}`)
-    fastDeepEqual(decompress(r.container), buf, `${name}: v25 roundtrip`)
+    // v25 = default + checksum, v27 = default + checksum + fresh distance buckets;
+    // either is legal, both must carry the CRC trailer and roundtrip.
+    assert.ok(r.container[3] === 25 || r.container[3] === 27, `${name}: checksummed default containers are v25/v27, got v${r.container[3]}`)
+    fastDeepEqual(decompress(r.container), buf, `${name}: checksummed roundtrip`)
     const strict = await compressAdaptive(buf, undefined, { checksum: true, strictZeroPrior: true })
     assert.equal(strict.container[3], 24, `${name}: strict + checksum stays v24`)
     fastDeepEqual(decompress(strict.container), buf, `${name}: v24 roundtrip`)

@@ -1,3 +1,5 @@
+import { deadlineHit } from './planner/budget'
+
 import {encodeCM,decodeCM} from './coder'
 import {MAX_OUTPUT_BYTES} from './limits'
 import {inheritPayloadModel} from './payload-model'
@@ -232,6 +234,10 @@ export function encodePeriodBytes(data:Uint8Array):Uint8Array|null {
  const tried=new Set<number>()
  const tryD=(D:number):Uint8Array|null=>{
   if(D<256||D>=n||tried.has(D))return null
+  // A budget may stop *starting* new verifications, never truncate one: a half-verified
+  // lag would be a wrong answer, an unverified lag is simply "not chosen". Unbudgeted
+  // runs never consult the clock, so their result is bit-identical to before.
+  if(deadlineHit())return null
   tried.add(D)
   const sample=Math.min(2048,n-D)
   // Find the delta period on a short sample first; only exact streams reach full verify.
@@ -254,7 +260,7 @@ export function encodePeriodBytes(data:Uint8Array):Uint8Array|null {
   out.set(data.subarray(0,D),5);out.set(table,5+D)
   return out
  }
- for(let k=8;k<=22;k++){const r=tryD(1<<k);if(r)return r}
+ for(let k=8;k<=22;k++){const r=tryD(1<<k);if(r)return r;if(deadlineHit())return null}
  // Arbitrary integer D: the lag-1 delta of a P-periodic byte recurrence is itself
  // periodic, so its primitive period p0 divides (or is a multiple of) the true P.
  // Search D = k*p0; this finds non-dyadic integer lags exactly without O(n^2).
@@ -269,6 +275,7 @@ export function encodePeriodBytes(data:Uint8Array):Uint8Array|null {
  if(p0){
   for(let D=p0;D<n/2;D+=p0){
    const r=tryD(D);if(r)return r
+   if(deadlineHit())return null
   }
  }
  return null

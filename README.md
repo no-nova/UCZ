@@ -17,18 +17,24 @@ input stream itself. The only thing it is told is that the input is a sequence o
 ### Integrity, budgets and determinism
 
 ```bash
-ucz compress big.bin big.ucz --checksum          # v24: 4-byte CRC-32C of the payload
+ucz compress big.bin big.ucz --checksum          # v25/v27: 4-byte CRC-32C of the payload
 ucz compress data.csv out.ucz --strict-zero-prior  # v23: no byte-class priors at all
 ucz decompress big.ucz --max-output 2000000000   # refuse to allocate more than this
 ucz compress big.bin out.ucz --time-budget 30 --threads 4 --memory-limit 4096
 ```
 
 * **`--checksum`** appends a CRC-32C of the *decompressed* payload and tags the container
-  `v24`. Decoding verifies it and fails with `container content check failed (CRC-32C)`.
+  `v25` (default priors) or `v27` (default priors + fresh match-distance state); with
+  `--strict-zero-prior` it is `v24`. Decoding verifies it and fails with
+  `container content check failed (CRC-32C)`.
   This detects **accidental corruption** (bit rot, truncated writes, bad transfers).
   It is **not authentication**: an attacker can recompute the checksum after editing the
-  payload, and containers written without the flag (v1..v23) carry no content checksum at
-  all — the decoder cannot tell a tampered old container from a valid one.
+  payload, and containers written without the flag (v1..v26 except v24/v25) carry no
+  content checksum at all — the decoder cannot tell a tampered old container from a valid
+  one.
+* **`--memory-limit`** is enforced twice: it caps the worker count *and* every job checks
+  the worker's resident set (`UCZ_RSS_LIMIT_MIB`) before it runs, so exceeding the budget
+  produces `memory budget exhausted` instead of an OOM kill.
 * **`--strict-zero-prior`** disables every prior that depends on byte *categories*
   (ASCII/printable tables, x86 call detection, gradient/bit-plane/anchor candidates,
   2-D scanline period). It is an ablation mode, not the default: on the reference corpora

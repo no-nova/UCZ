@@ -12,7 +12,7 @@ import { contextCodeOf, contextFromGroupBits, GROUP_CONTEXT_EXT_BIT } from '../s
 const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 function versionOf(flags: number): number {
-  return flags & 0x8000 ? 22 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
+  return flags & 0x8000 ? 26 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
 }
 const inContainer = <T>(flags: number, fn: () => T): T => flags ? withContainerModel(versionOf(flags), flags, fn) : fn()
 
@@ -101,7 +101,7 @@ export function testP178TextContexts() {
     eq(inContainer(flags, () => decodeTerrainGroup(lex, [data.length], spec3, undefined, [0], 'v20', false, { context: 'text-lexcol' }))[0], data)
     const lexMd = encodeTerrainGroup([data], spec3, undefined, undefined, undefined, [0], 'v20', { context: 'text-lexcol', matchDist: true })
     eq(decompress(container(data, spec3, lexMd, { context: 'text-lexcol', matchDist: true })), data)
-    assert.equal(container(data, spec3, lexMd, { context: 'text-lexcol', matchDist: true })[3], 22, 'matchDist bumps the container to version 22')
+    assert.equal(container(data, spec3, lexMd, { context: 'text-lexcol', matchDist: true })[3], 26, 'matchDist bumps the container to version 26 (stale-bucket fix)')
     assert.equal(container(data, spec3, lex, { context: 'text-lexcol' })[3], 21, 'context index 2 stays inside the version-21 header')
   }
   assert.ok(line.length < sparse.length)

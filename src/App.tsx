@@ -3,7 +3,7 @@ import { BLOCK, CLS_NAME } from './lib/analyze'
 import { MAX_INPUT_BYTES, MAX_SINGLE_CM_BYTES } from './lib/limits'
 import CodecWorker from './lib/compress.worker?worker&inline'
 import { CODECS, type Compressed, type CompressionLevel } from './lib/codec'
-import { CLS_LABEL_EN, CODEC_LABEL_EN, SAMPLE_LABEL_EN, TRUTH_LABEL_EN } from './lib/ui-locale'
+import { CLS_LABEL_EN, CODEC_LABEL_EN, SAMPLE_LABEL_EN, TRUTH_LABEL_EN, translateProgress } from './lib/ui-locale'
 import { V20_FLAG_CM, V20_FLAG_TRANSFORMS, V22_FLAG_MATCH_DISTANCE } from './lib/coder'
 import { V21_FLAG_CONTEXTS } from './lib/context-policy'
 import { SAMPLES, type TruthRegion } from './lib/samples'
@@ -312,7 +312,7 @@ export default function App() {
         {stage && (
           <div className="mt-6 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.05] p-5">
             <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-              <span className="truncate text-cyan-100">{lang === 'en' ? t.working : stage.msg}</span>
+              <span className="truncate text-cyan-100">{lang === 'en' ? translateProgress(stage.msg || t.working) : stage.msg}</span>
               <div className="flex shrink-0 items-center gap-3">
                 <span className="tabular-nums text-cyan-300">{Math.round(stage.pct)}%</span>
                 <button onClick={cancelRun} className="rounded-md border border-rose-300/40 px-2 py-1 text-xs text-rose-200 hover:bg-rose-300/10">{t.cancel}</button>

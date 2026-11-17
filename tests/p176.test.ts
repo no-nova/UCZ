@@ -17,7 +17,7 @@ const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffe
  * full UCZ header. Suppression/APM flags come from the container model, exactly
  * as they do in production. */
 function versionOf(flags: number): number {
-  return flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21
+  return flags & V22_FLAG_MATCH_DISTANCE ? 26 : flags & V21_FLAG_CONTEXTS ? 21
     : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18 : 17
 }
 const inContainer = <T>(flags: number, fn: () => T): T => (flags ? withContainerModel(versionOf(flags), flags, fn) : fn())

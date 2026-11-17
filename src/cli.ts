@@ -144,10 +144,13 @@ function applyBudgets(args: ParsedArgs): { timeBudgetMs?: number; maxOutputBytes
   if (memMiB !== undefined && memMiB < 800) throw new Error('--memory-limit must be at least 800 MiB (a single 24-bit model is ~640 MiB)')
   let budgetThreads = threads
   if (memMiB !== undefined) {
-    const byMemory = Math.max(1, Math.floor(memMiB / 640))
+    const byMemory = Math.max(1, Math.floor(memMiB / 640)) // ~640 MiB per 24-bit model
     budgetThreads = budgetThreads === undefined ? byMemory : Math.min(budgetThreads, byMemory)
   }
   if (budgetThreads !== undefined) process.env.UCZ_THREADS = String(Math.max(1, budgetThreads))
+  // The worker-count cap alone cannot stop a run that is already allocating; this env
+  // var is the runtime half, enforced in `runJob` before a job touches memory.
+  if (memMiB !== undefined) process.env.UCZ_RSS_LIMIT_MIB = String(memMiB)
   return { timeBudgetMs: timeSec === undefined ? undefined : Math.round(timeSec * 1000), maxOutputBytes: maxOut }
 }
 

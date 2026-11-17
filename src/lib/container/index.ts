@@ -5,3 +5,11 @@
  * this directory so the 5k-line file stops growing.
  */
 export { crc32c, crc32cUpdate, crcTrailer, readCrcTrailer } from './crc32c'
+export {
+  ID,
+  CONTAINER_MAGIC,
+  MAX_CONTAINER_VERSION,
+  containerHasChecksum,
+  containerHasFreshDistance,
+  containerIsStrict,
+} from './format'

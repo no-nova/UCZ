@@ -1,13 +1,23 @@
 // P14.1: a new v21 wire namespace; existing v20/legacy model semantics stay fixed.
-export const V21_FLAG_CONTEXTS = 0x4000 // container uint16, NOT group WORD-PRE
-export const GROUP_CONTEXT_SHIFT = 17
-export const GROUP_CONTEXT_MASK = 0xe0000
+import {
+  V21_FLAG_CONTEXTS,
+  GROUP_CONTEXT_SHIFT,
+  GROUP_CONTEXT_MASK,
+  GROUP_MATCH_DIST_BIT,
+  GROUP_CONTEXT_EXT_BIT,
+} from './container/format'
+export {
+  V21_FLAG_CONTEXTS,
+  GROUP_CONTEXT_SHIFT,
+  GROUP_CONTEXT_MASK,
+  GROUP_MATCH_DIST_BIT,
+  GROUP_CONTEXT_EXT_BIT,
+}
 /**
  * v22 per-group bit, above the three group-context bits. It records that THIS
  * group's payload used the distance-split match model, so groups that did not win
  * that candidate keep their exact old bytes inside a v22 container.
  */
-export const GROUP_MATCH_DIST_BIT = 0x100000
 /**
  * P17.7: second group-context namespace.
  *
@@ -20,7 +30,6 @@ export const GROUP_MATCH_DIST_BIT = 0x100000
  * self-describing (no container version bump), exactly like
  * `GROUP_MATCH_DIST_BIT` did for v22.
  */
-export const GROUP_CONTEXT_EXT_BIT = 0x200000
 /** Codes 1..7 inside the base namespace; 0 means "no context". */
 export const CONTEXT_CODES = { 'bin-stride4': 1, 'wide-geom': 2, 'wp-token3': 3, 'wp-merge': 4, 'text-sparse5': 5, 'xform-bin': 6, 'xform-bin-stride4': 7 } as const
 /**

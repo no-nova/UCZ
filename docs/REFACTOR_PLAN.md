@@ -43,7 +43,7 @@ src/lib/runtime/     codec entry points, worker pool, budgets, progress
 | 1 ✅ | `crc32c.ts` + the v24 trailer | pure, no shared state |
 | 2 ✅ | `planner/budget.ts` (level tier, pruning, deadline) | leaf module; workers inherit via `JobPayload.level` |
 | 2 | varint + header parse/write (`getVar`, `planHeader`, `decompress` header prologue) | header bytes must not change |
-| 3 | `ID` enum + container flag/version constants | single source of truth for v1..v24 |
+| 3 ✅ | `container/format.ts`: `ID` enum, all flag bits, `MAX_CONTAINER_VERSION`, `containerHas*` predicates | leaf module; `codec.ts`/`coder.ts` re-export, callers unchanged |
 | 4 | `analyze`/`detectRecordStride`/`detectLag*` | already isolated in `analyze.ts`; fold in |
 | 5 | planner stages (`candidatesFor`, `refine*`, `coalesce`) | keep `probeDepth` semantics |
 | 6 | CM model core (contexts, mixer, APM) | largest step; split in two |

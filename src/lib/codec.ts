@@ -10,7 +10,7 @@ import { fitMicroSeed, microFwd, microInv, microWeights, MICRO_SEED_BYTES } from
 import { encodePeeledTranspose, decodePeeledTranspose, encodePeeledAnchor, decodePeeledAnchor, inspectPeeledTranspose, inspectPeeledAnchor, type SubPeelInfo, type AnchorSubInfo } from './sub-peel'
 import { encodeAnchor, decodeAnchor, anchorRowCount, anchorPotential, MAX_ANCHOR_ROWS } from './anchor'
 import { analyze, detectAnchors, detectLagCandidates, detectRecordStride, detectWide16Lag, BLOCK, type Analysis, type Cls } from './analyze'
-import { crc32c, crcTrailer, readCrcTrailer } from './container'
+import { crc32c, crcTrailer, readCrcTrailer, containerHasChecksum } from './container'
 import {
   type CompressionLevel,
   currentCompressionLevel,
@@ -28,7 +28,8 @@ import { CM_FAMILIES, isFamilyCM } from './unify'
 import { threadCount, type JobPayload, type JobReply } from './parallel'
 import { closeNodePool, nodeParallelReady, runNodeJobs } from './parallel-node'
 
-export const ID = { STORE: 0, FILL: 1, RLE: 2, O0: 3, TEXT: 4, BIN: 5, DELTA: 6, GRAD: 7, D16: 8, TRANSPOSE: 9, TRANSPOSE_GROUP: 10, BCJ: 11, ANCHOR: 12, ANCHOR_FOLD: 13, PEEL: 14, SUB_TRANSPOSE: 15, SUB_ANCHOR: 16, MICRO: 17, TEXT_V2: 18, BIN_V2: 19, BCJ_V2: 20, GRAD_V2: 21, TRANSPOSE_2D: 22, TEXT_V3: 23, BIN_V3: 24, BCJ_V3: 25, GRAD_V3: 26, DELTA_V3: 27, SUB_TRANSPOSE_V3: 28, SUB_ANCHOR_V3: 29, TRANSPOSE_GROUP_V3: 30, WIDE_GRAD: 31, REC2: 32, BITPLANE: 33 } as const
+import { ID } from './container/format'
+export { ID }
 
 export interface CodecInfo {
   short: string
@@ -3082,7 +3083,11 @@ export function planHeader(n:number,segs:readonly PlanSegment[],groups:readonly 
   // v23 = strict only, v24 = strict + checksum, v25 = default priors + checksum.
   // Encoding a checksummed container with default priors as v24 would make the
   // decoder build the strict model, so the two axes get distinct versions.
-  const ver:number = containerChecksumOn() ? (strictPriorsOn() ? 24 : 25) : strictPriorsOn() ? 23 : flags & V22_FLAG_MATCH_DISTANCE ? 22 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
+  // v26 = v22 layout + fresh distance buckets. Old v22 containers keep their stale
+  // behaviour, so decoding is a pure function of the version byte.
+  const ver:number = (flags & V22_FLAG_MATCH_DISTANCE) && !strictPriorsOn()
+    ? (containerChecksumOn() ? 27 : 26)
+    : containerChecksumOn() ? (strictPriorsOn() ? 24 : 25) : strictPriorsOn() ? 23 : flags & V21_FLAG_CONTEXTS ? 21 : flags & (V20_FLAG_TRANSFORMS | V20_FLAG_CM) ? 20 : flags > 255 ? 19 : flags ? 18
     :hasV15?15:groups.some(g=>g.spec.id===ID.WIDE_GRAD)?14:groups.some(g=>g.spec.id>=ID.TEXT_V3)?13:groups.some(g=>g.spec.id>=ID.TEXT_V2)?12:groups.some(g=>g.spec.id===ID.MICRO)?11:groups.some(g=>g.spec.id===ID.SUB_TRANSPOSE||g.spec.id===ID.SUB_ANCHOR)?10:groups.some(g=>g.spec.id===ID.PEEL)?9:groups.some(g=>g.spec.id===ID.ANCHOR_FOLD)?8:7
   const hdr:number[]=[0x55,0x43,0x5a,ver]
   if (ver >= 19) hdr.push(flags & 255, flags >>> 8)
@@ -4787,7 +4792,7 @@ async function compressAdaptiveImpl(
 }
 
 export function decompress(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 25)
+  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || c[3] < 1 || c[3] > 27)
     throw new Error('不是有效的 UCZ 容器（不支持的格式版本）')
   if (c[3] >= 17 && c.length < (c[3] >= 19 ? 6 : 5)) throw new Error(`v${c[3]} 配置字段被截断`)
   // Strict version dispatch: v19 uint16 + tiered mht4; v17/v18 keep old widths.
@@ -4796,11 +4801,11 @@ export function decompress(c: Uint8Array, onProgress?: (done: number, total: num
 }
 
 function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
-  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23 && c[3] !== 24 && c[3] !== 25)) throw new Error('不是有效的 UCZ 容器')
+  if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23 && c[3] !== 24 && c[3] !== 25 && c[3] !== 26 && c[3] !== 27)) throw new Error('不是有效的 UCZ 容器')
   const st = { p: c[3] >= 19 ? 6 : c[3] >= 17 ? 5 : 4 }, n = getVar(c, st), cnt = getVar(c, st)
   // v24 appends a 4-byte CRC-32C of the decompressed payload; everything below
   // reads up to `bodyEnd` and the trailer is verified once the output exists.
-  const tail = c[3] >= 24 ? 4 : 0
+  const tail = containerHasChecksum(c[3]) ? 4 : 0
   const bodyEnd = c.length - tail
   if (tail && c.length < tail + 6) throw new Error('容器被截断（缺少校验尾部）')
   if (!Number.isSafeInteger(n) || !Number.isSafeInteger(cnt) || cnt > n) throw new Error('无效的容器长度')
@@ -4860,7 +4865,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // 次高位：该组载荷被 WORD-PRE 封装过（P4-2，独立于 v15 标记）。
     const wp = c[3] >= 15 && (rRaw & 0x4000) !== 0
     const contextCode=(rRaw & GROUP_CONTEXT_MASK) >>> GROUP_CONTEXT_SHIFT
-    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23 && c[3]!==24 && c[3]!==25)throw Error('旧容器包含 v21 组标记')
+    if(contextCode && c[3]!==21 && c[3]!==22 && c[3]!==23 && c[3]!==24 && c[3]!==25 && c[3]!==26 && c[3]!==27)throw Error('旧容器包含 v21 组标记')
     const matchDist = !!(rRaw & GROUP_MATCH_DIST_BIT)
     // v22 owns bit 20; P17.7 adds the extended-context namespace bit at 21. Every
     // earlier version (and every pre-P17.7 v22 stream) has bit 21 clear, so the
@@ -4871,7 +4876,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
     // reinterpret the group's r as a larger value. Bit 21 is the P17.7 extended
     // context namespace, so it is legal from v21 on (and rejected below v21).
     if(c[3]===21 && (rRaw>0x3fffff || (rRaw&GROUP_MATCH_DIST_BIT)!==0 || ((rRaw&0x10000)!==0 && !v15)))throw Error('未知组标志位或缺少 APM 内核')
-    if(matchDist && c[3]!==22 && c[3]!==23 && c[3]!==24 && c[3]!==25)throw Error('旧容器包含 v22 组匹配模型标记')
+    if(matchDist && c[3]!==22 && c[3]!==23 && c[3]!==24 && c[3]!==25 && c[3]!==26 && c[3]!==27)throw Error('旧容器包含 v22 组匹配模型标记')
     if(c[3]>=22 && rRaw>0x3fffff)throw Error('未知组标志位')
     const context=contextFromGroupBits(rRaw)
     const r = v15 || wp || context || matchDist ? rRaw & 0x3fff : rRaw

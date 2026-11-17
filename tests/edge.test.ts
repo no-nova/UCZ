@@ -300,9 +300,9 @@ export async function testEdgeInspectContainerBounds(): Promise<void> {
 
   // D4: 版本上界与 `decompress` 对齐（25：v23 严格、v24 严格+CRC、v25 默认+CRC）。
   const good = (await compressAdaptive(new TextEncoder().encode('bounds check payload\n'.repeat(30)), undefined, { level: 'fast' })).container
-  const v26 = Uint8Array.from(good); v26[3] = 26
+  const v26 = Uint8Array.from(good); v26[3] = 99
   // `isContainer` 与 `inspectContainer` 共用 1..25 的上界，26 在门禁处被拒。
-  mustThrow(() => inspectContainer(v26), 'inspect 拒绝 v26', /Not a UCZ container|version|版本/)
+  mustThrow(() => inspectContainer(v26), 'inspect 拒绝未知版本', /Not a UCZ container|version|版本/)
 
   // D7: 未知识别符。
   const badId = Uint8Array.from(good)

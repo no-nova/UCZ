@@ -11,7 +11,7 @@ import { contextCodeOf, contextFromGroupBits, GROUP_CONTEXT_EXT_BIT } from '../s
 const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 function versionOf(flags: number): number {
-  return flags & 0x8000 ? 22 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
+  return flags & 0x8000 ? 26 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
 }
 const inContainer = <T>(flags: number, fn: () => T): T => flags ? withContainerModel(versionOf(flags), flags, fn) : fn()
 
@@ -67,7 +67,7 @@ export function testP243VerticalColumns() {
   const mdFlags = payloadModelFlags(md)
   eq(inContainer(mdFlags, () => decodeTerrainGroup(md, [data.length], spec3, undefined, [0], 'v20', false, { context: 'text-vertcol', matchDist: true }))[0], data)
   eq(decompress(container(data, spec3, md, { context: 'text-vertcol', matchDist: true })), data)
-  assert.equal(container(data, spec3, md, { context: 'text-vertcol', matchDist: true })[3], 22, 'matchDist bumps the container to version 22')
+  assert.equal(container(data, spec3, md, { context: 'text-vertcol', matchDist: true })[3], 26, 'matchDist bumps the container to version 26 (stale-bucket fix)')
   console.log('P24.3 text-vertcol wire legality, gated vertical predictors and roundtrip PASS')
 }
 

@@ -10,8 +10,33 @@ import type { JobPayload, JobReply } from './parallel'
 import { cmV20Tuning, setStrictPriors } from './coder'
 import { setActiveCompressionLevel } from './codec'
 
+/**
+ * Resident-set ceiling for a single job, in MiB.
+ *
+ * `memorySafeThreads` only decides *how many* workers to start; it cannot stop a run
+ * that is already over budget. This guard is the runtime half of that promise: before a
+ * job allocates anything it compares the process RSS against the ceiling taken from
+ * `UCZ_RSS_LIMIT_MIB` (set by `--memory-limit`) and refuses the job instead of letting
+ * the allocator push the machine into swap. Refusing is safe because every job is
+ * re-runnable — the caller sees a clear error rather than an OOM kill.
+ */
+export const DEFAULT_RSS_LIMIT_MIB = 3584
+
+export function rssLimitMib(): number {
+  const raw = Number(process.env.UCZ_RSS_LIMIT_MIB)
+  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : DEFAULT_RSS_LIMIT_MIB
+}
+
+export function assertMemoryHeadroom(payload: JobPayload): void {
+  const limit = rssLimitMib()
+  const rss = process.memoryUsage().rss / (1024 * 1024)
+  if (rss <= limit) return
+  throw Error(`内存预算已用尽：RSS ${rss.toFixed(0)} MiB 超过上限 ${limit} MiB（任务 ${payload.kind} 已拒绝）`)
+}
+
 /** 执行一个任务。返回结构化克隆安全的纯数据。 */
 export async function runJob(payload: JobPayload, data: Uint8Array): Promise<JobReply> {
+  assertMemoryHeadroom(payload)
   const saved={...cmV20Tuning}
   if(payload.cmV20) {
     if(typeof payload.cmV20.enabled!=='boolean' || typeof payload.cmV20.binRecovery!=='boolean')throw Error('无效 v20 worker 配置')

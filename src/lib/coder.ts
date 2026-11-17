@@ -2,6 +2,25 @@ import { ByteWriter } from './byte-writer'
 import { V21_FLAG_CONTEXTS, contextCodeOf, type CMContext, type CMOptions } from './context-policy'
 export type { CMOptions, CMContext } from './context-policy'
 import { markPayloadModel, payloadModelFlags } from './payload-model'
+import {
+  V18_FLAG_TEXT_A2_OFF, V18_FLAG_BIG_TABLE_22, V18_FLAG_TABLE_23,
+  V18_FLAG_MATCH_21, V18_FLAG_MATCH_22, V18_FLAG_RES_A2_OFF,
+  V18_FLAG_WORD_PRE_A2_OFF, V18_FLAG_UNSCOPED,
+  V19_FLAG_TABLE_24, V19_FLAG_MATCH_23, V19_FLAG_MHT4_20,
+  V20_FLAG_TRANSFORMS, V20_FLAG_CM, V20_FLAG_BIN_RECOVERY,
+  V22_FLAG_MATCH_DISTANCE, CM_FLAGS_MASK, MAX_CONTAINER_VERSION,
+  containerHasChecksum, containerHasFreshDistance, containerIsStrict,
+} from './container/format'
+
+export {
+  V18_FLAG_TEXT_A2_OFF, V18_FLAG_BIG_TABLE_22, V18_FLAG_TABLE_23,
+  V18_FLAG_MATCH_21, V18_FLAG_MATCH_22, V18_FLAG_RES_A2_OFF,
+  V18_FLAG_WORD_PRE_A2_OFF, V18_FLAG_UNSCOPED,
+  V19_FLAG_TABLE_24, V19_FLAG_MATCH_23, V19_FLAG_MHT4_20,
+  V20_FLAG_TRANSFORMS, V20_FLAG_CM, V20_FLAG_BIN_RECOVERY,
+  V22_FLAG_MATCH_DISTANCE, CM_FLAGS_MASK, MAX_CONTAINER_VERSION,
+} from './container/format'
+
 
 // 二进制算术编码器 + 逐比特上下文混合(Context Mixing)预测器
 // 全部使用整数运算 / 确定性表,保证编码端与解码端逐比特一致 => 严格无损。
@@ -406,25 +425,11 @@ export const modelTuning = { maxTableBits: 24, matchTableBits: 23, largeOnly: tr
 export const a2Tuning = { resOn: true, textOn: true, wordPreTextOff: false }
 
 // UCZ v18 has its own wire namespace. NEVER interpret these as v17 flags.
-export const V18_FLAG_TEXT_A2_OFF = 0x01
-export const V18_FLAG_BIG_TABLE_22 = 0x02
-export const V18_FLAG_TABLE_23 = 0x04
-export const V18_FLAG_MATCH_21 = 0x08
-export const V18_FLAG_MATCH_22 = 0x10
-export const V18_FLAG_RES_A2_OFF = 0x20
-export const V18_FLAG_WORD_PRE_A2_OFF = 0x40
 // Diagnostic-only old global 21/22 + match20/21 policy. Not emitted by defaults.
-export const V18_FLAG_UNSCOPED = 0x80
 // v19 extends the flags to a little-endian uint16; low v18 bits keep their labels.
-export const V19_FLAG_TABLE_24 = 0x100
-export const V19_FLAG_MATCH_23 = 0x200
 // P11.1: only with an actual 24/23 feature. Old v19 without this bit keeps
 // P11's expanded mht4; never silently reinterpret an existing v19 stream.
-export const V19_FLAG_MHT4_20 = 0x400
 // v20 transform envelope; CM behavior is still v15 until a separate kernel flag.
-export const V20_FLAG_TRANSFORMS = 0x800
-export const V20_FLAG_CM = 0x1000
-export const V20_FLAG_BIN_RECOVERY = 0x2000 // container flag, NOT the r=8192 bit
 /**
  * v22 container flag: at least one group uses the distance-split match model.
  *
@@ -437,8 +442,6 @@ export const V20_FLAG_BIN_RECOVERY = 0x2000 // container flag, NOT the r=8192 bi
  * must not share a state. Cost: one extra Int32 per 4-gram slot and
  * 32x5 Uint16 state cells. Non-literal data measures exactly 0 B difference.
  */
-export const V22_FLAG_MATCH_DISTANCE = 0x8000
-export const CM_FLAGS_MASK = 0x3fff
 const V22_FLAGS_MASK = CM_FLAGS_MASK | V21_FLAG_CONTEXTS | V22_FLAG_MATCH_DISTANCE
 export const CM_FLAG_TABLE_24 = V19_FLAG_TABLE_24
 export const CM_FLAG_MATCH_TABLE_23 = V19_FLAG_MATCH_23
@@ -465,6 +468,14 @@ export interface ContainerModel {
   binRecovery: boolean
   /** v22: distance-split match state + second-generation 4-gram slot. */
   matchDistance: boolean
+  /**
+   * v26: `matchDistance` is recomputed for every byte a match is live, not only when
+   * a *new* match is started. v22..v25 left the stale value from the previous match in
+   * place when a match was resumed by the 8-gram table or by gap recovery, so the
+   * distance bucket could belong to a completely different match. Both sides compute
+   * it identically, which is why it was only a compression loss, never a corruption.
+   */
+  matchDistanceFresh: boolean
   /** v23: strict zero-prior profile — no bitmap scanline prior is inferred. */
   strictPriors: boolean
   /** v24: the container ends with a CRC-32C of the decompressed payload. */
@@ -472,11 +483,11 @@ export interface ContainerModel {
 }
 const LEGACY_CONTAINER_MODEL: Readonly<ContainerModel> = Object.freeze({
   maxTableBits: 21, matchTableBits: 20, textOn: true, resOn: true,
-  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false, checksum: false,
+  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, matchDistanceFresh: false, strictPriors: false, checksum: false,
 })
 const V16_EXPERIMENTAL_MODEL: Readonly<ContainerModel> = Object.freeze({
   maxTableBits: 22, matchTableBits: 20, textOn: false, resOn: true,
-  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false, checksum: false,
+  wordPreTextOff: false, largeOnly: false, groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, matchDistanceFresh: false, strictPriors: false, checksum: false,
 })
 let containerModel: Readonly<ContainerModel> | null = null
 /**
@@ -533,7 +544,7 @@ export function encodingModelFlags(): number {
 
 /** Hard version split: v17 keeps its OWN old bit definitions and stream sizing. */
 export function withContainerModel<T>(version: number, flags: number, fn: () => T): T {
-  if (!Number.isInteger(version) || version < 1 || version > 25) throw Error('不支持的 UCZ 格式版本')
+  if (!Number.isInteger(version) || version < 1 || version > MAX_CONTAINER_VERSION) throw Error('不支持的 UCZ 格式版本')
   if ((version >= 17) && (!Number.isInteger(flags) || flags < 0
     || flags > (version === 17 ? 63 : version === 18 ? 255 : version === 19 ? 0x7ff : version === 20 ? CM_FLAGS_MASK : version === 21 ? CM_FLAGS_MASK | V21_FLAG_CONTEXTS : V22_FLAGS_MASK)
     || (version === 21 && (!(flags & V21_FLAG_CONTEXTS) || !(flags & V20_FLAG_CM)))
@@ -552,15 +563,16 @@ export function withContainerModel<T>(version: number, flags: number, fn: () => 
     kernelV20: version >= 20 && !!(flags & V20_FLAG_CM),
     contextsV21: version >= 21 && !!(flags & V21_FLAG_CONTEXTS),
     matchDistance: version >= 22 && !!(flags & V22_FLAG_MATCH_DISTANCE),
+    matchDistanceFresh: containerHasFreshDistance(version),
     binRecovery: version >= 20 && !!(flags & V20_FLAG_BIN_RECOVERY),
-    strictPriors: version === 23 || version === 24,
-    checksum: version >= 24,
+    strictPriors: containerIsStrict(version),
+    checksum: containerHasChecksum(version),
     fixedMht4: version === 18 || version >= 20 || !!(flags & V19_FLAG_MHT4_20),
   } : version === 17 ? {
     maxTableBits: flags & 0x01 ? 22 : 21,
     matchTableBits: flags & 0x04 ? 21 : 20,
     textOn: !(flags & 0x02), resOn: !(flags & 0x08),
-    wordPreTextOff: !!(flags & 0x10), largeOnly: !!(flags & 0x20), groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, strictPriors: false, checksum: false,
+    wordPreTextOff: !!(flags & 0x10), largeOnly: !!(flags & 0x20), groupSizing: false, v19: false, fixedMht4: true, transformsV20: false, kernelV20: false, contextsV21: false, binRecovery: false, matchDistance: false, matchDistanceFresh: false, strictPriors: false, checksum: false,
   } : version === 16 ? V16_EXPERIMENTAL_MODEL : LEGACY_CONTAINER_MODEL
   const prev = containerModel, prevGroup = groupModelBytes, prevProbe = probeDepth
   containerModel = model; groupModelBytes = 0; probeDepth = 0
@@ -917,6 +929,8 @@ class Model {
   matchDistOn = false
   matchStats?: MatchStats
   matchDistance = 0
+  /** v26: refresh the distance bucket on every live-match byte. */
+  mdFresh = true
   mhShift: number
   mptr = 0
   mlen = 0
@@ -1089,6 +1103,7 @@ class Model {
       if (variant !== 'v20' || (profile !== 'text' && profile !== 'bin'))
         throw Error('无效的 v22 matchDist / profile / 格式标志')
       this.matchDistOn = true
+      this.mdFresh = containerModel ? containerModel.matchDistanceFresh : true
       // Mirror the context option: a payload asked for a v21 context must carry the
       // namespace flag itself, so priced headers match what the writer emits even
       // when this encoder is called directly rather than through a group wrapper.
@@ -1427,6 +1442,12 @@ class Model {
   }
 
   private computeContexts() {
+    // v26: the distance bucket describes the match that will predict THIS byte, so it is
+    // derived here rather than carried over from whenever the match happened to start.
+    if (this.mdFresh && this.matchDistOn && this.mlen > 0) {
+      const d = this.pos - this.mptr
+      this.matchDistance = d <= 16 ? 0 : d <= 256 ? 1 : d <= 4096 ? 2 : d <= 65536 ? 3 : 4
+    }
     // P28.5: small `bin` blocks may be 2-D bitmaps (fax rows, 1-bit BMP). The
     // detector is causal and header-free; it runs only at power-of-two
     // boundaries (at most a handful of times per stream) and the size band keeps

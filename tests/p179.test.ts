@@ -12,7 +12,7 @@ import { contextCodeOf, contextFromGroupBits, GROUP_CONTEXT_EXT_BIT } from '../s
 const eq = (a: Uint8Array, b: Uint8Array) => fastDeepEqual(Buffer.from(a), Buffer.from(b))
 
 function versionOf(flags: number): number {
-  return flags & 0x8000 ? 22 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
+  return flags & 0x8000 ? 26 : flags & 0x4000 ? 21 : flags & 0x2800 ? 20 : flags > 255 ? 19 : flags ? 18 : 17
 }
 const inContainer = <T>(flags: number, fn: () => T): T => flags ? withContainerModel(versionOf(flags), flags, fn) : fn()
 
@@ -96,7 +96,7 @@ export function testP179TextContexts() {
     const mdFlags = payloadModelFlags(md)
     eq(inContainer(mdFlags, () => decodeTerrainGroup(md, [data.length], spec3, undefined, [0], 'v20', false, { context: ctx, matchDist: true }))[0], data)
     eq(decompress(container(data, spec3, md, { context: ctx, matchDist: true })), data)
-    assert.equal(container(data, spec3, md, { context: ctx, matchDist: true })[3], 22, `${name}: matchDist bumps the container to version 22`)
+    assert.equal(container(data, spec3, md, { context: ctx, matchDist: true })[3], 26, `${name}: matchDist bumps the container to version 26`)
   }
   console.log('P17.9 text-lexcol upgrade + text-tabcol wire legality, tracker liveness and roundtrip PASS')
 }

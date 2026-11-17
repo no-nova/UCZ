@@ -70,7 +70,7 @@ export async function testP10() {
     // rejected for being a flag configuration.
     // v22 is supported since P17.1 (group match-distance bit), v23/v24/v25 since P37.2-P37.7
     // (strict profile, strict+CRC, default+CRC), so the representative unsupported version is v26.
-    assert.throws(() => withContainerModel(26, 0, () => {}), /版本/)
+    assert.throws(() => withContainerModel(28, 0, () => {}), /版本/)
     assert.throws(() => withContainerModel(21, 0, () => {}), /无效的 v21 模型配置/)
     assert.throws(() => withContainerModel(18, 0x84, () => {}), /v18/)
     assert.throws(() => withCMBlockSize(4 * MiB, () => { throw Error('scope restore') }), /scope restore/)
@@ -85,7 +85,7 @@ export async function testP10() {
     assert.equal(sha(decompress(old)), e24.rawSha256)
     eq(decompress(old), original)
     // v24/v25 add the CRC-32C trailer (strict / default priors); v26 tops out.
-    assert.throws(() => decompress(Uint8Array.of(85, 67, 90, 26, 0)), /版本/)
+    assert.throws(() => decompress(Uint8Array.of(85, 67, 90, 28, 0)), /版本/)
     checks++
 
     // Actual large tables, but only 128 bytes are encoded. Explicit raw-model
