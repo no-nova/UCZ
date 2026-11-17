@@ -42,8 +42,10 @@ ucz compress big.bin out.ucz --time-budget 30 --threads 4 --memory-limit 4096
   those measured bounds and that no forbidden transform appears in a strict container.
 * **`--time-budget SECONDS`** returns the best plan found when the budget expires and marks
   the result `budgetTruncated`; the container is still valid and still decodes.
-  **`--threads` / `--memory-limit`** cap workers (each 24-bit context table is ~640 MiB, so a
-  limit below 800 MiB is rejected). The budget bounds the planner's **search**, not
+  **`--threads` / `--memory-limit`** cap workers using the exact model accounting in
+  `cmModelBytes(nctx, bits)` (`src/lib/parallel.ts`): 25 contexts at 23 bits = 800.1 MiB,
+  14 at 24 bits = 896.1 MiB — not the old flat 1024 MiB guess — so a
+  limit below 800 MiB is rejected. The budget bounds the planner's **search**, not
   its arithmetic: it stops *starting* new candidate measurements and returns the best plan
   already priced, so a budgeted container is always complete and decodes (never a truncated
   stream). One model pass over one segment is atomic, so the worst case is "one baseline

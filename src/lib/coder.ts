@@ -1283,7 +1283,12 @@ class Model {
     // history (ties -> newest). Only `v20` streams get the extra table, keeping every
     // `v15` fixture byte-identical.
     else if (this.useMatch && matchExperiment && matchExperiment !== 'single') this.mhtOlder = new Int32Array(1 << mhBits)
-    if (this.useMatch && this.isV20 && n >= BIN_TEN_MIN_BYTES) this.mhtO2 = new Int32Array(1 << mhBits)
+    // P37.9：`mhtO2` is only ever *written* from `mhtOlder` (`mhtO2[h] = mhtOlder[h]`)
+    // and otherwise read as all-zero, i.e. it contributes a candidate only when a
+    // second match generation already exists. Allocating it when `mhtOlder` is absent
+    // therefore bought 4 MiB per model of pure zeroes — keep it only when it can be
+    // fed. Byte output is unchanged (a zero slot never wins the `older > 0` test).
+    if (this.useMatch && this.isV20 && n >= BIN_TEN_MIN_BYTES && this.mhtOlder) this.mhtO2 = new Int32Array(1 << mhBits)
     this.matchTabs = [this.mhtOlder, this.mhtO2].filter((t): t is Int32Array => t !== undefined)
     if (this.symDna) this.msm = new Uint16Array(32 * 5 * 16).fill(49152)
     else if (this.symProt) this.msm = new Uint16Array(32 * 5 * 8).fill(49152)

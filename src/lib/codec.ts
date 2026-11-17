@@ -10,7 +10,16 @@ import { fitMicroSeed, microFwd, microInv, microWeights, MICRO_SEED_BYTES } from
 import { encodePeeledTranspose, decodePeeledTranspose, encodePeeledAnchor, decodePeeledAnchor, inspectPeeledTranspose, inspectPeeledAnchor, type SubPeelInfo, type AnchorSubInfo } from './sub-peel'
 import { encodeAnchor, decodeAnchor, anchorRowCount, anchorPotential, MAX_ANCHOR_ROWS } from './anchor'
 import { analyze, detectAnchors, detectLagCandidates, detectRecordStride, detectWide16Lag, BLOCK, type Analysis, type Cls } from './analyze'
-import { crc32c, crcTrailer, readCrcTrailer } from './container/crc32c'
+import { crc32c, crcTrailer, readCrcTrailer } from './container'
+import {
+  type CompressionLevel,
+  currentCompressionLevel,
+  deadlineClear,
+  deadlineHit,
+  deadlineSet,
+  pruningLevel,
+  setActiveCompressionLevel,
+} from './planner'
 import { encodeCM, decodeCM, encodeCMDual, encodeCMContextDual, a2Suppress, transposeInnerSuppress, encodingModelFlags, withContainerModel, withCMBlockSize, withCMProbe, HUGE_CM_MIN_BYTES, V20_FLAG_TRANSFORMS, V20_FLAG_CM, V22_FLAG_MATCH_DISTANCE, isAPMKernel, cmV20Tuning, cmV22Tuning, transformsV20Enabled, modelTuning, a2Tuning, setStrictPriors, strictPriorsOn, setContainerChecksum, containerChecksumOn, type CostBins, type CMVariant, type Profile } from './coder'
 import { wordPreFwdSampled, wordPreInv, dictHeaderLen, collapseWithDict, type WordPreResult } from './wordpre'
 const ENABLE_WORDPRE = true
@@ -1625,16 +1634,13 @@ export function workerTuningMatchesDefaults(): boolean {
  * `'balanced'` 与 `'fast'` 只减少**搜索**，不改变容器格式：解码端完全不知道档位存在，
  * 任何档位产生的容器都由同一个 `decompress` 解回。
  */
-export type CompressionLevel = 'fast' | 'balanced' | 'max'
-let activeLevel: CompressionLevel = 'max'
-export function currentCompressionLevel(): CompressionLevel { return activeLevel }
-/** 在 worker / 临时作用域内切换档位，返回恢复函数。 */
-export function setActiveCompressionLevel(level?: CompressionLevel): () => void {
-  const previous = activeLevel
-  if (level === 'fast' || level === 'balanced' || level === 'max') activeLevel = level
-  return () => { activeLevel = previous }
-}
-function pruningLevel(): 0 | 1 | 2 { return activeLevel === 'fast' ? 2 : activeLevel === 'balanced' ? 1 : 0 }
+export {
+  currentCompressionLevel,
+  pruningLevel,
+  setActiveCompressionLevel,
+  deadlineActive,
+} from './planner/budget'
+export type { CompressionLevel } from './planner/budget'
 
 export function sampleBudgetForSegment(totalBytes: number, segments: number, segmentBytes: number): number {
   if (planTuning.soloSampleCap > 0 && segments <= 4 && segmentBytes >= 1024 * 1024)
@@ -3265,7 +3271,7 @@ async function tryParallelChoose(
 ): Promise<{ spec: Spec; trials: Trial[] }[] | null> {
   if (!parallelReport.ok) return null
   const jobs: JobPayload[] = segs.map((sg, i) => ({
-    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: activeLevel, strictPrior: strictPriorsOn(), start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
+    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: currentCompressionLevel(), strictPrior: strictPriorsOn(), start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
     bestS: sg.bestS, sampleLimit: sampleLimits[i], base: sg.start,
   }))
   const loads = segs.map(sg => sg.end - sg.start)
@@ -3325,7 +3331,7 @@ function groupJobs(
     const parts = g.members.map(i => [segs[i].start, segs[i].end] as [number, number])
     const positions = g.members.map(i => segs[i].start)
     const ends = logicalGroupEnds(g, segs)
-    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: activeLevel, strictPrior: strictPriorsOn(), groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
+    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: currentCompressionLevel(), strictPrior: strictPriorsOn(), groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
     index.push(gi)
     loads.push(g.members.reduce((a, i) => a + segs[i].rawLen, 0))
   }
@@ -3928,19 +3934,6 @@ function sealChecksum(comp: Compressed, raw: Uint8Array): Compressed {
  *  entry point therefore runs one encode at a time; a queue costs nothing for the
  *  single-call case and removes a whole class of silent corruption.
  */
-/** Wall-clock budget for the current encode.
- *
- *  A context-mixing planner cannot be asked for "the result in 50 ms": every stage
- *  is a measurement, and a measurement cannot be truncated without changing the
- *  answer. What a budget CAN do is stop *starting new measurements*: each search
- *  loop checks this deadline and returns the best plan it has already priced. The
- *  result is therefore "best plan found within the budget" — never a partial or
- *  invalid container, because only fully measured candidates are ever adopted.
- */
-let encodeDeadline = 0
-function deadlineHit(): boolean { return encodeDeadline > 0 && Date.now() >= encodeDeadline }
-function deadlineSet(ms: number): void { encodeDeadline = ms > 0 ? Date.now() + ms : 0 }
-function deadlineClear(): void { encodeDeadline = 0 }
 
 let encodeChain: Promise<void> = Promise.resolve()
 async function withEncodeLock<T>(run: () => Promise<T>): Promise<T> {
@@ -3957,8 +3950,7 @@ export async function compressAdaptive(
   options?: { serial?: boolean; batchGuards?: boolean; reuseGuardBases?: boolean; contextCandidates?: boolean; level?: CompressionLevel; strictZeroPrior?: boolean; checksum?: boolean; timeBudgetMs?: number; maxOutputBytes?: number },
 ): Promise<Compressed> {
   return withEncodeLock(async () => {
-  const previousLevel = activeLevel
-  activeLevel = options?.level ?? 'max'
+  const restoreLevel = setActiveCompressionLevel(options?.level ?? 'max')
   // v23 strict profile: every prior listed in PRIOR_REGISTRY.md is switched off
   // and the container version records it, so the decoder disables the same ones.
   const restoreStrict = setStrictPriors(!!options?.strictZeroPrior)
@@ -4035,7 +4027,7 @@ export async function compressAdaptive(
     }
     return seal(coalesceCompressedPlan(data.length,bp))
   }
-  finally { restoreChecksum(); restoreStrict(); activeLevel = previousLevel; deadlineClear(); await closeNodePool() }
+  finally { restoreChecksum(); restoreStrict(); restoreLevel(); deadlineClear(); await closeNodePool() }
   })
 }
 /** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
@@ -5361,7 +5353,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // other group later accepts a context/transform of its own.
       .filter(p=>!groups.some((other,i)=>i!==group && sameSpec(other.spec,p.spec)))
       .map(proposal=>({g,group,proposal,rawBytes:g.members.reduce((n,i)=>n+segs[i].rawLen,0)})))
-    const jobs:JobPayload[]=eligible.map(({g,proposal})=>({kind:'contextGroup',cmV20:{...cmV20Tuning},level:activeLevel,strictPrior:strictPriorsOn(),spec:{...proposal.spec},
+    const jobs:JobPayload[]=eligible.map(({g,proposal})=>({kind:'contextGroup',cmV20:{...cmV20Tuning},level:currentCompressionLevel(),strictPrior:strictPriorsOn(),spec:{...proposal.spec},
       parts:g.members.map(i=>[segs[i].start,segs[i].end] as [number,number]),positions:g.members.map(i=>segs[i].start),rawText:proposal.rawText,
       retained:sameSpec(g.spec,proposal.spec)?{payload:g.payload,flags:payloadModelFlags(g.payload),wordPre:!!g.wordPre}:undefined}))
     let replies:JobReply[]|null=null

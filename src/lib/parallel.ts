@@ -89,6 +89,20 @@ export function threadCount(): number {
   return Math.min(capped, memorySafeThreads())
 }
 
+/**
+ * Worst-case resident bytes for one context-mixing model.
+ *
+ * `tables` is one `Uint32Array(1 << bits)` per context (4 B/entry), plus the match
+ * tables (three 4-byte hashes of `2^mhBits`) and the small mixer arrays. The old
+ * budget used a flat "1024 MiB per worker" figure, which over- or under-estimated
+ * by 2x depending on the tier actually chosen for the stream.
+ */
+export function cmModelBytes(nctx: number, bits: number, mhBits = 0): number {
+  const tables = nctx * (1 << bits) * 4
+  const match = mhBits > 0 ? 3 * (1 << mhBits) * 4 : 0
+  return tables + match + 65536
+}
+
 /** P19.1 hard constitutional budget: 3.5 GiB workers + 512 MiB headroom. */
 export const CONSTITUTIONAL_MAX_RAM_MIB = 3584
 const CONSTITUTIONAL_HEADROOM_MIB = 512

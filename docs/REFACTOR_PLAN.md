@@ -1,7 +1,13 @@
 # Refactor plan: splitting `codec.ts` and `coder.ts`
 
-Status: **step 1 of N done.** Only `src/lib/container/crc32c.ts` has actually been
-extracted. Everything else below is a plan, not a claim about the current tree.
+Status: **steps 1–2 of N done.** Actually extracted:
+`src/lib/container/crc32c.ts` (+ barrel `src/lib/container/index.ts`) and
+`src/lib/planner/budget.ts` (+ barrel `src/lib/planner/index.ts`) — level tier,
+`pruningLevel()` and the wall-clock deadline, the only planner state every stage and
+every worker must share. `codec.ts` imports them through the barrels and re-exports the
+public names, so no caller moved. Both extractions were verified byte-identical on the
+26-file golden manifest, and `node tests/run.mjs` passes.
+Everything else below is still a plan, not a claim about the current tree.
 
 ## Why the split is risky
 
@@ -35,6 +41,7 @@ src/lib/runtime/     codec entry points, worker pool, budgets, progress
 | Step | Move | Notes |
 |---|---|---|
 | 1 ✅ | `crc32c.ts` + the v24 trailer | pure, no shared state |
+| 2 ✅ | `planner/budget.ts` (level tier, pruning, deadline) | leaf module; workers inherit via `JobPayload.level` |
 | 2 | varint + header parse/write (`getVar`, `planHeader`, `decompress` header prologue) | header bytes must not change |
 | 3 | `ID` enum + container flag/version constants | single source of truth for v1..v24 |
 | 4 | `analyze`/`detectRecordStride`/`detectLag*` | already isolated in `analyze.ts`; fold in |
