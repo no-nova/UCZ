@@ -4,7 +4,7 @@
 // 单文件包，而 esbuild 的 JavaScript API 自身不能被这样打包 —— 所以 CLI 的
 // 打包/执行必须发生在包外。
 import assert from 'node:assert/strict'
-import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, truncateSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -55,6 +55,12 @@ try {
   const minimal = JSON.parse(run(['inspect', arc, '--json', '--no-compress']).stdout)
   assert.equal(minimal.container.totalRawBytes, raw.length)
   assert.ok(!('fingerprint' in minimal), '--no-compress must not invent a fingerprint')
+  // The text form used to dereference `fingerprint: null` and crash with a
+  // TypeError even though the container was valid (external audit M-3).
+  const minimalText = run(['inspect', arc, '--no-compress'])
+  assert.equal(minimalText.status, 0, `inspect --no-compress 文本失败: ${minimalText.stderr}`)
+  assert.ok(/container version/.test(minimalText.stdout), '文本报告应包含容器信息')
+  assert.ok(/integrity/.test(minimalText.stdout), '文本报告应标明内容校验状态')
 
   const n = run(['ncd', src, out])
   assert.equal(n.status, 0, `ncd 失败: ${n.stderr}`)
@@ -91,6 +97,33 @@ try {
   assert.ok(existsSync(`${plain}.out`), '应默认写入 <input>.out')
   assert.equal(Buffer.compare(readFileSync(`${plain}.out`), Buffer.from(raw)), 0, '默认输出必须还原原文件')
   assert.equal(Buffer.compare(readFileSync(plain), readFileSync(arc)), 0, '输入文件必须保持原样')
+
+  // External audit M-1: `readFileSync` used to allocate the whole file before
+  // any size check. A sparse 300 MiB file must be rejected from `stat` alone.
+  const huge = join(dir, 'huge.bin')
+  writeFileSync(huge, '')
+  truncateSync(huge, 300 * 1024 * 1024)
+  const hugeRun = run(['compress', huge, join(dir, 'huge.ucz'), '--fast'])
+  assert.equal(hugeRun.status, 1, '超过输入上限应失败')
+  assert.ok(/exceeds the \d+ B limit/.test(hugeRun.stderr), `输入上限报错缺失: ${hugeRun.stderr}`)
+  assert.ok(!existsSync(join(dir, 'huge.ucz')), '拒绝后不得创建输出')
+  rmSync(huge)
+
+  // External audit H-2: an implicit 100 MiB expansion from a ~23 B FILL
+  // container is refused by the CLI's monotonic budget; an explicit
+  // --max-output is the documented opt-in for trusted high-ratio files.
+  const putVar = (v) => { const a = []; while (v >= 128) { a.push((v % 128) | 128); v = Math.floor(v / 128) } a.push(v); return a }
+  const fillSize = 100 * 1024 * 1024
+  const fillArc = join(dir, 'fill.ucz'), fillOut = join(dir, 'fill.out')
+  writeFileSync(fillArc, Uint8Array.from([0x55, 0x43, 0x5a, 7, ...putVar(fillSize), 1, 1, 1, 1, 1, 1, ...putVar(fillSize), 0x41]))
+  const fillDenied = run(['decompress', fillArc, fillOut])
+  assert.equal(fillDenied.status, 1, '隐式 100 MiB 膨胀应被拒绝')
+  assert.ok(/--max-output/.test(fillDenied.stderr), `拒绝信息应提示 --max-output: ${fillDenied.stderr}`)
+  assert.ok(!existsSync(fillOut), '拒绝后不得写出文件')
+  const fillAllowed = run(['decompress', fillArc, fillOut, '--max-output', String(fillSize)])
+  assert.equal(fillAllowed.status, 0, `显式 --max-output 应允许可信高压缩比容器: ${fillAllowed.stderr}`)
+  assert.equal(statSync(fillOut).size, fillSize, '输出长度必须等于声明长度')
+  rmSync(fillArc); rmSync(fillOut)
 
   // 已存在的输出必须要求 -f，且在压缩之前就失败（fail fast）。
   const guarded = run(['compress', src, arc])

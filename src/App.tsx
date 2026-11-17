@@ -51,9 +51,10 @@ const TIERS: readonly CompressionLevel[] = ['fast', 'balanced', 'max']
 export default function App() {
   const [lang, setLang] = useState<Lang>('en')
   const t = DICT[lang]
-  const [level, setLevel] = useState<CompressionLevel>('max')
+  // `max` on a 256 MiB file can take hours; balanced is the usable default.
+  const [level, setLevel] = useState<CompressionLevel>('balanced')
   // The queue is created once, so the executor reads the tier through a ref.
-  const levelRef = useRef<CompressionLevel>('max')
+  const levelRef = useRef<CompressionLevel>('balanced')
   // The document language must follow the UI language so screen readers and
   // hyphenation do not stay on the initial zh-CN.
   useEffect(() => { document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en' }, [lang])

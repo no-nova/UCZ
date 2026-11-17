@@ -3178,7 +3178,19 @@ export function decodeCM(payload: Uint8Array, n: number, profile: Profile, s = 1
 function decodeCMImpl(payload: Uint8Array, n:number, profile:Profile, s:number, r:number, onProgress?: (done:number,total:number)=>void, variant:CMVariant=false, geomStride=0, matchExperiment?:MatchExperiment, wordTokens=false, options?:CMOptions):Uint8Array {
   const m = new Model(n, profile, s, r, variant, geomStride, matchExperiment, undefined, wordTokens, options)
   let ip = 0
-  const next = () => (ip < payload.length ? payload[ip++] : 0)
+  // The arithmetic decoder may legitimately look a few bytes past the payload
+  // because the encoder's final `x` needs up to four zero bytes of flush. It must
+  // never keep inventing an unbounded tail: a 19-byte container that declares
+  // 8 MiB used to decode for seconds by reading zeros forever (external audit
+  // H-1). Valid streams in the reference corpus overread exactly 3 B, so 8 B is
+  // a format invariant, not a size gate.
+  const MAX_OVERREAD = 8
+  let overread = 0
+  const next = () => {
+    if (ip < payload.length) return payload[ip++]
+    if (++overread > MAX_OVERREAD) throw new Error('压缩载荷被截断（算术解码越界）')
+    return 0
+  }
   let x = 0
   for (let i = 0; i < 4; i++) x = ((x << 8) | next()) >>> 0
   let x1 = 0

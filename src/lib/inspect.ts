@@ -467,21 +467,29 @@ export async function inspectStream(
   return { fingerprint, container, compressedBytes, residual, elapsedMs: performance.now() - t0 }
 }
 
-export function formatInspectionReport(info: StreamInspection): string {
+/** Render any combination of stream fingerprint, residual profile and container
+ * anatomy. `fingerprint` is absent for `inspect --no-compress` on a container:
+ * the report must still describe the container instead of dereferencing null. */
+export function formatInspectionReport(
+  info: Pick<StreamInspection, 'elapsedMs'>
+    & Partial<Pick<StreamInspection, 'fingerprint' | 'residual' | 'container' | 'compressedBytes'>>,
+): string {
   const f = info.fingerprint, out: string[] = []
   out.push('=== UCZ Residual Information Microscope ===')
-  out.push(`bytes                 ${f.byteLength}`)
-  out.push(`H0 entropy            ${f.entropyH0.toFixed(3)} bit/byte`)
-  out.push(`printable ASCII       ${(f.printableAsciiRatio * 100).toFixed(2)} %`)
-  out.push(`flat bytes 00/FF      ${(f.flatByteRatio * 100).toFixed(2)} %`)
-  out.push(`record stride s       ${f.detectedStride || '-'}`)
-  out.push(`lag candidates        ${f.detectedLags.length ? f.detectedLags.join(', ') : '-'}`)
-  out.push(`scanline period P     ${f.detectedScanPeriod || '-'}`)
-  const d = f.detectedDelimiters
-  out.push(`delimiters            , ${d.comma}  TAB ${d.tab}  ; ${d.semicolon}  : ${d.colon}  | ${d.pipe}  NL ${d.newline}`)
-  if (d.newline) out.push(`mean line length      ${d.meanLineBytes.toFixed(1)} B`)
-  out.push(`manifold class        ${f.inferredManifoldClass}`)
-  if (f.rationale.length) out.push(`evidence              ${f.rationale.join(' | ')}`)
+  if (f) {
+    out.push(`bytes                 ${f.byteLength}`)
+    out.push(`H0 entropy            ${f.entropyH0.toFixed(3)} bit/byte`)
+    out.push(`printable ASCII       ${(f.printableAsciiRatio * 100).toFixed(2)} %`)
+    out.push(`flat bytes 00/FF      ${(f.flatByteRatio * 100).toFixed(2)} %`)
+    out.push(`record stride s       ${f.detectedStride || '-'}`)
+    out.push(`lag candidates        ${f.detectedLags.length ? f.detectedLags.join(', ') : '-'}`)
+    out.push(`scanline period P     ${f.detectedScanPeriod || '-'}`)
+    const d = f.detectedDelimiters
+    out.push(`delimiters            , ${d.comma}  TAB ${d.tab}  ; ${d.semicolon}  : ${d.colon}  | ${d.pipe}  NL ${d.newline}`)
+    if (d.newline) out.push(`mean line length      ${d.meanLineBytes.toFixed(1)} B`)
+    out.push(`manifold class        ${f.inferredManifoldClass}`)
+    if (f.rationale.length) out.push(`evidence              ${f.rationale.join(' | ')}`)
+  }
   if (info.residual) {
     const r = info.residual
     out.push('')
@@ -500,6 +508,7 @@ export function formatInspectionReport(info: StreamInspection): string {
     out.push('')
     out.push(`container version     ${c.containerVersion}${c.flags ? ` (flags 0x${c.flags.toString(16).padStart(4, '0')})` : ''}`)
     out.push(`raw / compressed      ${c.totalRawBytes} -> ${c.totalCompressedBytes} B (${c.compressionRatio.toFixed(4)}x, ${c.overallBpb.toFixed(3)} bpb, header ${c.headerBytes} B)`)
+    out.push(`integrity             ${containerHasChecksum(c.containerVersion) ? 'CRC-32C (content verified on decode)' : 'none (pre-v24 container; silent corruption is not detectable)'}`)
     out.push('')
     out.push(' idx   rawOff    rawLen   compB     bpb  transform            s   r  context        flags')
     out.push(' ---  -------  --------  ------  ------  -------------------  --  --  -------------  -----')

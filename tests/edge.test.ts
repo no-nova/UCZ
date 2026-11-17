@@ -196,6 +196,19 @@ export async function testEdgeDecodeBudgets(): Promise<void> {
   // A header promising more records than the body can hold is rejected up front.
   const tooMany = Uint8Array.from([0x55, 0x43, 0x5a, 1, ...varint(1024), ...varint(1000), 0, 1, 1])
   mustThrow(() => decompress(tooMany), '记录数越界必须被拒绝', /截断|长度/)
+
+  // External audit H-1: a 19-byte v13 container with one TEXT_V3 group, a
+  // one-byte payload and an 8 MiB declared output used to spin for seconds
+  // because the arithmetic decoder silently invented an infinite zero tail.
+  // It must now fail as soon as it overreads the payload.
+  const cmBomb = Uint8Array.from([
+    0x55, 0x43, 0x5a, 13, ...varint(8 * 1024 * 1024), 1, 1,
+    23, 1, 1, 1, ...varint(8 * 1024 * 1024), 0,
+  ])
+  const bombStart = performance.now()
+  mustThrow(() => decompress(cmBomb), 'CM CPU 炸弹必须被拒绝', /截断|越界/)
+  const bombMs = performance.now() - bombStart
+  assert.ok(bombMs < 200, `CM 炸弹拒绝耗时 ${bombMs.toFixed(1)} ms（应 < 200 ms）`)
 }
 
 export async function testEdgeCases(): Promise<void> {

@@ -31,3 +31,40 @@ changed; probes were deleted afterwards.
 Reference containers are byte-identical after the change (alice29 37,421 / ptt5
 26,939 / kennedy 33,107 / wdbc 31,542 / winequality-white 37,497 / yeast 8,640, all
 `rt = true`), `npx tsc --noEmit` is clean, and `node tests/run.mjs` exits 0.
+
+## Follow-up audit (2026-11-17): decoder resource limits
+
+A second external review focused on decoder denial-of-service and CLI resource
+handling. The labels below are local (`F-*`) because the previous audit already
+used `H-1`/`H-2` for different findings. Every item was reproduced before the
+fix; probes and temporary containers were deleted afterwards.
+
+| ID | Claim | Verdict | Action |
+|----|-------|---------|--------|
+| F-1 (review label H-1) | A 24-byte CM container can declare 8 MiB and decode for 11.5 s; a 512 MiB declaration extrapolates to minutes of CPU | **TRUE** | Root cause: `decodeCMImpl` returned `0` forever after the payload ended. The arithmetic decoder now permits at most 8 B of zero flush (valid corpus streams overread exactly 3 B) and throws `压缩载荷被截断（算术解码越界）`. The reproduced 19 B / 8 MiB bomb now fails in 24 ms instead of 5,860 ms. Regression in `tests/edge.test.ts`. |
+| F-2 (review label H-2) | A 23-byte FILL container writes 512 MiB; the default limit is independent of input size and the whole result is buffered before writing | **TRUE** | The library's explicit 512 MiB hard cap is unchanged, but the CLI now applies a monotonic implicit budget: `min(512 MiB, max(64 MiB, 4096 × container size))`. A trusted high-ratio file can still be decoded with an explicit `--max-output`. The reproduced 21 B → 512 MiB case is refused before allocation/write; the opt-in path still works. Regression in `tests/cli.test.mjs`. |
+| F-3 (review label H-3) | Default containers have no content checksum: 397/500 random mutations decode “successfully” with wrong bytes; CRC containers detect all 500 | **TRUE, not changed by default** | `checksum` remains opt-in because turning it on changes every container byte and the 26-file golden manifest. The tradeoff is now explicit: `inspect` prints `integrity CRC-32C` or `integrity none (pre-v24 container; silent corruption is not detectable)`, and `--checksum` stays documented. Verdict: known format tradeoff, not a silent assumption. |
+| F-4 (review label M-1) | The library/CLI have no input cap; `readFileSync` OOMs on a 10 GiB file | **TRUE** | CLI now `stat`s before reading and refuses inputs above `MAX_INPUT_BYTES` (256 MiB) for data, or `MAX_OUTPUT_BYTES + 16 MiB` for containers. `--max-input N` is the explicit trusted-file override. A sparse 300 MiB file is rejected without allocation. Regression in `tests/cli.test.mjs`. |
+| F-5 (review label M-2) | `max` throughput is unusably low (98 KiB in 85 s; 1 MiB decompress ≈ 1.5 s) | **TRUE, data-dependent** | Reproduced 100,352 B at `max` in 11.1 s (1,180 B container) and 1 MiB in 41.1 s (9,792 B container); decompress 152 ms / 1,515 ms. This is a planner-cost property, not a bug that can be fixed by a threshold without changing output. Mitigation: the Web UI now defaults to `balanced` (the CLI default) instead of `max`, so the 256 MiB queue no longer defaults to multi-hour jobs. `max` remains selectable. |
+| F-6 (review label M-3) | `ucz inspect <container> --no-compress` throws a `TypeError` for every valid container | **TRUE** | `formatInspectionReport` now accepts reports without a fingerprint and guards the fingerprint block; `--no-compress` renders container anatomy, integrity status and elapsed time. `--json` shape is unchanged. Regression in `tests/cli.test.mjs`. |
+
+### What changed
+
+- `src/lib/coder.ts` — bounded arithmetic-decoder overread (`F-1`).
+- `src/cli.ts` — `stat`-based input caps and `--max-input` (`F-4`), monotonic
+  implicit decode budget with explicit `--max-output` override (`F-2`), inspect
+  path uses the same budget.
+- `src/lib/inspect.ts` — nullable-fingerprint report and integrity status
+  (`F-3`, `F-6`).
+- `src/App.tsx` — Web default tier is `balanced` (`F-5` mitigation).
+- `tests/edge.test.ts`, `tests/cli.test.mjs`, `tests/concurrency.test.ts` —
+  regressions for the CM bomb, input cap, FILL amplification, text inspect, and
+  early corruption rejection.
+
+### Invariants held
+
+Reference containers remain byte-identical after the change (alice29 37,421 /
+ptt5 26,939 / kennedy 33,107 / wdbc 31,542 / winequality-white 37,497 / yeast
+8,640, all `rt = true`), `npx tsc --noEmit` is clean, `node tests/run.mjs` exits
+0, `node tests/run-ui.mjs` passes 17/17, `npm run test:p111` passes, and
+`npm run bench:quick` still totals 91,759 B versus gzip's 120,730 B.

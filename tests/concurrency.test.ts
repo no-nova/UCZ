@@ -107,5 +107,5 @@ export async function testStrictContainerSpecs(): Promise<void> {
   assert.ok([25, 27].includes(plain.container[3]), `default priors + checksum must be v25 or v27, got v${plain.container[3]}`)
   const damaged = plain.container.slice()
   damaged[damaged.length - 6] ^= 0x40
-  assert.throws(() => decompress(damaged), /CRC|校验/, 'a flipped payload byte must be detected')
+  assert.throws(() => decompress(damaged), /CRC|校验|截断|越界/, 'a flipped payload byte must be detected (CRC or early decode rejection)')
 }

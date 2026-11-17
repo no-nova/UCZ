@@ -7,13 +7,14 @@
  * `ncd` through `src/lib/ncd.ts`. The CLI never participates in an algorithmic
  * decision, so it cannot change a single golden byte.
  */
-import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs'
 import { basename } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { compressAdaptive, decompress } from './lib/codec'
 import type { CompressionLevel } from './lib/codec'
 import { formatInspectionReport, inspectContainer, inspectStream, isContainer } from './lib/inspect'
 import { computeNCD, computeNCDMatrix, formatNCDMatrixReport } from './lib/ncd'
+import { MAX_INPUT_BYTES, MAX_OUTPUT_BYTES } from './lib/limits'
 import type { NcdMode } from './lib/ncd'
 
 export { VERSION } from './version'
@@ -23,11 +24,20 @@ const USAGE = `ucz ${VERSION} - Universal Adaptive Compression
 
 Usage:
   ucz compress <input> [output] [-1|--fast] [-2|--balanced] [-3|--max] [-f|--force]
+               [--checksum] [--strict-zero-prior] [--time-budget S]
   ucz decompress <input> [output] [-f|--force]
   ucz inspect <input> [--fast|--balanced|--max] [--no-compress] [--json]
   ucz ncd <file1> <file2> [...fileN] [--mode cm|container] [--json]
   ucz --version | -v
   ucz --help | -h
+
+Resource limits (all commands):
+  --max-input N    refuse inputs above N bytes (default: 256 MiB for data,
+                  512 MiB + framing for containers; override only for trusted files)
+  --max-output N   refuse output above N bytes; implicit decompression uses
+                  min(512 MiB, max(64 MiB, 4096x container)) unless N is given
+  --time-budget S  stop planner search after S seconds (compression only)
+  --threads N      worker count; --memory-limit MiB caps worker RSS
 
 Levels:
   -1, --fast       fast planning (fewest probes, slightly larger output)
@@ -64,7 +74,7 @@ interface ParsedArgs {
   mode?: string
 }
 
-const VALUE_FLAGS = new Set(['--mode', '--threads', '--memory-limit', '--time-budget', '--max-output'])
+const VALUE_FLAGS = new Set(['--mode', '--threads', '--memory-limit', '--time-budget', '--max-output', '--max-input'])
 
 /**
  * Parse flags in any position: `ucz compress -1 in.txt`, `ucz inspect --json a`,
@@ -136,11 +146,12 @@ function intValue(args: ParsedArgs, flag: string): number | undefined {
  * time budget cuts the search short the result is "best within budget", not
  * "best of all candidates" — the CLI says so on stdout.
  */
-function applyBudgets(args: ParsedArgs): { timeBudgetMs?: number; maxOutputBytes?: number } {
+function applyBudgets(args: ParsedArgs): { timeBudgetMs?: number; maxOutputBytes?: number; maxInputBytes?: number } {
   const threads = intValue(args, '--threads')
   const memMiB = intValue(args, '--memory-limit')
   const timeSec = intValue(args, '--time-budget')
   const maxOut = intValue(args, '--max-output')
+  const maxIn = intValue(args, '--max-input')
   if (memMiB !== undefined && memMiB < 800) throw new Error('--memory-limit must be at least 800 MiB (a single 24-bit model is ~640 MiB)')
   let budgetThreads = threads
   if (memMiB !== undefined) {
@@ -151,7 +162,7 @@ function applyBudgets(args: ParsedArgs): { timeBudgetMs?: number; maxOutputBytes
   // The worker-count cap alone cannot stop a run that is already allocating; this env
   // var is the runtime half, enforced in `runJob` before a job touches memory.
   if (memMiB !== undefined) process.env.UCZ_RSS_LIMIT_MIB = String(memMiB)
-  return { timeBudgetMs: timeSec === undefined ? undefined : Math.round(timeSec * 1000), maxOutputBytes: maxOut }
+  return { timeBudgetMs: timeSec === undefined ? undefined : Math.round(timeSec * 1000), maxOutputBytes: maxOut, maxInputBytes: maxIn }
 }
 
 function levelOf(flags: Set<string>): CompressionLevel {
@@ -172,6 +183,21 @@ function writeOut(path: string, bytes: Uint8Array): void {
   writeFileSync(path, bytes)
 }
 
+/**
+ * `readFileSync` allocates the whole file before any codec check runs, so a
+ * 10 GiB path used to OOM the CLI even though the Web queue already enforced
+ * MAX_INPUT_BYTES (external audit M-1). `statSync` rejects it first. The
+ * override exists for trusted files and for containers from older/higher
+ * limits; it never relaxes the codec's own `--max-output` check.
+ */
+function readInput(path: string, cap: number): Uint8Array {
+  const size = statSync(path).size
+  if (size > cap) {
+    throw new Error(`input ${size} B exceeds the ${cap} B limit (raise it with --max-input only for trusted files)`)
+  }
+  return new Uint8Array(readFileSync(path))
+}
+
 async function cmdCompress(args: ParsedArgs): Promise<void> {
   const [input, explicitOut] = args.positionals
   if (!input) throw new Error('missing input file')
@@ -180,7 +206,7 @@ async function cmdCompress(args: ParsedArgs): Promise<void> {
   // Fail before spending minutes on a compression we would refuse to write.
   guardOverwrite(output, forceOf(args.flags))
   const budgets = applyBudgets(args)
-  const raw = new Uint8Array(readFileSync(input))
+  const raw = readInput(input, budgets.maxInputBytes ?? MAX_INPUT_BYTES)
   const t = performance.now()
   const enc = await compressAdaptive(raw, undefined, {
     level: lvl,
@@ -208,12 +234,32 @@ async function cmdDecompress(args: ParsedArgs): Promise<void> {
   const output = explicitOut ?? (input.endsWith('.ucz') ? input.slice(0, -4) : `${input}.out`)
   if (output === input) throw new Error('refusing to decompress in place (pass an explicit output path)')
   guardOverwrite(output, forceOf(args.flags))
-  const container = new Uint8Array(readFileSync(input))
+  const budgets = applyBudgets(args)
+  // A container can be no larger than its (bounded) output plus framing. Reading
+  // 512 MiB of container is safe; reading an unbounded path is not.
+  const container = readInput(input, budgets.maxInputBytes ?? (MAX_OUTPUT_BYTES + 16 * 1024 * 1024))
   // `--max-output` bounds the *decompressed* size too — a container may legitimately
   // be small and expand a lot, so the decode path needs the same ceiling.
-  const cap = applyBudgets(args).maxOutputBytes
+  // External audit H-2: a 21-byte FILL container can declare 512 MiB. The
+  // library keeps its 512 MiB hard cap, but the CLI applies a monotonic
+  // resource budget for *implicit* output: at most 64 MiB, or 4096x the
+  // container, whichever is larger. A trusted high-ratio container can still
+  // be decoded with an explicit `--max-output`; nothing about the format
+  // changes, and ordinary files (a few MiB from a few hundred KiB) never hit
+  // this floor. This is a disk/RAM budget, not a coding decision.
+  const implicitCap = Math.min(MAX_OUTPUT_BYTES, Math.max(64 * 1024 * 1024, container.length * 4096))
+  const cap = budgets.maxOutputBytes ?? implicitCap
   const t = performance.now()
-  const out = cap === undefined ? decompress(container) : decompress(container, undefined, cap)
+  let out: Uint8Array
+  try {
+    out = decompress(container, undefined, cap)
+  } catch (err) {
+    const msg = String((err as Error)?.message ?? err)
+    if (budgets.maxOutputBytes === undefined && /超过上限/.test(msg)) {
+      throw new Error(`${msg}；该容器可能是高压缩比文件（如全零流），如确认可信请显式传入 --max-output`)
+    }
+    throw err
+  }
   const ms = performance.now() - t
   writeOut(output, out)
   console.log(`  output ${out.length} B  time ${ms.toFixed(0)} ms -> ${output}`)
@@ -224,7 +270,7 @@ async function cmdInspect(args: ParsedArgs): Promise<void> {
   if (!input) throw new Error('missing input file')
   // `--threads/--memory-limit` constrain the whole process, including this command.
   const budgets = applyBudgets(args)
-  const bytes = new Uint8Array(readFileSync(input))
+  const bytes = readInput(input, budgets.maxInputBytes ?? (MAX_OUTPUT_BYTES + 16 * 1024 * 1024))
   const json = args.flags.has('--json')
   const field = args.flags.has('--no-compress')
   if (isContainer(bytes)) {
@@ -233,10 +279,11 @@ async function cmdInspect(args: ParsedArgs): Promise<void> {
       // `--json` always answers with the same top-level shape; with
       // `--no-compress` only the container part is available.
       const minimal = { container: anatomy, compressedBytes: bytes.length, elapsedMs: 0 }
-      console.log(json ? JSON.stringify(minimal, null, 2) : formatInspectionReport({ ...emptyInspection(), ...minimal } as never))
+      console.log(json ? JSON.stringify(minimal, null, 2) : formatInspectionReport(minimal))
       return
     }
-    const info = await inspectStream(decompress(bytes), { compress: false })
+    const implicitCap = Math.min(MAX_OUTPUT_BYTES, Math.max(64 * 1024 * 1024, bytes.length * 4096))
+    const info = await inspectStream(decompress(bytes, undefined, budgets.maxOutputBytes ?? implicitCap), { compress: false })
     info.container = anatomy
     info.compressedBytes = bytes.length
     console.log(json ? JSON.stringify(info, null, 2) : formatInspectionReport(info))
@@ -246,17 +293,14 @@ async function cmdInspect(args: ParsedArgs): Promise<void> {
   console.log(json ? JSON.stringify(info, null, 2) : formatInspectionReport(info))
 }
 
-function emptyInspection() {
-  return { fingerprint: null, residual: null }
-}
-
 async function cmdNcd(args: ParsedArgs): Promise<void> {
   const files = args.positionals
   if (files.length < 2) throw new Error('need at least two files')
   const budgets = applyBudgets(args)
   const mode: NcdMode = args.mode === 'container' ? 'container' : 'cm'
   const json = args.flags.has('--json')
-  const items = files.map(f => ({ name: basename(f), data: new Uint8Array(readFileSync(f)) }))
+  const inputCap = budgets.maxInputBytes ?? MAX_INPUT_BYTES
+  const items = files.map(f => ({ name: basename(f), data: readInput(f, inputCap) }))
   const bytes = (v: number) => `${v.toFixed(0)} B`
   if (items.length === 2) {
     const r = await computeNCD(items[0].data, items[1].data, { mode, ...budgets })
