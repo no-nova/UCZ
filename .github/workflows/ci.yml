@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - run: npm ci
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
       - name: TypeScript
         run: npx tsc --noEmit
       - name: Worker bundle is in sync with src/lib/coder.ts
