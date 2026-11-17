@@ -5045,6 +5045,13 @@ export function contextProposalsForGroup(spec:Spec,
   // positions, so its stride-4 context is a measured regression (ooffice).
   // Keep the transform-aware direct API intact, but never propose it here.
   if(spec.id===ID.BCJ_V3)return []
+  // P38.1 (external audit C-2): the legacy BCJ/BCJ_V2 ids reach this function too,
+  // and their payload is NOT forward-BCJ-filtered here, while `decodeTerrainGroup`
+  // applies `contextFilterInverse` (i.e. `bcjInv`) whenever the context is
+  // `bin-stride4`. Encoding raw bytes and decoding them through an inverse filter
+  // silently rewrites every 4-byte operand after an `E8`/`E9`. Only `xform-bin`
+  // (which filters inside `joinForSpec`) may carry an x86 spec.
+  if(spec.id===ID.BCJ || spec.id===ID.BCJ_V2)return []
   if(contextSpecAllowed('xform-bin',spec))return [{spec:{...spec},reason:'selected-xform'}]
   if(contextSpecAllowed('bin-stride4',spec))return [{spec:{...spec},reason:'selected-bin'}]
   if(contextSpecAllowed('wide-geom',spec))return [{spec:{...spec},reason:'selected-wide'}]
@@ -5071,6 +5078,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // P17.5: see contextProposalsForGroup. Screening BCJ3 here spends a full
     // candidate encode on a context that cannot align with its filtered bytes.
     if(spec.id===ID.BCJ_V3){result.skipped='bcj3-context-disabled';return result}
+    if(spec.id===ID.BCJ || spec.id===ID.BCJ_V2){result.skipped='bcj-legacy-context-disabled';return result}
     // Prior registry §2/§3: every `text-*` layout keys on ASCII character classes
     // and delimiter bytes, and `wp-*` keys on whitespace tokenisation. The strict
     // profile offers no context layout at all, so such a group falls back to its
@@ -5175,7 +5183,9 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
           shared={base:wrap(shared.base),alt:wrap(shared.alt)}
         }
       }
-      const controlBytes=price(shared?.base ?? withCMProbe(()=>encode(sample.parts,sample.positions,undefined,samplePre)),sample.bytes)
+      // The dual `base` stream is not a valid control sample (shared tables with the
+      // alt arm), so price the control with a real independent encode.
+      const controlBytes=price(withCMProbe(()=>encode(sample.parts,sample.positions,undefined,samplePre)),sample.bytes)
       const trials=modes.map(context=>({context,bytes:price(shared && context===dualMode ? shared.alt : withCMProbe(()=>encode(sample.parts,sample.positions,context,samplePre)),sample.bytes,context)}))
       // A >=0.15% sample win spends one full extra encode. Never drop the old
       // complete candidate on the strength of a sample. WP alternatives do not add.
@@ -5245,20 +5255,14 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
       if(!pick){result.skipped='probe-not-better';return result}
     }
     const canReuse=retained && retained.wordPre===wordPre && (retained.flags&V20_FLAG_CM) && !(retained.flags&V21_FLAG_CONTEXTS)
-    let fullDual: {base:Uint8Array;alt:Uint8Array}|undefined
-    const fullMode=modes.length===1 ? modes[0] : undefined
-    if(!canReuse && (fullMode==='text-sparse5' || (fullMode==='wp-token3' && wordPre) || (fullMode==='bin-stride4' && spec.id!==ID.TRANSPOSE_GROUP_V3))) {
-      const body=wordPre ? (()=>{const x=new Uint8Array(pre!.header.length+pre!.body.length);x.set(pre!.header);x.set(pre!.body,pre!.header.length);return x})() : joinContextBin(parts)
-      fullDual=withCMBlockSize(rawBytes,()=>encodeCMContextDual(body,fullMode))
-      if(wordPre) {
-        const wrap=(cm:Uint8Array)=>{const p=new Uint8Array(cm.length+4),n=body.length;p[0]=n&255;p[1]=(n>>>8)&255;p[2]=(n>>>16)&255;p[3]=(n>>>24)&255;p.set(cm,4);return inheritPayloadModel(p,cm)}
-        fullDual={base:wrap(fullDual.base),alt:wrap(fullDual.alt)}
-      }
-    }
+    // P38.1 (external audit C-1): the dual encoder shares `tables[0..7]` between its
+    // `base` and `alt` arms, so NEITHER stream can be decoded standalone — an
+    // independent `decodeCM` diverges from the first byte on. It is therefore usable
+    // for *pricing* only, never for a payload that goes into a container.
     if(canReuse) {
       result.control={payload:retained.payload,flags:retained.flags};result.controlReused=true
     } else {
-      const payload=fullDual?.base ?? encode(parts,positions)
+      const payload=encode(parts,positions)
       result.control={payload,flags:payloadModelFlags(payload)}
     }
     // Exactly one full-group encode per axis winner. For groups below the
@@ -5288,7 +5292,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
       pushTrial(undefined as unknown as CMContext,encode(parts,positions,undefined,pre,true),true)
       for(const context of modes) {
         const owned=reuseFor(context,false)
-        const plain=owned ?? (fullDual && context===fullMode ? fullDual.alt : encode(parts,positions,context,pre,false))
+        const plain=owned ?? encode(parts,positions,context,pre,false)
         pushTrial(context,plain,false)
         const ownedMd=reuseFor(context,true)
         pushTrial(context,ownedMd ?? encode(parts,positions,context,pre,true),true)
@@ -5296,7 +5300,7 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     } else {
       for(const context of modes) {
         const owned=reuseFor(context,md)
-        const payload=owned ?? (fullDual && context===fullMode && !md ? fullDual.alt : encode(parts,positions,context,pre,md))
+        const payload=owned ?? encode(parts,positions,context,pre,md)
         pushTrial(context,payload,md)
       }
     }

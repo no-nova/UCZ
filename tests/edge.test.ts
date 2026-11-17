@@ -143,6 +143,24 @@ export async function testEdgeChecksumTrailer(): Promise<void> {
   try { decompress(tamperedLegacy) } catch { legacyCaught = true }
   assert.equal(legacyCaught, false, 'legacy containers have no content checksum')
 
+  // P38.1 (audit H-2): an inspector must recognise every version the codec emits.
+  // It used to hardcode `<= 23`, so checksummed containers were re-analysed as raw
+  // input instead of being parsed.
+  for (const [name, c] of [['v25', sealed.container], ['v24', sealedStrict.container]] as const) {
+    assert.equal(isContainer(c), true, `${name} containers must be recognised by isContainer`)
+    const anatomy = inspectContainer(c)
+    assert.equal(anatomy.containerVersion, c[3])
+    assert.equal(anatomy.totalRawBytes, data.length)
+    // The 4-byte CRC trailer must not be counted as group payload.
+    const payload = anatomy.segments.reduce((n, g) => n + g.compressedBytes, 0)
+    assert.ok(anatomy.headerBytes + payload <= c.length - 4, `${name} anatomy must exclude the CRC trailer`)
+  }
+  // Trailing junk after a payload must be rejected, not silently billed as payload.
+  const junk = new Uint8Array(sealed.container.length + 100)
+  junk.set(sealed.container)
+  junk.fill(0xde, sealed.container.length)
+  assert.throws(() => inspectContainer(junk), /do not fill|exceed the container body|截断/)
+
   // Budget knobs: max-output is enforced inside the codec, and a tiny time budget
   // must still produce a valid container (flagged as truncated, not as optimal).
   let over = false

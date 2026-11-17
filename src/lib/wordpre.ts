@@ -150,11 +150,15 @@ function putVar(out: number[], v: number): void {
 }
 
 function getVar(buf: Uint8Array, st: { p: number }): number {
+  // P38.1 (external audit C-4): accumulate with float multiply, not `<<`. A signed
+  // shift at `shift = 28` turns the fifth byte into a negative number, which used to
+  // make `st.p` walk backwards and loop forever (14-byte input -> V8 OOM abort).
   let v = 0, shift = 0
   for (;;) {
     if (st.p >= buf.length) throw new Error('词元词典被截断')
     const b = buf[st.p++]
-    v |= (b & 0x7f) << shift
+    v += (b & 0x7f) * 2 ** shift
+    if (!Number.isSafeInteger(v)) throw new Error('词元词典长度非法')
     if (b < 0x80) return v
     shift += 7
     if (shift > 28) throw new Error('词元词典长度非法')

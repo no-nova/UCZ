@@ -8,6 +8,7 @@
 import { detectLagCandidates, detectRecordStride } from './analyze'
 import { encodeCM } from './coder'
 import { contextFromGroupBits, GROUP_MATCH_DIST_BIT } from './context-policy'
+import { containerHasChecksum, MAX_CONTAINER_VERSION } from './container/format'
 import { compressAdaptive, ID } from './codec'
 import type { CompressionLevel } from './codec'
 
@@ -238,16 +239,25 @@ function getVar(c: Uint8Array, st: { p: number }): number {
 }
 
 export function isContainer(c: Uint8Array): boolean {
-  return c.length >= 4 && c[0] === 0x55 && c[1] === 0x43 && c[2] === 0x5a && c[3] >= 1 && c[3] <= 23
+  // P38.1 (external audit H-2): 这里过去写死 `<= 23`，于是 `--checksum` 产出的
+  // v24/v25/v27 容器会被 `inspect` 当成「未压缩原始流」重跑一遍显微镜压缩。
+  // 版本上限必须与 codec/inspect 共用同一个常量。
+  if (c.length < 4 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a) return false
+  const version = c[3]
+  if (version < 1 || version > MAX_CONTAINER_VERSION) return false
+  return c.length >= (version >= 19 ? 6 : version >= 17 ? 5 : 5)
 }
 
 /** 解析 UCZ 头部：组规则与载荷长度。只读头部已写明的字段。 */
 export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   if (!isContainer(c)) throw new Error('Not a UCZ container')
   const version = c[3]
-  // D4: `decompress` 只接受 1..22；解剖器过去接受任意版本，会把伪造的头当成
-  // 正常容器渲染出来。
-  if (version < 1 || version > 27) throw new Error(`Unsupported container version ${version} (expected 1..27)`)
+  // D4: 版本上下界必须与 `decompress` 完全一致，伪造的头不能当正常容器渲染。
+  if (version < 1 || version > MAX_CONTAINER_VERSION)
+    throw new Error(`Unsupported container version ${version} (expected 1..${MAX_CONTAINER_VERSION})`)
+  // P38.1 (H-2): v24+ 的末尾 4 字节是原始内容的 CRC-32C 尾部，不属于载荷区。
+  const bodyEnd = containerHasChecksum(version) ? c.length - 4 : c.length
+  if (bodyEnd < 6) throw new Error('容器被截断')
   const st = { p: 4 }
   let flags = 0
   // D6: 与 codec.ts:4646 对齐——v17/v18 只有 1 字节配置，v19+ 才是 uint16。
@@ -296,7 +306,10 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
     const id = getVar(c, st), s = getVar(c, st), rRaw = getVar(c, st), pl = getVar(c, st)
     // D7: 未知识别符/非法步长/超界载荷都必须在解剖阶段就拒绝。
     if (!KNOWN_TRANSFORMS.has(id)) throw new Error(`Unknown transform id ${id}`)
-    if (!Number.isSafeInteger(s) || s < 1 || !Number.isSafeInteger(rRaw) || !Number.isSafeInteger(pl) || pl < 0)
+    // ANCHOR 家族把锚字节存在 `s` 里，`s = 0`（NUL 锚点）完全合法。
+    const anchorSpec = id === ID.ANCHOR || id === ID.ANCHOR_FOLD || id === ID.SUB_ANCHOR || id === ID.SUB_ANCHOR_V3
+    if (!Number.isSafeInteger(s) || (anchorSpec ? s < 0 || s > 255 : s < 1)
+      || !Number.isSafeInteger(rRaw) || !Number.isSafeInteger(pl) || pl < 0)
       throw new Error('Invalid group descriptor')
     specs.push({ id, s, rRaw, pl })
   }
@@ -317,7 +330,7 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
       const next: number[] = []
       for (const i of pending) {
         const pos = st.p + Math.floor(bit / 8)
-        if (pos >= c.length) throw new Error('Group membership bitmap is truncated')
+        if (pos >= bodyEnd) throw new Error('Group membership bitmap is truncated')
         if ((c[pos] >>> (bit % 8)) & 1) members[gi].push(i)
         else next.push(i)
         bit++
@@ -352,8 +365,12 @@ export function inspectContainer(c: Uint8Array): ContainerAnatomy {
   }
   // 载荷必须整段落在容器里：`headerBytes + Σpl <= c.length`。
   const payloadBytes = specs.reduce((sum, sp) => sum + sp.pl, 0)
-  if (headerBytes + payloadBytes > c.length)
-    throw new Error(`Group payloads (${payloadBytes} B) plus the ${headerBytes} B header exceed the container`)
+  // P38.1 (H-2): 载荷区必须**恰好**铺满 bodyEnd；多余字节（拼接垃圾、被误算的
+  // CRC 尾部）一律拒绝，而不是计入 compressedBytes。
+  if (groups > 0 && headerBytes + payloadBytes !== bodyEnd)
+    throw new Error(`Group payloads (${payloadBytes} B) plus the ${headerBytes} B header do not fill the ${bodyEnd} B container body`)
+  if (headerBytes + payloadBytes > bodyEnd)
+    throw new Error(`Group payloads (${payloadBytes} B) plus the ${headerBytes} B header exceed the container body (${bodyEnd} B)`)
   return {
     containerVersion: version, flags, totalRawBytes: n, totalCompressedBytes: c.length,
     headerBytes, overallBpb: n ? (c.length * 8) / n : 0,
