@@ -70,3 +70,42 @@ export async function testConcurrencyAndChecksum(): Promise<void> {
   await testSequentialSizeChangeRoundtrip()
   console.log('[concurrency] checksum/strict decoupling, overlap isolation and buffer reuse ok')
 }
+
+/**
+ * M-6 / strict-profile leak scan: a strict container must never contain a spec whose
+ * coding depends on byte *values* (mod-256 deltas, bit planes, value-coded anchors).
+ * The earlier P37.7 bug put `DELTA_V3` (27) into a strict container through the
+ * post-pass chain, so this asserts on the *serialised* plan, not on the candidate set.
+ */
+export async function testStrictContainerSpecs(): Promise<void> {
+  const { STRICT_FORBIDDEN_SPECS } = await import('../src/lib/codec')
+  const { inspectContainer } = await import('../src/lib/inspect')
+  const enc = (s: string) => new TextEncoder().encode(s)
+  let seed = 0x9e3779b9
+  const rnd = () => { seed ^= seed << 13; seed >>>= 0; seed ^= seed >>> 17; seed ^= seed << 5; seed >>>= 0; return seed }
+  const cases: [string, Uint8Array][] = []
+  const prose = enc('the compression must not assume ascii text structure at all. '.repeat(600))
+  cases.push(['prose', prose])
+  const records = new Uint8Array(48000)
+  for (let i = 0; i < records.length; i++) records[i] = i % 24 === 23 ? 10 : 48 + ((i / 24 | 0) * 7 + (i % 24) * 3) % 10
+  cases.push(['records', records])
+  const noise = new Uint8Array(65536)
+  for (let i = 0; i < noise.length; i++) noise[i] = rnd() & 0xff
+  cases.push(['noise', noise])
+  for (const [name, data] of cases) {
+    const r = await compressAdaptive(data, undefined, { level: 'balanced', strictZeroPrior: true })
+    assert.equal(r.container[3], 23, `${name}: strict container must be v23`)
+    const anatomy = inspectContainer(r.container)
+    const ids = anatomy.segments.map(g => g.transformId)
+    for (const id of ids) assert.ok(!STRICT_FORBIDDEN_SPECS.has(id), `${name}: strict container contains forbidden spec ${id}`)
+    fastDeepEqual(decompress(r.container), data, `${name}: strict roundtrip`)
+  }
+  // checksum + default priors must be v27, and the CRC must reject a flipped byte
+  const plain = await compressAdaptive(prose, undefined, { level: 'fast', checksum: true })
+  // v25 = default priors + CRC without a match-distance flag; v27 adds fresh bucket
+  // distance (only written when the plan actually uses the match model).
+  assert.ok([25, 27].includes(plain.container[3]), `default priors + checksum must be v25 or v27, got v${plain.container[3]}`)
+  const damaged = plain.container.slice()
+  damaged[damaged.length - 6] ^= 0x40
+  assert.throws(() => decompress(damaged), /CRC|校验/, 'a flipped payload byte must be detected')
+}

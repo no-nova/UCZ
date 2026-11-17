@@ -12,5 +12,8 @@ try {
   // P31.0：CLI 冒烟测试单独跑（它需要 esbuild 的 JS API，不能被上面打进单文件）。
   const cli = spawnSync(process.execPath, ['tests/cli.test.mjs'], {stdio:'inherit'})
   if (cli.error) throw cli.error
-  process.exitCode = (result.status ?? 1) || (cli.status ?? 1)
+  // 本地对照服务的安全/健壮性用例（Host、Origin、Content-Length、繁忙态）。
+  const bench = spawnSync(process.execPath, ['--test', 'tests/bench-server.test.mjs'], {stdio:'inherit'})
+  if (bench.error) throw bench.error
+  process.exitCode = (result.status ?? 1) || (cli.status ?? 1) || (bench.status ?? 1)
 } finally { await rm(dir, {recursive:true, force:true}) }
