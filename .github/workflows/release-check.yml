@@ -33,3 +33,5 @@ jobs:
           npm init -y >/dev/null
           npm install "$GITHUB_WORKSPACE"/ucz-*.tgz --silent
           node -e "const u=require('ucz'); if(!u.compressAdaptive) throw new Error('missing export')"
+      - name: TypeScript NodeNext consumer
+        run: npm run check:package

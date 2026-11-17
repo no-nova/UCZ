@@ -1,5 +1,6 @@
 // P32.0: `npm run build` -> dist/cli.js (executable bundle) + dist/index.js (ESM library).
 import { build } from 'esbuild'
+import { fixDeclarationSpecifiers } from './fix-dts-specifiers.mjs'
 import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -50,4 +51,8 @@ const tsc = spawnSync(process.execPath, [
 ], { stdio: 'inherit' })
 if (tsc.status !== 0) throw new Error('declaration emit failed')
 await writeFile('dist/index.d.ts', "export * from './types/src/index'\n")
-console.log('built dist/index.d.ts (+ dist/types)')
+// Publish-time fix: NodeNext consumers require explicit `.js` extensions in ESM
+// declaration imports. TypeScript preserves our extensionless source specifiers,
+// so rewrite the emitted `.d.ts` graph (including directory index imports).
+const fixed = fixDeclarationSpecifiers('dist')
+console.log(`built dist/index.d.ts (+ dist/types); fixed ${fixed.changed}/${fixed.files} declaration file(s)`)

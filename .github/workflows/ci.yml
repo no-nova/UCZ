@@ -26,6 +26,8 @@ jobs:
         run: npm run build
       - name: Single-file Web build
         run: npm run build:web
+      - name: Packed package TypeScript NodeNext consumer
+        run: npm run check:package
 
   unit:
     name: codec + CLI + UI
