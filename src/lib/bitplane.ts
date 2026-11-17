@@ -3,7 +3,7 @@ import { deadlineHit } from './planner/budget'
 import {encodeCM,decodeCM} from './coder'
 import {MAX_OUTPUT_BYTES} from './limits'
 import {inheritPayloadModel} from './payload-model'
-import {encodePlaneBitCM,decodePlaneBitCM,createBitCMModel} from './bitcm'
+import {encodePlaneBitCM,decodePlaneBitCM,createBitCMModel,bitCMOrdersFor} from './bitcm'
 
 /** P16.2: cheap first-order gate, kept from the REC2 lineage. A high first-2 KiB
  * byte entropy is one trigger; see `bitplaneStoreTrigger` for the other. */
@@ -81,7 +81,7 @@ export function bitplaneFullProof(data:Uint8Array):{q:number;proof:boolean[];cod
  const start=Date.now(),q=Math.floor(data.length/8),proof:boolean[]=[],coded:Uint8Array[]=[]
  for(let b=0;b<8;b++){
   const plane=packPlane(data,b,q)
-  const bytes=encodePlaneBitCM(plane,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
+  const bytes=encodePlaneBitCM(plane,q*8,createBitCMModel(bitCMOrdersFor(q * 8)))
   coded.push(bytes)
   proof.push(bytes.length+4<q||!!findLag(plane,q*8))
  }
@@ -145,7 +145,7 @@ export function encodeBitplanesBitCM(data:Uint8Array,proof:readonly boolean[],co
     if(laggedBytes.length+4<q){out=laggedBytes;used=true;lagged=true}
    }
    if(!lagged){
-    const bytes=coded?.[b]??encodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
+    const bytes=coded?.[b]??encodePlaneBitCM(p,q*8,createBitCMModel(bitCMOrdersFor(q * 8)))
     if(bytes.length+4<q){out=bytes;used=true}
    }
   }
@@ -219,7 +219,7 @@ export function decodeBitplanes(payload:Uint8Array,n:number,format:number=BITPLA
   else if(format===BITPLANE_BYTE_CM)plane=decodeCM(p,q,'bin',1,1,undefined,'v20')
   else if(entry.lagged)plane=decodeLagPlane(p,q*8,entry.length)
   else {
-   plane=decodePlaneBitCM(p,q*8,createBitCMModel(BITPLANE_BIT_ORDERS))
+   plane=decodePlaneBitCM(p,q*8,createBitCMModel(bitCMOrdersFor(q * 8)))
   }
   for(let i=0;i<q*8;i++)out[i]|=((plane[i>>>3]>>>(i&7))&1)<<b
  }

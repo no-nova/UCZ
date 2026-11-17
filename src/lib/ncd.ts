@@ -90,7 +90,9 @@ function printableRatio(d: Uint8Array): number {
 function representative(d: Uint8Array, maxBytes: number): Uint8Array {
   // 取**前缀**窗口而不是中段：前缀包含文件的语法/表头（最有跨文件共性的部分），
   // 中段窗口取到的是纯数据区，跨文件共享的信息更少。
-  return d.length <= maxBytes ? d : d.subarray(0, maxBytes)
+  // `maxBytes <= 0` 表示不截断（与 `gzip-ncd.ts` 的契约一致）；负数视为非法。
+  if (!Number.isFinite(maxBytes) || maxBytes < 0) throw new Error('无效的 maxBytes')
+  return maxBytes === 0 || d.length <= maxBytes ? d : d.subarray(0, maxBytes)
 }
 
 /**
@@ -126,6 +128,13 @@ function cmOptions(profile: 'text' | 'bin') {
   return profile === 'text' ? { context: 'text-vertcol' as const, matchDist: true } : { matchDist: true }
 }
 
+function cmBins(d: Uint8Array, profile: 'text' | 'bin'): Float32Array {
+  const blocks = Math.max(1, Math.ceil(d.length / SPLIT_BLOCK))
+  const bins = new Float32Array(blocks)
+  encodeCM(d, profile, 1, 1, undefined, 0, { values: bins, blockSize: SPLIT_BLOCK }, undefined, 'v20', 0, false, cmOptions(profile))
+  return bins
+}
+
 function sumBins(bins: Float32Array, from: number, to: number): number {
   let c = 0
   for (let i = from; i < to; i++) c += bins[i]
@@ -139,6 +148,14 @@ function sumBins(bins: Float32Array, from: number, to: number): number {
  * 像整条 `C(x||y)` 那样把两半的绝对代价混在一起。
  */
 function condCost(prefix: Uint8Array, target: Uint8Array, profile: 'text' | 'bin'): number {
+  // 短前缀（< 512 B）不能整段被抹掉：那会让 `C(y | M_x)` 退化成 `C(y)`，
+  // 于是两段几乎相同的短文本会得到 ncd = 1.0（外部审计 M-1 复现过）。
+  // 单块小前缀没有可用的块边界，改用一个不依赖分块的保守估计。
+  if (prefix.length < SPLIT_BLOCK) {
+    const cx = sumBins(cmBins(prefix, profile), 0, Math.max(1, Math.ceil(prefix.length / SPLIT_BLOCK)))
+    const cxy = sumBins(cmBins(concat(prefix, target), profile), 0, Math.ceil((prefix.length + target.length) / SPLIT_BLOCK))
+    return Math.max(0, cxy - cx)
+  }
   const cut = (prefix.length >> 9) << 9
   const x = prefix.subarray(0, cut)
   const joined = concat(x, target)

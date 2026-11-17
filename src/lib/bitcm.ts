@@ -43,6 +43,18 @@ export interface BitCMModel {
   stretch: Int32Array
 }
 
+/** Order tables are exponential in the order: `[16,20,24]` costs 68 MiB. A 72-byte
+ * plane cannot use a 24-bit history, so the orders are clamped to what the plane can
+ * actually address. Both sides derive the same set from the byte count, so no header
+ * change is needed; planes >= 1 MiB keep the historical `[16,20,24]` exactly. */
+export function bitCMOrdersFor(n: number): number[] {
+  if (n >= 1 << 20) return [16, 20, 24]
+  const cap = Math.max(6, Math.min(24, Math.ceil(Math.log2(Math.max(n, 2)))))
+  const out: number[] = []
+  for (const o of [16, 20, 24]) { const v = Math.min(o, cap); if (!out.includes(v)) out.push(v) }
+  return out
+}
+
 export function createBitCMModel(orders: readonly number[]): BitCMModel {
   if (!orders.length || orders.some(o => !Number.isInteger(o) || o < 1 || o > 24)) throw Error('无效位历史阶数')
   return {

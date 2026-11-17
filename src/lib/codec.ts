@@ -4800,6 +4800,18 @@ export function decompress(c: Uint8Array, onProgress?: (done: number, total: num
     () => decompressImpl(c, onProgress, maxOutput))
 }
 
+/** P38.2 (external audit H-1): reject the "empty payload, huge output" shape.
+ * A non-FILL group with zero payload bytes can only be decoded by inventing data
+ * from a model, which is exactly the zip-bomb primitive the audit demonstrated
+ * (22 bytes declaring 8 MiB). The bit-plane table footprint is bounded separately
+ * in `bitcm.ts` by scaling the bit-history orders with the plane length. */
+function guardDecodeFootprint(specs: readonly { id: number }[], payloadLens: readonly number[]): void {
+  for (let i = 0; i < specs.length; i++) {
+    if (specs[i].id === ID.FILL) continue
+    if (payloadLens[i] === 0) throw new Error('非填充分组缺少载荷')
+  }
+}
+
 function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number) => void, maxOutput = MAX_OUTPUT_BYTES): Uint8Array {
   if (c.length < 6 || c[0] !== 0x55 || c[1] !== 0x43 || c[2] !== 0x5a || (c[3] !== 1 && c[3] !== 2 && c[3] !== 3 && c[3] !== 4 && c[3] !== 5 && c[3] !== 6 && c[3] !== 7 && c[3] !== 8 && c[3] !== 9 && c[3] !== 10 && c[3] !== 11 && c[3] !== 12 && c[3] !== 13 && c[3] !== 14 && c[3] !== 15 && c[3] !== 16 && c[3] !== 17 && c[3] !== 18 && c[3] !== 19 && c[3] !== 20 && c[3] !== 21 && c[3] !== 22 && c[3] !== 23 && c[3] !== 24 && c[3] !== 25 && c[3] !== 26 && c[3] !== 27)) throw new Error('不是有效的 UCZ 容器')
   const st = { p: c[3] >= 19 ? 6 : c[3] >= 17 ? 5 : 4 }, n = getVar(c, st), cnt = getVar(c, st)
@@ -4925,6 +4937,7 @@ function decompressImpl(c: Uint8Array, onProgress?: (done: number, total: number
   }
   if (count) { if (!pending.length) throw new Error('空规则'); members[count - 1] = pending }
   st.p += Math.ceil(bit / 8)
+  guardDecodeFootprint(specs, payloadLens)
   const out = new Uint8Array(n)
   let completed = 0
   for (let gi = 0; gi < count; gi++) {
