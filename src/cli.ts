@@ -34,10 +34,13 @@ Usage:
 Resource limits (all commands):
   --max-input N    refuse inputs above N bytes (default: 256 MiB for data,
                   512 MiB + framing for containers; override only for trusted files)
-  --max-output N   refuse output above N bytes; implicit decompression uses
-                  min(512 MiB, max(64 MiB, 4096x container)) unless N is given
-  --time-budget S  stop planner search after S seconds (compression only)
-  --threads N      worker count; --memory-limit MiB caps worker RSS
+  --max-output N   refuse output above N bytes (output buffer, not total RSS);
+                  implicit decompression uses min(512 MiB, max(64 MiB,
+                  4096x container)) unless N is given
+  --time-budget S  cooperative planner search deadline in seconds; does not
+                   interrupt one model pass or decode (compression only)
+  --threads N      worker count; --memory-limit MiB caps worker admission and
+                   checks RSS before each job (not a memory reservation)
 
 Levels:
   -1, --fast       fast planning (fewest probes, slightly larger output)

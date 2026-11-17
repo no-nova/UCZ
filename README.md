@@ -61,7 +61,14 @@ ucz compress big.bin out.ucz --time-budget 30 --threads 4 --memory-limit 4096
   1 MiB model pass dominates).
 * **`--max-output BYTES`** refuses an oversized container
   (in the library: `maxOutputBytes`), and the decoder validates the whole header before it
-  allocates the output buffer.
+  allocates the output buffer. It bounds the declared output buffer, not total process RSS.
+
+These are admission and budget controls, not OS-enforced reservations: `--time-budget` is
+cooperative and cannot interrupt a single model pass or a decode; `--memory-limit` caps
+worker admission and checks RSS before each job, but does not reserve memory or cover the
+main-thread serial encode path; and `--max-output` bounds the output buffer, not decoder
+state or temporary allocations. For untrusted inputs, put the process under an external
+memory and wall-clock limit as well.
 
 ## The thought experiment
 
@@ -315,7 +322,7 @@ identical bytes to `--max` on most files, ~4× faster planning), `--max` (full c
 tournament). The level never changes model parameters, so any container decodes with any build.
 
 ```bash
-npm run bench:quick    # 6 self-verifying streams, ~7 s
+npm run bench:quick    # 6 self-verifying streams, ~7 s; fails on roundtrip/size drift
 node tests/run.mjs     # full suite: plan ledger, roundtrip, edge cases, CLI, manifold suite
 ```
 

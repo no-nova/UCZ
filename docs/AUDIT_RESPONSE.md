@@ -68,3 +68,25 @@ ptt5 26,939 / kennedy 33,107 / wdbc 31,542 / winequality-white 37,497 / yeast
 8,640, all `rt = true`), `npx tsc --noEmit` is clean, `node tests/run.mjs` exits
 0, `node tests/run-ui.mjs` passes 17/17, `npm run test:p111` passes, and
 `npm run bench:quick` still totals 91,759 B versus gzip's 120,730 B.
+
+## Follow-up review (2026-11-18): publishing and regression gates
+
+A third review focused on the published TypeScript surface, benchmark gating,
+and the strength of the resource-limit wording. All claims were reproduced.
+
+| ID | Claim | Verdict | Action |
+|----|-------|---------|--------|
+| P-1 | The packed `dist/index.d.ts` uses extensionless relative imports, so a `moduleResolution: NodeNext` consumer cannot resolve the public API (`TS2834`, `TS2305`) | **TRUE** | `scripts/fix-dts-specifiers.mjs` rewrites the emitted declaration graph (`.js`, directory imports to `/index.js`) and fails on unresolved specifiers; `scripts/build-dist.mjs` runs it after `tsc`. `npm run check:package` packs the tarball, installs it into a fresh ESM project, and compiles a real NodeNext consumer with `skipLibCheck:false`; CI and release-check run that gate. |
+| P-2 | `bench:quick` prints `❌` on a broken roundtrip but still exits 0, and has no size baseline | **TRUE** | Every stream is now SHA-256 verified; any mismatch exits nonzero. Per-stream raw size, corpus SHA-256, and UCZ bytes are locked in `scripts/bench-public-baseline.json`, so size drift also fails. `-- --update-baseline` is the explicit, reviewable way to accept a byte change. |
+| P-3 | Resource-limit flags sound stronger than they are | **TRUE, documentation** | `--time-budget` is a cooperative planner deadline; `--memory-limit` caps worker admission and checks RSS before jobs, not a reservation; `--max-output` bounds the output buffer, not total RSS. CLI help and README now say this, and recommend an external memory/wall-clock limit for untrusted input. |
+| P-4 | Dev build chain has high-severity `picomatch` advisories | **TRUE, dev-only** | `npm audit --omit=dev` is clean and the published package has no runtime dependencies. Latest `picomatch` is still in the advisory range, so no non-breaking upgrade fixes it yet; this is tracked as a build-chain advisory, not a shipped-code vulnerability. |
+| P-5 | `inspectContainer` and `decompressImpl` duplicate the header parser | **TRUE, known debt** | Not changed in this pass; unifying them requires careful trailer/CRC handling. Both paths validate before allocating, and both are covered by the golden suite. |
+
+### Invariants held
+
+Declaration emission is idempotent (first pass 25/54 files, second 0/54), the
+NodeNext consumer compiles, `npm run bench:quick` totals 91,759 B and passes its
+locked baseline, `npx tsc --noEmit` is clean, `node tests/run.mjs` exits 0,
+`node tests/run-ui.mjs` passes 17/17, and `npm run test:p111` passes. Reference
+container bytes are unchanged.
+

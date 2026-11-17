@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "corpusSha256": "642651d4bd379547045151e4bac1eb282b9cf9d913f5b1ca52aa7ac99f187c96",
+  "streams": {
+    "tabular CSV": {
+      "raw": 34173,
+      "sha256": "4af17d7a625a8b4513faaa1777d533cd3c17799e6682f796eab72b7dcb609e47",
+      "ucz": 5869
+    },
+    "quasi-periodic P=73": {
+      "raw": 29200,
+      "sha256": "690d422c6499651087bf5c02e84f7070c7fd94961ed32e518682d0b93cf1ecbb",
+      "ucz": 14463
+    },
+    "2D raster W=113": {
+      "raw": 24860,
+      "sha256": "354861dcee3ee40ed30c096a1a7e48a84ea51cc46ed6dff976ba779219b001d3",
+      "ucz": 136
+    },
+    "4-channel sensor s=4": {
+      "raw": 16000,
+      "sha256": "e315a4201b2436e1b805f13967d371f11a61ed06ee4a932eff71b11b5d749b26",
+      "ucz": 5678
+    },
+    "DNA 4-symbol Markov": {
+      "raw": 65536,
+      "sha256": "3f90277a4b7dfb37d596ca879c2b1bbd32dca8be02689f4306784768e4a2e903",
+      "ucz": 16443
+    },
+    "high-entropy noise": {
+      "raw": 49152,
+      "sha256": "bb57edfb382a9fc76788a049a228703d045aeece27b61b93a310c4c0926d476e",
+      "ucz": 49170
+    }
+  },
+  "total": {
+    "raw": 218921,
+    "ucz": 91759
+  }
+}

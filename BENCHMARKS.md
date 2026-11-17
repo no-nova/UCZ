@@ -48,7 +48,7 @@ explains the mechanism, because a benchmark table without a mechanism is adverti
 
 ```bash
 npm run build                      # worker bundle + dist/cli.js + dist/index.js
-npm run bench:quick                # 6 synthetic streams, ~7 s, self-verifying
+npm run bench:quick                # 6 synthetic streams, ~7 s; fails on roundtrip/size drift
 npx tsx tests/codec.test.ts        # plan/ledger/roundtrip/edge/CLI (~8 min)
 node tests/run.mjs                 # the same suite under the release gate
 ```
