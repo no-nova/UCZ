@@ -5064,7 +5064,7 @@ export function contextProposalsForGroup(spec:Spec,
 
 /** A job computes controls/candidates, never chooses a container. */
 export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,positions:number[],
-  retained?:{payload:Uint8Array;flags:number;wordPre:boolean},screen=true,rawText=false,lateMatchDist=true):ContextCandidates {
+  retained?:{payload:Uint8Array;flags:number;wordPre:boolean;context?:CMContext},screen=true,rawText=false,lateMatchDist=true):ContextCandidates {
   const rawBytes=parts.reduce((n,p)=>n+p.length,0),wordPre=ENABLE_WORDPRE && !rawText && spec.id===ID.TEXT_V3
   const result:ContextCandidates={spec:{...spec},rawBytes,wordPre,control:null,trials:[],controlReused:false,fullCandidateInputBytes:0}
   try {
@@ -5268,6 +5268,15 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     // refineContextCandidates still decides adoption; this only ensures the
     // candidates exist.
     const md=!!result.screen?.matchDist
+    // P37.12 (R5): the retained group *is* one of the candidate configurations. Re-encoding
+    // it produces the same bytes by construction, so reuse the payload instead of paying for
+    // a full-group encode — the tournament then simply finds no strict improvement.
+    const reuseFor=(context:CMContext|undefined,mdAxis:boolean):Uint8Array|undefined=>{
+      if(!retained || retained.wordPre!==wordPre) return undefined
+      if((retained.context ?? undefined)!==context) return undefined
+      if(!!(retained.flags & V22_FLAG_MATCH_DISTANCE)!==mdAxis) return undefined
+      return retained.payload
+    }
     const pushTrial=(context:CMContext,payload:Uint8Array,mdAxis=false)=>{
       // A payload that did not actually take the v22 model must not be labelled as
       // if it had: the decoder would build a different model and diverge.
@@ -5278,13 +5287,16 @@ export function contextGroupCandidatesSync(parts:Uint8Array[],spec:Spec,position
     if(md && rawBytes<CONTEXT_SCREEN_MIN_BYTES) {
       pushTrial(undefined as unknown as CMContext,encode(parts,positions,undefined,pre,true),true)
       for(const context of modes) {
-        const plain=fullDual && context===fullMode ? fullDual.alt : encode(parts,positions,context,pre,false)
+        const owned=reuseFor(context,false)
+        const plain=owned ?? (fullDual && context===fullMode ? fullDual.alt : encode(parts,positions,context,pre,false))
         pushTrial(context,plain,false)
-        pushTrial(context,encode(parts,positions,context,pre,true),true)
+        const ownedMd=reuseFor(context,true)
+        pushTrial(context,ownedMd ?? encode(parts,positions,context,pre,true),true)
       }
     } else {
       for(const context of modes) {
-        const payload=fullDual && context===fullMode && !md ? fullDual.alt : encode(parts,positions,context,pre,md)
+        const owned=reuseFor(context,md)
+        const payload=owned ?? (fullDual && context===fullMode && !md ? fullDual.alt : encode(parts,positions,context,pre,md))
         pushTrial(context,payload,md)
       }
     }
@@ -5328,7 +5340,7 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
       // payload, same kernel. Without this fallback the whole tournament aborted.
       const fb=retainedPlanGroups.get(baseline.container)
       if(!fb)throw Error('缺少实际旧容器的分组载荷，拒绝猜测或替换')
-      retained=fb.map(g => ({ spec: { ...g.spec }, members: [...g.members], payload: g.payload, v15: g.v15, wordPre: g.wordPre }))
+      retained=fb.map(g => ({ spec: { ...g.spec }, members: [...g.members], payload: g.payload, v15: g.v15, wordPre: g.wordPre, context: g.context }))
       retainedContextGroups.set(baseline.container, retained)
     }
     const groups=retained.map(g=>({...g,spec:{...g.spec},members:[...g.members]})),segs=baseline.segs

@@ -8,6 +8,7 @@
 // 语义保证：加载失败或不支持时一律返回 null / false，调用方退回串行，产物不变。
 
 import type { JobPayload, JobReply } from './parallel'
+import { deadlineActive } from './planner/budget'
 import { registerCoreCounter, registerMemoryLimit, threadCount } from './parallel'
 
 /** 是否运行在 Node（有 worker_threads 的真实环境，排除打包后的浏览器）。 */
@@ -81,9 +82,15 @@ async function loadPool(): Promise<PoolModule | null> {
   return loading
 }
 
-/** 池是否可用（同步判断：Node 且多核）。 */
+/**
+ * 池是否可用（同步判断：Node 且多核）。
+ *
+ * 带 `--time-budget` 时一律退回串行：一次派发是一整批任务，池无法在批内中断，
+ * 于是"有预算"反而比串行慢（实测 6.8 s → 15.5 s）。串行循环每步都会查一次
+ * 截止时间，这才是预算想要的语义。
+ */
 export function nodeParallelReady(): boolean {
-  return isNodeRuntime() && threadCount() > 1
+  return isNodeRuntime() && threadCount() > 1 && !deadlineActive()
 }
 
 /** 并行执行；不可用时返回 null。 */

@@ -35,7 +35,7 @@ import { buildMapModel, drawDigram } from '../src/lib/viz'
 import { CM_FAMILIES, CM_ENCODING, isFamilyCM } from '../src/lib/unify'
 import { lptAssign, threadCount } from '../src/lib/parallel'
 import { encodeCMDual, decodeCM as decodeCMapm, apm2Tuning, a2Tuning } from '../src/lib/coder'
-import { wordPreFwd, wordPreInv, buildTokenDict, wordPreFwd2Sampled, wordPreInv2 } from '../src/lib/wordpre'
+import { wordPreFwd, wordPreInv, buildTokenDict } from '../src/lib/wordpre'
 import { lzPreFwd, lzPreInv } from '../src/lib/lzpre'
 
 /** Historical selector fixtures intentionally require MICRO/ANCHOR/PEEL/etc.
@@ -1265,13 +1265,10 @@ testP243VerticalColumns(); testP244SyncHighEntropy()
       apm2Tuning.on = true
     }
   }
-  // P5-2 / P5-4：两个"实测证伪"的预变换也必须严格可逆（保留它们的唯一理由
-  // 是让探针可复现；一旦反转就直接接入）。
+  // P5-4：LZ-PRE 是实测证伪的预变换，但它仍被分组级 A/B 引用，必须严格可逆。
+  // （P5-2 的 WORD-PRE v2 双层词表与分块路径从未被 src/ 调用，已随 P37.12 删除。）
   {
     const sample = new TextEncoder().encode('the quick brown fox jumps over the lazy dog. '.repeat(400))
-    const wp2 = wordPreFwd2Sampled(sample, 64 * 1024)
-    assert.ok(wp2 && wp2.dict.one.length > 0, 'v2 词表必须非空')
-    fastDeepEqual(wordPreInv2(wp2!.header, wp2!.body, sample.length), sample, 'WORD-PRE v2 必须可逆')
     const lz = lzPreFwd(sample)
     fastDeepEqual(lzPreInv(lz.body, sample.length, lz.esc), sample, 'LZ-PRE 必须可逆')
     const esc = Uint8Array.from({ length: 4096 }, (_, i) => (i % 7 === 0 ? 0x9c : (i * 31) & 127))
