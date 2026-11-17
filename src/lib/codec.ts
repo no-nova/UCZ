@@ -908,6 +908,11 @@ export function tgPlanningWindow(bytes: number, width: number, v20 = transformsV
   return Math.floor(budget/width)*width
 }
 function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: boolean | 'v20' = false): ColumnGroup[] {
+  // A wall-clock budget must never leave the segmentation half-built: the DP's
+  // costs[]/plans[] arrays are only meaningful once every column has been priced.
+  // So the budget skips the search as a whole (the cheap single-group plan is a
+  // valid, fully measured fallback) rather than aborting it mid-way.
+  if (deadlineHit()) return [{ start: 0, span: width, mode: ID.STORE }]
   // Use a central, record-aligned window from the largest available segment.
   let largest = parts[0] ?? new Uint8Array(0)
   for (const p of parts) if (p.length > largest.length) largest = p
@@ -947,7 +952,11 @@ function planColumnGroups(parts: Uint8Array[], width: number, v13 = false, v15: 
               ? (deltaH < rawH ? [ID.DELTA, ID.O0, ID.BIN] : [ID.O0, ID.BIN, ID.DELTA])
               : deltaH < rawH ? [ID.DELTA, ID.RLE, ID.O0, ID.BIN] : [ID.RLE, ID.O0, ID.BIN, ID.DELTA]
           if (v13 && transformsV20Enabled() && (span===4 || span===8)) options.push(span===4?TG_LE32:TG_LE64)
-          for (const candidate of options) {
+          // 严格档：列内一律不做模 256 差分 / 跨列算术。DELTA 与 TG_LE* 都是值算术，
+          // 置换后同一列的残差完全不同；O0/BIN/STORE/FILL 只依赖当前字节。
+          const strictOptions = options.filter(id => id === ID.STORE || id === ID.FILL || id === ID.O0 || id === ID.BIN)
+          const useOptions = strictPriorsOn() && strictOptions.length ? strictOptions : options
+          for (const candidate of useOptions) {
             const n = encodeGroupData(data, candidate, lengths, span, undefined, v13, v15, reverse).length
             if (n < size) { size = n; mode = candidate }
           }
@@ -1770,6 +1779,8 @@ function blockMinEntropy(data: Uint8Array, start: number, end: number): number {
 export const STRICT_FORBIDDEN_SPECS = new Set<number>([
   ID.DELTA, ID.DELTA_V3, ID.GRAD, ID.GRAD_V2, ID.GRAD_V3, ID.WIDE_GRAD,
   ID.REC2, ID.BITPLANE, ID.MICRO,
+  // 16 位线性预测/定长记录拆分同样按字节值做模 2^16 算术。
+  ID.D16,
   // 锚点族把**字节值**写进头部（`r = anchor + 1`，且 r 的编码还受范围约束），
   // 置换后同一个结构可能根本不可编码 —— 这是格式层面的值依赖，必须一起禁掉。
   ID.ANCHOR, ID.ANCHOR_FOLD, ID.SUB_ANCHOR, ID.SUB_ANCHOR_V3,
@@ -3917,6 +3928,20 @@ function sealChecksum(comp: Compressed, raw: Uint8Array): Compressed {
  *  entry point therefore runs one encode at a time; a queue costs nothing for the
  *  single-call case and removes a whole class of silent corruption.
  */
+/** Wall-clock budget for the current encode.
+ *
+ *  A context-mixing planner cannot be asked for "the result in 50 ms": every stage
+ *  is a measurement, and a measurement cannot be truncated without changing the
+ *  answer. What a budget CAN do is stop *starting new measurements*: each search
+ *  loop checks this deadline and returns the best plan it has already priced. The
+ *  result is therefore "best plan found within the budget" — never a partial or
+ *  invalid container, because only fully measured candidates are ever adopted.
+ */
+let encodeDeadline = 0
+function deadlineHit(): boolean { return encodeDeadline > 0 && Date.now() >= encodeDeadline }
+function deadlineSet(ms: number): void { encodeDeadline = ms > 0 ? Date.now() + ms : 0 }
+function deadlineClear(): void { encodeDeadline = 0 }
+
 let encodeChain: Promise<void> = Promise.resolve()
 async function withEncodeLock<T>(run: () => Promise<T>): Promise<T> {
   const previous = encodeChain
@@ -3943,9 +3968,9 @@ export async function compressAdaptive(
   // Time budget: a cooperative deadline checked between planner stages. When it
   // fires we keep the best plan produced so far and flag it, because "best within
   // the budget" is not the same claim as "best of all candidates".
-  const deadline = options?.timeBudgetMs && options.timeBudgetMs > 0 ? Date.now() + options.timeBudgetMs : 0
+  deadlineSet(options?.timeBudgetMs ?? 0)
   const seal = (r: Compressed): Compressed => {
-    if (deadline && Date.now() >= deadline) (r as Compressed & { budgetTruncated?: boolean }).budgetTruncated = true
+    if (deadlineHit()) (r as Compressed & { budgetTruncated?: boolean }).budgetTruncated = true
     const out = containerChecksumOn() ? sealChecksum(r, data) : r
     if (options?.maxOutputBytes !== undefined && out.container.length > options.maxOutputBytes) {
       throw new Error(`输出 ${out.container.length} B 超过上限 ${options.maxOutputBytes} B`)
@@ -3963,7 +3988,7 @@ export async function compressAdaptive(
     // P30.0: `fast` 只做"基线 + 上下文锦标赛"两步；`balanced` 再多做两项
     // 收益最大、代价最小的结构细化（BCJ 合并、噪声凹槽切分），跳过 REC2/位平面。
     const pr = pruningLevel()
-    if (deadline && Date.now() >= deadline) return seal(coalesceCompressedPlan(data.length,chosen))
+    if (deadlineHit()) return seal(coalesceCompressedPlan(data.length,chosen))
     if (pr >= 2) return seal(coalesceCompressedPlan(data.length,chosen))
     const coalescedBcj=refineBcjSegments(data,chosen)
     // P37.7：严格档跳过这两遍后处理——它们的候选集含 DELTA/DELTA_V3/TRANSPOSE_GROUP，
@@ -4010,7 +4035,7 @@ export async function compressAdaptive(
     }
     return seal(coalesceCompressedPlan(data.length,bp))
   }
-  finally { restoreChecksum(); restoreStrict(); activeLevel = previousLevel; await closeNodePool() }
+  finally { restoreChecksum(); restoreStrict(); activeLevel = previousLevel; deadlineClear(); await closeNodePool() }
   })
 }
 /** P17.7 Direction 4: carve low-entropy pockets out of coarse, nearly
@@ -4259,6 +4284,7 @@ export function refineNoisePockets(data: Uint8Array, baseline: Compressed): Comp
     let bestTotal = baseline.container.length
     let best = buildPlan(accepted)
     for (const candidate of candidates) {
+      if (deadlineHit()) break
       const pocket = data.subarray(candidate.start, candidate.end)
       // Spec options: the merged r=1 group (each pocket of a rule shares one stream)
       // and, for rules whose decoder ignores `res`, one isolated group with a fresh
@@ -4375,6 +4401,7 @@ export function refineGroupCodecs(data: Uint8Array, baseline: Compressed): Compr
     let curSegs: typeof segs = segs
     const planTotal = (gs: readonly PlanGroup[], ss: readonly SegResult[]) => planHeader(data.length, ss, gs).length + gs.reduce((n, g) => n + g.payload.length, 0)
     for (let gi = 0; gi < nextGroups.length; gi++) {
+      if (deadlineHit()) break
       const g = nextGroups[gi]
       if (GROUP_CODEC_SKIP.has(g.spec.id) || g.wordPre || g.context || g.matchDist) continue
       const members = [...g.members]
@@ -4994,6 +5021,8 @@ export interface ContextGroupComparison {
 }
 export interface ContextComparison {
   baselineBytes: number; candidateBytes: number; accepted: boolean
+  /** True when the wall-clock budget stopped the tournament early. */
+  budgetTruncated?: boolean
   workerJobs: number; workerFallbacks: number; groups: ContextGroupComparison[]; error?: string
   legacyUpgrades?: {group:number;spec:Spec;sampleBase?:number;sampleV20?:number;oldPayload:number;newPayload?:number;oldContainer:number;newContainer?:number;accepted:boolean;skipped?:string;error?:string}[]
 }
@@ -5345,6 +5374,10 @@ export async function refineContextCandidates(data:Uint8Array,baseline:Compresse
     }
     let total=baseline.container.length
     for(let k=0;k<eligible.length;k++) {
+      // The context tournament is the most expensive planner stage (one full encode
+      // per candidate). Under a wall-clock budget we stop STARTING candidates;
+      // everything already measured stays adoptable, so the result is still a plan.
+      if(deadlineHit()){comparison.budgetTruncated=true;break}
       const {g,group,proposal,rawBytes}=eligible[k],job=jobs[k]
       if(job.kind!=='contextGroup')throw Error('v21 job type')
       onStage?.(`v21 上下文候选 ${k+1}/${eligible.length}（保留原容器）`,85+2*k/eligible.length)

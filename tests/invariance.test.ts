@@ -76,7 +76,12 @@ export function invarianceCorpus(): { name: string; data: Uint8Array }[] {
  */
 export async function testStrictProfileInvariance(): Promise<void> {
   const pi = randomBijection(0x85ebca6b)
-  const driftBound = 0.7
+  const driftBound = 0.05
+  // A linear ramp is the one fixture where a permutation legitimately destroys the
+  // structure the planner found: π(ramp) is not a ramp, so no compressor can price
+  // it the same way. Its drift therefore measures *information*, not prior leakage,
+  // and the bound is set from measurement (observed 21.6%).
+  const perFixtureBound: Record<string, number> = { text: 0.05, ramp4: 0.25, noise: 0.02 }
   let totalPlain = 0, totalPerm = 0
   for (const { name, data } of invarianceCorpus()) {
     const perm = applyBijection(data, pi)
@@ -94,7 +99,8 @@ export async function testStrictProfileInvariance(): Promise<void> {
     fastDeepEqual(decompress(a.container), data, `${name}: strict roundtrip`)
     fastDeepEqual(decompress(b.container), perm, `${name}: strict permuted roundtrip`)
     const drift = Math.abs(b.container.length - a.container.length) / a.container.length
-    assert.ok(drift <= driftBound, `${name}: size drift ${(drift * 100).toFixed(2)}% exceeds ${driftBound * 100}%`)
+    const bound = perFixtureBound[name] ?? driftBound
+    assert.ok(drift <= bound, `${name}: size drift ${(drift * 100).toFixed(2)}% exceeds ${(bound * 100).toFixed(0)}%`)
     for (const seg of a.segs) assert.ok(!STRICT_FORBIDDEN_SPECS.has(seg.spec.id), `${name}: strict profile leaked a byte-value spec (id ${seg.spec.id})`)
     for (const seg of b.segs) assert.ok(!STRICT_FORBIDDEN_SPECS.has(seg.spec.id), `${name}: strict profile leaked a byte-value spec (id ${seg.spec.id}) under π`)
     totalPlain += a.container.length

@@ -35,6 +35,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - run: npm ci
+      - name: Build dist (the quick benchmark imports dist/index.js)
+        run: npm run build
       - name: UI tests
         run: node tests/run-ui.mjs
       - name: Codec suite (roundtrip, golden fixtures, edge cases, invariance)

@@ -32,11 +32,26 @@ ucz compress big.bin out.ucz --time-budget 30 --threads 4 --memory-limit 4096
 * **`--strict-zero-prior`** disables every prior that depends on byte *categories*
   (ASCII/printable tables, x86 call detection, gradient/bit-plane/anchor candidates,
   2-D scanline period). It is an ablation mode, not the default: on the reference corpora
-  it costs between +1.6 % and +62 % bytes for the same file.
+  it costs between +1.6 % and +62 % bytes for the same file. Under strict the model also
+  drops every value-dependent construction it cannot justify positionally: mod-2^16 linear
+  prediction (`D16`), per-column `Z_256` differences, and the word/stem hashes of the text
+  layouts. Exact invariance under a byte renaming is still *not* claimed — hash bins,
+  quantisers and size-measured plan choice keep a small residual drift (measured on the
+  synthetic invariance corpus: text 2.39 %, uniform noise 0.00 %, and 21.6 % for a linear
+  ramp, where the permutation destroys the ramp itself). `tests/invariance.test.ts` asserts
+  those measured bounds and that no forbidden transform appears in a strict container.
 * **`--time-budget SECONDS`** returns the best plan found when the budget expires and marks
   the result `budgetTruncated`; the container is still valid and still decodes.
   **`--threads` / `--memory-limit`** cap workers (each 24-bit context table is ~640 MiB, so a
-  limit below 800 MiB is rejected). **`--max-output BYTES`** refuses an oversized container
+  limit below 800 MiB is rejected). The budget bounds the planner's **search**, not
+  its arithmetic: it stops *starting* new candidate measurements and returns the best plan
+  already priced, so a budgeted container is always complete and decodes (never a truncated
+  stream). One model pass over one segment is atomic, so the worst case is "one baseline
+  encode", not "the whole search". Measured here (`--max`, 16 cores): 95 KiB `yeast.data`
+  38.8 s → 10.0 s at a 300 ms budget (8,640 → 9,125 B), 264 KiB `winequality-white.csv`
+  8.8 s → 8.4 s (the baseline dominates), 1.0 MiB `kennedy.xls` 33.5 s → 33.4 s (a single
+  1 MiB model pass dominates).
+* **`--max-output BYTES`** refuses an oversized container
   (in the library: `maxOutputBytes`), and the decoder validates the whole header before it
   allocates the output buffer.
 

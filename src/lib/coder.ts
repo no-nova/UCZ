@@ -2370,7 +2370,10 @@ class Model {
     // sides freeze on exactly the same byte.
     const frozen = this.vertTbl !== undefined && vertTuning.freeze && this.emaErr > vertTuning.thr
     if (this.context === 'text-linecol' || this.context === 'text-lexcol' || this.context === 'text-tabcol' || (this.context === 'text-vertcol' && !frozen)) this.updateLineCol(byte)
-    if (this.profile === 'text' && this.variant && !frozen) {
+    // P37.8：严格档禁用一切"字母/词"概念。`text-*` 布局本身还是合法候选（它只是
+    // 按位置取邻域），但词哈希 `curWord/prevWord/prev2Word/stem` 会把字节值折叠成
+    // "是不是字母"的分类，置换后整张词表失效 —— 严格容器里必须关掉，只留原始滞后位。
+    if (this.profile === 'text' && this.variant && !frozen && !this.strictPriors) {
       const lower = byte | 32
       const asciiLetter = lower >= 97 && lower <= 122
       if (this.context === 'wp-merge' && (asciiLetter || byte >= 128)) {
