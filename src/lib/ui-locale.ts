@@ -77,8 +77,18 @@ export const TRUTH_LABEL_EN: Record<string, string> = {
  * are recognised here, and anything unrecognised falls back to the raw text rather
  * than to a lie. Called only when the UI language is English.
  */
+const TERRAIN_EN: Record<string, string> = {
+  '缓坡(连续/渐变)': 'slope (smooth)',
+  '森林(文本编码)': 'forest (text)',
+  '沙漠(高熵噪声)': 'desert (noise)',
+  '平原(常量填充)': 'plain (constant)',
+  '梯田(重复结构)': 'terrace (repeat)',
+}
+
 export function translateLabel(label: string): string {
-  return label
+  const exact = TERRAIN_EN[label]
+  if (exact) return exact
+  let out = label
     .replace(/步长/g, 'stride ')
     .replace(/声道/g, 'ch ')
     .replace(/记录/g, 'records')
@@ -86,22 +96,72 @@ export function translateLabel(label: string): string {
     .replace(/残余/g, 'residual')
     .replace(/合并/g, 'merged')
     .replace(/预置/g, 'preset')
+  if (hasCjk(out)) {
+    // 未知标签：只保留其中的 ASCII 结构（规则名、数字、步长），绝不把中文原样透传。
+    out = out.replace(/[^\x20-\x7e]/g, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim()
+    if (!out) out = 'candidate'
+  }
+  return out
 }
 
+export const PLANNER_STRINGS_EN: Record<string, string> = {
+  '扫描数据地形…': 'Scanning the data terrain…',
+  '为每个区域试探最合适的编码规则…': 'Probing the best coding rule for each region…',
+  '探测跨区域 16 位宽行结构…': 'Probing a 16-bit wide-row structure across regions…',
+  '启动后台工作线程…': 'Starting the background worker…',
+  '低基数符号流：采样比较 8 位与低基数符号模型…': 'Low-cardinality stream: comparing 8-bit and symbol models…',
+  '低基数符号流：整份文件单遍低基数符号编码…': 'Low-cardinality stream: single-pass symbol encoding…',
+  '完整容器择优完成': 'Container selection finished',
+  '原样存储': 'Stored raw',
+  '常量填充': 'Constant fill',
+  '游程编码': 'Run-length',
+  '差分 + 残差': 'Delta + residual',
+  '记录转置': 'Record transpose',
+  '排队中…': 'Queued…',
+  '读取中…': 'Reading…',
+  '读取文件…': 'Reading the file…',
+  '校验中…': 'Verifying…',
+  '逐字节校验通过': 'Byte-verified',
+  '已取消，未保留部分结果。': 'Cancelled (no partial result kept)',
+}
+
+/** True when the text still contains CJK — used to guarantee English mode never leaks it. */
+function hasCjk(text: string): boolean { return /[\u3400-\u9fff\u3000-\u303f\uff00-\uffef]/.test(text) }
+
+/**
+ * English rendering of a planner/queue message.
+ *
+ * Exact literals come from `STAGE_EN`; the few parameterised shapes are recognised by
+ * regex. Anything else that still contains CJK becomes a neutral English phrase: the
+ * one thing English mode must never do is show Chinese, and the one thing it must not
+ * do instead is invent a specific-but-wrong description.
+ */
 export function translateProgress(message: string): string {
   const msg = message.trim()
+  const exact = PLANNER_STRINGS_EN[msg]
+  if (exact) return exact
   let m = /^并行试探 (\d+) 个区域（(\d+) 线程）…$/.exec(msg)
   if (m) return `Parallel probing of ${m[1]} regions (${m[2]} threads)…`
-  if (msg === '探测跨区域 16 位宽行结构…') return 'Probing a 16-bit wide-row structure across regions…'
-  if (msg === '启动后台工作线程…') return 'Starting the background worker…'
-  if (msg === '排队中…') return 'Queued…'
-  if (msg === '读取中…') return 'Reading…'
-  if (msg === '校验中…') return 'Verifying…'
   m = /^区域 (\d+)\/(\d+) · 试探 (.+)$/.exec(msg)
   if (m) return `Region ${m[1]}/${m[2]} · trying ${translateLabel(m[3])}`
   m = /^区域 (\d+)\/(\d+) → (.+)$/.exec(msg)
   if (m) return `Region ${m[1]}/${m[2]} → ${translateLabel(m[3])}`
   m = /^试探开始 (\d+) 区域 \/ (\d+) 线程$/.exec(msg)
   if (m) return `Probing ${m[1]} regions on ${m[2]} threads`
+  if (hasCjk(msg)) return 'Working…'
+  return msg
+}
+
+/** Failure messages: keep the raw text available for diagnosis, show English in the UI. */
+export function translateError(message: string): string {
+  const msg = message.trim()
+  const exact = PLANNER_STRINGS_EN[msg]
+  if (exact) return exact
+  if (/不是有效的 UCZ 容器/.test(msg)) return 'Not a valid UCZ container'
+  if (/容器内容校验失败/.test(msg)) return 'Container checksum mismatch (data corrupted)'
+  if (/超过上限|超过该输出长度的预算/.test(msg)) return 'Output exceeds the configured limit'
+  if (/内存预算/.test(msg)) return 'Memory budget exhausted'
+  if (/截断/.test(msg)) return 'Container truncated'
+  if (hasCjk(msg)) return 'Compression failed (see the browser console for the raw message)'
   return msg
 }

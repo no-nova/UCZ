@@ -446,7 +446,7 @@ export function profileResidual(data: Uint8Array, options?: { profile?: 'text' |
 
 export async function inspectStream(
   data: Uint8Array,
-  options?: { compress?: boolean; level?: CompressionLevel },
+  options?: { compress?: boolean; level?: CompressionLevel; timeBudgetMs?: number; maxOutputBytes?: number },
 ): Promise<StreamInspection> {
   const t0 = performance.now()
   const fingerprint = fingerprintStream(data)
@@ -454,7 +454,13 @@ export async function inspectStream(
   let container: ContainerAnatomy | undefined
   let compressedBytes: number | undefined
   if (options?.compress !== false && data.length > 0) {
-    const enc = await compressAdaptive(data, undefined, options?.level ? { level: options.level } : undefined)
+    // H-5: `ucz inspect` is a planner user like any other, so it must honour the same
+    // budget flags instead of silently compressing regardless of what the user asked.
+    const enc = await compressAdaptive(data, undefined, {
+      ...(options?.level ? { level: options.level } : {}),
+      ...(options?.timeBudgetMs ? { timeBudgetMs: options.timeBudgetMs } : {}),
+      ...(options?.maxOutputBytes !== undefined ? { maxOutputBytes: options.maxOutputBytes } : {}),
+    })
     container = inspectContainer(enc.container)
     compressedBytes = enc.container.length
   }

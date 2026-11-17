@@ -8,9 +8,12 @@ export {
   type CompressionLevel,
   currentCompressionLevel,
   deadlineActive,
+  deadlineAtNow,
   deadlineClear,
   deadlineHit,
+  deadlineRemainingMs,
   deadlineSet,
+  deadlineSetAt,
   pruningLevel,
   setActiveCompressionLevel,
 } from './budget'

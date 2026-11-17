@@ -1154,6 +1154,8 @@ class Model {
     this.byteToSym = sm ? sm.byteToSym : null
     this.compByte = sm ? sm.compByte : null
     this.symKm9 = 0; this.symKm10 = 0; this.symDir = 1; this.symTbl = null
+    this.symTblBits = n >= (1 << 20) ? 22 : Math.max(10, Math.min(22, Math.ceil(Math.log2(Math.max(n, 2))) + 2))
+    this.symTblMask = (1 << this.symTblBits) - 1
     // P18.2: the quaternary path uses the verified 17-mer multi-seed tracker.
     // sym-5bit keeps its original 8-mer seed/gate untouched.
     this.symDna = this.symBits === 2
@@ -2318,6 +2320,11 @@ class Model {
   symKm10 = 0
   symDir = 1
   symTbl: Int32Array | null = null
+  /** H-1 remainder: the symbol match table is 4 B/slot; sizing it by the stream keeps a
+   * tiny payload from allocating 64 MiB. Both sides derive it from `n`, so no header
+   * field is needed and streams >= 1 MiB keep the historical 22-bit table. */
+  symTblBits = 22
+  symTblMask = 0x3fffff
   symSeedK = 14
   symProt = false
   symP5Soft = false
@@ -2503,7 +2510,7 @@ class Model {
             const kk2 = this.symSeedK, b2s2 = this.byteToSym!
             let h2 = 0x811c9dc5
             for (let q = pos - kk2; q < pos; q++) h2 = Math.imul(h2 ^ (b2s2[buf[q]] + 1), 0x01000193)
-            h2 = (h2 ^ (h2 >>> 15)) & 0x3fffff
+            h2 = (h2 ^ (h2 >>> 15)) & this.symTblMask
             const b2 = h2 << 2, cands = this.symTbl
             for (let w = 0; w < 4; w++) {
               const cd = cands[b2 + w]
@@ -2618,9 +2625,9 @@ class Model {
           if (rev) { for (let q = e - 1; q >= e - kk; q--) h = Math.imul(h ^ (b2s[cp[buf[q]]] + 1), 0x01000193) }
           else { for (let q = e - kk; q < e; q++) h = Math.imul(h ^ (b2s[buf[q]] + 1), 0x01000193) }
           h ^= h >>> 15
-          return h & 0x3fffff
+          return h & this.symTblMask
         }
-        if (!this.symTbl) this.symTbl = new Int32Array((1 << 22) * 4)
+        if (!this.symTbl) this.symTbl = new Int32Array((1 << this.symTblBits) * 4)
         const tf = this.symTbl
         const kf = hashAt(pos, false)
         let bestL = 0, bestP = 0, bestD = 0, bestLocal = false, bestE = 0
@@ -2761,9 +2768,9 @@ class Model {
           let h = 0x811c9dc5
           for (let q = e - k; q < e; q++) h = Math.imul(h ^ (b2s[buf[q]] + 1), 0x01000193)
           h ^= h >>> 15
-          return h & 0x3fffff
+          return h & this.symTblMask
         }
-        if (!this.symTbl) this.symTbl = new Int32Array((1 << 22) * 4)
+        if (!this.symTbl) this.symTbl = new Int32Array((1 << this.symTblBits) * 4)
         const tf = this.symTbl
         const kf = hashAt(pos, kk)
         let bestL = 0, bestP = 0, bestE = 0, bestScore = -1
@@ -2895,9 +2902,9 @@ class Model {
           if (rev) { for (let q = e - 1; q >= e - kk; q--) h = Math.imul(h ^ (b2s[cp[buf[q]]] + 1), 0x01000193) }
           else { for (let q = e - kk; q < e; q++) h = Math.imul(h ^ (b2s[buf[q]] + 1), 0x01000193) }
           h ^= h >>> 15
-          return h & 0x3fffff
+          return h & this.symTblMask
         }
-        if (!this.symTbl) this.symTbl = new Int32Array(1 << 22)
+        if (!this.symTbl) this.symTbl = new Int32Array(1 << this.symTblBits)
         const tf = this.symTbl
         const kf = hashAt(pos, false)
         let bestL = 0, bestP = 0, bestD = 0

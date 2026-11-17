@@ -14,6 +14,7 @@ import { crc32c, crcTrailer, readCrcTrailer, containerHasChecksum } from './cont
 import {
   type CompressionLevel,
   currentCompressionLevel,
+  deadlineAtNow,
   deadlineClear,
   deadlineHit,
   deadlineSet,
@@ -1643,6 +1644,9 @@ export {
 } from './planner/budget'
 export type { CompressionLevel } from './planner/budget'
 
+/** Smallest possible container: 17-byte v1-style header plus one rule/payload byte. */
+const MIN_CONTAINER_BYTES = 18
+
 export function sampleBudgetForSegment(totalBytes: number, segments: number, segmentBytes: number): number {
   if (planTuning.soloSampleCap > 0 && segments <= 4 && segmentBytes >= 1024 * 1024)
     return Math.min(segmentBytes, planTuning.soloSampleCap)
@@ -1970,6 +1974,11 @@ function chooseSpecCore(seg: Uint8Array, cls: Cls, bestS: number, sampleLimit: n
   const center = sampleWindow(seg, sampleLimit, bestS)
   const trials: Trial[] = [{ spec: { id: ID.STORE, s: 1, r: 1 }, label: 'STORE', ratio: 1, sampleLen: center.sample.length, payloadSize: center.sample.length, sampleStart: center.start }]
   for (const sp of candidatesFor(seg, cls, bestS, center.sample)) {
+    // H-5: the spec search is the dominant cost on small file-shaped inputs (a 95 KiB
+    // records file spends ~36 s of its 40 s here). A budget may only stop *starting*
+    // trials — every adopted trial is fully measured, so the returned plan is always
+    // a real plan, never a partial one.
+    if (deadlineHit()) break
     onTrial?.(specLabel(sp))
     yieldIfNeeded?.()
     const budget = sp.id === ID.WIDE_GRAD ? Math.max(sampleLimit, 4*sp.r) : sampleLimit
@@ -2662,6 +2671,8 @@ async function unifyFamilies(data:Uint8Array,groups:PlanGroup[],segs:SegResult[]
   if(groups.filter(g=>isFamilyCM(g.spec.id)).length<2) return groups
   let out=groups.slice()
   for(const family of CM_FAMILIES){
+    // H-5：预算耗尽后不再开始新的家族合并尝试（已合并的结果保留）。
+    if (deadlineHit()) break
     // 族内只有 1 个活跃分组（或成员规则全同）时统一必然不会更小，
     // 这里在分配任何载荷、跑任何编码之前直接跳过，代价只有一次 filter。
     const members=out.filter(g=>matches(g,family))
@@ -3276,7 +3287,7 @@ async function tryParallelChoose(
 ): Promise<{ spec: Spec; trials: Trial[] }[] | null> {
   if (!parallelReport.ok) return null
   const jobs: JobPayload[] = segs.map((sg, i) => ({
-    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: currentCompressionLevel(), strictPrior: strictPriorsOn(), start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
+    kind: 'chooseSpec', cmV20: {...cmV20Tuning}, level: currentCompressionLevel(), strictPrior: strictPriorsOn(), deadlineAt: deadlineAtNow() || undefined, start: sg.start, end: sg.end, cls: CLS_CODE[sg.cls],
     bestS: sg.bestS, sampleLimit: sampleLimits[i], base: sg.start,
   }))
   const loads = segs.map(sg => sg.end - sg.start)
@@ -3336,7 +3347,7 @@ function groupJobs(
     const parts = g.members.map(i => [segs[i].start, segs[i].end] as [number, number])
     const positions = g.members.map(i => segs[i].start)
     const ends = logicalGroupEnds(g, segs)
-    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: currentCompressionLevel(), strictPrior: strictPriorsOn(), groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
+    jobs.push({ kind: 'encodeGroup', cmV20:{...cmV20Tuning}, level: currentCompressionLevel(), strictPrior: strictPriorsOn(), deadlineAt: deadlineAtNow() || undefined, groupOptions:{allowBcjUpgrade:g.bcjUpgradeAllowed===true,screen:planTuning.groupKernelScreen}, parts, spec: { id: g.spec.id, s: g.spec.s, r: g.spec.r }, positions, ends, ...(g.baseCost ? { skipBase: true } : {}) })
     index.push(gi)
     loads.push(g.members.reduce((a, i) => a + segs[i].rawLen, 0))
   }
@@ -3879,6 +3890,8 @@ export async function compressCachedPlansForProbe(data: Uint8Array, plans: reado
   const results: Compressed[] = []
   try {
     for (const picks of plans) {
+      // H-5：预算耗尽后只保留已经完整测量过的计划。
+      if (deadlineHit() && results.length > 0) break
       validatePlan(data, picks)
       const prepared = picks.map(p => ({ ...p, spec: { ...p.spec }, trials: [] }))
       const result = await encodePreparedPlan(data, analysis, prepared, !!options?.serial,
@@ -3966,6 +3979,13 @@ export async function compressAdaptive(
   // fires we keep the best plan produced so far and flag it, because "best within
   // the budget" is not the same claim as "best of all candidates".
   deadlineSet(options?.timeBudgetMs ?? 0)
+  // H-5: a container cannot be shorter than its header plus one rule byte, so an
+  // impossible limit must be rejected in microseconds instead of after the planner
+  // has spent seconds proving it. This is a lower bound, not an estimate.
+  if (options?.maxOutputBytes !== undefined && options.maxOutputBytes < MIN_CONTAINER_BYTES) {
+    deadlineClear()
+    throw new Error(`输出上限 ${options.maxOutputBytes} B 小于最小容器长度（${MIN_CONTAINER_BYTES} B）`)
+  }
   const seal = (r: Compressed): Compressed => {
     if (deadlineHit()) (r as Compressed & { budgetTruncated?: boolean }).budgetTruncated = true
     const out = containerChecksumOn() ? sealChecksum(r, data) : r
@@ -3987,19 +4007,25 @@ export async function compressAdaptive(
     const pr = pruningLevel()
     if (deadlineHit()) return seal(coalesceCompressedPlan(data.length,chosen))
     if (pr >= 2) return seal(coalesceCompressedPlan(data.length,chosen))
+    // H-5：预算按阶段生效。每个阶段结束后先把已经真实测量过的计划封存起来，
+    // 后面没跑的阶段不会让容器变成"半成品"——它只是少了一次可能更优的尝试。
+    if (deadlineHit()) return seal(coalesceCompressedPlan(data.length, chosen))
     const coalescedBcj=refineBcjSegments(data,chosen)
     // P37.7：严格档跳过这两遍后处理——它们的候选集含 DELTA/DELTA_V3/TRANSPOSE_GROUP，
     // 会在严格容器里重新引入模 256 差分（P37.2 的 STRICT_FORBIDDEN_SPECS 只能约束
     // 主候选，管不到这里）。
+    if (deadlineHit()) return seal(coalesceCompressedPlan(data.length, coalescedBcj))
     const carved=strictPriorsOn()?coalescedBcj:refineNoisePockets(data,coalescedBcj)
     if (pr === 1) return seal(coalesceCompressedPlan(data.length,carved))
+    if (deadlineHit()) return seal(coalesceCompressedPlan(data.length, carved))
     const upgraded=strictPriorsOn()?carved:refineGroupCodecs(data,carved)
     // P37.2：严格档跳过递归残差与位平面——两者都按字节值做算术/位拆分。
+    if (deadlineHit()) return seal(coalesceCompressedPlan(data.length, upgraded))
     const rec2=strictPriorsOn()?upgraded:refineRec2(data,upgraded)
     let bp=strictPriorsOn()?rec2:(rec2.rec2Comparison?.accepted?rec2:refineBitplane(data,rec2))
     // P22.1: a uniform BCJ stream must keep its call-target history across tiny
     // FILL islands. Compete the dominant BCJ_V3 spec as one whole-stream plan.
-    if(data.length>=131072 && bp.segs.length>1 && bp.segs.some(s=>s.spec.id===ID.BCJ_V3)){
+    if(!deadlineHit() && data.length>=131072 && bp.segs.length>1 && bp.segs.some(s=>s.spec.id===ID.BCJ_V3)){
       try{
         const whole=await compressGuardedPlanForProbe(data,[{start:0,end:data.length,cls:'binary',spec:{id:ID.BCJ_V3,s:2,r:1}}],{serial:!!options?.serial||!workerTuningMatchesDefaults()})
         if(whole.container.length<bp.container.length)bp=whole
@@ -4012,7 +4038,7 @@ export async function compressAdaptive(
     // 或 `refineBitplane` 切碎，每个碎片都要重新预热哈希表，反而更大
     // （整段 26,935 B vs 切碎 28,275 B）。这里只对"绝大多数字节是 0x00/0xFF、
     // 几乎不含可打印文本"的流补一个整段候选，采纳与否仍由真实容器字节数决定。
-    if(!strictPriorsOn() && data.length>=65536 && bp.segs.length>1){
+    if(!deadlineHit() && !strictPriorsOn() && data.length>=65536 && bp.segs.length>1){
       let zeros=0, printable=0
       const step=Math.max(1,Math.floor(data.length/65536))
       let seen=0

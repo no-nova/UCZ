@@ -1,6 +1,6 @@
 import { completedTotals, isPending, type CompressionTask } from '../utils/compression-queue'
 import { formatBytes, type SizeUnit } from '../utils/format-bytes'
-import { translateProgress } from '../lib/ui-locale'
+import { translateError, translateProgress } from '../lib/ui-locale'
 
 type Lang = 'en' | 'zh'
 
@@ -114,7 +114,7 @@ export function BatchResults({ tasks, unit, selectedId, locked, onSelect, onCanc
               {isPending(task) && <div role="progressbar" aria-label={text.progress(task.name)} aria-valuenow={Math.round(task.progress)} aria-valuemin={0} aria-valuemax={100} className="mt-2 h-1 overflow-hidden rounded bg-white/10">
                 <div className="h-full bg-cyan-300 transition-all" style={{ width: `${task.progress}%` }} />
               </div>}
-              {task.message && <p className={`mt-1 break-words leading-relaxed ${task.status === 'error' ? 'text-rose-300' : 'text-slate-500'}`}>{lang === 'en' ? translateProgress(task.message) : task.message}</p>}
+              {task.message && <p className={`mt-1 break-words leading-relaxed ${task.status === 'error' ? 'text-rose-300' : 'text-slate-500'}`}>{lang === 'en' ? (task.status === 'error' ? translateError(task.message) : translateProgress(task.message)) : task.message}</p>}
             </td>
             <td className="whitespace-nowrap px-3 py-4 text-right align-top tabular-nums">{output ? `${Math.round(output.tComp)} ms` : '—'}</td>
             <td className="py-4 pl-3 align-top">

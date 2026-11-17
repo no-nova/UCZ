@@ -222,6 +222,8 @@ async function cmdDecompress(args: ParsedArgs): Promise<void> {
 async function cmdInspect(args: ParsedArgs): Promise<void> {
   const [input] = args.positionals
   if (!input) throw new Error('missing input file')
+  // `--threads/--memory-limit` constrain the whole process, including this command.
+  const budgets = applyBudgets(args)
   const bytes = new Uint8Array(readFileSync(input))
   const json = args.flags.has('--json')
   const field = args.flags.has('--no-compress')
@@ -240,7 +242,7 @@ async function cmdInspect(args: ParsedArgs): Promise<void> {
     console.log(json ? JSON.stringify(info, null, 2) : formatInspectionReport(info))
     return
   }
-  const info = await inspectStream(bytes, { compress: !field, level: levelOf(args.flags) })
+  const info = await inspectStream(bytes, { compress: !field, level: levelOf(args.flags), ...budgets })
   console.log(json ? JSON.stringify(info, null, 2) : formatInspectionReport(info))
 }
 
@@ -251,12 +253,13 @@ function emptyInspection() {
 async function cmdNcd(args: ParsedArgs): Promise<void> {
   const files = args.positionals
   if (files.length < 2) throw new Error('need at least two files')
+  const budgets = applyBudgets(args)
   const mode: NcdMode = args.mode === 'container' ? 'container' : 'cm'
   const json = args.flags.has('--json')
   const items = files.map(f => ({ name: basename(f), data: new Uint8Array(readFileSync(f)) }))
   const bytes = (v: number) => `${v.toFixed(0)} B`
   if (items.length === 2) {
-    const r = await computeNCD(items[0].data, items[1].data, { mode })
+    const r = await computeNCD(items[0].data, items[1].data, { mode, ...budgets })
     if (json) { console.log(JSON.stringify(r, null, 2)); return }
     console.log(`C(x)     ${bytes(r.cx)}`)
     console.log(`C(y)     ${bytes(r.cy)}`)

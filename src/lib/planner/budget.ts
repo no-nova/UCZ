@@ -40,5 +40,11 @@ let encodeDeadline = 0
 
 export function deadlineHit(): boolean { return encodeDeadline > 0 && Date.now() >= encodeDeadline }
 export function deadlineSet(ms: number): void { encodeDeadline = ms > 0 ? Date.now() + ms : 0 }
+/** Absolute deadline for the current encode (0 = none). Workers receive this value. */
+export function deadlineAtNow(): number { return encodeDeadline }
+/** Install an absolute deadline (a worker inheriting the parent's budget). */
+export function deadlineSetAt(epochMs: number): void { encodeDeadline = epochMs > 0 ? epochMs : 0 }
+/** Remaining milliseconds (0 when no budget is active, negative when already spent). */
+export function deadlineRemainingMs(): number { return encodeDeadline > 0 ? encodeDeadline - Date.now() : 0 }
 export function deadlineClear(): void { encodeDeadline = 0 }
 export function deadlineActive(): boolean { return encodeDeadline > 0 }

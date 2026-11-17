@@ -243,3 +243,30 @@ test('result table renders complete B values, verified-only totals, file-specifi
   const automatic = renderToStaticMarkup(createElement(BatchResults, { ...props, unit: 'auto' }))
   assert.match(automatic, /2\.0 KiB/); assert.match(automatic, /title="2,048 B"/)
 })
+
+test('English mode never renders CJK planner text', async () => {
+  const { PLANNER_STRINGS_EN, translateError, translateProgress } = await import('../src/lib/ui-locale')
+  const cjk = /[\u3400-\u9fff\u3000-\u303f\uff00-\uffef]/
+  // 1. every literal the planner/queue can emit must translate to non-CJK English
+  for (const key of Object.keys(PLANNER_STRINGS_EN)) {
+    assert.ok(!cjk.test(translateProgress(key)), `untranslated: ${key}`)
+    assert.ok(!cjk.test(translateError(key)), `untranslated error: ${key}`)
+  }
+  // 2. parameterised shapes and unknown CJK must degrade to English, never to raw Chinese
+  for (const sample of ['并行试探 12 个区域（4 线程）…', '区域 3/9 · 试探 DELTA3(步长3)', '区域 3/9 → 森林(文本编码)', '试探开始 12 区域 / 4 线程', '某种全新的中文提示', '输出 123 B 超过上限 10 B', '容器内容校验失败（CRC-32C 不匹配）']) {
+    assert.ok(!cjk.test(translateProgress(sample)), `progress leaked CJK: ${sample}`)
+    assert.ok(!cjk.test(translateError(sample)), `error leaked CJK: ${sample}`)
+  }
+  // 3. static guard: every CJK literal the planner or queue emits is in the dictionary
+  const fs = await import('node:fs')
+  const stageCall = /(?:onStage\?\.|onProgress\?\.|message:|msg:)\s*\(?\s*'([^'\n]+)'/g
+  for (const file of ['src/lib/codec.ts', 'src/utils/compression-queue.ts']) {
+    const text = fs.readFileSync(file, 'utf8')
+    for (const m of text.matchAll(stageCall)) {
+      const literal = m[1]
+      if (!cjk.test(literal)) continue
+      if (literal in PLANNER_STRINGS_EN) continue
+      assert.fail(`${file}: add "${literal}" to PLANNER_STRINGS_EN`)
+    }
+  }
+})
