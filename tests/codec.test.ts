@@ -1,4 +1,5 @@
 import { testP131Gate, testP131Worker } from './p131.test'
+import { availableParallelism } from 'node:os'
 import { fastDeepEqual } from './fast-equal'
 import { testBcjSeams, testBcjTargetFirst, testBcjTargetLast, testBcjLargeWorker, testBcjUpgrade, testBcjCacheWorker, testFamilyReuse, testPolicy, testScreen, testWorkerScreen } from './p13.test'
 import { testP122CachedCollision, testP122Reservations, testP122Collision, testP122WorkerPlan, testP122Worker, testP122Kernel, testP122Mixed, testP121Worker, testP121Transforms, testP120Units, testP12HistoricalDecode, testP120Family, testP12Worker } from './p12.test'
@@ -15,6 +16,7 @@ import { testP178TextContexts, testP178Pockets, testP178BcjCoalesce } from './p1
 import { testP179TextContexts, testP179GroupCodecs } from './p179.test'
 import { testP180Sym2bit, testP180Sym5bit, testP180Planner } from './p180.test'
 import { testP243VerticalColumns, testP244SyncHighEntropy } from './p24.test'
+import { memorySafeThreads } from '../src/lib/parallel'
 import { testManifoldUniversality } from './manifold.test'
 import { testDefaultProfileSurvivesPermutation, testStrictProfileInvariance } from './invariance.test'
 import { testConcurrencyAndChecksum } from './concurrency.test'
@@ -1127,7 +1129,9 @@ testP243VerticalColumns(); testP244SyncHighEntropy()
     const saved = process.env.UCZ_THREADS
     try {
       process.env.UCZ_THREADS = '3'
-      assert.equal(threadCount(), 3)
+      // 环境无关：线程数还受可用核数与该机内存上限约束（小内存机器上 memorySafeThreads()
+      // 可能返回 1..2），所以只断言"请求被尊重到环境允许的上限"，不写死 3。
+      assert.equal(threadCount(), Math.min(Math.min(Math.max(1, availableParallelism()), 8), memorySafeThreads(), 3))
       process.env.UCZ_THREADS = 'abc'
       assert.ok(threadCount() >= 1)
     } finally {
