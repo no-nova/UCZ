@@ -19,3 +19,6 @@ golden-check-tmp.*
 
 # 生成但已跟踪的 Worker 内联源码（src/lib/parallel-worker-code.ts）仍然入库：
 # 它由 `npm run build:worker` 生成，`npm run check:worker` 保证与源码一致，不要忽略。
+
+# local working notes
+HANDOVER.md
