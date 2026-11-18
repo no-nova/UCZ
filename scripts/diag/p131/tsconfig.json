@@ -1,1 +1,1 @@
-{"extends":"../../../tsconfig.json","compilerOptions":{"baseUrl":"../../..","paths":{"@lib/*":["src/lib/*"]}},"include":["prepare.ts","decision.ts"]}
+{"extends":"../../../tsconfig.json","compilerOptions":{"paths":{"@lib/*":["../../../src/lib/*"]}},"include":["prepare.ts","decision.ts"]}
