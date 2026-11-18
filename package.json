@@ -41,18 +41,18 @@
     "check:package": "node scripts/check-package-consumer.mjs"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "4.1.17",
+    "@tailwindcss/vite": "4.3.5",
     "@types/node": "26.6.6",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.3.0",
     "esbuild": "^0.28.2",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "tailwindcss": "4.1.17",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "tailwindcss": "4.3.5",
     "typescript": "7.0.2",
     "vite": "^8.3.8",
-    "vite-plugin-singlefile": "2.3.0"
+    "vite-plugin-singlefile": "2.3.4"
   },
   "bin": {
     "ucz": "./dist/cli.js"
